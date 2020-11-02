@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans spring-beans-2.5.xsd">
+
+
+<!-- Dictionary cache -->
+   <bean id="t_metacolumn" class="com.bixuebihui.cache.DictionaryDefine">
+		<property name="tableName">
+			<value>t_metacolumn</value>
+		</property>
+		<property name="id_name">
+			<value>cname</value>
+		</property>
+		<property name="value_name">
+			<value>description</value>
+		</property>
+		<property name="sort_name">
+			<value>cid</value>
+		</property>
+		<property name="addCondition">
+			<value> and tid={0}</value>
+		</property>
+	</bean>
+
+	 <bean id="metatable" class="com.bixuebihui.cache.DictionaryDefine">
+		<property name="tableName">
+			<value>t_metatable</value>
+		</property>
+		<property name="id_name">
+			<value>tid</value>
+		</property>
+		<property name="value_name">
+			<value>tname</value>
+		</property>
+		<property name="sort_name">
+			<value>tid</value>
+		</property>
+		<property name="addCondition">
+			<value></value>
+		</property>
+	</bean>
+
+
+	<bean id="t_metatable" class="com.bixuebihui.cache.DictionaryDefine">
+		<property name="tableName">
+			<value>t_metatable</value>
+		</property>
+		<property name="id_name">
+			<value>tname</value>
+		</property>
+		<property name="value_name">
+			<value>description</value>
+		</property>
+		<property name="sort_name">
+			<value>tid</value>
+		</property>
+		<property name="addCondition">
+			<value></value>
+		</property>
+	</bean>
+
+</beans>

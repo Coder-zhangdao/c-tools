@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+
+<pojos>
+    <pojo name="TemplateSuite" table-name="sm_template_suite" implements="" extends="">
+        <properties>
+            <property name="suite_name">
+                <annotation><![CDATA[
+                             @NotNull
+                             @Size(min=2,max=100,message="套件名长度必须在2-100之间")
+
+                ]]></annotation>
+                <comment><![CDATA[
+
+                     套件名称
+                ]]></comment>
+            </property>
+        </properties>
+    </pojo>
+
+</pojos>

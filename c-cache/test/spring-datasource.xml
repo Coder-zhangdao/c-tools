@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans spring-beans-2.5.xsd">
+
+
+	<bean id="oracleConfig" class="com.bixuebihui.dbcon.DatabaseConfig">
+		<property name="alias">
+			<value>verycard</value>
+		</property>
+		<property name="className">
+			<value>oracle.jdbc.driver.OracleDriver</value>
+		</property>
+		<property name="dburl">
+			<value>jdbc:oracle:thin:@test.youth.cn:1521:cycdev</value>
+		</property>
+		<property name="username">
+			<value>verycard</value>
+		</property>
+		<property name="password">
+			<value>cyc123</value>
+		</property>
+	</bean>
+
+	<!--
+	<alias name="oracleConfig" alias="dbConfig" />
+ -->
+
+<bean id="derbyConfig" class="com.bixuebihui.dbcon.DatabaseConfig">
+		<property name="alias">
+			<value>goldjetty</value>
+		</property>
+		<property name="className">
+			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
+		</property>
+		<property name="dburl">
+			<value>jdbc:derby:/data/goldjetty;create=true</value>
+		</property>
+		<property name="username">
+			<value></value>
+		</property>
+		<property name="password">
+			<value></value>
+		</property>
+	</bean>
+
+	<alias name="oracleConfig" alias="dbConfig" />
+
+
+
+
+	<!-- com.bixuebihui.datasource.BitmechanicDataSource.java 默认连接的数据源 -->
+	<bean id="bitmechanicDataSource"
+		class="com.bixuebihui.datasource.BitmechanicDataSource">
+		<property name="databaseConfig">
+			<ref bean="dbConfig" />
+		</property>
+		<!--
+		<property name="alias">
+			<value>zichangl</value>
+		</property>
+		 -->
+	</bean>
+
+	<bean id="dbcpDataSource"
+          class="com.bixuebihui.datasource.DbcpDataSource" destroy-method="close">
+		<property name="databaseConfig">
+			<ref bean="dbConfig" />
+		</property>
+
+	</bean>
+
+	<alias name="dbcpDataSource" alias="dataSource" />
+
+	<bean id="dbHelper1" class="com.bixuebihui.jdbc.DbHelper">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+	</bean>
+
+
+
+	 <bean id="dbHelperBeforeAdvice" class="com.bixuebihui.jdbc.aop.DbHelperBeforeAdvice"/>
+     <bean id="dbHelperAroundAdvice" class="com.bixuebihui.jdbc.aop.DbHelperAroundAdvice"/>
+     <bean id="dbHelperAfterAdvice" class="com.bixuebihui.jdbc.aop.DbHelperAfterAdvice"/>
+     <bean id="dbHelperThrowsAdvice" class="com.bixuebihui.jdbc.aop.DbHelperThrowsAdvice"/>
+
+     <bean id="dbHelper" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="proxyInterfaces">
+            <value>com.bixuebihui.jdbc.IDbHelper</value>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                  <value>dbHelperBeforeAdvice</value>
+                  <value>dbHelperAfterAdvice</value>
+                  <value>dbHelperAroundAdvice</value>
+                  <value>dbHelperThrowsAdvice</value>
+            </list>
+        </property>
+        <property name="target">
+            <ref bean="dbHelper1"/>
+        </property>
+     </bean>
+
+<alias name="dbHelper" alias="kuozhanDbHelper" />
+    <alias name="dbHelper" alias="gamesDbHelper" />
+    <alias name="dbHelper" alias="sequenceDbHelper" />
+   <alias name="dbHelper" alias="sessionDbHelper" />
+   <alias name="dbHelper" alias="cacheDbHelper" />
+   	<!-- more bean definitions go here -->
+
+</beans>
+

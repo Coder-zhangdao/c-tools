@@ -1,0 +1,15 @@
+<decorators defaultdir="/decorators">
+
+	<excludes>
+        <pattern>/docs/api/*</pattern>
+        <!-- <pattern>/*/*excel*</pattern>  -->
+    </excludes>
+
+    <decorator name="ajax" page="ajax.jsp">
+          <pattern>/list/*</pattern>
+    </decorator>
+    <decorator name="main" page="main.jsp">
+          <pattern>/list/*</pattern>
+    </decorator>
+
+</decorators>

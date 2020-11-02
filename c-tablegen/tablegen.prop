@@ -1,0 +1,36 @@
+projectname=test
+alias=test1
+
+className=com.mysql.jdbc.Driver
+dburl=jdbc:mysql://localhost:3306/test
+username=test
+password=test123
+
+
+src_dir=src/main/java
+test_dir=src/test/java
+jsp_dir=WebRoot
+extra_setting=pojos.xml
+package_name=com.exapmle.mytest
+keys=yes
+indexes=no
+types_are_strings=no
+kuozhanbiao=no
+schema=dbo
+table_owner=dbo
+#table_list=KUOZHANBIAOMING,KUOZHANBIAOXINXI
+#table_list=VC_ANSWERED_RECORDS
+table_list=t_(\\w+)
+#VC_(\w+)
+#exclude_table_list=PLAN_TABLE,T_SESSION,T_SEQUENCE
+
+#keep table name and field case
+keep_case=yes
+
+generator_all=yes
+use_annotation=yes
+generate_baselist=yes
+over_write_all =yes
+
+#if use auto increment, then not insert key, nor update primary key
+use_autoincrement=yes

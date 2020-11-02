@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	 <bean id="words" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>
+				SELECT id, body,  postto, postby, postdate, state FROM Words
+                   </value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>id</value>
+		</property>
+		<property name="colsList">
+			<value>ID,BODY,POSTTO,POSTBY,POSTDATE,STATE</value>
+		</property>
+	</bean>
+
+	 <bean id="view_zoning_plot" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>
+				select z2.name city,z1.name district, z.name 小区名称,z.*   FROM Zoning_Plot z left join Zoning z1 on z.zonecode=z1.code
+left join Zoning z2 on left(z1.code,4)=left(z2.code,4)
+where z1.rank=3 and z2.rank=2
+                   </value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>ID</value>
+		</property>
+		<property name="colsList">
+			<value>ID,CITY,DISTRICT,COMMUNITYID,小区名称,OTHERNAME,SPELL,LONGITUDE,LATITUDE,REMARKS,SITE_ID,FULL_PINYIN,SHORT_PINYIN,ZONECODE</value>
+		</property>
+	</bean>
+
+	 <bean id="view_questions" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>
+				select * from questions
+                   </value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>q_id</value>
+		</property>
+		<property name="colsList">
+			<value>Q_ID,U_ID,CONTENT,NOTE,LASTEDITTIME</value>
+		</property>
+	</bean>
+
+	 <bean id="view_userbyrole" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>SELECT u.id uid, u.Name, RealName, email, mobile, lastlogindate, registereddate, r.id roleid, r.name rolename FROM User u, User_Profile up, User_Roles r, User_ReferUR ur
+where u.id=up.id and u.id= ur.UserID and r.id=ur.roleid</value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>uid</value>
+		</property>
+		<property name="colsList">
+			<value>UID,NAME,REALNAME,EMAIL,MOBILE,LASTLOGINDATE,REGISTEREDDATE,ROLEID,ROLENAME</value>
+		</property>
+	</bean>
+
+	<bean id="view_userbyperm" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>SELECT u.id uid, u.Name, RealName, email, mobile, lastlogindate, registereddate, pe.id permissionid, pe.name permissionname
+FROM User u, User_Profile p, User_Permissions pe, User_ReferUP up
+where u.id=p.id and u.id= up.UserID and pe.id=up.PermissionID </value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>uid</value>
+		</property>
+		<property name="colsList">
+			<value>UID,NAME,REALNAME,EMAIL,MOBILE,LASTLOGINDATE,REGISTEREDDATE,PERMISSIONID,PERMISSIONNAME</value>
+		</property>
+	</bean>
+
+	<bean id="view_usertopics" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>SELECT u.id uid, u.Name, RealName, count(poster) cnt
+FROM User u, User_Profile p, Topics t
+where u.id=p.id and u.id= t.poster
+group by poster</value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>uid</value>
+		</property>
+		<property name="colsList">
+			<value>UID,NAME,REALNAME,CNT</value>
+		</property>
+	</bean>
+
+	<bean id="view_userreplies" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>SELECT u.id uid, u.Name, RealName, count(RepliedBy) cnt
+FROM User u, User_Profile p, Reply t
+where u.id=p.id and u.id= t.RepliedBy
+group by RepliedBy</value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>uid</value>
+		</property>
+		<property name="colsList">
+			<value>UID,NAME,REALNAME,CNT</value>
+		</property>
+	</bean>
+
+	<bean id="view_topics_per_user" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>SELECT u.id uid, u.Name, RealName, count(poster) cnt
+ FROM User u, User_Profile p, Topics t
+ where u.id=p.id and u.id= t.poster and t.CommunityID=?
+ group by poster</value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>uid</value>
+		</property>
+		<property name="colsList">
+			<value>UID,NAME,REALNAME,CNT</value>
+		</property>
+	</bean>
+
+	<bean id="view_replies_per_user" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>SELECT u.id uid, u.Name, RealName, count(RepliedBy) cnt
+ FROM User u, User_Profile p, Reply t
+ where u.id=p.id and u.id= t.RepliedBy  and u.site_id=?
+ group by RepliedBy</value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>uid</value>
+		</property>
+		<property name="colsList">
+			<value>UID,NAME,REALNAME,CNT</value>
+		</property>
+	</bean>
+
+
+	<bean id="view_businesses_per_site" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>select count(B.ID) cnt, zone_code, ZS.site_id, ZS.site_domain, ZS.site_name
+from Businesses B , Business_CommunityMap BCOM, zoning_site ZS
+   where B.ID=BCOM.BusinessID
+and BCOM.site_id=ZS.site_id group by zone_code, ZS.site_id, ZS.site_domain, ZS.site_name</value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>site_id</value>
+		</property>
+		<property name="colsList">
+			<value>SITE_ID,SITE_NAME,SITE_DOMAIN,ZONE_CODE,CNT</value>
+		</property>
+	</bean>
+
+	<bean id="view_businesses_per_category" class="com.bixuebihui.jmesa.BasicWebUI">
+		<property name="service">
+			<bean class="com.bixuebihui.jmesa.BasicListService">
+				<constructor-arg>
+					<ref bean="dbHelper" />
+				</constructor-arg>
+				<property name="coreSql"><value>select count(B.ID) cnt, zone_code, BC.Name category, ZS.site_id, ZS.site_domain, ZS.site_name
+from Businesses B , Business_CategoryMap BCAM, Business_Category BC, Business_CommunityMap BCOM, zoning_site ZS
+   where B.ID=BCAM.BusinessID and BCAM.category_id=BC.id and B.ID=BCOM.BusinessID
+and BCOM.site_id=ZS.site_id and BCOM.site_id=? group by BC.ID, BC.Name</value>
+				</property>
+			</bean>
+		</property>
+		<property name="uniquePropertyName">
+			<value>site_id</value>
+		</property>
+		<property name="colsList">
+			<value>SITE_ID,SITE_NAME,SITE_DOMAIN,ZONE_CODE,CATEGORY,CNT</value>
+		</property>
+		<property name="colsTemplate">
+			<map>
+    		<entry key="SITE_ID" >
+    			<value><![CDATA[<a href="#{SITE_ID}">,column "" is a test</a> ]]></value>
+    		</entry>
+   		    </map>
+		</property>
+	</bean>
+
+
+
+</beans>

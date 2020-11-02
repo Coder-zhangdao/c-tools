@@ -1,0 +1,6 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+
+mvn clean package deploy -Dmaven.test.skip=true -Ppro
+
+#docker build --build-arg version=0.0.1-SNAPSHOT -t hub.issll.com/java/qxx:'${BUILD_ID}' . 
