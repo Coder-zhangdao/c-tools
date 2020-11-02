@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 
-/*
+/**
  * http://www.rgagnon.com/javadetails/java-0452.html
+ * @author xwx
  */
 public class SMTPMXLookup {
     private static int hear(BufferedReader in) throws IOException {
@@ -145,9 +146,10 @@ public class SMTPMXLookup {
                 valid = true;
             } catch (Exception ex) {
                 // Do nothing but try next host
-                ex.printStackTrace();
             }
-            if (valid) return true;
+            if (valid) {
+                return true;
+            }
         }
         return false;
     }

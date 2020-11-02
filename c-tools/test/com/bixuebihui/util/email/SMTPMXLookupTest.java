@@ -8,7 +8,8 @@ public class SMTPMXLookupTest {
 
     @Test
    public void testIsAddressValid( ) {
-             String testData[] = {/*
+             String testData[] = {
+                     /*
          "real@rgagnon.com",
          "you@acquisto.net",
          "fail.me@nowhere.spam", // Invalid domain name

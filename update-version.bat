@@ -1,2 +1,2 @@
-mvn versions:set -DnewVersion=1.0.0 -DgenerateBackupPoms=false
+mvn versions:set -DnewVersion=1.0.1-SNAPSHOT -DgenerateBackupPoms=false
 mvn versions:commit
