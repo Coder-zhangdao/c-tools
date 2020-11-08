@@ -17,14 +17,16 @@ public class AbstractWebUITest extends TestCase {
 				return null;
 			}
 
-			protected String render(HttpServletRequest request,
-					HttpServletResponse response) {
+			@Override
+            protected String render(HttpServletRequest request,
+                                    HttpServletResponse response) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
+			@Override
 			protected void validateColumn(WorksheetColumn worksheetColumn,
-					String changedValue) {
+										  String changedValue) {
 				// TODO Auto-generated method stub
 
 			}

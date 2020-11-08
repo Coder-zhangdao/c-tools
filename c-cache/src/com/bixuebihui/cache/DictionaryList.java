@@ -47,8 +47,8 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	}
 
 	private String getSelectSql(){
-		if(def.getId_name().toUpperCase().equals(def.getSort_name().toUpperCase())||
-				def.getValue_name().toUpperCase().equals(def.getSort_name().toUpperCase())) {
+		if(def.getId_name().equalsIgnoreCase(def.getSort_name())||
+				def.getValue_name().equalsIgnoreCase(def.getSort_name())) {
 			return "select "+def.getId_name()+", "+def.getValue_name()
 			+" from ";
 		} else {

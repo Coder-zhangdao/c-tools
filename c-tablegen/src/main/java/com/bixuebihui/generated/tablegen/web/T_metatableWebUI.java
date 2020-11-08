@@ -33,6 +33,7 @@ protected String getUniquePropertyName(){return "tid";};
 /**
 * An example of how to validate the worksheet column cells.
 */
+@Override
 protected void validateColumn(WorksheetColumn worksheetColumn, String changedValue) {
     if (changedValue.equals("foo")) {
         worksheetColumn.setErrorKey("foo.error");

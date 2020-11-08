@@ -1,6 +1,5 @@
 package com.bixuebihui.jmesa;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +16,9 @@ import org.jmesa.view.component.Table;
 import com.bixuebihui.jdbc.IBaseListService;
 import com.bixuebihui.util.ParameterUtils;
 
+/**
+ * @author xwx
+ */
 public class BasicWebUI extends AbstractWebUI<Object, Long> {
 
 	private String uniquePropertyName;
@@ -48,7 +50,7 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
 
 	@Override
 	protected String render(HttpServletRequest request,
-			HttpServletResponse response) throws SQLException  {
+			HttpServletResponse response) {
 
 		TableModel tableFacade = new TableModel(id, request, response);
 
@@ -71,7 +73,9 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
 		setDataAndLimitVariables(tableFacade);
 
 
-        if(isUseSimpleView())  tableFacade.setView(new SimpleView());
+        if(isUseSimpleView()) {
+			tableFacade.setView(new SimpleView());
+		}
 
 		this.setTitles(table, id, getColNames(), true);
 		final Row row = table.getRow();

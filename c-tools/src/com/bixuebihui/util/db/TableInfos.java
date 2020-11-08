@@ -90,9 +90,9 @@ public class TableInfos {
                 String sFieldName;
                 FieldInfo fieldInfo;
                 for (; rs.next(); tableInfo.putFieldInfo(sFieldName, fieldInfo)) {
-                    String sTableName = rs.getString("TABLE_NAME").toUpperCase();
+                    String sTableName = rs.getString("TABLE_NAME");
                     int nColumnId = rs.getInt("COLUMN_ID");
-                    sFieldName = rs.getString("COLUMN_NAME").toUpperCase();
+                    sFieldName = rs.getString("COLUMN_NAME");
                     String sDataType = rs.getString("DATA_TYPE");
                     int nDataLength = rs.getInt("DATA_LENGTH");
                     String sNullable = rs.getString("NULLABLE");

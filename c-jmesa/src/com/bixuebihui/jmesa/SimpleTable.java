@@ -14,6 +14,7 @@ public class SimpleTable extends BasicWebUI {
 		this.items = items;
 	}
 
+	@Override
 	protected void setDataAndLimitVariables(TableModel tableModel){
 		tableModel.setItems(items);
 	}

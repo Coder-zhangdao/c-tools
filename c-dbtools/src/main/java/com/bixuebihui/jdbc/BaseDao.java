@@ -723,26 +723,30 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     <K> K map2object(Map<String, Object> h, @NotNull K receiver) {
         BeanMap b = new BeanMap(receiver);
 
-        // 因大小写的问题,不能直接传入全部属性
         Iterator<Entry<Object, Object>> iter = b.entryIterator();
         while (iter.hasNext()) {
             Entry<?, ?> e = iter.next();
-            String hkey = e.getKey().toString().toUpperCase();
+            String hkey = e.getKey().toString();
+            Object value;
             if (h.containsKey(hkey)) {
-                Object value = h.get(hkey);
-
-                Class<?> type = b.getType(e.getKey().toString());
-                value = reduceValueType(type, value);
-
-                try {
-
-                    b.put(e.getKey(), value);
-
-                } catch (IllegalArgumentException ex) {
-                    mLog.error("类型错误:key=" + e.getKey() + ", value=" + value + " instanceof " + value.getClass()
-                            + ",but expected " + b.getType(e.getKey().toString()));
-                    throw ex;
+                value = h.get(hkey);
+            }else {
+                hkey = hkey.toUpperCase();
+                if (h.containsKey(hkey)){
+                    value = h.get(hkey);
+                }else{
+                    continue;
                 }
+            }
+
+            Class<?> type = b.getType(e.getKey().toString());
+            value = reduceValueType(type, value);
+            try {
+                b.put(e.getKey(), value);
+            } catch (IllegalArgumentException ex) {
+                mLog.error("类型错误:key=" + e.getKey() + ", value=" + value + " instanceof " + value.getClass()
+                        + ",but expected " + b.getType(e.getKey().toString()));
+                throw ex;
             }
         }
         b.setBean(receiver);
@@ -791,13 +795,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @throws java.lang.NoSuchMethodException     无法拷贝属性
      */
     protected @NotNull
-    <K> K convertCaseInsensitive(Map<String, Object> h, @NotNull K reciever)
+    <K> K convertCaseSensitive(Map<String, Object> h, @NotNull K reciever)
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         // access properties as Map
         Map<String, String> properties = BeanUtils.describe(reciever);
         Map<String, Object> values = new HashMap<>();
         for (Map.Entry<String, ?> e : properties.entrySet()) {
-            Object o = h.get(e.getKey().toUpperCase());
+            Object o = h.get(e.getKey());
             values.put(e.getKey(), o);
         }
         BeanUtils.populate(reciever, values);
@@ -890,7 +894,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         } else {
             for (Map<String, Object> h : v) {
                 try {
-                    v1.add(convertCaseInsensitive(h, clz.newInstance()));
+                    v1.add(convertCaseSensitive(h, clz.newInstance()));
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
                     throw new SQLException(e);
                 }

@@ -1,17 +1,20 @@
 package com.bixuebihui.tablegen.dbinfo;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.Vector;
-
+import com.bixuebihui.tablegen.TableUtils;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.bixuebihui.tablegen.TableUtils;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * @author xwx
+ */
 public class ProcedureUtils {
 	private static final Log mLog = LogFactory.getLog(ProcedureUtils.class);
 
@@ -90,32 +93,23 @@ public class ProcedureUtils {
      * maximum allowed precision of the fractional seconds component). For binary data, this is the length in bytes.  For the ROWID datatype,
      * this is the length in bytes. Null is returned for data types where the
      * column size is not applicable.
-     * @param catalog a catalog name; must match the catalog name as it
+     * @param metaData a catalog name; must match the catalog name as it
      *        is stored in the database; "" retrieves those without a catalog;
      *        <code>null</code> means that the catalog name should not be used to narrow
      *        the search
-     * @param schemaPattern a schema name pattern; must match the schema name
-     *        as it is stored in the database; "" retrieves those without a schema;
-     *        <code>null</code> means that the schema name should not be used to narrow
-     *        the search
-     * @param procedureNamePattern a procedure name pattern; must match the
+     * @param ti a procedure name pattern; must match the
      *        procedure name as it is stored in the database
-     * @param columnNamePattern a column name pattern; must match the column name
-     *        as it is stored in the database
-     * @return <code>ResultSet</code> - each row describes a stored procedure parameter or
-     *      column
      * @exception SQLException if a database access error occurs
-     * @see #getSearchStringEscape
      */
 
-	public static Vector<ProcedureParameterInfo> getProcedureColumns(DatabaseMetaData metaData,IProcedureInfo ti)
+	public static List<ProcedureParameterInfo> getProcedureColumns(DatabaseMetaData metaData,IProcedureInfo ti)
 			throws SQLException
 		{
 			ResultSet rs = metaData.getProcedureColumns(ti.getCatalogName(),
 														ti.getSchemaName(),
 														ti.getSimpleName(),
 														"%");
-			Vector<ProcedureParameterInfo> v = new Vector<ProcedureParameterInfo>();
+			List<ProcedureParameterInfo> v = new ArrayList<>();
 			while(rs.next()){
 				ProcedureParameterInfo res = ProcedureParameterInfo.mapRow(rs, rs.getRow());
 				v.add(res);
@@ -123,14 +117,14 @@ public class ProcedureUtils {
 
 			return v;
 		}
-	public static Vector<ProcedureParameterInfo> getFunctionColumns(DatabaseMetaData metaData,IProcedureInfo ti)
+	public static List<ProcedureParameterInfo> getFunctionColumns(DatabaseMetaData metaData,IProcedureInfo ti)
 			throws SQLException
 		{
 			ResultSet rs = metaData.getFunctionColumns(ti.getCatalogName(),
 														ti.getSchemaName(),
 														ti.getSimpleName(),
 														"%");
-			Vector<ProcedureParameterInfo> v = new Vector<ProcedureParameterInfo>();
+			List<ProcedureParameterInfo> v = new ArrayList<>();
 			while(rs.next()){
 				ProcedureParameterInfo res = ProcedureParameterInfo.mapRow(rs, rs.getRow());
 				v.add(res);
@@ -162,35 +156,23 @@ public class ProcedureUtils {
      *  </OL>
      * <p>
 	 */
-	public static Vector<ProcedureInfo> getProcedure(DatabaseMetaData metaData,
+	public static List<ProcedureInfo> getProcedure(DatabaseMetaData metaData,
 			String catalog, String schema, String tableOwner,
 			Map<String, String> includeList,
 			Map<String, String> excludeList) throws SQLException {
 
-		Vector<ProcedureInfo> procedures = null;
+		List<ProcedureInfo> procedures;
 
 		ResultSet tables = metaData.getProcedures(catalog, schema, "%");
 
 
 		try {
-			procedures = new Vector<ProcedureInfo>();
+			procedures = new ArrayList<>();
 
 			String tableName = "";
 
-			// mLog.info("");
-			// mLog.info("Classes being created for the following tables...");
 			while (tables.next()) {
 
-				// System.out.println("tables.getString(2)="+tables.getString(2));
-				// System.out.println("tableOwner="+tableOwner);
-				//table.getString(2)=dbo
-				//table.getString(1)=lenovoDB
-				//table.getString(3)=11111111;1
-				//table.getString(4)=-1
-				//table.getString(5)=-1
-				//table.getString(6)=-1
-				//table.getString(7)=null
-				//table.getString(8)=null
 				String owner = tables.getString(2);
 
 				if (tableOwner != null
@@ -208,74 +190,46 @@ public class ProcedureUtils {
 				// then check against that first.
 				// If no list then we use everything.
 				//
-				//if (!procedures.contains(tableName))
 				if (TableUtils.matchTableName(includeList, tableName)) {
 					if (!TableUtils.isExcluded(excludeList, tableName)) {
 						ProcedureInfo p = new ProcedureInfo(tables.getString(1), tables.getString(2), tables.getString(3), tables.getString(7), tables.getInt(8));
 						procedures
-						.addElement(p);
+						.add(p);
 						String str="Procedure name = "+tableName+" "+tables.getString(4)+" "+tables.getString(5)+" "+tables.getString(6)+" "+tables.getString(7)+" "+tables.getString(8);
 						System.out.println(str);
 					 mLog.info(str);
-					} else {
-						// mLog
-						// .info("Skip table name contain char $ or in
-						// exclude
-						// list: "
-						// + tableName);
 					}
-				} else {
-					// mLog.info("Skip table not in include list: " +
-					// tableName);
 				}
-				// else if (tablesList.get(tableName) != null)
-				// {
-				// tableNames.addElement(tableName);
-				// mLog.info(tableName);
-				// }
+
 			}
 		} finally {
 			DbUtils.close(tables);
 		}
-		// mLog.info("");
 		return procedures;
 	}
 
-	public static Vector<ProcedureInfo> getFunctions(DatabaseMetaData metaData,
+	public static List<ProcedureInfo> getFunctions(DatabaseMetaData metaData,
 			String catalog, String schema, String tableOwner,
 			Map<String, String> includeList,
 			Map<String, String> excludeList) throws SQLException {
 
-		Vector<ProcedureInfo> procedures = null;
+		List<ProcedureInfo> procedures;
 
 		ResultSet tables = metaData.getFunctions(catalog, schema, "%");
 
 
 		try {
-			procedures = new Vector<ProcedureInfo>();
+			procedures = new ArrayList<>();
 
 			String tableName = "";
 
-			// mLog.info("");
-			// mLog.info("Classes being created for the following tables...");
 			while (tables.next()) {
 
-				// System.out.println("tables.getString(2)="+tables.getString(2));
-				// System.out.println("tableOwner="+tableOwner);
-				//table.getString(2)=dbo
-				//table.getString(1)=lenovoDB
-				//table.getString(3)=11111111;1
-				//table.getString(4)=-1
-				//table.getString(5)=-1
-				//table.getString(6)=-1
-				//table.getString(7)=null
-				//table.getString(8)=null
 				String owner = tables.getString(2);
 
 				if (tableOwner != null
 						&& owner != null
-						&& !tableOwner.toUpperCase().equals(
-								owner.toUpperCase())) {
+						&& !tableOwner.equalsIgnoreCase(owner)) {
 					 mLog.debug("tableOwner is :" + tableOwner + " skip: "
 					 + owner);
 					continue;
@@ -287,36 +241,21 @@ public class ProcedureUtils {
 				// then check against that first.
 				// If no list then we use everything.
 				//
-				//if (!procedures.contains(tableName))
 				if (TableUtils.matchTableName(includeList, tableName)) {
 					if (!TableUtils.isExcluded(excludeList, tableName)) {
 						ProcedureInfo p = new ProcedureInfo(tables.getString(1), tables.getString(2), tables.getString(3), tables.getString(7), tables.getInt(8));
-						procedures
-						.addElement(p);
+						procedures.add(p);
 						String str="Procedure name = "+tableName+" "+tables.getString(4)+" "+tables.getString(5)+" "+tables.getString(6)+" "+tables.getString(7)+" "+tables.getString(8);
 						System.out.println(str);
 					 mLog.info(str);
-					} else {
-						// mLog
-						// .info("Skip table name contain char $ or in
-						// exclude
-						// list: "
-						// + tableName);
 					}
-				} else {
-					// mLog.info("Skip table not in include list: " +
-					// tableName);
+
 				}
-				// else if (tablesList.get(tableName) != null)
-				// {
-				// tableNames.addElement(tableName);
-				// mLog.info(tableName);
-				// }
+
 			}
 		} finally {
 			DbUtils.close(tables);
 		}
-		// mLog.info("");
 		return procedures;
 	}
 

@@ -139,19 +139,16 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             HtmlColumn chkbox = (HtmlColumn) row.getColumn("chkbox");
             chkbox.setHeaderEditor(new WorksheetCheckboxHeaderEditor());
 
-            chkbox.setCellEditor(new CellEditor() {
-                public Object getValue(Object item, String property,
-                                       int rowcount) {
+            chkbox.setCellEditor((item, property, rowcount) -> {
 
-                    UniqueProperty rowid = row.getUniqueProperty(item);
-                    String v = rowid == null ? "no_unique_property" : rowid.getValue();
+                UniqueProperty rowid = row.getUniqueProperty(item);
+                String v = rowid == null ? "no_unique_property" : rowid.getValue();
 
-                    return "<input name=\"" + checkboxName
-                            + "\" id='chk_" + rowcount
-                            + "' type=\"checkbox\" value=\""
-                            + v
-                            + "\">";
-                }
+                return "<input name=\"" + checkboxName
+                        + "\" id='chk_" + rowcount
+                        + "' type=\"checkbox\" value=\""
+                        + v
+                        + "\">";
             });
 
             chkbox.setTitle(" ");
@@ -211,7 +208,6 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         String mv = successView;
         String html = render(request, response);
         if (html == null) {
-            // response.addHeader("content-disposition","inline; filename="+id+".xls");
             return null; // an export
         } else {
             request.setAttribute(this.id, html); // Set the Html in the
@@ -307,8 +303,9 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
     }
 
     protected void deleteSelected(V[] keys) throws SQLException {
-        if (keys == null)
+        if (keys == null) {
             return;
+        }
         for (int i = 0; i < keys.length; i++) {
             if (!service.deleteByKey(keys[i])) {
                 mLog.warn("fail to delete key=" + keys[i]);
@@ -335,6 +332,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
     /**
      * An example of how to save the worksheet.
      */
+    @Override
     public void saveWorksheet(Worksheet worksheet) {
         if (!worksheet.isSaving() || !worksheet.hasChanges()) {
             return;
@@ -351,52 +349,50 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             mLog.error(e1);
             return;
         }
-        worksheet.processRows(new WorksheetCallbackHandler() {
-            public void process(WorksheetRow worksheetRow) {
-                Collection<WorksheetColumn> columns = worksheetRow.getColumns();
-                for (WorksheetColumn worksheetColumn : columns) {
-                    String changedValue = worksheetColumn.getChangedValue();
-                    validateColumn(worksheetColumn, changedValue);
-                    if (worksheetColumn.hasError()) {
-                        continue;
-                    }
-                    String uniqueValue = worksheetRow.getUniqueProperty()
-                            .getValue();
-                    T info = infos.get(uniqueValue);
-                    boolean isNew = false;
-                    if (info == null) {
-                        info = service.create();
-                        isNew = true;
-                    }
-                    String property = worksheetColumn.getProperty();
-                    try {
-                        if (worksheetColumn.getProperty().equals("selected")) {
-                            if (changedValue
-                                    .equals(CheckboxWorksheetEditor.CHECKED)) {
-                                PropertyUtils.setProperty(info, property, "y");
-                            } else {
-                                PropertyUtils.setProperty(info, property, "n");
-                            }
+        worksheet.processRows(worksheetRow -> {
+            Collection<WorksheetColumn> columns = worksheetRow.getColumns();
+            for (WorksheetColumn worksheetColumn : columns) {
+                String changedValue = worksheetColumn.getChangedValue();
+                validateColumn(worksheetColumn, changedValue);
+                if (worksheetColumn.hasError()) {
+                    continue;
+                }
+                String uniqueValue = worksheetRow.getUniqueProperty()
+                        .getValue();
+                T info = infos.get(uniqueValue);
+                boolean isNew = false;
+                if (info == null) {
+                    info = service.create();
+                    isNew = true;
+                }
+                String property = worksheetColumn.getProperty();
+                try {
+                    if (worksheetColumn.getProperty().equals("selected")) {
+                        if (changedValue
+                                .equals(CheckboxWorksheetEditor.CHECKED)) {
+                            PropertyUtils.setProperty(info, property, "y");
                         } else {
-                            Object value = convert(changedValue, PropertyUtils
-                                    .getPropertyType(info, property));
+                            PropertyUtils.setProperty(info, property, "n");
+                        }
+                    } else {
+                        Object value = convert(changedValue, PropertyUtils
+                                .getPropertyType(info, property));
 
-                            PropertyUtils.setProperty(info, property, value);
-                        }
-                    } catch (Exception ex) {
-                        mLog.error(ex);
-                        throw new JMesaException(
-                                "Not able to set the property [" + property
-                                        + "] when saving worksheet.");
+                        PropertyUtils.setProperty(info, property, value);
                     }
-                    try {
-                        boolean res = isNew ? service.insert(info) : service.updateByKey(info);
-                        if (!res) {
-                            mLog.warn("fail to update info=" + info.toString());
-                        }
-                    } catch (SQLException e) {
-                        mLog.error(e);
+                } catch (Exception ex) {
+                    mLog.error(ex);
+                    throw new JMesaException(
+                            "Not able to set the property [" + property
+                                    + "] when saving worksheet.");
+                }
+                try {
+                    boolean res = isNew ? service.insert(info) : service.updateByKey(info);
+                    if (!res) {
+                        mLog.warn("fail to update info=" + info.toString());
                     }
+                } catch (SQLException e) {
+                    mLog.error(e);
                 }
             }
         });
@@ -444,8 +440,9 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
         String template = getColsTemplate() == null ? "" : getColsTemplate().get(col.getProperty());
 
-        if (StringUtils.isBlank(template))
+        if (StringUtils.isBlank(template)) {
             return;
+        }
 
         template = template.replaceAll("\\%\\{(.+?)\\}", "\\$\\{$1\\}");
 

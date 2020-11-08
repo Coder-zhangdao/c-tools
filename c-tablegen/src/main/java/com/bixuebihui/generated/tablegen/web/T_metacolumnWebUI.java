@@ -40,8 +40,9 @@ public class T_metacolumnWebUI extends AbstractWebUI<T_metacolumn, Long> {
 	/**
 	 * An example of how to validate the worksheet column cells.
 	 */
-	protected void validateColumn(WorksheetColumn worksheetColumn,
-			String changedValue) {
+	@Override
+    protected void validateColumn(WorksheetColumn worksheetColumn,
+                                  String changedValue) {
 		if (changedValue.equals("foo")) {
 			worksheetColumn.setErrorKey("foo.error");
 		} else {

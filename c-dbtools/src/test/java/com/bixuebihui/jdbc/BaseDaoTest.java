@@ -209,34 +209,6 @@ public class BaseDaoTest extends TestCase {
 	}
 
 
-	public static class Simple{
-		public String getNaMe() {
-			return naMe;
-		}
-		public void setNaMe(String name) {
-			this.naMe = name;
-		}
-		public long getId() {
-			return id;
-		}
-		public void setId(long id) {
-			this.id = id;
-		}
-
-		public String toString(){
-			return "id="+id+", name="+naMe+", dt="+dt;
-		}
-		public Timestamp getDt() {
-			return dt;
-		}
-		public void setDt(Timestamp dt) {
-			this.dt = dt;
-		}
-		private String naMe;
-		private long id;
-		private Timestamp dt;
-	}
-
 	public void testGetSingleObject() throws SQLException{
 		DbcpDataSource ds = new DbcpDataSource();
 		ds.setDatabaseConfig(DataSourceTest.getConfigDerby());
@@ -270,14 +242,14 @@ public class BaseDaoTest extends TestCase {
 
 		BD mybd = new BD(db);
 
-		String select = "select id, nAme,dt from test";
+		String select = "select id, name, dt from test";
 		String whereClause=" where id>100";
 		String orderBy=" order by id";
 		Simple s = new Simple();
 		Simple obj = mybd.getSingleObject(select+whereClause+orderBy, new Object[]{}, s);
 
 		assertEquals(200, obj.getId());
-		assertEquals("efg", obj.getNaMe());
+		assertEquals("efg", obj.getName());
 		System.out.println(obj);
 
 		List<Simple> res = mybd.select(select, whereClause, orderBy, null, 0, 100, Simple.class);
@@ -285,6 +257,36 @@ public class BaseDaoTest extends TestCase {
 			System.out.println(s1);
 		}
 
+	}
+
+	public static class Simple{
+		private String name;
+
+		public String getName() {
+			return name;
+		}
+		public long getId() {
+			return id;
+		}
+		public void setId(long id) {
+			this.id = id;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+		public Timestamp getDt() {
+			return dt;
+		}
+		public void setDt(Timestamp dt) {
+			this.dt = dt;
+		}
+
+		public String toString(){
+			return "id="+id+", name="+ name +", dt="+dt;
+		}
+		private long id;
+		private Timestamp dt;
 	}
 
 

@@ -1105,14 +1105,14 @@ public class TableGen implements DiffHandler {
 			out("     {");
 			out("      StringBuilder s= new StringBuilder();");
 			out("      String ln = System.getProperty(\"line.separator\");");
-			out("      s.append(\"<" + tableName.toUpperCase() + " \");");
+			out("      s.append(\"<" + tableName + " \");");
 			for (ColumnData col : colData) {
 				if ("String".equals(col.getJavaType())) {
-					out("     s.append(\"" + col.getName().toUpperCase()
+					out("     s.append(\"" + col.getName()
 							+ "=\\\"\").append(com.bixuebihui.util.other.CMyString.filterForXML(this.get"
 							+ firstUp(col.getName()) + "())).append(\"\\\" \");");
 				} else {
-					out("     s.append(\"" + col.getName().toUpperCase() + "=\\\"\").append(this.get"
+					out("     s.append(\"" + col.getName() + "=\\\"\").append(this.get"
 							+ firstUp(col.getName()) + "()).append(\"\\\" \");");
 				}
 			}
@@ -1285,9 +1285,9 @@ public class TableGen implements DiffHandler {
 			i++;
 			boolean isNotLast = i < colData.size();
 
-			fields.append("        public static final String ").append(cd.getName().toUpperCase())
+			fields.append("        public static final String ").append(cd.getName())
 					.append(" = \"" + cd.getName() + "\";\n");
-			fieldsAll.append(cd.getName().toUpperCase());
+			fieldsAll.append(cd.getName());
 
 			if(isNotLast) {
 				fieldsAll.append(",");
@@ -1296,7 +1296,6 @@ public class TableGen implements DiffHandler {
 			if (!(use_autoincrement && cd.isAuto_increment)) {
 				if (cd.getName().equalsIgnoreCase(versionColName)){
 					update.append(cd.getName() + " = " + cd.getName() + "+1");
-					//hasVersion = true;
 				}else{
 					update.append(cd.getName() + "=?");
 				}

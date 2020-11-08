@@ -1,11 +1,16 @@
 package com.bixuebihui.jmesa;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
+import com.bixuebihui.jmesa.mock.SimpleHttpServletRequest;
+import com.bixuebihui.jmesa.mock.SimpleHttpServletResponse;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -103,7 +108,25 @@ public class EasyTable extends BasicWebUI {
 
 	@Override
 	public String getColsList() {
-		return StringUtils.join(msp.colNames,",").toUpperCase();
+		return StringUtils.join(msp.colNames,",");
+	}
+
+	public String json(Map<String,Object> paramsMap) throws SQLException{
+		SimpleHttpServletRequest request = new SimpleHttpServletRequest();
+		request.setParameter(this.id+"_e_","json");
+		SimpleHttpServletResponse response = new SimpleHttpServletResponse();
+		response.setCharacterEncoding(Charset.defaultCharset().displayName());
+
+		this.handleRequestInternal(request, response);
+
+		request.getAttribute(tableCaption);
+
+		try {
+			return response.getContentAsString();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 
 	static class MiniSqlParser {
@@ -174,7 +197,7 @@ public class EasyTable extends BasicWebUI {
 				sp.tableName = rsmd.getTableName(1);
 
 				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-					sp.colNames[i - 1] = rsmd.getColumnName(i).toUpperCase();
+					sp.colNames[i - 1] = rsmd.getColumnName(i);
 					sp.colLabels[i - 1] = rsmd.getColumnLabel(i);
 				}
 			} finally {

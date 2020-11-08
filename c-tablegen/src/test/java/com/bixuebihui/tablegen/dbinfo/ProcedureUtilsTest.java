@@ -1,17 +1,17 @@
 package com.bixuebihui.tablegen.dbinfo;
 
+import com.bixuebihui.BeanFactory;
+import com.bixuebihui.jdbc.IDbHelper;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-
-import com.bixuebihui.BeanFactory;
-import com.bixuebihui.jdbc.IDbHelper;
-import org.junit.Before;
-import org.junit.Test;
 
 public class ProcedureUtilsTest {
 	IDbHelper dbHelper;
@@ -21,7 +21,7 @@ public class ProcedureUtilsTest {
 	String schema = null;
 	String tableOwner = "dbo";
 	Map<String, String> includeList = null;
-	Map<String, String> excludeList = new HashMap<String, String>();
+	Map<String, String> excludeList = new HashMap<>();
 
 
 
@@ -39,12 +39,11 @@ public class ProcedureUtilsTest {
 	public void testGetProcedureColumns() throws SQLException {
 		IProcedureInfo info;
 
-		Vector<ProcedureInfo> res = ProcedureUtils.getProcedure(metaData,
+		List<ProcedureInfo> res = ProcedureUtils.getProcedure(metaData,
 				catalog, schema, tableOwner, includeList, excludeList);
 		info = res.get(2);
 
-		Vector<ProcedureParameterInfo> rs = ProcedureUtils.getProcedureColumns(metaData, info);
-		//dump(rs);
+		List<ProcedureParameterInfo> rs = ProcedureUtils.getProcedureColumns(metaData, info);
 		for(ProcedureParameterInfo in:rs){
 			System.out.println(in);
 		}
@@ -54,11 +53,11 @@ public class ProcedureUtilsTest {
 	public void testProcess() throws SQLException{
 
 
-		Vector<ProcedureInfo> res = ProcedureUtils.getProcedure(metaData,
+		List<ProcedureInfo> res = ProcedureUtils.getProcedure(metaData,
 				catalog, schema, tableOwner, includeList, excludeList);
 
 		for(ProcedureInfo info:res){
-			Vector<ProcedureParameterInfo> rs = ProcedureUtils.getProcedureColumns(metaData, info);
+			List<ProcedureParameterInfo> rs = ProcedureUtils.getProcedureColumns(metaData, info);
 			String str = ProcedureGen.process(info, rs, true);
 			System.out.println(str);
 		}
@@ -67,7 +66,7 @@ public class ProcedureUtilsTest {
 	@Test
 	public void testGetProcedure() throws SQLException {
 
-		Vector<ProcedureInfo> res = ProcedureUtils.getProcedure(metaData,
+		List<ProcedureInfo> res = ProcedureUtils.getProcedure(metaData,
 				catalog, schema, tableOwner, includeList, excludeList);
 
 		System.out.println(res);
