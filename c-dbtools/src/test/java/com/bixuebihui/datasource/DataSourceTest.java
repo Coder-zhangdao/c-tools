@@ -1,5 +1,9 @@
 package com.bixuebihui.datasource;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +16,7 @@ import java.util.Random;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -242,13 +247,19 @@ public class DataSourceTest extends TestCase {
 	}
 
 	public static DatabaseConfig getConfigDerby() {
-
+	    String dbName = "/tmp/data/jijian";
+		File file = new File(dbName);
+		try {
+			FileUtils.deleteDirectory(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		DatabaseConfig cfg = new DatabaseConfig();
 		cfg.setAlias("derby");
 		cfg.setClassName("org.apache.derby.jdbc.EmbeddedDriver");
 		cfg.setUsername("");
 		cfg.setPassword("");
-		cfg.setDburl("jdbc:derby:/tmp/data/jijian;create=true");
+		cfg.setDburl("jdbc:derby:"+dbName+";create=true");
 
 		return cfg;
 

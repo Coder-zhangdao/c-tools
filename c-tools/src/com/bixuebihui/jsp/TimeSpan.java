@@ -8,7 +8,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
@@ -181,45 +184,36 @@ public class TimeSpan implements ISqlConditionType {
 
     }
 
-    private void getParams(HttpServletRequest request) {
-        if (ParameterUtils.getCookieAndRequestInt(request, getBYearName(), 0) > 0) {
-
-            beginYear = ParameterUtils.getCookieAndRequestInt(request,
-                    getBYearName(), beginYear);
-            beginMonth = ParameterUtils.getCookieAndRequestInt(request,
-                    getBMonthName(), beginMonth);
-            beginDay = ParameterUtils.getCookieAndRequestInt(request,
-                    getBDayName(), beginDay);
-
-            Calendar begin_date = new GregorianCalendar(beginYear,
-                    beginMonth - 1, beginDay, 0, 0, 0);
-            if (beginYear > MIN_BEGIN_YEAR)
-                beginDate = begin_date.getTime();
+    /**
+     *
+     * @param tildeSeparatedBeginInclusiveEndExclusive yyyy-MM-dd~yyyy-MM-dd
+     * @return time span
+     */
+    public static TimeSpan build(String tildeSeparatedBeginInclusiveEndExclusive) throws ParseException {
+        TimeSpan ts = new TimeSpan();
+        if (!isTimeSpan(tildeSeparatedBeginInclusiveEndExclusive)) {
+            return ts;
         }
-
-        if (ParameterUtils.getCookieAndRequestInt(request, getEYearName(), 0) > 0) {
-
-            endYear = ParameterUtils.getCookieAndRequestInt(request,
-                    getEYearName(), endYear);
-            endMonth = ParameterUtils.getCookieAndRequestInt(request,
-                    getEMonthName(), endMonth);
-            endDay = ParameterUtils.getCookieAndRequestInt(request,
-                    getEDayName(), endDay);
-
-            Calendar end_date = new GregorianCalendar(endYear,
-                    endMonth - 1, endDay, 0, 0, 0);
-
-            if (endYear < MAX_END_YEAR)
-                endDate = end_date.getTime();
-
+        String[] dates = tildeSeparatedBeginInclusiveEndExclusive.split("~");
+        if(dates.length<2){
+            return ts;
         }
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+        Date begin = sf.parse(dates[0]);
+        Date end= sf.parse(dates[1]);
+        Calendar cb= Calendar.getInstance();
+        cb.setTime(begin);
+        Calendar ce= Calendar.getInstance();
+        ce.setTime(end);
+        ts.init(cb,ce);
+
+        return ts;
     }
 
     private void getSeparatedParams(HttpServletRequest request) {
         beginDate = ParameterUtils.getCookieAndRequestDate(request,
                 getBDate(), beginDate);
         if (beginDate != null && beginDate.getTime() != 0) {
-
             Calendar begin_date = Calendar.getInstance();
             begin_date.setTime(beginDate);
             beginYear = begin_date.get(Calendar.YEAR);
@@ -494,6 +488,47 @@ public class TimeSpan implements ISqlConditionType {
         this.iconPath = iconpath;
     }
 
+    public static boolean isTimeSpan(String tildeSeparatedDates){
+        String regex = "(\\d{4}-\\d{1,2}-\\d{1,2})?~(\\d{4}-\\d{1,2}-\\d{1,2})?";
+        return tildeSeparatedDates!=null &&
+                tildeSeparatedDates.matches(regex);
+    }
+
+    private void getParams(HttpServletRequest request) {
+        if (ParameterUtils.getCookieAndRequestInt(request, getBYearName(), 0) > 0) {
+
+            beginYear = ParameterUtils.getCookieAndRequestInt(request,
+                    getBYearName(), beginYear);
+            beginMonth = ParameterUtils.getCookieAndRequestInt(request,
+                    getBMonthName(), beginMonth);
+            beginDay = ParameterUtils.getCookieAndRequestInt(request,
+                    getBDayName(), beginDay);
+
+            Calendar begin_date = new GregorianCalendar(beginYear,
+                    beginMonth - 1, beginDay, 0, 0, 0);
+            if (beginYear > MIN_BEGIN_YEAR)
+                beginDate = begin_date.getTime();
+        }
+
+        if (ParameterUtils.getCookieAndRequestInt(request, getEYearName(), 0) > 0) {
+
+            endYear = ParameterUtils.getCookieAndRequestInt(request,
+                    getEYearName(), endYear);
+            endMonth = ParameterUtils.getCookieAndRequestInt(request,
+                    getEMonthName(), endMonth);
+            endDay = ParameterUtils.getCookieAndRequestInt(request,
+                    getEDayName(), endDay);
+
+            Calendar end_date = new GregorianCalendar(endYear,
+                    endMonth - 1, endDay, 0, 0, 0);
+
+            if (endYear < MAX_END_YEAR) {
+                endDate = end_date.getTime();
+            }
+
+        }
+    }
+
     /**
      * 得到自定义类型的条件语句
      *
@@ -501,6 +536,7 @@ public class TimeSpan implements ISqlConditionType {
      * @param databaseType 采用BaseDao里的数据类型定义
      * @return 为and开头的条件子句
      */
+    @Override
     public String getConditionSql(String sqlFieldName, int databaseType) {
         switch (databaseType) {
             case BaseDao.DERBY:
@@ -517,7 +553,10 @@ public class TimeSpan implements ISqlConditionType {
         return this.getMysqlSqlCondition(sqlFieldName);
     }
 
+    @Override
     public String toString() {
         return "{" + beginYear + "-" + beginMonth + "-" + beginDay + "," + endYear + "-" + endMonth + "-" + endDay + "}";
     }
+
+
 }

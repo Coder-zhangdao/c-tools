@@ -5,6 +5,7 @@ import com.bixuebihui.jdbc.IBaseListService;
 import com.bixuebihui.jdbc.SqlFilter;
 import com.bixuebihui.jdbc.ClobString;
 import com.bixuebihui.jdbc.SqlSort;
+import com.bixuebihui.jsp.TimeSpan;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -28,8 +29,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.*;
 
+/**
+ * @author xwx
+ */
 public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
     public static final String VAR_NAME = "row";
@@ -237,7 +242,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         return sqlFilter;
     }
 
-    public static SqlFilter getFilter(Limit limit, String tableAlias) {
+    public static SqlFilter getFilter(Limit limit, String tableAlias) throws ParseException {
         SqlFilter sqlFilter = new SqlFilter();
         FilterSet filterSet = limit.getFilterSet();
         java.util.Collection<Filter> filters = filterSet.getFilters();
@@ -245,7 +250,13 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         for (Filter filter : filters) {
             String property = filter.getProperty();
             String value = filter.getValue();
-            sqlFilter.addFilter(tableAlias + "." + property, value);
+            String prop = tableAlias + "." + property;
+            if(TimeSpan.isTimeSpan(value)) {
+                TimeSpan ts = TimeSpan.build(value);
+                sqlFilter.addFilter(prop, ts);
+            }else {
+                sqlFilter.addFilter(prop, value);
+            }
         }
         return sqlFilter;
     }

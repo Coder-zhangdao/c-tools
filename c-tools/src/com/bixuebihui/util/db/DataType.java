@@ -6,6 +6,9 @@
 package com.bixuebihui.util.db;
 
 
+/**
+ * @author xwx
+ */
 public class DataType {
 
     public DataType(String _name, int _type) {
@@ -39,14 +42,17 @@ public class DataType {
         return maxLength < 0;
     }
 
+    @Override
     public String toString() {
         return "Name=" + name + " Type=" + type;
     }
 
+    @Override
     public boolean equals(Object _obj) {
         return (_obj instanceof DataType) && ((DataType) _obj).name.compareToIgnoreCase(name) == 0;
     }
 
+    @Override
     public int hashCode() {
         return name.hashCode();
     }

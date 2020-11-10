@@ -82,6 +82,9 @@ public class TimeSpanTest extends TestCase {
 	}
 
 
-
-
+    public void testIsTimeSpan() {
+		assertTrue(TimeSpan.isTimeSpan("2014-12-23~"));
+		assertTrue(TimeSpan.isTimeSpan("~2014-12-23"));
+		assertTrue(TimeSpan.isTimeSpan("2014-12-23~2020-11-11"));
+    }
 }

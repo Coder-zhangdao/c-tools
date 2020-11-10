@@ -18,6 +18,7 @@
         <module>c-jmesa</module>
         <module>c-cache</module>
         <module>c-tablegen</module>
+        <module>c-tablegen-mojo</module>
     </modules>
     <properties>
         <jackson-databind.version>2.10.4</jackson-databind.version>
