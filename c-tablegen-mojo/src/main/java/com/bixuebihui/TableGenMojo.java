@@ -1,4 +1,4 @@
-package com.ssll;
+package com.bixuebihui;
 
 import com.bixuebihui.tablegen.TableGen;
 import org.apache.maven.plugin.AbstractMojo;

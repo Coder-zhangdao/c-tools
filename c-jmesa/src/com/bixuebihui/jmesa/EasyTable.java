@@ -113,6 +113,7 @@ public class EasyTable extends BasicWebUI {
 
 	public String json(Map<String,Object> paramsMap) throws SQLException{
 		SimpleHttpServletRequest request = new SimpleHttpServletRequest();
+		request.setParameters(paramsMap);
 		request.setParameter(this.id+"_e_","json");
 		SimpleHttpServletResponse response = new SimpleHttpServletResponse();
 		response.setCharacterEncoding(Charset.defaultCharset().displayName());

@@ -11,7 +11,7 @@ password=ssll123
 src_dir=../../gen/src
 test_dir=../../gen/test
 jsp_dir=../../gen/WebContent
-package_name=com.ssll.nb
+package_name=com.bixuebihui.nb
 keys=yes
 foreign_keys=yes
 indexes=no
@@ -34,13 +34,13 @@ generate_baselist=yes
 
 ##if kuozhanbiao==yes
 #haschildren code name \u4E09\u4E2A\u5B57\u6BB5
-pojo_node_interface=com.ssll.module.catalog.node.NodeInterface
+pojo_node_interface=com.bixuebihui.module.catalog.node.NodeInterface
 pojo_node_interface_list=Business_Category,Forum,Indexes,Product_Category,Zoning
 #version
-pojo_version_interface=com.ssll.module.catalog.node.VersionInterface
+pojo_version_interface=com.bixuebihui.module.catalog.node.VersionInterface
 #state
-pojo_state_interface=com.ssll.module.catalog.node.StateInterface
+pojo_state_interface=com.bixuebihui.module.catalog.node.StateInterface
 #uuid
-pojo_uuid_interface=com.ssll.module.catalog.node.UUIDInterface
+pojo_uuid_interface=com.bixuebihui.module.catalog.node.UUIDInterface
 #modifydate
-pojo_modifydate_interface=com.ssll.module.catalog.node.ModifydateInterface
+pojo_modifydate_interface=com.bixuebihui.module.catalog.node.ModifydateInterface
