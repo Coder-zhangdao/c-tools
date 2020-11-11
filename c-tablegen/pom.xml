@@ -6,11 +6,11 @@
     <groupId>com.github.yujiaao</groupId>
     <artifactId>tablegen</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1-RC2</version>
     <parent>
         <groupId>com.github.yujiaao</groupId>
         <artifactId>c-tools-parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1-RC2</version>
     </parent>
     <build>
         <finalName>tablegen</finalName>
@@ -129,17 +129,17 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-tools</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1-RC2</version>
         </dependency>
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-dbtools</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1-RC2</version>
         </dependency>
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-cache</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1-RC2</version>
         </dependency>
         <dependency>
             <groupId>postgresql</groupId>
@@ -163,14 +163,9 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-jmesa</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1-RC2</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.yujiaao</groupId>
-            <artifactId>jmesa</artifactId>
-            <version>4.0.1</version>
-        </dependency>
 
         <dependency>
             <groupId>javax.validation</groupId>
