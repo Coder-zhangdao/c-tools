@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>c-tools-parent</artifactId>
+        <groupId>com.github.yujiaao</groupId>
+        <version>1.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>c-tablegen-demo</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.yujiaao</groupId>
+            <artifactId>c-tools-parent</artifactId>
+            <version>1.0.1-RC2</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>2.1.7.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.9</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.yujiaao</groupId>
+            <artifactId>c-jmesa</artifactId>
+            <version>1.0.1-RC2</version>
+            <scope>compile</scope>
+        </dependency>
+
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.yujiaao</groupId>
+                <artifactId>tablegen-maven-plugin</artifactId>
+                <version>1.0.1-RC2</version>
+                <executions>
+                    <execution>
+                        <id>first-execution</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>gen</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <propPath>${project.basedir}/tablegen.properties</propPath>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

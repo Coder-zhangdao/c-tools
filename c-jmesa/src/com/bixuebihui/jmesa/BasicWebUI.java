@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jmesa.core.preference.Preferences;
+import org.jmesa.model.ExportTypes;
 import org.jmesa.model.TableModel;
 import org.jmesa.model.TableModelUtils;
 import org.jmesa.view.component.Column;
@@ -54,7 +55,7 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
 
 		TableModel tableFacade = new TableModel(id, request, response);
 
-		tableFacade.setExportTypes(TableModel.CSV,TableModel.EXCEL);
+		tableFacade.setExportTypes(ExportTypes.CSV,ExportTypes.EXCEL);
 
 		Preferences preferences = null;
 		tableFacade.setPreferences(preferences);

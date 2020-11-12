@@ -106,7 +106,8 @@ public class BitmechanicDataSource implements DataSource, INamingPool {
     /** {@inheritDoc} */
     @Override
     public synchronized void setDatabaseConfig(DatabaseConfig cfg) {
-        if(cfg.getAlias()!=null && cfg.getAlias().equals(this.getAlias())) {
+        String alias = cfg==null?null:cfg.getAlias();
+        if(alias!=null && alias.equals(this.getAlias())) {
             //避免重复初始化同一连接池
             return;
         }

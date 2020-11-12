@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jmesa.limit.*;
+import org.jmesa.model.ExportTypes;
 import org.jmesa.model.TableModel;
 import org.jmesa.model.TableModelUtils;
 import org.jmesa.model.WorksheetSaver;
@@ -116,15 +117,18 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
                 .createTable(getColNames()) : TableModelUtils
                 .createHtmlTable(getColNames());
 
-        tableModel.setExportTypes(TableModel.CSV, TableModel.EXCEL); // Tell the tableFacade what
-        // exports to use.
+        // Tell the tableFacade what exports to use.
+        tableModel.setExportTypes(ExportTypes.CSV, ExportTypes.EXCEL);
         tableModel.setStateAttr("restore");
-        setDataAndLimitVariables(tableModel); // Find the data to display and
+        // Find the data to display and
+        setDataAndLimitVariables(tableModel);
         // build the Limit.
         CustomToolbar toolbar = new CustomToolbar();
 
         toolbar.enablePageNumbers(true);
-        onSetCustomToolBar(toolbar); //allow user add additional custom tool bar buttons
+
+        //allow user add additional custom tool bar buttons
+        onSetCustomToolBar(toolbar);
         tableModel.setToolbar(toolbar);
 
 
@@ -138,8 +142,9 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         if (tableModel.isExporting()) {
             exportRender(tableModel);
             // Will write the export data out to the response.
-            return null; // In Spring return null tells the controller not to do
+            // In Spring return null tells the controller not to do
             // anything.
+            return null;
         } else {
             HtmlColumn chkbox = (HtmlColumn) row.getColumn("chkbox");
             chkbox.setHeaderEditor(new WorksheetCheckboxHeaderEditor());
@@ -165,7 +170,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
     }
 
     protected void exportRender(TableModel tableModel) {
-        if (TableModel.EXCEL.equals(tableModel.getExportType())) {
+        if (ExportTypes.EXCEL.equals(tableModel.getExportType())) {
             tableModel.setExportFileName(tableCaption + ".xls");
         }
 

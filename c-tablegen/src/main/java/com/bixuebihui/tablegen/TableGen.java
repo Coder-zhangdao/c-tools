@@ -60,7 +60,7 @@ import java.util.*;
  *
  */
 public class TableGen implements DiffHandler {
-	public static final String DB_ERROR = "[GEN]安装数据库时出错";
+	public static final String DB_ERROR = "[GEN]Error setup database";
 	public static final String MANAGER_SUFFIX = "Manager";
 	public static final String INDENT = "      ";
 	public static final String BUSINESS = "business";
@@ -89,7 +89,7 @@ public class TableGen implements DiffHandler {
 	BufferedWriter currentOutput;
 	Map<String, T_metatable> tableData;
 	/**
-	 * 如果扩展表可用,那每个表可以实现以下几个接口
+	 * If the extended table is available, each table can implement the following interfaces
 	 */
 	String pojo_node_interface;
 	String pojo_version_interface;
@@ -105,7 +105,7 @@ public class TableGen implements DiffHandler {
 	Map<String, String> tablesList;
 	Map<String, String> excludeTablesList;
 	/**
-	 * 补充设置,主要用于注释,数据检查,接口等
+	 * additional settings, used for comments, data checking, interfaces, etc.
 	 */
 	String extra_setting;
 	IDbHelper dbHelper = null;
@@ -115,7 +115,7 @@ public class TableGen implements DiffHandler {
 	 */
 	Map<String,String> typeDefaultValue = initDefaultTypeValue();
 	/**
-	 * 生成是否成功的标志
+	 * Whether the generation is successful
 	 */
 	private boolean generateFlag = true;
 	private String tableOwner;
@@ -1109,7 +1109,7 @@ public class TableGen implements DiffHandler {
 			for (ColumnData col : colData) {
 				if ("String".equals(col.getJavaType())) {
 					out("     s.append(\"" + col.getName()
-							+ "=\\\"\").append(com.bixuebihui.util.other.CMyString.filterForXML(this.get"
+							+ "=\\\"\").append(StringEscapeUtils.escapeXml11(this.get"
 							+ firstUp(col.getName()) + "())).append(\"\\\" \");");
 				} else {
 					out("     s.append(\"" + col.getName() + "=\\\"\").append(this.get"
@@ -1133,7 +1133,7 @@ public class TableGen implements DiffHandler {
 	/**
 	 * 生成单个dal
 	 *
-	 * @param tableName
+	 * @param tableName database table name
 	 */
 	private void generateDAL(String tableName) {
 
@@ -1588,6 +1588,7 @@ public class TableGen implements DiffHandler {
 
 		if ("pojo".equals(subPackage) && this.use_annotation) {
 			out("import javax.validation.constraints.*;");
+			out("import org.apache.commons.text.StringEscapeUtils;");
 		}
 
 		if (!"pojo".equals(subPackage)) {
