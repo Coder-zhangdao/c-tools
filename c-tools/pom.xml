@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>com.github.yujiaao</groupId>
 		<artifactId>c-tools-parent</artifactId>
-		<version>1.0.1-RC2</version>
+		<version>1.0.1-RC3</version>
 	</parent>
 
 	<build>
@@ -187,7 +187,7 @@
 		<dependency>
 			<groupId>com.github.yujiaao</groupId>
 			<artifactId>c-dbtools</artifactId>
-            <version>1.0.1-RC2</version>
+            <version>1.0.1-RC3</version>
 		</dependency>
 
 		<dependency>

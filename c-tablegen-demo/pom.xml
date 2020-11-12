@@ -5,7 +5,7 @@
     <parent>
         <artifactId>c-tools-parent</artifactId>
         <groupId>com.github.yujiaao</groupId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1-RC3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-tools-parent</artifactId>
-            <version>1.0.1-RC2</version>
+            <version>1.0.1-RC3</version>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-jmesa</artifactId>
-            <version>1.0.1-RC2</version>
+            <version>1.0.1-RC3</version>
             <scope>compile</scope>
         </dependency>
 
@@ -43,7 +43,7 @@
             <plugin>
                 <groupId>com.github.yujiaao</groupId>
                 <artifactId>tablegen-maven-plugin</artifactId>
-                <version>1.0.1-RC2</version>
+                <version>1.0.1-RC3</version>
                 <executions>
                     <execution>
                         <id>first-execution</id>
