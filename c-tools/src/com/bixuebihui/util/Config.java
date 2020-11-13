@@ -6,20 +6,17 @@
 package com.bixuebihui.util;
 
 import org.apache.commons.configuration2.*;
-import org.apache.commons.configuration2.event.ConfigurationEvent;
-import org.apache.commons.configuration2.event.EventListener;
-import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.configuration2.reloading.ZKNodeChangeEventReloadingStrategy;
-import org.apache.commons.lang.StringUtils;
+//import org.apache.commons.configuration2.event.ConfigurationEvent;
+//import org.apache.commons.configuration2.event.EventListener;
+//import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.imps.CuratorFrameworkState;
-import org.apache.curator.retry.ExponentialBackoffRetry;
+
 
 import javax.sql.DataSource;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -41,7 +38,7 @@ public class Config implements AutoCloseable {
     private static CompositeConfiguration config = null;
     private static DatabaseConfiguration dbconfig = null;
 
-    private static CuratorFramework client;
+//    private static CuratorFramework client;
 
     private static final Log mLogger = LogFactory.getLog(Config.class);
 
@@ -84,17 +81,19 @@ public class Config implements AutoCloseable {
                 if (initFileBaseConfig()) {
                     STAGE |= CONFIG_LOCAL;
 
-                    String zookeeper_url = config.getConfiguration(0).getString(CONFIG_ZOOKEEPER_KEY);
-                    useZooKeeper = !StringUtils.isEmpty(zookeeper_url);
-
-                    if (useZooKeeper) {
-                        if (initZookeeperConfig()) STAGE |= CONFIG_ZOOKEEPER;
-                    }
+//                    String zookeeper_url = config.getConfiguration(0).getString(CONFIG_ZOOKEEPER_KEY);
+//                    useZooKeeper = !StringUtils.isEmpty(zookeeper_url);
+//
+//                    if (useZooKeeper) {
+//                        if (initZookeeperConfig()) STAGE |= CONFIG_ZOOKEEPER;
+//                    }
                 }
 
                 if (((STAGE & CONFIG_ZOOKEEPER) != 0)
                         || !useZooKeeper) {
-                    if (initDbConfig()) STAGE |= CONFIG_DB;
+                    if (initDbConfig()) {
+                        STAGE |= CONFIG_DB;
+                    }
                 }
             // -----
 
@@ -107,21 +106,21 @@ public class Config implements AutoCloseable {
 
 
 
-    private static boolean initZookeeperConfig() {
-        String zookeeper_url = getProperty(CONFIG_ZOOKEEPER_KEY);
-        if (StringUtils.trimToNull(zookeeper_url) != null) {
-            mLogger.debug("尝试加载zookeeper配置");
-            Configuration zooConfig = initZookeeper(zookeeper_url, ZK_CONFIG_APP_PROPERTIES);
-            if (zooConfig != null) {
-                config.addConfiguration(zooConfig);
-                mLogger.debug("加载zookeeper配置完成");
-                return true;
-            }
-        }
-        return false;
-    }
+//    private static boolean initZookeeperConfig() {
+//        String zookeeper_url = getProperty(CONFIG_ZOOKEEPER_KEY);
+//        if (StringUtils.trimToNull(zookeeper_url) != null) {
+//            mLogger.debug("尝试加载zookeeper配置");
+//            Configuration zooConfig = initZookeeper(zookeeper_url, ZK_CONFIG_APP_PROPERTIES);
+//            if (zooConfig != null) {
+//                config.addConfiguration(zooConfig);
+//                mLogger.debug("加载zookeeper配置完成");
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
-    public static boolean initDbConfig() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public static boolean initDbConfig() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         if (!dbInitPhase) {
             dbInitPhase = true;
         } else {
@@ -139,7 +138,7 @@ public class Config implements AutoCloseable {
             String valueColumn = getProperty("config.datasource.valuecolumn");
             String configurationNameColumn = nameColumn == null ? "c_name" : nameColumn;
 
-            DataSource ds = (DataSource) (cls.newInstance());
+            DataSource ds = (DataSource) (cls.getDeclaredConstructor().newInstance());
             dbconfig = new DatabaseConfiguration();
             dbconfig.setDataSource(ds);
             dbconfig.setTable(table);
@@ -259,8 +258,9 @@ public class Config implements AutoCloseable {
 
     public static String getProperty(String key, String defaultValue) {
         String result = config == null ? null : config.getString(key, defaultValue);
-        if (StringUtils.isBlank(result))
+        if (StringUtils.isBlank(result)) {
             result = defaultValue;
+        }
         return result;
     }
 
@@ -316,8 +316,9 @@ public class Config implements AutoCloseable {
         config.setProperty(name, value);
 
         // 设置数据库
-        if (dbconfig != null)
+        if (dbconfig != null) {
             dbconfig.setProperty(name, value);
+        }
 
     }
 
@@ -325,35 +326,36 @@ public class Config implements AutoCloseable {
         config.addProperty(name, value);
 
         // 设置数据库
-        if (dbconfig != null)
+        if (dbconfig != null) {
             dbconfig.addProperty(name, value);
-    }
-
-    protected static byte[] getRawData(String path) {
-        try {
-            if (client != null && client.getState() == CuratorFrameworkState.STARTED)
-                return client.getData().forPath(path);
-        } catch (Exception e) {
-            mLogger.warn("Load config from ZooKeeper error",e);
         }
-        return new byte[0];
     }
 
-    protected static String getRawDataAsString(String path) {
-        return new String(getRawData(path));
-    }
+//    protected static byte[] getRawData(String path) {
+//        try {
+//            if (client != null && client.getState() == CuratorFrameworkState.STARTED)
+//                return client.getData().forPath(path);
+//        } catch (Exception e) {
+//            mLogger.warn("Load config from ZooKeeper error",e);
+//        }
+//        return new byte[0];
+//    }
 
-    public static Properties getZooProperties(String path) {
-        String res = getRawDataAsString(path);
-        Properties p = new Properties();
-        try (Reader in = new StringReader(res)) {
-            p.load(in);
-        } catch (IOException e) {
-            mLogger.debug("Could not load properties from zookeeper: [" + path + "].");
-        }
-        return p;
+//    protected static String getRawDataAsString(String path) {
+//        return new String(getRawData(path));
+//    }
 
-    }
+//    public static Properties getZooProperties(String path) {
+//        String res = getRawDataAsString(path);
+//        Properties p = new Properties();
+//        try (Reader in = new StringReader(res)) {
+//            p.load(in);
+//        } catch (IOException e) {
+//            mLogger.debug("Could not load properties from zookeeper: [" + path + "].");
+//        }
+//        return p;
+//
+//    }
 
     /**
      * Set the "uploads.dir" property at runtime.
@@ -364,8 +366,9 @@ public class Config implements AutoCloseable {
      */
     public static void setUploadsDir(String path) {
         // only do this if the user wants to use the webapp context
-        if ("${webapp.context}".equals(config.getProperty("uploads.dir")))
+        if ("${webapp.context}".equals(config.getProperty("uploads.dir"))) {
             config.setProperty("uploads.dir", path);
+        }
     }
 
     /**
@@ -426,11 +429,13 @@ public class Config implements AutoCloseable {
                     text1 = formatTime(dt, DATE_FORMAT_YESTODAY);
 
                 }
-            } else
+            } else {
                 text1 = formatTime(dt, DATE_FORMAT_THIS_YEAR);
+            }
 
-        } else
+        } else {
             text1 = formatTime(dt, DATE_FORMAT);
+        }
 
         return text1;
 
@@ -441,45 +446,45 @@ public class Config implements AutoCloseable {
         return new SimpleDateFormat(fmt).format(dt);
     }
 
-
-    private static Configuration initZookeeper(String connectString, String nodePath) {
-        // Init Curator
-        client = CuratorFrameworkFactory.newClient(connectString, new ExponentialBackoffRetry(1000, 3));
-        client.start();
-
-        try {
-            ZKPropertiesConfiguration config = new ZKPropertiesConfiguration(client, nodePath); // "/path/to/file.properties");
-
-            // add reloading strategy
-            // properties are reloaded when zookeeper node changes.
-            config.setReloadingStrategy(new ZKNodeChangeEventReloadingStrategy());
-
-            // add listener
-            EventListener<ConfigurationEvent> el = new EventListener<ConfigurationEvent>() {
-                public void onEvent(final ConfigurationEvent event) {
-                    if (!event.isBeforeUpdate()) {
-                        System.out.println(
-                                "Path '" + event.getPropertyValue() + "' has been " + event.getEventType() + " !");
-                    }
-                }
-            };
-
-            config.addEventListener(ZKPropertiesConfiguration.EVENT_NODE_CREATE, el);
-            config.addEventListener(ZKPropertiesConfiguration.EVENT_NODE_UPDATE, el);
-            config.addEventListener(ZKPropertiesConfiguration.EVENT_NODE_DELETE, el);
-
-            return config;
-        } catch (ConfigurationException e) {
-            mLogger.warn(e);
-        }
-        return null;
-    }
+//
+//    private static Configuration initZookeeper(String connectString, String nodePath) {
+//        // Init Curator
+//        client = CuratorFrameworkFactory.newClient(connectString, new ExponentialBackoffRetry(1000, 3));
+//        client.start();
+//
+//        try {
+//            ZKPropertiesConfiguration config = new ZKPropertiesConfiguration(client, nodePath); // "/path/to/file.properties");
+//
+//            // add reloading strategy
+//            // properties are reloaded when zookeeper node changes.
+//            config.setReloadingStrategy(new ZKNodeChangeEventReloadingStrategy());
+//
+//            // add listener
+//            EventListener<ConfigurationEvent> el = new EventListener<ConfigurationEvent>() {
+//                public void onEvent(final ConfigurationEvent event) {
+//                    if (!event.isBeforeUpdate()) {
+//                        System.out.println(
+//                                "Path '" + event.getPropertyValue() + "' has been " + event.getEventType() + " !");
+//                    }
+//                }
+//            };
+//
+//            config.addEventListener(ZKPropertiesConfiguration.EVENT_NODE_CREATE, el);
+//            config.addEventListener(ZKPropertiesConfiguration.EVENT_NODE_UPDATE, el);
+//            config.addEventListener(ZKPropertiesConfiguration.EVENT_NODE_DELETE, el);
+//
+//            return config;
+//        } catch (ConfigurationException e) {
+//            mLogger.warn(e);
+//        }
+//        return null;
+//    }
 
     @Override
     public void close() {
-        if (client != null) {
-            client.close();
-        }
+//        if (client != null) {
+//            client.close();
+//        }
 
     }
 

@@ -1,7 +1,7 @@
 package com.bixuebihui.util;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 16进制数转成36进制，从15字符可以压缩至12字符，压缩率只有20%

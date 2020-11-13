@@ -2,7 +2,6 @@ package com.bixuebihui;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.helpers.Loader;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -13,6 +12,9 @@ import org.springframework.core.io.UrlResource;
 
 import java.net.URL;
 
+/**
+ * @author xwx
+ */
 public class SpringBeanZK {
     private GenericApplicationContext beanFactory;
 
@@ -43,8 +45,9 @@ public class SpringBeanZK {
     }
 
     private ApplicationContext getXMLlBeanFactory() {
-        if (beanFactory == null)
+        if (beanFactory == null) {
             initFactory();
+        }
         return beanFactory;
     }
 

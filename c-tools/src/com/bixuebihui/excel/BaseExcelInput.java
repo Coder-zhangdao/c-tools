@@ -1,15 +1,12 @@
 package com.bixuebihui.excel;
 
 import com.bixuebihui.util.DateConverter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
 import javax.validation.constraints.NotNull;
 import java.io.File;
@@ -32,22 +29,23 @@ public class BaseExcelInput {
 
         Cell cell = row.getCell(i);
 
-        if (cell == null)
+        if (cell == null) {
             return "";
-        int celltype = cell.getCellType();
+        }
+        CellType celltype = cell.getCellTypeEnum();
 
-        if (celltype == Cell.CELL_TYPE_STRING) {
+        if (celltype == CellType.STRING) {
             return cell.getRichStringCellValue().getString().trim();
-        } else if (celltype == Cell.CELL_TYPE_NUMERIC) {
+        } else if (celltype == CellType.NUMERIC) {
             double v = cell.getNumericCellValue();
             if (v > 1e6) {//可能为手机号或身份证号等，避免生成科学记数法的格式，如1.3910010327e10
                 return new DecimalFormat("#").format(v);
             }
             return "" + v;
-        } else if (celltype == Cell.CELL_TYPE_BLANK) {
+        } else if (celltype == CellType.BLANK) {
             return "";
-        } else if(celltype == Cell.CELL_TYPE_FORMULA) {
-            cell.setCellType(Cell.CELL_TYPE_STRING);
+        } else if(celltype == CellType.FORMULA) {
+            cell.setCellType(CellType.STRING);
             return cell.getStringCellValue();
         }else{
             return "" + cell.getNumericCellValue();
@@ -65,14 +63,16 @@ public class BaseExcelInput {
     protected static double getDoubleCellContent(Row row, int i) {
 
         Cell cell = row.getCell(i);
-        if (cell == null)
+        if (cell == null) {
             return 0;
-        int cellType = cell.getCellType();
+        }
+        CellType cellType = cell.getCellTypeEnum();
 
-        if (cellType == Cell.CELL_TYPE_STRING) {
+        if (cellType == CellType.STRING) {
             String tmp = cell.getRichStringCellValue().getString().trim();
-            if (StringUtils.isEmpty(tmp))
+            if (StringUtils.isEmpty(tmp)) {
                 return 0;
+            }
             return Double.parseDouble(tmp);
         } else {
             return cell.getNumericCellValue();
@@ -95,16 +95,17 @@ public class BaseExcelInput {
      * 时间转换String转换成Date 可自动判断年月日分隔型;‘-’分隔型;数字型；
      */
     protected static java.util.Date getDateCellContent(Row row, int i) {
-        int cellType = row.getCell(i).getCellType();
+        CellType cellType = row.getCell(i).getCellTypeEnum();
 
-        if (cellType == Cell.CELL_TYPE_NUMERIC) {
+        if (cellType == CellType.NUMERIC) {
             return getDateCell(row, i);
         } else {
             String tmp = getCellContent(row, i);
-            if ( tmp.contains("-"))
+            if ( tmp.contains("-")) {
                 return getDateCellStringContentWithSeparator(row, i);
-            else
+            } else {
                 return getDateCellStringContent(row, i);
+            }
         }
     }
 
@@ -116,11 +117,11 @@ public class BaseExcelInput {
         String changedCell = "";
 
 
-        int celltype = row.getCell(i).getCellType();
+        CellType celltype = row.getCell(i).getCellTypeEnum();
 
-        if (celltype == Cell.CELL_TYPE_STRING) {
+        if (celltype == CellType.STRING) {
             changedCell = row.getCell(i).getRichStringCellValue().getString();
-        } else if (celltype == Cell.CELL_TYPE_NUMERIC) {
+        } else if (celltype == CellType.NUMERIC) {
             changedCell = "" + (int) row.getCell(i).getNumericCellValue();
         }
 
@@ -140,11 +141,11 @@ public class BaseExcelInput {
         String postTime;
 
 
-        int cellType = row.getCell(i).getCellType();
+        CellType cellType = row.getCell(i).getCellTypeEnum();
 
-        if (cellType == Cell.CELL_TYPE_STRING) {
+        if (cellType == CellType.STRING) {
             changedCell = row.getCell(i).getRichStringCellValue().getString();
-        } else if (cellType == Cell.CELL_TYPE_NUMERIC) {
+        } else if (cellType == CellType.NUMERIC) {
             changedCell = "" + (int) row.getCell(i).getNumericCellValue();
         }
 
@@ -161,12 +162,15 @@ public class BaseExcelInput {
             }
         }
 
-        if (year.equals(""))
+        if ("".equals(year)) {
             year = "1900";
-        if (month.equals(""))
+        }
+        if ("".equals(month)) {
             month = "01";
-        if (day.equals(""))
+        }
+        if ("".equals(day)) {
             day = "01";
+        }
 
         postTime = year + "-" + month + "-" + day;
 
@@ -294,8 +298,9 @@ public class BaseExcelInput {
 
     protected static String filterOutSpace(String src) {
         src = StringUtils.stripToNull(src);
-        if (src == null)
+        if (src == null) {
             return null;
+        }
         if (src.matches("^[0-9a-zA-Z].*")) {
             return src; //如是英文或数字，略去最后一步
         }

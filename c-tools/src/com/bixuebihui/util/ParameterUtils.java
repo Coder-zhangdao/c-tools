@@ -11,8 +11,8 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -93,8 +93,9 @@ public class ParameterUtils {
         String str = EncryptUtil.decrypt64(encryptedString, encryptKey);
         Map<String, String> res = Collections.emptyMap();
 
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return res;
+        }
 
         res = splitQuery(str);
         if (verifySignedParams(res)) {
@@ -139,14 +140,16 @@ public class ParameterUtils {
                 } catch (UnsupportedEncodingException e) {
                     logger.error(e);
                 }
-                if (!(localIterator.hasNext()))
+                if (!(localIterator.hasNext())) {
                     break;
+                }
                 res.append("&");
             }
         }
 
-        if (res.charAt(res.length() - 1) == '&')
+        if (res.charAt(res.length() - 1) == '&') {
             res.deleteCharAt(res.length() - 1);
+        }
 
         return res.toString();
     }
@@ -202,8 +205,9 @@ public class ParameterUtils {
     protected static Map<String, String> splitQuery(String queryString) {
         Map<String, String> queryPairs = new LinkedHashMap<>();
 
-        if (StringUtils.isBlank(queryString))
+        if (StringUtils.isBlank(queryString)) {
             return queryPairs;
+        }
 
         String[] pairs = queryString.split("&");
         for (String pair : pairs) {
@@ -339,16 +343,19 @@ public class ParameterUtils {
 
     // 把全角数字转为半角数字
     public static String getAlabNum(String src, String defaultValue) {
-        if (StringUtils.isBlank(src))
+        if (StringUtils.isBlank(src)) {
             return defaultValue;
+        }
 
         String[] nums = {"０", "１", "２", "３", "４", "５", "６", "７", "８", "９"};
         String fnums = "0123456789";
-        for (int i = 0; i <= 9; i++)
+        for (int i = 0; i <= 9; i++) {
             src = src.replaceAll(nums[i], fnums.charAt(i) + ""); // OsPHP.COM.CN
+        }
         src = src.replaceAll("[^\\-0-9.]|^0{1,}", "").trim();
-        if (StringUtils.isBlank(src))
+        if (StringUtils.isBlank(src)) {
             src = defaultValue;
+        }
         return src;
     }
 
@@ -364,8 +371,9 @@ public class ParameterUtils {
     }
 
     public static Date strToDate(String date) {
-        if (StringUtils.trimToNull(date) == null)
+        if (StringUtils.trimToNull(date) == null) {
             return null;
+        }
 
         int m = date.indexOf('-');
         int k = date.lastIndexOf('-');
@@ -373,8 +381,9 @@ public class ParameterUtils {
             int yyyy = Integer.parseInt(date.substring(0, m));
             int mm = Integer.parseInt(date.substring(m + 1, k));
             String day = date.substring(k + 1, date.length());
-            if (day.contains(" "))
+            if (day.contains(" ")) {
                 day = day.substring(0, day.indexOf(' '));
+            }
 
             int dd = Integer.parseInt(day);
 
@@ -459,7 +468,7 @@ public class ParameterUtils {
 
     private static boolean isUnknow(String ipaddress) {
         return ipaddress == null || ipaddress.length() == 0 || "unknown".equalsIgnoreCase(ipaddress)
-                || ipaddress.equals("127.0.0.1");
+                || "127.0.0.1".equals(ipaddress);
     }
 
     public static String getClientIP(HttpServletRequest request) {
@@ -471,15 +480,18 @@ public class ParameterUtils {
         for (String header : ipHeaders) {
             if (isLocalOrUnknow(ipAddress)) {
                 ipAddress = request.getHeader(header);
-                if (ipAddress == null)
+                if (ipAddress == null) {
                     ipAddress = request.getHeader(header.toLowerCase());
-                if (ipAddress == null)
+                }
+                if (ipAddress == null) {
                     ipAddress = request.getHeader(header.toUpperCase());
+                }
                 if (ipAddress != null && ipAddress.contains(",")) {
                     ipAddress = ipAddress.substring(0, ipAddress.indexOf(','));
                 }
-            } else
+            } else {
                 break;
+            }
         }
         if (isUnknow(ipAddress)) {
             ipAddress = request.getRemoteAddr();
@@ -508,10 +520,13 @@ public class ParameterUtils {
 
     public static int getCookieAndRequestInt(HttpServletRequest request, String cookieName, int defaultValue) {
         int res = getInt(request, cookieName);
-        if (res == 0)
+        if (res == 0) {
             res = getCookieInt(request, cookieName);
-        if (res == 0)
+        }
+
+        if (res == 0) {
             res = defaultValue;
+        }
 
         return res;
     }
@@ -525,8 +540,9 @@ public class ParameterUtils {
 
                 if (sname != null && sname.equals(cookieName)) {
                     String value = cooky.getValue();
-                    if (StringUtils.isNotEmpty(value) && StringUtils.isNumeric(value))
+                    if (StringUtils.isNotEmpty(value) && StringUtils.isNumeric(value)) {
                         return Integer.parseInt(value);
+                    }
                 }
             }
         }
@@ -542,8 +558,9 @@ public class ParameterUtils {
 
                 if (sname != null && sname.equals(cookieName)) {
                     String value = cookies[c].getValue();
-                    if (StringUtils.isNotEmpty(value) && StringUtils.isNumeric(value))
+                    if (StringUtils.isNotEmpty(value) && StringUtils.isNumeric(value)) {
                         return Long.parseLong(value);
+                    }
                 }
             }
         }
@@ -552,12 +569,15 @@ public class ParameterUtils {
 
     public static Date getCookieAndRequestDate(HttpServletRequest request, String dateName, Date defaultValue) {
         Date res = new Date(0);
-        if (res.getTime() == 0)
+        if (res.getTime() == 0) {
             res = getDate(request, dateName);
-        if (res == null || res.getTime() == 0)
+        }
+        if (res == null || res.getTime() == 0) {
             res = getCookieDate(request, dateName);
-        if (res == null || res.getTime() == 0)
+        }
+        if (res == null || res.getTime() == 0) {
             res = defaultValue;
+        }
         return res;
     }
 

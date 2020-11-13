@@ -48,6 +48,9 @@ public class SMTPMXLookup {
         Hashtable env = new Hashtable();
         env.put("java.naming.factory.initial",
                 "com.sun.jndi.dns.DnsContextFactory");
+        env.put("com.sun.jndi.dns.timeout.initial", "500");
+        env.put("com.sun.jndi.dns.timeout.retries", "2");
+
         DirContext ictx = new InitialDirContext(env);
         Attributes attrs = ictx.getAttributes
                 (hostName, new String[]{"MX"});

@@ -1,7 +1,10 @@
 package com.bixuebihui.util.gb;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @author xwx
+ */
 public class HKShenfenzheng {
     /**
      * 英文字母（老年人通常是A或者B，成年人多数是之后的英文字母，如D, E之类；
@@ -30,7 +33,9 @@ public class HKShenfenzheng {
      * 这样，就得出一个完整的香港特区身份证号码了。这个号码送给您，Z687485(2)。
      */
     public static boolean isValid(String id) {
-        if (StringUtils.isBlank(id) || id.length() < 8 || id.length() > 10) return false;
+        if (StringUtils.isBlank(id) || id.length() < 8 || id.length() > 10) {
+            return false;
+        }
 
 
         id = id.replaceAll("\\(", "").replaceAll("\\)", "");
@@ -45,7 +50,9 @@ public class HKShenfenzheng {
         dig = dig % 11;
         dig = 11 - dig;
 
-        if (dig == 10) return id.charAt(7) == 'A';
+        if (dig == 10) {
+            return id.charAt(7) == 'A';
+        }
         return dig == Byte.parseByte(id.charAt(7) + "");
     }
 }

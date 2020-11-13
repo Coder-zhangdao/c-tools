@@ -4,7 +4,12 @@ import com.bixuebihui.util.Config;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
+import java.lang.reflect.InvocationTargetException;
 
+
+/**
+ * @author xwx
+ */
 public class BeanPostPrcessorImpl implements BeanPostProcessor {
 
 
@@ -13,11 +18,11 @@ public class BeanPostPrcessorImpl implements BeanPostProcessor {
 
     // Bean 实例化之前进行的处理
 
+    @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName)
 
             throws BeansException {
 
-        //System.out.println("对象" + beanName + "开始实例化");
         if (beanName.equals(getDbHelperBeanName())) {
             try {
 
@@ -28,7 +33,7 @@ public class BeanPostPrcessorImpl implements BeanPostProcessor {
                     System.err.println("Config.initDbConfig failed in postProcessBeforeInitialization");
                 }
 
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 e.printStackTrace();
             }
         }
@@ -40,6 +45,7 @@ public class BeanPostPrcessorImpl implements BeanPostProcessor {
 
     // Bean 实例化之后进行的处理
 
+    @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
 
             throws BeansException {

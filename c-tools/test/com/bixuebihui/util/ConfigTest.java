@@ -2,7 +2,7 @@ package com.bixuebihui.util;
 
 
 import junit.framework.TestCase;
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 
 public class ConfigTest extends TestCase {
 	public void testDbConfig()
@@ -24,22 +24,22 @@ public class ConfigTest extends TestCase {
 		System.out.println("abc="+res);
 	}
 
-	public void testGetRawData(){
-		//to avoid init time calculation
-		StopWatch sw=new StopWatch();
-
-		init(sw);
-		init(sw);
-
-		sw.start();
-		String path="/config/beans.properties";
-		String res = Config.getRawDataAsString(path);
-		sw.stop();
-
-		System.out.println("data="+res+"\n\n use time:"+sw.getTime());
-
-
-	}
+//	public void testGetRawData(){
+//		//to avoid init time calculation
+//		StopWatch sw=new StopWatch();
+//
+//		init(sw);
+//		init(sw);
+//
+//		sw.start();
+//		String path="/config/beans.properties";
+//		String res = Config.getRawDataAsString(path);
+//		sw.stop();
+//
+//		System.out.println("data="+res+"\n\n use time:"+sw.getTime());
+//
+//
+//	}
 
 	public void testGetPropertyChange() throws InterruptedException{
 		//to avoid init time calculation

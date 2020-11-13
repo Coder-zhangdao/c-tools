@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.yujiaao</groupId>
         <artifactId>c-tools-parent</artifactId>
-        <version>1.0.1-RC3</version>
+        <version>1.0.1-RC4</version>
     </parent>
 
     <groupId>com.github.yujiaao</groupId>

@@ -19,7 +19,7 @@ public class SMTPMXLookupTest {
                          "131212312312312@msn.com",
                                  "xwx@live.cn",
                                  "www@qsn.so",
-                                 "xwx@youth.cn",
+                                 "xwx@g.cn",
                              };
 
                      for ( int ctr = 0 ; ctr < testData.length ; ctr++ ) {

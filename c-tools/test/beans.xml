@@ -7,9 +7,9 @@
 		<property name="path" value="/config/spring/beans.properties" />
 	</bean> -->
 
-	<bean class="com.bixuebihui.spring.SpringApplicationContextHolder">
-		<property name="path" value="/config/spring/beans.properties" />
-	</bean>
+<!--	<bean class="com.bixuebihui.spring.SpringApplicationContextHolder">-->
+<!--		<property name="path" value="/config/spring/beans.properties" />-->
+<!--	</bean>-->
 
 	<!-- execute Config.initDbConfig() when dbHelper created-->
 	<bean class="com.bixuebihui.spring.BeanPostPrcessorImpl">

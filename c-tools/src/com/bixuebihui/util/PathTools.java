@@ -1,8 +1,8 @@
 package com.bixuebihui.util;
 
+import com.bixuebihui.Loader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.helpers.Loader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 

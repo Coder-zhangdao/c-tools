@@ -1,5 +1,16 @@
 package com.bixuebihui.cache;
 
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.bixuebihui.jdbc.BaseDao;
+import com.bixuebihui.jdbc.RowMapperResultReader;
+import com.bixuebihui.sequence.SequenceUtils;
+
 /**
  * DictionaryItem
  *
@@ -7,19 +18,6 @@ package com.bixuebihui.cache;
  * Do not edit the pojo and dal packages,use bixuebihui-smartable!
  * Code Generator by J.A.Carter
  * Modified by Xing Wanxiang 2008
- */
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.bixuebihui.jdbc.BaseDao;
-import com.bixuebihui.jdbc.RowMapperResultReader;
-import com.bixuebihui.sequence.SequenceUtils;
-
-/**
  * @author xwx
  */
 public class DictionaryList extends BaseList<DictionaryItem, String>  {
@@ -73,7 +71,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 			query += orderbyClause;
 		}
 		query = getPagingSql(query, beginNum, endNum);
-		return dbHelper.executeQuery(query, null, new RowMapperResultReader<DictionaryItem>(
+		return dbHelper.executeQuery(query, null, new RowMapperResultReader<>(
 				this));
 	}
 
@@ -88,7 +86,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 		if(StringUtils.trimToNull(def.getSort_name())!=null){
 			query += " order by "+def.getSort_name();
 		}
-		return dbHelper.executeQuery(query, null, new RowMapperResultReader<DictionaryItem>(
+		return dbHelper.executeQuery(query, null, new RowMapperResultReader<>(
 				this));
 	}
 
@@ -166,13 +164,13 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 
 	/**
 	 * Counts the number of entries for this table in the database.
-	 * @param kzbm_id id
+	 * @param id id
 	 * @return  count
 	 */
-	public int countLikeKey(long kzbm_id) throws SQLException {
+	public int countLikeKey(long id) throws SQLException {
 		String query = "select count(*) from " + getTableName()
 				+ " where "+def.getId_name()+"=?"+" "+def.getSqlCondition();
-		Object o = dbHelper.executeScalar(query, new Object[] { kzbm_id });
+		Object o = dbHelper.executeScalar(query, new Object[] { id });
 		return o == null ? 0 : Integer.parseInt(o.toString());
 	}
 
