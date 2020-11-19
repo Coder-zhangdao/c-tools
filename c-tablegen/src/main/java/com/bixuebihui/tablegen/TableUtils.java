@@ -450,19 +450,13 @@ public class TableUtils {
 
             String tableName;
 
-            // mLog.info("");
-            // mLog.info("Classes being created for the following tables...");
             while (tables.next()) {
 
-                // System.out.println("tables.getString(2)="+tables.getString(2));
-                // System.out.println("tableOwner="+tableOwner);
 
                 if (tableOwner != null
                         && tables.getString(2) != null
                         && !tableOwner.toUpperCase().equals(
                         tables.getString(2).toUpperCase())) {
-                    // mLog.debug("tableOwner is :" + tableOwner + " skip: "
-                    // + tables.getString(2));
                     continue;
                 }
 

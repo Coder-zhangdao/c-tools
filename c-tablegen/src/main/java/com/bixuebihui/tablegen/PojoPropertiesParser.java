@@ -1,7 +1,6 @@
 package com.bixuebihui.tablegen;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,16 +12,20 @@ import org.dom4j.Element;
 import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 
+/**
+ * @author xwx
+ */
 public class PojoPropertiesParser {
 
 	public static Map<String, T_metatable> parse(String xml) {
 		try {
-			Map<String, T_metatable> res = new Hashtable<String, T_metatable>();
+			Map<String, T_metatable> res = new Hashtable<>();
 			Document document = DocumentHelper.parseText(xml);
-			Element nodesElement = document.getRootElement(); // pojos
-			List nodes = nodesElement.elements();
-			for (Iterator its = nodes.iterator(); its.hasNext();) {
-				Element nodeElement = (Element) its.next(); // pojo
+			// pojos
+			Element nodesElement = document.getRootElement();
+			List<Element> nodes = nodesElement.elements();
+			for (Element nodeElement : nodes) {
+				// pojo
 				T_metatable t = new T_metatable();
 
 				String tableName = nodeElement.attributeValue("table-name");
@@ -42,9 +45,6 @@ public class PojoPropertiesParser {
 				}
 
 			}
-			nodes = null;
-			nodesElement = null;
-			document = null;
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -54,10 +54,10 @@ public class PojoPropertiesParser {
 
 	private static Map<String, T_metacolumn> getProperties(List<Element> properties) {
 		try {
-			Map<String, T_metacolumn> res = new Hashtable<String, T_metacolumn>();
+			Map<String, T_metacolumn> res = new Hashtable<>();
 
-			for (Iterator<Element> its = properties.iterator(); its.hasNext();) {
-				Element nodeElement = its.next(); // property
+			for (Element nodeElement : properties) {
+				// property
 				T_metacolumn t = new T_metacolumn();
 
 				String columnName = nodeElement.attributeValue("name");
@@ -80,32 +80,38 @@ public class PojoPropertiesParser {
 
 	public static Map<String, T_metatable> mergeTableSetting(Map<String, T_metatable> to,
 			Map<String, T_metatable> from) {
-		if(to==null)return from;
-		if(from!=null)
-		for(Map.Entry<String, T_metatable> entry:from.entrySet()){
-			if(to.containsKey(entry.getKey())){
-				T_metatable t_from = entry.getValue();
-				T_metatable t_to = to.get(entry.getKey());
+		if(to==null) {
+			return from;
+		}
+		if(from!=null) {
+			for(Map.Entry<String, T_metatable> entry:from.entrySet()){
+				if(to.containsKey(entry.getKey())){
+					T_metatable tableFrom = entry.getValue();
+					T_metatable tableTo = to.get(entry.getKey());
 
-				if(StringUtils.isNotEmpty(t_from.getClassname()))
-					t_to.setClassname(t_from.getClassname());
+					if(StringUtils.isNotEmpty(tableFrom.getClassname())) {
+						tableTo.setClassname(tableFrom.getClassname());
+					}
 
-				if(StringUtils.isNotEmpty(t_from.getDescription()))
-					t_to.setDescription(t_from.getDescription());
+					if(StringUtils.isNotEmpty(tableFrom.getDescription())) {
+						tableTo.setDescription(tableFrom.getDescription());
+					}
 
-				if(StringUtils.isNotEmpty(t_from.getExtrainterfaces()))
-					t_to.setExtrainterfaces(t_from.getExtrainterfaces());
+					if(StringUtils.isNotEmpty(tableFrom.getExtrainterfaces())) {
+						tableTo.setExtrainterfaces(tableFrom.getExtrainterfaces());
+					}
 
-				if(StringUtils.isNotEmpty(t_from.getExtrasuperclasses()))
-					t_to.setExtrasuperclasses(t_from.getExtrasuperclasses());
+					if(StringUtils.isNotEmpty(tableFrom.getExtrasuperclasses())) {
+						tableTo.setExtrasuperclasses(tableFrom.getExtrasuperclasses());
+					}
 
 
-				t_to.setColumns( mergeColumns(t_to.getColumns(), t_from.getColumns()));
+					tableTo.setColumns( mergeColumns(tableTo.getColumns(), tableFrom.getColumns()));
 
-				//BeanUtils.copyProperties(t_from, t_to);
-			}
-			else{
-				to.put(entry.getKey(), entry.getValue());
+				}
+				else{
+					to.put(entry.getKey(), entry.getValue());
+				}
 			}
 		}
 		return to;
@@ -116,22 +122,27 @@ public class PojoPropertiesParser {
 			Map<String, T_metacolumn> to,
 			Map<String, T_metacolumn> from) {
 
-		if(to==null)return from;
-		if(from!=null)
-		for(Map.Entry<String, T_metacolumn> entry:from.entrySet()){
-			if(to.containsKey(entry.getKey())){
-				T_metacolumn t_from = entry.getValue();
-				T_metacolumn t_to = to.get(entry.getKey());
+		if(to==null) {
+			return from;
+		}
+		if(from!=null) {
+			for(Map.Entry<String, T_metacolumn> entry:from.entrySet()){
+				if(to.containsKey(entry.getKey())){
+					T_metacolumn tableFrom = entry.getValue();
+					T_metacolumn tableTo = to.get(entry.getKey());
 
-				if(StringUtils.isNotEmpty(t_from.getAnnotation()))
-					t_to.setAnnotation(t_from.getAnnotation());
+					if(StringUtils.isNotEmpty(tableFrom.getAnnotation())) {
+						tableTo.setAnnotation(tableFrom.getAnnotation());
+					}
 
-				if(StringUtils.isNotEmpty(t_from.getDescription()))
-					t_to.setDescription(t_from.getDescription());
+					if(StringUtils.isNotEmpty(tableFrom.getDescription())) {
+						tableTo.setDescription(tableFrom.getDescription());
+					}
 
-			}
-			else{
-				to.put(entry.getKey(), entry.getValue());
+				}
+				else{
+					to.put(entry.getKey(), entry.getValue());
+				}
 			}
 		}
 		return to;

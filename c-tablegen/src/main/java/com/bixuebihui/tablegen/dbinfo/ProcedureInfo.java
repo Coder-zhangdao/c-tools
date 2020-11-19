@@ -34,17 +34,20 @@ public class ProcedureInfo extends DatabaseObjectInfo implements IProcedureInfo
 	}
 
 //TODO: Rename to getProcedureType().
+	@Override
 	public int getType()
 	{
 		return _procType;
 	}
 
-	public String getRemarks()
+	@Override
+    public String getRemarks()
 	{
 		return _remarks;
 	}
 
 //TODO: Rename to getProcedureTypeDescription().
+	@Override
 	public String getTypeDescription()
 	{
 		switch (_procType)

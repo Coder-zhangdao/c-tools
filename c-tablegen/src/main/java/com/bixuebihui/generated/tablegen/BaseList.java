@@ -1,18 +1,45 @@
 package com.bixuebihui.generated.tablegen;
 /**
-  * BaseList
-  *
-  * WARNING! Automatically generated file!
-  * Do not edit!
-  * Code Generator by J.A.Carter
-  * Modified by Xing Wanxiang 2008
-  * (c) www.goldjetty.com
-*/
-  import com.bixuebihui.jdbc.BaseDao;
+ * BaseList
+ * <p>
+ * WARNING! Automatically generated file!
+ * Do not edit!
+ * Code Generator by J.A.Carter
+ * Modified by Xing Wanxiang 2008
+ * (c) www.goldjetty.com
+ */
 
-public abstract class BaseList<T,V> extends BaseDao<T,V>
-{
- public BaseList(){
-  // dbHelper = (IDbHelper) BeanFactory.createObjectById("tablegenDbHelper");
- }
+import com.bixuebihui.jdbc.BaseDao;
+import com.bixuebihui.jdbc.IDbHelper;
+import com.bixuebihui.jdbc.MSDbHelper;
+import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.sql.DataSource;
+
+/**
+ * @author xwx
+ */
+public abstract class BaseList<T, V> extends BaseDao<T, V> {
+
+    @Autowired
+    DataSource ds;
+
+
+    public BaseList() {
+        // dbHelper = (IDbHelper) BeanFactory.createObjectById("tablegenDbHelper");
+        MSDbHelper dbHelper0 = new MSDbHelper();
+        dbHelper0.setMasterDatasource(ds);
+        dbHelper0.setDataSource(ds);
+        if(mLog.isDebugEnabled()) {
+            ProxyFactory obj = new ProxyFactory(dbHelper0);
+            obj.addAdvice(new DbHelperAroundAdvice());
+            dbHelper = (IDbHelper) obj.getProxy();
+        }else{
+            dbHelper = dbHelper0;
+        }
+
+    }
+
 }

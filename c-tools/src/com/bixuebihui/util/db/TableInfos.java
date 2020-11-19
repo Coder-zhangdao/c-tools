@@ -15,6 +15,9 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 
+/**
+ * @author xwx
+ */
 public class TableInfos {
 
     private String _sDBOwner = "JIAOGUANJU";
@@ -42,15 +45,16 @@ public class TableInfos {
         if (_sTableName == null)
             return null;
         else
-            return (TableInfo) hTableInfos.get(_sTableName.trim().toUpperCase());
+            return (TableInfo) hTableInfos.get(_sTableName.trim());
     }
 
     public FieldInfo getFieldInfo(String _sTableName, String _sFieldName) {
         TableInfo tableInfo = getTableInfo(_sTableName);
-        if (tableInfo == null)
+        if (tableInfo == null) {
             return null;
-        else
+        } else {
             return tableInfo.getFieldInfo(_sFieldName);
+        }
     }
 
     public boolean isField(String _sTableName, String _sFieldName) {
@@ -141,9 +145,9 @@ public class TableInfos {
             for (sHtml.append("\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> \n" +
                     "  <link rel=\"stylesheet\" href=\"../style/zc2006.css\">\n</head><body>"); rs.next(); sHtml.append("\n</tr>")) {
                 i++;
-                String sTableName = rs.getString("TABLE_NAME").toUpperCase();
+                String sTableName = rs.getString("TABLE_NAME");
                 int nColumnId = rs.getInt("COLUMN_ID");
-                String sFieldName = rs.getString("COLUMN_NAME").toUpperCase();
+                String sFieldName = rs.getString("COLUMN_NAME");
                 String sDataType = rs.getString("DATA_TYPE");
                 int nDataLength = rs.getInt("DATA_LENGTH");
                 boolean isNullable = rs.getString("NULLABLE").compareToIgnoreCase("Y") == 0;

@@ -1,6 +1,9 @@
 package com.bixuebihui.tablegen.dbinfo;
 
 
+/**
+ * @author xwx
+ */
 public interface IDatabaseObjectInfo extends Comparable
 {
 	String getCatalogName();

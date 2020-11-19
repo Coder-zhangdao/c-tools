@@ -17,19 +17,20 @@ public class TableGenTest {
 	@Test
 	public void testRun() throws SQLException {
 		TableGen tg = new TableGen(System.out);
-		System.out.println(this.getClass().getResource("/tablegen.prop")
+		System.out.println(this.getClass().getResource("/tablegen.properties")
 			.getFile());
 
-
-		tg.run(this.getClass().getResource("/tablegen.prop").getFile());
+		tg.run(this.getClass().getResource("/tablegen.properties").getFile());
 
 	}
+
+
 
     @Test
 	public void testRunDiff() throws SQLException {
         TableGen tg = new TableGen(System.out);
 
-        String propPath = System.getProperty("user.dir")+"/tablegen.prop";
+        String propPath = System.getProperty("user.dir")+ "/tablegen.properties";
 
         tg.run(propPath);
 
@@ -67,76 +68,7 @@ public class TableGenTest {
 
 
 
-	@Test
-	public void testRunVol2008() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/vol2008_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/vol2008_tablegen.properties")
-				.getFile());
-	}
 
-	@Test
-	public void testRunSms() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/sms_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/sms_tablegen.properties")
-				.getFile());
-	}
-
-	@Test
-	public void testRunTrs() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/trs_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/trs_tablegen.properties")
-				.getFile());
-	}
-
-
-
-	@Test
-	public void testRunAppraise() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/appraise_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/appraise_tablegen.properties")
-				.getFile());
-	}
-	@Test
-	public void testRunJob() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/job_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/job_tablegen.properties")
-				.getFile());
-	}
-
-	@Test
-	public void testRunPhotolist() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/photolist_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/photolist_tablegen.properties")
-				.getFile());
-	}
-
-	@Test
-	public void testRundns() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/dns_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/dns_tablegen.properties")
-				.getFile());
-	}
 	@Test
 	public void testRunSpider() throws SQLException {
 		TableGen tg = new TableGen();
@@ -158,26 +90,6 @@ public class TableGenTest {
 	}
 
 
-	@Test
-	public void testRunMySqlTest() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/tablegen.prop").getFile());
-		tg.run(this.getClass().getResource("/tablegen.prop")
-				.getFile());
-	}
-
-	@Test
-	public void testRunDdns() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/ddns_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/ddns_tablegen.properties")
-				.getFile());
-	}
-
 
 	@Test
 	public void testRunVolManager() throws SQLException {
@@ -190,33 +102,13 @@ public class TableGenTest {
 	}
 
 	@Test
-	public void testRunCheguan() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/cheguan_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/cheguan_tablegen.properties")
-				.getFile());
-	}
-
-	@Test
-	public void testRunself() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/cheguan_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/cheguan_tablegen.properties")
-				.getFile());
-	}
-
-	@Test
 	public void testGetTableDate() throws SQLException, InstantiationException, IllegalAccessException, IOException {
 		TableGen tg = new TableGen();
 		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource("/tablegen.prop")
+		System.out.println(this.getClass().getResource("/tablegen.properties")
 				.getFile());
 		try {
-			tg.init(this.getClass().getResource("/tablegen.prop")
+			tg.init(this.getClass().getResource("/tablegen.properties")
 					.getFile());
 			tg.connect();
 			tg.getTableData();
@@ -234,10 +126,10 @@ public class TableGenTest {
 	public void testInitTableDateExt() throws SQLException, InstantiationException, IllegalAccessException, IOException {
 		TableGen tg = new TableGen();
 		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource("/tablegen.prop")
+		System.out.println(this.getClass().getResource("/tablegen.properties")
 				.getFile());
 		try {
-			tg.init(this.getClass().getResource("/tablegen.prop")
+			tg.init(this.getClass().getResource("/tablegen.properties")
 					.getFile());
 			tg.connect();
 			tg.getTableData();
@@ -262,33 +154,4 @@ public class TableGenTest {
 		Assert.assertTrue(tg.makeDir());
 	}
 
-	@Test
-	public void testRunDGW() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/dgw_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/dgw_tablegen.properties")
-				.getFile());
-	}
-
-	@Test
-	public void testRunMissionReport() throws SQLException {
-		TableGen tg = new TableGen();
-		// this.getClass().getResource("tablegen.properties").getFile()
-		System.out.println(this.getClass().getResource(
-				"/mr2010_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/mr2010_tablegen.properties")
-				.getFile());
-	}
-
-
-	@Test
-	public void testRunCyea() throws SQLException {
-		TableGen tg = new TableGen();
-		System.out.println(this.getClass().getResource(
-				"/cyea_tablegen.properties").getFile());
-		tg.run(this.getClass().getResource("/cyea_tablegen.properties")
-				.getFile());
-	}
 }

@@ -1,4 +1,7 @@
 package com.bixuebihui.tablegen.dbinfo;
+/**
+ * @author xwx
+ */
 public class IntegerIdentifierFactory
 {
 	private int _next;

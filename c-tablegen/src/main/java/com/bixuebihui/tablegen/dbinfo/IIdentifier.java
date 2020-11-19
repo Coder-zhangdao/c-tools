@@ -1,9 +1,12 @@
 package com.bixuebihui.tablegen.dbinfo;
+/**
+ * @author xwx
+ */
 public interface IIdentifier {
 
-	public boolean equals(Object rhs);
+	boolean equals(Object rhs);
 
-	public String toString();
+	String toString();
 
-	public int hashCode();
+	int hashCode();
 }

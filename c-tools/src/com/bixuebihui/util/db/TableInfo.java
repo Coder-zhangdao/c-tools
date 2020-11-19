@@ -8,8 +8,6 @@ package com.bixuebihui.util.db;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-// Referenced classes of package com.bixuebihui.util.database:
-//            FieldInfo
 
 public class TableInfo {
 
@@ -19,6 +17,7 @@ public class TableInfo {
         hFieldInfos = new Hashtable();
     }
 
+    @Override
     protected void finalize() {
         clear();
     }

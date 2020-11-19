@@ -25,10 +25,10 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.

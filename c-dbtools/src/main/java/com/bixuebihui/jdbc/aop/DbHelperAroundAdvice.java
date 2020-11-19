@@ -93,8 +93,8 @@ public class DbHelperAroundAdvice implements MethodInterceptor{
                     LOG.warn("[AOP] Query is SLOW: " + thisTime + " sql=" + sql);
                 }
             }
-            LOG.debug("[AOP] Current call time: " + thisTime + " Counts: "
-                    + count + " Total sql time: " + totalTime + "On average: "
+            LOG.debug("[AOP] Current call time: " + thisTime + "s, Counts: "
+                    + count + " Total sql time: " + totalTime + "s, on average: "
                     + (count > 0 ? (totalTime / count) : 0));
         }
     }

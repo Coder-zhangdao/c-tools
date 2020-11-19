@@ -154,9 +154,6 @@ public class EasyTable extends BasicWebUI {
 				sp.colNames = tmpColNames;
 				if(sp.colNames!=null && sp.colNames.length>0) {
 					for(int i =0;  i <cl.size() && tmpColNames.length >i && sp.colNames[i]!=null; i++) {
-
-						sp.colNames[i] =  sp.colNames[i].toUpperCase() ;
-
 						sp.colLabels[i]= cl.get(i).getExpression().toString();
 					}
 				}

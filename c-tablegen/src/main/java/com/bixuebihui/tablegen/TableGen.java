@@ -53,6 +53,8 @@ import java.io.*;
 import java.sql.*;
 import java.util.*;
 
+import static com.bixuebihui.tablegen.NameUtils.columnNameToFieldName;
+
 /**
  * 思路决定出路，创新才有发展，整合才能壮大
  *
@@ -272,10 +274,11 @@ public class TableGen implements DiffHandler {
 			/**
 			 * 如果generator_all == yes，则生成所有表 否则，进行本地快照和数据库的比对
 			 */
-			if ("yes".equals(configProperties.getProperty("generator_all"))) {
-				if (generate_baselist) {
-					generateBaseList();
-				}
+			if (generate_baselist) {
+				generateBaseList();
+			}
+			if ("yes".equals(configProperties.getProperty("generate_all"))) {
+
 
 				generatePojos();
 				generateDALs();
@@ -285,7 +288,9 @@ public class TableGen implements DiffHandler {
 				generateWebUI();
 
 				generateTest();
-				generateJsp();
+				if(jspDir!=null) {
+					generateJsp();
+				}
 				generateSpringXml();
 
 				if (generate_procedures) {
@@ -428,17 +433,18 @@ public class TableGen implements DiffHandler {
 	private String getCachedColumnDataFilePath() {
 
 		String baseDir = getConfigBaseDir(propertiesFilename);
-		String src_dir = configProperties.getProperty("src_dir");
+		//String src_dir = configProperties.getProperty("src_dir");
+		String src_dir = "target";
 
-		return  baseDir + File.separator + src_dir + File.separator + "cache_column_data.txt";
+		return  baseDir + File.separator + src_dir + File.separator + "gen_column_data.cache";
 	}
 
 	private String getCachedTableDataFilePath() {
 		String baseDir = System.getProperty("user.dir");
 
-		String src_dir = configProperties.getProperty("src_dir");
+		String src_dir = "target"; //configProperties.getProperty("src_dir");
 
-		return baseDir + File.separator + src_dir + File.separator + "cache_table_data.txt";
+		return baseDir + File.separator + src_dir + File.separator + "gen_table_data.cache";
 	}
 
 	private synchronized void saveTableDataToLocalCache(HashMap<String, List<ColumnData>> data) {
@@ -1284,16 +1290,17 @@ public class TableGen implements DiffHandler {
 		for (ColumnData cd: colData) {
 			i++;
 			boolean isNotLast = i < colData.size();
+			String field = columnNameToFieldName(cd.getName());
 
-			fields.append("        public static final String ").append(cd.getName())
+			fields.append("        public static final String ").append(field)
 					.append(" = \"" + cd.getName() + "\";\n");
-			fieldsAll.append(cd.getName());
+			fieldsAll.append(field);
 
 			if(isNotLast) {
 				fieldsAll.append(",");
 			}
 
-			if (!(use_autoincrement && cd.isAuto_increment)) {
+			if (!(use_autoincrement && cd.isAutoIncrement)) {
 				if (cd.getName().equalsIgnoreCase(versionColName)){
 					update.append(cd.getName() + " = " + cd.getName() + "+1");
 				}else{
@@ -1939,7 +1946,7 @@ public class TableGen implements DiffHandler {
 			colType = cd.getJavaType();
 
 			// work out which data type we are getting for each variable
-			String ucol = "F." + col.toUpperCase();
+			String ucol = "F." + columnNameToFieldName(col);
 
 			if (colType.compareTo("String") == 0) {
 				get = "(r.getString(" + ucol + "));";
@@ -2046,7 +2053,7 @@ public class TableGen implements DiffHandler {
 		Iterator<ColumnData> iterator = columnData.iterator();
 		while (iterator.hasNext()) {
 			ColumnData cd=iterator.next();
-			if (useAutoincrement && cd.isAuto_increment
+			if (useAutoincrement && cd.isAutoIncrement
 					|| (useVersion && cd.getName().equalsIgnoreCase(versionColName))) {
 				continue;
 			}
@@ -2212,7 +2219,7 @@ public class TableGen implements DiffHandler {
 		}
 		else{
 			out("    return " + (isKey ?
-					"F." + (tableOrKeyName.toUpperCase())
+					"F." + columnNameToFieldName(tableOrKeyName)
 					: "\"" + tableOrKeyName + "\""
 			) + ";");
 		}

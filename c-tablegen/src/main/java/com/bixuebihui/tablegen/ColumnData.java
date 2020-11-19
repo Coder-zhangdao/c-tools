@@ -14,76 +14,7 @@ import java.io.Serializable;
   * Released under GPL. See LICENSE for full details
   */
 public class ColumnData implements Serializable {
-  @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (columns ^ (columns >>> 32));
-		result = prime * result
-				+ (int) (decimalDigits ^ (decimalDigits >>> 32));
-		result = prime * result + (isAuto_increment ? 1231 : 1237);
-		result = prime * result + (isNullable ? 1231 : 1237);
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + type;
-		return result;
-	}
-
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ColumnData other = (ColumnData) obj;
-		if (columns != other.columns)
-			return false;
-		if (decimalDigits != other.decimalDigits)
-			return false;
-		if (isAuto_increment != other.isAuto_increment)
-			return false;
-		if (isNullable != other.isNullable)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-
-        return type == other.type;
-    }
-
-// NB "TEXT" is my own add on!
-  static String[] sqlTypes = { "CHAR","TINYINT","BIGINT","INT",
-                               "SMALLINT","FLOAT","REAL","DOUBLE",
-                               "NUMERIC","DECIMAL","DATE","VARCHAR",
-                               "LONGVARCHAR","TIMESTAMP","TIME","BIT",
-                               "BINARY","VARBINARY","LONGVARBINARY","NULL",
-                               "OTHER","TEXT", "CLOB","NVARCHAR",
-                               "NTEXT","DATETIME","SYSNAME", "VARBINARY",
-                               "NCHAR"};
-  //sysname in sql server is nvarchar(128) NOT NULL
-
-
-  long cid;
-  int type;
-  long columns;//数字类型的位数或字符类型的最大长度
-  long decimalDigits =0;
-  String name;
-  boolean isNullable;
-  boolean isAuto_increment;
-  String defaultValue;
-  String remarks;//注释
-
-
-  public static ColumnData valueOf(T_metacolumn src){
-	  ColumnData d =  new ColumnData(src.getCname(), src.getType(),src.getColumns(), src.getIsnullable(), src.getIsauto_increment(), src.getDecimaldigits(),
-			  null,src.getDescription());
-	  d.cid = src.getCid();
-	  return d;
-  }
+  boolean isAutoIncrement;
 
 
 /**
@@ -93,13 +24,13 @@ public class ColumnData implements Serializable {
  * @param remarks
  * @param defaultValue
   */
-  public ColumnData (String name,long origType, long columns, boolean isNullable, boolean isAuto_increment,long decimalDigits, String defaultValue, String remarks)
+  public ColumnData (String name, long origType, long columns, boolean isNullable, boolean isAutoIncrement, long decimalDigits, String defaultValue, String remarks)
   {
     this.name = name;
     this.type = (int)origType;
     this.columns = columns;
     this.isNullable = isNullable;
-    this.isAuto_increment = isAuto_increment;
+    this.isAutoIncrement = isAutoIncrement;
     this.decimalDigits = decimalDigits;
     this.defaultValue = defaultValue;
     this.remarks = remarks;
@@ -116,11 +47,16 @@ public class ColumnData implements Serializable {
     {
 
     case 2:
-    	  if(columns>1) type = 3; //derby numeric(n), added by Xing
-    	  else type=16;
+    	  if(columns>1) {
+              type = 3; //derby numeric(n), added by Xing
+          } else {
+              type=16;
+          }
     	break;
     case 3:
-  	  if(decimalDigits>0) type = 8; //mysql decimal(n, decimalDigits);
+  	  if(decimalDigits>0) {
+          type = 8; //mysql decimal(n, decimalDigits);
+      }
 
   	break;
 
@@ -225,6 +161,24 @@ public class ColumnData implements Serializable {
     }
   }
 
+// NB "TEXT" is my own add on!
+  static String[] sqlTypes = { "CHAR","TINYINT","BIGINT","INT",
+                               "SMALLINT","FLOAT","REAL","DOUBLE",
+                               "NUMERIC","DECIMAL","DATE","VARCHAR",
+                               "LONGVARCHAR","TIMESTAMP","TIME","BIT",
+                               "BINARY","VARBINARY","LONGVARBINARY","NULL",
+                               "OTHER","TEXT", "CLOB","NVARCHAR",
+                               "NTEXT","DATETIME","SYSNAME", "VARBINARY",
+                               "NCHAR"};
+  //sysname in sql server is nvarchar(128) NOT NULL
+
+
+  long cid;
+  int type;
+  long columns;//数字类型的位数或字符类型的最大长度
+  long decimalDigits =0;
+  String name;
+  boolean isNullable;
 /**
   * Constructor with column type as a String.
   * Requires name, type, number of columns.
@@ -248,13 +202,74 @@ public class ColumnData implements Serializable {
       }
 
       i++;
-      if (i>=sqlTypes.length)
-        quit = true;
+      if (i>=sqlTypes.length) {
+          quit = true;
+      }
     }
 
-    if (this.type == -1)
-      System.out.println("Column name : "+name+" Type : "+coltype+" is unknown");
+    if (this.type == -1) {
+        System.out.println("Column name : "+name+" Type : "+coltype+" is unknown");
+    }
   }
+  String defaultValue;
+  String remarks;//注释
+
+
+  public static ColumnData valueOf(T_metacolumn src){
+	  ColumnData d =  new ColumnData(src.getCname(), src.getType(),src.getColumns(), src.getIsnullable(), src.getIsauto_increment(), src.getDecimaldigits(),
+			  null,src.getDescription());
+	  d.cid = src.getCid();
+	  return d;
+  }
+
+  @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (columns ^ (columns >>> 32));
+		result = prime * result
+				+ (int) (decimalDigits ^ (decimalDigits >>> 32));
+		result = prime * result + (isAutoIncrement ? 1231 : 1237);
+		result = prime * result + (isNullable ? 1231 : 1237);
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + type;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+            return true;
+        }
+		if (obj == null) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
+		ColumnData other = (ColumnData) obj;
+		if (columns != other.columns) {
+            return false;
+        }
+		if (decimalDigits != other.decimalDigits) {
+            return false;
+        }
+		if (isAutoIncrement != other.isAutoIncrement) {
+            return false;
+        }
+		if (isNullable != other.isNullable) {
+            return false;
+        }
+		if (name == null) {
+			if (other.name != null) {
+                return false;
+            }
+		} else if (!name.equals(other.name)) {
+            return false;
+        }
+
+        return type == other.type;
+    }
 
 /**
   * Returns the name of the column.
@@ -267,20 +282,23 @@ public class ColumnData implements Serializable {
 /**
   * Converts to entry to a readable form.
   */
+  @Override
   public String toString()
   {
     String res = "";
     String digits = "";
 
-	if ((type == 1) || (type == 12)|| (type == 22)|| (type == 24)|| (type == 25)|| (type == 27)|| (type == 29))
-	  digits = "("+columns+")";
-	else
-	  digits = decimalDigits>0 ? "("+decimalDigits+")":"";
+	if ((type == 1) || (type == 12)|| (type == 22)|| (type == 24)|| (type == 25)|| (type == 27)|| (type == 29)) {
+        digits = "("+columns+")";
+    } else {
+        digits = decimalDigits>0 ? "("+decimalDigits+")":"";
+    }
 
-    if ((type > sqlTypes.length) || (type < 0))
-      res = "Type : "+type+"  Name : "+name;
-    else
-      res = "Type : "+sqlTypes[type-1]+digits+" Name : "+name;
+    if ((type > sqlTypes.length) || (type < 0)) {
+        res = "Type : "+type+"  Name : "+name;
+    } else {
+        res = "Type : "+sqlTypes[type-1]+digits+" Name : "+name;
+    }
 
 	return res;
 	  //return super.toString()+"[type="+type+":"+ sqlTypes[type]+",columns="+columns+",name="+name+",isNullable="+isNullable+"]";

@@ -15,7 +15,9 @@ import java.util.List;
 import com.bixuebihui.sequence.SequenceUtils;
 import com.bixuebihui.generated.tablegen.BaseList;
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
+import org.springframework.stereotype.Service;
 
+@Service
 public class T_metatableList  extends BaseList<T_metatable,Long>
 {
 /**

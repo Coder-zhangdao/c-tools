@@ -1,6 +1,9 @@
 package com.bixuebihui.tablegen.dbinfo;
 
 
+/**
+ * @author xwx
+ */
 public class DatabaseObjectType implements IHasIdentifier
 {
 	/** Factory to generate unique IDs for these objects. */
@@ -71,6 +74,7 @@ public class DatabaseObjectType implements IHasIdentifier
 	 *
 	 * @return	Unique ID.
 	 */
+	@Override
 	public IIdentifier getIdentifier()
 	{
 		return _id;

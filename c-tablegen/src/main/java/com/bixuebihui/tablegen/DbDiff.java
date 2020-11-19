@@ -4,6 +4,8 @@ import com.bixuebihui.datasource.BitmechanicDataSource;
 import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -15,6 +17,7 @@ import java.util.*;
  * @author xwx
  */
 public class DbDiff {
+    private static final Log LOG = LogFactory.getLog(DbDiff.class);
 
     Database db1;
     Database db2;
@@ -165,7 +168,7 @@ public class DbDiff {
                 dh.processTableDiff(tableName);
             }
 
-            System.out.println("====>" + tableName + " changed");
+            LOG.debug("====>" + tableName + " changed");
         }
     }
 
@@ -181,11 +184,11 @@ public class DbDiff {
         Collection<String> res2 = CollectionUtils.subtract(tab2, tab1);
 
         if (!res1.isEmpty()) {
-            System.out.println("db1 - db2 =");
+            LOG.debug("db1 - db2 =");
             outputSortedList(res1);
         }
         if (!res2.isEmpty()) {
-            System.out.println("db2 - db1 =");
+            LOG.debug("db2 - db1 =");
             outputSortedList(res2);
 
             for (String tableName : res2) {
@@ -200,7 +203,7 @@ public class DbDiff {
         }
         Collection res3 = CollectionUtils.disjunction(tab1, tab2);
         if (!res3.isEmpty()) {
-            System.out.println("|db1-db2|=");
+            LOG.debug("|db1-db2|=");
             outputSortedList(res3);
         }
 
@@ -210,7 +213,7 @@ public class DbDiff {
     private void outputSortedList(Collection<String> res2) {
         ArrayList<String> list = new ArrayList<>(res2);
         Collections.sort(list);
-        System.out.println(list);
+        LOG.debug(list);
     }
 
     /**
@@ -226,14 +229,14 @@ public class DbDiff {
         Collection<ColumnData> res2 = CollectionUtils.subtract(cols2, cols1);
         boolean changed = false;
         if (!res1.isEmpty()) {
-            System.out.println("cols1 - cols2 =");
-            System.out.println(res1);
+            LOG.debug("cols1 - cols2 =");
+            LOG.debug(res1);
             changed = true;
         }
 
         if (!res2.isEmpty()) {
-            System.out.println("cols2 - cols1 =");
-            System.out.println(res2);
+            LOG.debug("cols2 - cols1 =");
+            LOG.debug(res2);
             changed = true;
         }
 

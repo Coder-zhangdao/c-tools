@@ -1,5 +1,8 @@
 package com.bixuebihui.tablegen.dbinfo;
 
+/**
+ * @author xwx
+ */
 public class IntegerIdentifier implements IIdentifier {
 	public interface IPropertyNames {
 		String STRING = "string";
@@ -12,6 +15,7 @@ public class IntegerIdentifier implements IIdentifier {
 		_id = value;
 	}
 
+	@Override
 	public boolean equals(Object rhs) {
 		boolean rc = false;
 		if (rhs != null && rhs.getClass().equals(getClass())) {
@@ -20,6 +24,7 @@ public class IntegerIdentifier implements IIdentifier {
 		return rc;
 	}
 
+	@Override
 	public  int hashCode() {
 		return _id;
 	}
