@@ -6,22 +6,28 @@ import java.util.Map;
 
 import javax.servlet.jsp.el.FunctionMapper;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class ElExpressionExCellEditorTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class ElExpressionExCellEditorTest {
+
+	@Test
 	public void testElExpressionExCellEditorExpressionMapOfStringQ() {
 		//fail("Not yet implemented");
 	}
 
+	@Test
 	public void testElExpressionExCellEditorStringObjectMapOfStringQ() {
 //		fail("Not yet implemented");
 	}
 
+	@Test
 	public void testGetVariableResolverObject() {
 //		fail("Not yet implemented");
 	}
 
+	@Test
 	public void testGetFunctionMapper() {
 		String temp="'<span title=\\'#{fn:escapeXml(row.body)}\\'>#{fn:escapeXml(fn:abbreviate(row.body,100))}</span>";
 

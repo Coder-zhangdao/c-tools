@@ -14,13 +14,13 @@
 		<property name="tableName">
 			<value>KUOZHANBIAOXINXI</value>
 		</property>
-		<property name="id_name">
+		<property name="idFieldName">
 			<value>KZ_ZDM</value>
 		</property>
-		<property name="value_name">
+		<property name="valueFieldName">
 			<value>KZ_ZDSM</value>
 		</property>
-		<property name="sort_name">
+		<property name="sortFieldName">
 			<value>KZ_ID</value>
 		</property>
 		<property name="addCondition">
@@ -33,13 +33,13 @@
 		<property name="tableName">
 			<value>KUOZHANBIAOXINXI</value>
 		</property>
-		<property name="id_name">
+		<property name="idFieldName">
 			<value>KZ_ZDM</value>
 		</property>
-		<property name="value_name">
+		<property name="valueFieldName">
 			<value>KZ_ZDSM</value>
 		</property>
-		<property name="sort_name">
+		<property name="sortFieldName">
 			<value>KZ_ID</value>
 		</property>
 		<property name="addCondition">
@@ -47,54 +47,17 @@
 		</property>
 	</bean>
 
-	<bean id="sequence"
-		class="com.bixuebihui.cache.DictionaryDefine">
-		<property name="tableName">
-			<value>T_SEQUENCE</value>
-		</property>
-		<property name="id_name">
-			<value>KEYNAME</value>
-		</property>
-		<property name="value_name">
-			<value>KEYVALUE</value>
-		</property>
-		<property name="sort_name">
-			<value>KEYNAME</value>
-		</property>
-		<property name="addCondition">
-			<value></value>
-		</property>
-	</bean>
-
-	<bean id="biaoming" class="com.bixuebihui.cache.DictionaryDefine">
-		<property name="tableName">
-			<value>KUOZHANBIAOMING</value>
-		</property>
-		<property name="id_name">
-			<value>KZBM_BM</value>
-		</property>
-		<property name="value_name">
-			<value>KZBM_SM</value>
-		</property>
-		<property name="sort_name">
-			<value>KZBM_ID</value>
-		</property>
-		<property name="addCondition">
-			<value></value>
-		</property>
-	</bean>
-
 	<bean id="objtest" class="com.bixuebihui.cache.DictionaryDefine">
 		<property name="tableName">
 			<value>KUOZHANBIAOXINXI</value>
 		</property>
-		<property name="id_name">
+		<property name="idFieldName">
 			<value>KZ_ID</value>
 		</property>
-		<property name="value_name">
+		<property name="valueFieldName">
 			<value>KZ_ZDM</value>
 		</property>
-		<property name="sort_name">
+		<property name="sortFieldName">
 			<value>KZ_ZDSM</value>
 		</property>
 		<property name="addCondition">

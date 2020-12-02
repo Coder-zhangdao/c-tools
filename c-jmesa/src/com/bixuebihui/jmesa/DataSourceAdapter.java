@@ -26,28 +26,34 @@ public class DataSourceAdapter implements DataSource {
 	private int timeout = 0;
 
 
+	@Override
 	public Connection getConnection() throws SQLException {
 		return dbHelper.getConnection();
 	}
 
+	@Override
 	public Connection getConnection(String username, String password)
 			throws SQLException {
 		return dbHelper.getConnection();
 	}
 
+	@Override
 	public PrintWriter getLogWriter() throws SQLException {
 		return out;
 	}
 
+	@Override
+	public void setLogWriter(PrintWriter out) throws SQLException {
+		this.out = out;
+	}
+
+	@Override
 	public int getLoginTimeout() throws SQLException {
 
 		return timeout;
 	}
 
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		this.out = out;
-	}
-
+	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
 		timeout = seconds;
 	}
@@ -72,18 +78,18 @@ public class DataSourceAdapter implements DataSource {
 		this.timeout = timeout;
 	}
 
+	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

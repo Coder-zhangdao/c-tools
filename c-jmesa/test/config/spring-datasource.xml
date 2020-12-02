@@ -46,10 +46,7 @@
 
 
 	<!-- 以下用来TRACE DbHelper的执行情况 -->
-	<bean id="dbHelperBeforeAdvice" class="com.bixuebihui.jdbc.aop.DbHelperBeforeAdvice" />
 	<bean id="dbHelperAroundAdvice" class="com.bixuebihui.jdbc.aop.DbHelperAroundAdvice" />
-	<bean id="dbHelperAfterAdvice" class="com.bixuebihui.jdbc.aop.DbHelperAfterAdvice" />
-	<bean id="dbHelperThrowsAdvice" class="com.bixuebihui.jdbc.aop.DbHelperThrowsAdvice" />
 
 	<bean id="dbHelper" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces">
@@ -57,10 +54,7 @@
 		</property>
 		<property name="interceptorNames">
 			<list>
-				<value>dbHelperBeforeAdvice</value>
-				<value>dbHelperAfterAdvice</value>
 				<value>dbHelperAroundAdvice</value>
-				<value>dbHelperThrowsAdvice</value>
 			</list>
 		</property>
 		<property name="target">

@@ -39,7 +39,8 @@ public class CustomToolbar extends SimpleToolbar {
     private List<String> buttons;
 
 
-    protected List<ToolbarItem> getToolbarItems() {
+    @Override
+	protected List<ToolbarItem> getToolbarItems() {
     	List<ToolbarItem> items = super.getToolbarItems();
 
 	   	 if (enableSeparators) {

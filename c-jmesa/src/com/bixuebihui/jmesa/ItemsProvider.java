@@ -12,6 +12,9 @@ import com.bixuebihui.jdbc.IReaderService;
 import com.bixuebihui.jdbc.SqlFilter;
 import com.bixuebihui.jdbc.SqlSort;
 
+/**
+ * @author xwx
+ */
 public class ItemsProvider<T> implements PageItems {
 	/**
 	 *
@@ -24,6 +27,7 @@ public class ItemsProvider<T> implements PageItems {
 		this.service = service;
 	}
 
+	@Override
 	public int getTotalRows(Limit limit) {
 
 		SqlFilter filter = AbstractWebUI.getFilter(limit);
@@ -37,6 +41,7 @@ public class ItemsProvider<T> implements PageItems {
 
 	}
 
+	@Override
 	public Collection<T> getItems(Limit limit) {
 		SqlSort sort = AbstractWebUI.getSort(limit);
 		SqlFilter filter = AbstractWebUI.getFilter(limit);

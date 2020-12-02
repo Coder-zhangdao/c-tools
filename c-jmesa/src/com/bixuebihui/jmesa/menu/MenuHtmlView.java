@@ -8,6 +8,7 @@ import org.jmesa.view.html.HtmlSnippets;
  * Created by super on 14-3-20.
  */
 public class MenuHtmlView extends AbstractHtmlView {
+    @Override
     public Object render() {
         HtmlSnippets snippets = getHtmlSnippets();
 

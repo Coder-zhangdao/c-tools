@@ -5,10 +5,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jmesa.worksheet.WorksheetColumn;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class AbstractWebUITest extends TestCase {
+public class AbstractWebUITest{
 
+	@Test
 	public void testConvert() {
 		AbstractWebUI<?, ?> ui = new AbstractWebUI<Object, Object>(){
 

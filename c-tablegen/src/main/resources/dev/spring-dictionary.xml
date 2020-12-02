@@ -15,7 +15,7 @@
 		<property name="value_name">
 			<value>description</value>
 		</property>
-		<property name="sort_name">
+		<property name="sortFieldName">
 			<value>cid</value>
 		</property>
 		<property name="addCondition">
@@ -33,7 +33,7 @@
 		<property name="value_name">
 			<value>tname</value>
 		</property>
-		<property name="sort_name">
+		<property name="sortFieldName">
 			<value>tid</value>
 		</property>
 		<property name="addCondition">
@@ -52,7 +52,7 @@
 		<property name="value_name">
 			<value>description</value>
 		</property>
-		<property name="sort_name">
+		<property name="sortFieldName">
 			<value>tid</value>
 		</property>
 		<property name="addCondition">

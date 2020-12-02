@@ -3,20 +3,24 @@ package com.bixuebihui.jmesa;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.bixuebihui.BeanFactory;
 
-import junit.framework.TestCase;
 
-public class BasicWebUITest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class BasicWebUITest{
 
 	String id="view_businesses_per_category";
 
 	BasicWebUI ui =  ( BasicWebUI) BeanFactory.createObjectById(id);
 	//IBaseListService service;
 
+	@BeforeAll
 	public void setUp(){
 
 		//ui.setService(service);
@@ -26,6 +30,7 @@ public class BasicWebUITest extends TestCase {
 	}
 
 
+	@Test
 	public void testRender() throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -37,6 +42,7 @@ public class BasicWebUITest extends TestCase {
 
 
 
+	@Test
 	public void testGetColsTemplate() throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();

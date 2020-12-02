@@ -3,42 +3,47 @@ package com.bixuebihui.cache;
 import com.bixuebihui.jdbc.IBaseListService;
 import com.bixuebihui.util.other.CMyString;
 
+/**
+ * @author xwx
+ */
 public class DictionaryDefine {
 
 	private String addCondition="";
 
 	private String conditionValue;
 
-	private String id_name="MS_ID";
-	private String value_name="MS_VALUE";
-	private String sort_name="MS_SORT";
+	private String idFieldName ="MS_ID";
+	private String valueFieldName ="MS_VALUE";
+	private String sortFieldName ="MS_SORT";
 	private IBaseListService<DictionaryItem, String> serviceClass;
 	private int maxCapacity=5000;
 
-	public String getId_name() {
-		return id_name;
+	public DictionaryDefine(String tableName, String idFieldName, String valueName, String sortName, String addCondition){
+		this.tableName = tableName;
+		this.idFieldName = idFieldName;
+		this.valueFieldName = valueName;
+		this.sortFieldName = sortName;
+		this.addCondition = addCondition;
 	}
 
-	public void setId_name(String id_name) {
-		this.id_name = id_name;
+	public String getIdFieldName() {
+		return idFieldName;
 	}
 
-	public String getValue_name() {
-		return value_name;
+	public void setIdFieldName(String idName) {
+		this.idFieldName = idName;
 	}
 
-	public void setValue_name(String value_name) {
-		this.value_name = value_name;
+	public String getValueFieldName() {
+		return valueFieldName;
 	}
 
-
-
-	public String getSort_name() {
-		return sort_name;
+	public void setValueFieldName(String valueName) {
+		this.valueFieldName = valueName;
 	}
 
-	public void setSort_name(String sort_name) {
-		this.sort_name = sort_name;
+	public String getSortFieldName() {
+		return sortFieldName;
 	}
 
 	private String tableName;
@@ -51,12 +56,8 @@ public class DictionaryDefine {
 		this.tableName = tableName;
 	}
 
-	public DictionaryDefine(String tableName, String idName, String valueName, String sortName, String addCondition){
-		this.tableName = tableName;
-		this.id_name = idName;
-		this.value_name = valueName;
-		this.sort_name = sortName;
-		this.addCondition = addCondition;
+	public void setSortFieldName(String sortFieldName) {
+		this.sortFieldName = sortFieldName;
 	}
 	public DictionaryDefine(String tableName){
 		this.tableName = tableName;
@@ -82,7 +83,6 @@ public class DictionaryDefine {
 
 	public String getSqlCondition(){
 		if(this.conditionValue!=null){
-			//return	MessageFormat.format( this.getAddCondition(), this.conditionValue);
 			return CMyString.replaceStr(this.getAddCondition(), "{0}", this.conditionValue);
 		}
 		return this.getAddCondition();

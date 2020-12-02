@@ -9,6 +9,7 @@ import org.jmesa.view.html.HtmlSnippets;
  */
 public class CustomView  extends AbstractHtmlView {
 
+    @Override
     public Object render() {
         HtmlSnippets snippets = getHtmlSnippets();
 

@@ -5,16 +5,20 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.bixuebihui.BeanFactory;
 import com.bixuebihui.jdbc.IDbHelper;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class EasyTableTest extends TestCase {
 
+public class EasyTableTest{
+
+	@Test
 	public void testGetColNames() {
 		EasyTable et = new EasyTable(dbHelper , null, "select count(*) cnt, myc as c from b limit 3");
 		String[] cols = et.getColNames();
@@ -36,6 +40,7 @@ public class EasyTableTest extends TestCase {
 
 	IDbHelper dbHelper = (IDbHelper)BeanFactory.createObjectById("dbHelper");
 
+	@Test
 	public void testEasyTableIDbHelperStringString() {
 		EasyTable et = new EasyTable(dbHelper ,null, "select count(*) cnt, c from b limit 3");
 
@@ -66,6 +71,7 @@ public class EasyTableTest extends TestCase {
 
 	}
 
+	@Test
 	public void testEasyTableForStat() throws SQLException {
 		EasyTable et  = new EasyTable(dbHelper ,"站内系统私信","select count(id)  数量 from Words where PostBy =0");
 
@@ -98,6 +104,7 @@ public class EasyTableTest extends TestCase {
 
 
 
+	@Test
 	public void testEasyTableIDbHelperStringStringString() throws SQLException {
 		String tableName = "t_config";
 		String pkName ="c_key";
@@ -118,6 +125,7 @@ public class EasyTableTest extends TestCase {
 
 	}
 
+	@Test
 	public void testRender() throws Exception {
 		String tableName = "t_config";
 		String pkName ="c_key";
@@ -134,6 +142,7 @@ public class EasyTableTest extends TestCase {
 		//System.out.println(res);
 	}
 
+	@Test
 	public void testRenderPager() throws Exception {
 		String tableName = "t_config";
 		String pkName ="c_key";
@@ -154,6 +163,7 @@ public class EasyTableTest extends TestCase {
 		System.out.println(res);
 	}
 
+	@Test
 	public void testRenderAuto() throws Exception {
 
 

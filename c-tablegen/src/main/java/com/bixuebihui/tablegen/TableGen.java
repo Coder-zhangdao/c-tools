@@ -24,12 +24,14 @@ package com.bixuebihui.tablegen;
  * Released under GPL. See LICENSE for full details.
  */
 
+import com.bixuebihui.BeanFactory;
 import com.bixuebihui.algorithm.LRULinkedHashMap;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.cache.DictionaryItem;
 import com.bixuebihui.datasource.BitmechanicDataSource;
 import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.jdbc.*;
+import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;
 import com.bixuebihui.tablegen.dbinfo.ProcedureGen;
 import com.bixuebihui.tablegen.dbinfo.ProcedureInfo;
 import com.bixuebihui.tablegen.dbinfo.ProcedureParameterInfo;
@@ -45,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.CollectionUtils;
 
@@ -1027,8 +1030,20 @@ public class TableGen implements DiffHandler {
 				writeBaseHeader();
 				out(" public BaseList(){");
 				String lastName = packageName.substring(packageName.lastIndexOf('.') + 1);
-				out("   dbHelper = (IDbHelper) BeanFactory.createObjectById(\"" + lastName + "DbHelper\");");
-
+				out(" try {");
+				out("    dbHelper = (IDbHelper) BeanFactory.createObjectById(\"" + lastName + "DbHelper\");");
+				out("    }catch (Exception e ) { ");
+				out("    	MSDbHelper dbHelper0 = new MSDbHelper(); ");
+				out("    	dbHelper0.setMasterDatasource(ds); ");
+				out("    	dbHelper0.setDataSource(ds);");
+				out("    	if (mLog.isDebugEnabled()) {");
+				out("    			ProxyFactory obj = new ProxyFactory(dbHelper0);");
+				out("    			obj.addAdvice(new DbHelperAroundAdvice());");
+				out("    			dbHelper = (IDbHelper) obj.getProxy();");
+				out("    		} else {");
+				out("    			dbHelper = dbHelper0;");
+				out("    		}");
+				out("    	}");
 				out(" }");
 
 				out("}");
@@ -1569,6 +1584,12 @@ public class TableGen implements DiffHandler {
 		out("  import com.bixuebihui.BeanFactory;");
 		out("  import com.bixuebihui.jdbc.BaseDao;");
 		out("  import com.bixuebihui.jdbc.IDbHelper;");
+		out("  import com.bixuebihui.jdbc.MSDbHelper;");
+		out("  import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;");
+		out("  import org.springframework.aop.framework.ProxyFactory;");
+		out("  import org.springframework.beans.factory.annotation.Autowired;");
+
+		out("  import javax.sql.DataSource;");
 		out("  import java.sql.SQLException;");
 		out("");
 

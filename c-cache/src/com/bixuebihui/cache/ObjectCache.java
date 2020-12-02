@@ -112,11 +112,12 @@ public class ObjectCache {
 			Map<String, ?> all;
 			all = (Map<String, ?>) admin.getFromCache(storeKey);//, refreshPeriod);
 			int count = arr.size();
-			for (int i = count - 1; i >= 0; i--)
+			for (int i = count - 1; i >= 0; i--) {
 				if (all.containsKey(arr.get(i))) {
 					m.put(arr.get(i), all.get(arr.get(i)));
 					arr.remove(i);
 				}
+			}
 		} catch (NeedsRefreshException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
@@ -147,7 +148,7 @@ public class ObjectCache {
 			List<String> arr) throws  SQLException {
 
 		IBaseListService<DictionaryItem, String> list = def.getServiceClass();
-		Map<String, DictionaryItem> li = list.selectByIds(def.getId_name(), arr);
+		Map<String, DictionaryItem> li = list.selectByIds(def.getIdFieldName(), arr);
 
 		mLog.debug("dump data:"+li);
 
@@ -181,8 +182,9 @@ public class ObjectCache {
 		List<String> l = new ArrayList<String>();
 		l.add(id);
 		Map<String, ?> m = batchGet(key, l);
-		if (m == null)
+		if (m == null) {
 			return null;
+		}
 		return m.get(id);
 	}
 
