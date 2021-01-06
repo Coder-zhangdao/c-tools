@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.yujiaao</groupId>
         <artifactId>c-tools-parent</artifactId>
-        <version>1.0.1-RC7</version>
+        <version>1.0.1-RC8</version>
     </parent>
 
     <groupId>com.github.yujiaao</groupId>
@@ -18,7 +18,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring3.version>3.2.18.RELEASE</spring3.version>
         <spring4.version>4.3.29.RELEASE</spring4.version>
-        <junit.version>4.11</junit.version>
     </properties>
 
     <build>
@@ -230,13 +229,6 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- supported and tested connection pool, can works with any or none -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -256,7 +248,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>1.1.8</version>
+            <version>1.2.4</version>
             <scope>provided</scope>
         </dependency>
 

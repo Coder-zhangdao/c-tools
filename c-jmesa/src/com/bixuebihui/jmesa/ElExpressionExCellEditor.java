@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.servlet.jsp.el.FunctionMapper;
-import javax.servlet.jsp.el.VariableResolver;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jmesa.view.editor.expression.ElExpressionCellEditor;
 import org.jmesa.view.editor.expression.Expression;
+
+import javax.el.FunctionMapper;
+import javax.el.VariableMapper;
 
 /**
  * @author xwx
@@ -40,21 +41,22 @@ public class ElExpressionExCellEditor extends ElExpressionCellEditor {
      * @param item The row's backing bean.
      */
     @Override
-	protected VariableResolver getVariableResolver(Object item) {
+	protected VariableMapper getVariableMapper(Object item) {
 
-    	 Map<String, Object> context = new HashMap<String, Object>();
+    	 Map<String, Object> context = new HashMap<>(16);
 
-    	 if(addtionalContext!=null) context.putAll(addtionalContext);
+    	 if(addtionalContext!=null) {
+    	 	context.putAll(addtionalContext);
+		 }
 
-         context.put(var, item);
-         return new VariableResolverMap(context);
+         return super.getVariableMapper(item);
     }
 
     @Override
 	protected FunctionMapper getFunctionMapper() {
 
         return new FunctionMapper(){
-			Map<String, Method> map = new Hashtable<String, Method>();
+			Map<String, Method> map = new Hashtable<>();
 
 			//避免命名冲突，三个参数以上的方法加上参数个数后缀
 			@Override
@@ -73,8 +75,9 @@ public class ElExpressionExCellEditor extends ElExpressionCellEditor {
 							Class<?>[] types = m.getParameterTypes();
 
 							if(types!=null && types.length>0){
-								if(types[0] == java.io.Writer.class)
+								if(types[0] == java.io.Writer.class) {
 									continue; //忽略参数带Writer方法
+								}
 							}
 
 							String name = changeName(m, types);
@@ -90,8 +93,9 @@ public class ElExpressionExCellEditor extends ElExpressionCellEditor {
 
 			private String changeName(Method m, Class<?>[] types) {
 				String name = m.getName();
-				if(types!=null && types.length>2)
+				if(types!=null && types.length>2) {
 					name += types.length;
+				}
 				return name;
 			}
 

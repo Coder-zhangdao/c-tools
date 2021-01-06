@@ -9,13 +9,14 @@
 	<parent>
 		<groupId>com.github.yujiaao</groupId>
 		<artifactId>c-tools-parent</artifactId>
-		<version>1.0.1-RC7</version>
+		<version>1.0.1-RC8</version>
 	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.3.29.RELEASE</spring.version>
 		<jetty9.version>9.4.30.v20200611</jetty9.version>
+		<junitVersion>5.7.0</junitVersion>
 	</properties>
 
 	<build>
@@ -148,17 +149,17 @@
 		<dependency>
 			<groupId>com.github.yujiaao</groupId>
 			<artifactId>c-tools</artifactId>
-            <version>1.0.1-RC7</version>
+            <version>1.0.1-RC8</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.yujiaao</groupId>
 			<artifactId>c-dbtools</artifactId>
-			<version>1.0.1-RC7</version>
+			<version>1.0.1-RC8</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.yujiaao</groupId>
 			<artifactId>jmesa</artifactId>
-			<version>4.1.0-RC2</version>
+			<version>4.1.0-RC5</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>xwork</artifactId>
@@ -182,12 +183,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.5.2</version>
-			<scope>test</scope>
-		</dependency>
+
 
 		<!-- this can be removed, for web test only -->
 		<dependency>
@@ -198,25 +194,11 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<version>6.1.6.Final</version>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>javax.el-api</artifactId>
-			<version>2.2.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.web</groupId>
-			<artifactId>javax.el</artifactId>
-			<version>2.2.4</version>
-			<scope>test</scope>
-		</dependency>
-
 
 		<dependency>
 			<groupId>org.springframework</groupId>

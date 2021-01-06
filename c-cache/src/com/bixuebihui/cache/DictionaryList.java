@@ -38,19 +38,19 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	@Override
 	public DictionaryItem mapRow(ResultSet r, int index) throws SQLException {
 		DictionaryItem res = new DictionaryItem();
-		res.setMs_id(r.getString(def.getId_name()));
-		res.setMs_value(r.getString(def.getValue_name()));
+		res.setMs_id(r.getString(def.getIdFieldName()));
+		res.setMs_value(r.getString(def.getValueFieldName()));
 		res.setMs_sort(r.getString(def.getSortFieldName()));
 		return res;
 	}
 
 	private String getSelectSql(){
-		if(def.getId_name().equalsIgnoreCase(def.getSortFieldName())||
-				def.getValue_name().equalsIgnoreCase(def.getSortFieldName())) {
-			return "select "+def.getId_name()+", "+def.getValue_name()
+		if(def.getIdFieldName().equalsIgnoreCase(def.getSortFieldName())||
+				def.getValueFieldName().equalsIgnoreCase(def.getSortFieldName())) {
+			return "select "+def.getIdFieldName()+", "+def.getValueFieldName()
 			+" from ";
 		} else {
-			return "select "+def.getId_name()+", "+def.getValue_name()
+			return "select "+def.getIdFieldName()+", "+def.getValueFieldName()
 			+", "+def.getSortFieldName() +" from ";
 		}
 	}
@@ -96,7 +96,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	 * @return DictionaryItem
 	 */
 	public DictionaryItem selectByKey(long id) throws SQLException {
-		String query = getSelectSql() + getTableName() + " where "+def.getId_name()+"=?"+" "+def.getSqlCondition();
+		String query = getSelectSql() + getTableName() + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
 		List<DictionaryItem> info = dbHelper.executeQuery(query, new Object[] { id },
 				new RowMapperResultReader<>(this));
 		if (info != null && info.size() > 0) {
@@ -112,7 +112,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	 */
 	public List<DictionaryItem> selectAllLikeKey(long id)
 			throws SQLException {
-		String query = getSelectSql() + getTableName() + " where "+def.getId_name()+"=?"+" "+def.getSqlCondition();
+		String query = getSelectSql() + getTableName() + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
 		return dbHelper.executeQuery(query, new Object[] { id },
 				new RowMapperResultReader<>(this));
 	}
@@ -124,8 +124,8 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	 */
 	@Override
 	public boolean updateByKey(DictionaryItem info) throws SQLException {
-		String query = "update " + getTableName() + " set " + def.getId_name()+"=?" + ","
-				+def.getValue_name()+ "=?" + "," + def.getSortFieldName()+"=?" + " where "+def.getId_name()+"=?"+" "+def.getSqlCondition();
+		String query = "update " + getTableName() + " set " + def.getIdFieldName()+"=?" + ","
+				+def.getValueFieldName()+ "=?" + "," + def.getSortFieldName()+"=?" + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
 		return 1 == dbHelper.executeNoQuery(query, new Object[] {
 				info.getMs_id(), info.getMs_value(), info.getMs_sort(),
 				info.getMs_id() });
@@ -139,7 +139,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	 * @return true if succcess
 	 */
 	public boolean deleteByKey(long id) throws SQLException {
-		String query = "delete from " + getTableName() + " where "+def.getId_name()+"=?"+" "+def.getSqlCondition();
+		String query = "delete from " + getTableName() + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
 		return 1 <= dbHelper.executeNoQuery(query, new Object[] { id });
 	}
 
@@ -157,7 +157,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	 */
 	public int countByKey(long id) throws SQLException {
 		String query = "select count(*) from " + getTableName()
-				+ " where "+def.getId_name()+"=?"+" "+def.getSqlCondition();
+				+ " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
 		Object o = dbHelper.executeScalar(query, new Object[] { id });
 		return o == null ? 0 : Integer.parseInt(o.toString());
 	}
@@ -169,7 +169,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	 */
 	public int countLikeKey(long id) throws SQLException {
 		String query = "select count(*) from " + getTableName()
-				+ " where "+def.getId_name()+"=?"+" "+def.getSqlCondition();
+				+ " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
 		Object o = dbHelper.executeScalar(query, new Object[] { id });
 		return o == null ? 0 : Integer.parseInt(o.toString());
 	}
@@ -184,7 +184,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 	@Override
 	public boolean insert(DictionaryItem info) throws SQLException {
 		String query = "insert into " + getTableName()
-				+ " ( "+def.getId_name()+","+def.getValue_name()+","+def.getSortFieldName()+" ) values ( ?,?,? )";
+				+ " ( "+def.getIdFieldName()+","+def.getValueFieldName()+","+def.getSortFieldName()+" ) values ( ?,?,? )";
 		return 1 == dbHelper.executeNoQuery(query, new Object[] {
 				info.getMs_id(), info.getMs_value(), info.getMs_sort() });
 	}
@@ -222,7 +222,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String>  {
 
 	@Override
 	public String getKeyName() {
-		return def.getId_name();
+		return def.getIdFieldName();
 	}
 
 

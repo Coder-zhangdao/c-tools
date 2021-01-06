@@ -1,9 +1,9 @@
 package com.bixuebihui.jmesa;
 
+import javax.el.VariableMapper;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.VariableResolver;
 
-import org.apache.commons.el.VariableResolverImpl;
+import com.sun.el.lang.VariableMapperImpl;
 import org.jmesa.view.editor.expression.Expression;
 
 public class ElExpressionPageContextCellEditor extends ElExpressionExCellEditor {
@@ -30,10 +30,23 @@ public class ElExpressionPageContextCellEditor extends ElExpressionExCellEditor 
      * @param item The row's backing bean.
      */
     @Override
-    protected VariableResolver getVariableResolver(Object item) {
+	protected VariableMapper getVariableMapper(Object item) {
    	 	addtionalContext.getRequest().setAttribute(var, item);
-    	return new VariableResolverImpl(addtionalContext);
+    	return new ExVariableMapper(super.getVariableMapper(item), addtionalContext);
     }
+
+    public static class ExVariableMapper extends VariableMapperImpl{
+
+    	PageContext pageContext;
+		VariableMapper defaultMapper;
+
+		ExVariableMapper(VariableMapper defaultMapper, PageContext pageContext){
+			this.pageContext = pageContext;
+			this.defaultMapper = defaultMapper;
+		}
+
+
+	}
 
 
 }

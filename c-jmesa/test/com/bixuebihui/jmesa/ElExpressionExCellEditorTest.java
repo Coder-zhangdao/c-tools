@@ -4,9 +4,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.jsp.el.FunctionMapper;
 
 import org.junit.jupiter.api.Test;
+
+import javax.el.FunctionMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,7 +32,7 @@ public class ElExpressionExCellEditorTest {
 	public void testGetFunctionMapper() {
 		String temp="'<span title=\\'#{fn:escapeXml(row.body)}\\'>#{fn:escapeXml(fn:abbreviate(row.body,100))}</span>";
 
-		Map<String, ?> map =new HashMap<String, Object>();
+		Map<String, ?> map = new HashMap<>();
 		ElExpressionExCellEditor e = new ElExpressionExCellEditor("test", temp, map );
 		FunctionMapper f = e.getFunctionMapper();
 

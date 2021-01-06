@@ -6,11 +6,11 @@
     <groupId>com.github.yujiaao</groupId>
     <artifactId>tablegen</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1-RC7</version>
+    <version>1.0.1-RC8</version>
     <parent>
         <groupId>com.github.yujiaao</groupId>
         <artifactId>c-tools-parent</artifactId>
-        <version>1.0.1-RC7</version>
+        <version>1.0.1-RC8</version>
     </parent>
     <build>
         <finalName>tablegen</finalName>
@@ -129,17 +129,17 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-tools</artifactId>
-            <version>1.0.1-RC7</version>
+            <version>1.0.1-RC8</version>
         </dependency>
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-dbtools</artifactId>
-            <version>1.0.1-RC7</version>
+            <version>1.0.1-RC8</version>
         </dependency>
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-cache</artifactId>
-            <version>1.0.1-RC7</version>
+            <version>1.0.1-RC8</version>
         </dependency>
         <dependency>
             <groupId>postgresql</groupId>
@@ -147,13 +147,7 @@
             <version>9.1-901.jdbc4</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine -->
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>5.4.2</version>
-            <scope>test</scope>
-        </dependency>
+
 
         <dependency>
             <groupId>javax.transaction</groupId>
@@ -163,7 +157,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-jmesa</artifactId>
-            <version>1.0.1-RC7</version>
+            <version>1.0.1-RC8</version>
         </dependency>
 
 

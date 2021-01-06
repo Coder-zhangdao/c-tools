@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>c-cache</artifactId>
 	<name>dictionary cache</name>
-	<version>1.0.1-RC7</version>
+	<version>1.0.1-RC8</version>
 	<description>dictionary cache for database</description>
 	<parent>
 		<groupId>com.github.yujiaao</groupId>
 		<artifactId>c-tools-parent</artifactId>
-		<version>1.0.1-RC7</version>
+		<version>1.0.1-RC8</version>
 	</parent>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -127,19 +127,14 @@
 		<dependency>
 			<groupId>com.github.yujiaao</groupId>
 			<artifactId>c-dbtools</artifactId>
-			<version>1.0.1-RC7</version>
+			<version>1.0.1-RC8</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.yujiaao</groupId>
 			<artifactId>c-tools</artifactId>
-			<version>1.0.1-RC7</version>
+			<version>1.0.1-RC8</version>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>opensymphony</groupId>
 			<artifactId>oscache</artifactId>
