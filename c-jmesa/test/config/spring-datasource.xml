@@ -125,10 +125,7 @@
 		</property>
 		<property name="interceptorNames">
 			<list>
-				<value>dbHelperBeforeAdvice</value>
-				<value>dbHelperAfterAdvice</value>
 				<value>dbHelperAroundAdvice</value>
-				<value>dbHelperThrowsAdvice</value>
 			</list>
 		</property>
 		<property name="target">
@@ -137,15 +134,10 @@
 	</bean>
 
 	<bean id="jeecmsDbHelper" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces">
-			<value>com.bixuebihui.jdbc.IDbHelper</value>
-		</property>
+		<property name="proxyInterfaces" value="com.bixuebihui.jdbc.IDbHelper"/>
 		<property name="interceptorNames">
 			<list>
-				<value>dbHelperBeforeAdvice</value>
-				<value>dbHelperAfterAdvice</value>
 				<value>dbHelperAroundAdvice</value>
-				<value>dbHelperThrowsAdvice</value>
 			</list>
 		</property>
 		<property name="target">

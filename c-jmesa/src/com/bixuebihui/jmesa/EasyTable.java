@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.bixuebihui.jmesa.mock.SimpleHttpServletRequest;
 import com.bixuebihui.jmesa.mock.SimpleHttpServletResponse;
+import com.sun.istack.Nullable;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -37,28 +38,41 @@ public class EasyTable extends BasicWebUI {
 
 	private boolean onePage=true;
 
-	/**
-	 * use com.foundationdb.sql.parser.SQLParser to detect columns and key
-	 * @param dbhelper use as data source
-	 * @param tableCaption  表名描述
-	 * @param baseSql 核心sql语句
-	 */
 	public EasyTable(IDbHelper dbhelper, String tableCaption, String baseSql) {
+	    this(dbhelper,tableCaption, baseSql, null,null);
+    }
+
+
+		/**
+         * use com.foundationdb.sql.parser.SQLParser to detect columns and key
+         * 通过数据库返回的元数据确定列名
+         * @param dbhelper use as data source
+         * @param tableCaption  表名描述
+         * @param baseSql 核心sql语句
+         * @param tableId 表名
+         * @param pkName   主键名
+         * @throws SQLException
+         */
+	public EasyTable(IDbHelper dbhelper, String tableCaption, String baseSql, @Nullable String pkName, @Nullable  String tableId) {
+		this.id = tableId;
 		super.setTableCaption(tableCaption);
 
 		init(dbhelper, baseSql);
 
+		if(pkName!=null){
+			this.setUniquePropertyName(pkName);
+		}
+
 		msp = initMeta(baseSql);
-		if(msp!=null){
+		if(pkName!=null && msp!=null){
 			this.setUniquePropertyName(msp.uniquePropertyName);
 		}
 
-		if(msp!=null && msp.tableName!=null) {
+		if(this.id==null && msp!=null && msp.tableName!=null) {
 			this.setId(msp.tableName);
 		} else {
 			this.setId(tableCaption);
 		}
-
 	}
 
 	protected void init(IDbHelper dbHelper, String baseSql){
@@ -69,24 +83,6 @@ public class EasyTable extends BasicWebUI {
 			log.info("maxRows="+maxRows+"  maxRowsIncrements[0]="+this.maxRowsIncrements[0]);
 		}
 		((BasicListService) this.service).setCoreSql(baseSql);
-	}
-
-	/**
-	 * 通过数据库返回的元数据确定列名
-	 * @param dbHelper 数据源
-	 * @param tableName 表名
-	 * @param pkName   主键名
-	 * @param baseSql  核心sql语句
-	 * @throws SQLException
-	 */
-	public EasyTable(IDbHelper dbHelper, String tableName,String pkName, String baseSql) throws SQLException {
-		init(dbHelper, baseSql);
-
-		this.id = tableName;
-
-		this.setUniquePropertyName(pkName);
-
-		msp = MiniSqlParser.getByDb(dbHelper.getConnection(), baseSql);
 	}
 
 
@@ -111,10 +107,29 @@ public class EasyTable extends BasicWebUI {
 		return StringUtils.join(msp.colNames,",");
 	}
 
+	/**
+	 * use LimitActionFactoryJsonImpl
+	json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
+	*/
 	public String json(Map<String,Object> paramsMap) throws SQLException{
 		SimpleHttpServletRequest request = new SimpleHttpServletRequest();
-		request.setParameters(paramsMap);
 		request.setParameter(this.id+"_e_","json");
+		request.setAttribute(JSON_QUERY, paramsMap);
+		return getJsonData(request);
+	}
+
+	/**
+	 * use LimitActionFactoryJsonImpl
+	 json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
+	 */
+	public String json(String jsonQuery) throws SQLException{
+		SimpleHttpServletRequest request = new SimpleHttpServletRequest();
+		request.setParameter(this.id+"_e_","json");
+		request.setAttribute(JSON_QUERY, jsonQuery);
+		return getJsonData(request);
+	}
+
+	private String getJsonData(SimpleHttpServletRequest request) throws SQLException {
 		SimpleHttpServletResponse response = new SimpleHttpServletResponse();
 		response.setCharacterEncoding(Charset.defaultCharset().displayName());
 

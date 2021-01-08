@@ -109,7 +109,7 @@ public class EasyTableTest{
 		String tableName = "t_config";
 		String pkName ="c_key";
 		String baseSql = " select c_key, c_name , c_value from t_config";
-		EasyTable et = new EasyTable( dbHelper,  tableName , pkName ,  baseSql );
+		EasyTable et = new EasyTable( dbHelper,  tableName , baseSql ,  pkName, null );
 
 
 		String[] cols = et.getColNames();
@@ -130,7 +130,7 @@ public class EasyTableTest{
 		String tableName = "t_config";
 		String pkName ="c_key";
 		String baseSql = " select c_key, c_name , c_value from t_config";
-		EasyTable et = new EasyTable( dbHelper,  tableName , pkName ,  baseSql );
+		EasyTable et = new EasyTable( dbHelper,  tableName ,   baseSql,pkName ,null );
 
 		HttpServletRequest request = new MockHttpServletRequest();
 
@@ -147,7 +147,7 @@ public class EasyTableTest{
 		String tableName = "t_config";
 		String pkName ="c_key";
 		String baseSql = " select c_key, c_name , c_value from t_config";
-		EasyTable et = new EasyTable( dbHelper,  tableName , pkName ,  baseSql );
+		EasyTable et = new EasyTable( dbHelper,  tableName ,  baseSql, pkName , null );
 		//int maxRows=50;
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		//request.setParameter("maxRows",maxRows+"");

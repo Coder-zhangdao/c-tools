@@ -1,12 +1,19 @@
 package com.bixuebihui.jmesa;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.jmesa.core.preference.Preferences;
+import org.jmesa.limit.Limit;
+import org.jmesa.limit.LimitFactory;
 import org.jmesa.model.ExportTypes;
 import org.jmesa.model.TableModel;
 import org.jmesa.model.TableModelUtils;
@@ -16,6 +23,7 @@ import org.jmesa.view.component.Table;
 
 import com.bixuebihui.jdbc.IBaseListService;
 import com.bixuebihui.util.ParameterUtils;
+import org.springframework.web.bind.ServletRequestUtils;
 
 /**
  * @author xwx
@@ -25,9 +33,14 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
 	private String uniquePropertyName;
 
 	/**
-	 * @see   SimpleView
+	 * @see  json query, use LimitFactoryJsonImpl
+	 */
+	public static String JSON_QUERY = "JSON_QUERY";
+	/**
+	 * @see   SimpleView  Only simple table, not toolbar and etc
 	 */
 	private boolean useSimpleView = false;
+
 
 	/**
 	 * 是否使用日期区间控件，如使用则每个控件增加两个参数：起始和截止日期，与coreSql里的参数相对应
@@ -54,6 +67,14 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
 			HttpServletResponse response) {
 
 		TableModel tableFacade = new TableModel(id, request, response);
+
+		Object json = request.getAttribute(JSON_QUERY);
+		if(json!=null){
+			LimitFactory limitFactory = json instanceof Map ? new LimitFactory(id, (Map<String, Object>) json) :
+					  new LimitFactory(id, json.toString());
+			Limit limit = limitFactory.createLimit();
+			tableFacade.setLimit(limit);
+		}
 
 		tableFacade.setExportTypes(ExportTypes.CSV,ExportTypes.EXCEL);
 
