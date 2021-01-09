@@ -185,7 +185,7 @@ public class EncryptUtil {
      * @param buf
      * @return 字节转16进制后的字符串
      */
-    public static String parseByte2HexStr(byte buf[]) {
+    public static String parseByte2HexStr(byte[] buf) {
         if(buf==null) {
             return null;
         }

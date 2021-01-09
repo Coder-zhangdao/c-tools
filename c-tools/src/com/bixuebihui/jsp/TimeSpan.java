@@ -24,28 +24,17 @@ public class TimeSpan implements ISqlConditionType {
     public final static int MIN_BEGIN_YEAR = 1900;
 
     public final static int MAX_END_YEAR = 2100;
-
-    private java.util.Date beginDate = null;
-
-    private java.util.Date endDate = null;
-
-    private String prefix = "";
-
     private static final String BYEAR = "byear";
-
     private static final String BMONTH = "bmonth";
-
     private static final String BDAY = "bday";
-
     private static final String EYEAR = "eyear";
-
     private static final String EMONTH = "emonth";
-
     private static final String EDAY = "eday";
-
     private static final String BDATE = "bdate";
     private static final String EDATE = "edate";
-
+    private java.util.Date beginDate = null;
+    private java.util.Date endDate = null;
+    private String prefix = "";
     private int beginYear;
 
     private int beginMonth;
@@ -60,6 +49,53 @@ public class TimeSpan implements ISqlConditionType {
 
     private boolean showChoiceDateDialog = true;
     private boolean useOneDateCell = true;
+    /**
+     * 时间的提示文字 tooltips
+     */
+    private String title;
+    private String iconPath = "images/calendar.gif";
+    private String baseUrl = "../";
+
+    public TimeSpan() {
+        beginYear = MIN_BEGIN_YEAR;
+        beginMonth = 1;
+        beginDay = 1;
+        endYear = MAX_END_YEAR;
+        endMonth = 1;
+        endDay = 1;
+
+    }
+
+    /**
+     * @param tildeSeparatedBeginInclusiveEndExclusive yyyy-MM-dd~yyyy-MM-dd
+     * @return time span
+     */
+    public static TimeSpan build(String tildeSeparatedBeginInclusiveEndExclusive) throws ParseException {
+        TimeSpan ts = new TimeSpan();
+        if (!isTimeSpan(tildeSeparatedBeginInclusiveEndExclusive)) {
+            return ts;
+        }
+        String[] dates = tildeSeparatedBeginInclusiveEndExclusive.split("~");
+        if (dates.length < 2) {
+            return ts;
+        }
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+        Date begin = sf.parse(dates[0]);
+        Date end = sf.parse(dates[1]);
+        Calendar cb = Calendar.getInstance();
+        cb.setTime(begin);
+        Calendar ce = Calendar.getInstance();
+        ce.setTime(end);
+        ts.init(cb, ce);
+
+        return ts;
+    }
+
+    public static boolean isTimeSpan(String tildeSeparatedDates) {
+        String regex = "(\\d{4}-\\d{1,2}-\\d{1,2})?~(\\d{4}-\\d{1,2}-\\d{1,2})?";
+        return tildeSeparatedDates != null &&
+                tildeSeparatedDates.matches(regex);
+    }
 
     public boolean isUseOneDateCell() {
         return useOneDateCell;
@@ -69,13 +105,6 @@ public class TimeSpan implements ISqlConditionType {
         this.useOneDateCell = useOneDateCell;
     }
 
-    /**
-     * 时间的提示文字 tooltips
-     */
-    private String title;
-
-    private String iconPath = "images/calendar.gif";
-
     public String getTitle() {
         return title;
     }
@@ -84,8 +113,6 @@ public class TimeSpan implements ISqlConditionType {
         this.title = title;
     }
 
-    private String baseUrl = "../";
-
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -93,7 +120,6 @@ public class TimeSpan implements ISqlConditionType {
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
     }
-
 
     /**
      * 形成URL参数,for GET method
@@ -137,16 +163,6 @@ public class TimeSpan implements ISqlConditionType {
 
     }
 
-    public TimeSpan() {
-        beginYear = MIN_BEGIN_YEAR;
-        beginMonth = 1;
-        beginDay = 1;
-        endYear = MAX_END_YEAR;
-        endMonth = 1;
-        endDay = 1;
-
-    }
-
     /**
      * 形成保存cookie的JavaScript脚本
      *
@@ -182,32 +198,6 @@ public class TimeSpan implements ISqlConditionType {
             getParams(request);
         }
 
-    }
-
-    /**
-     *
-     * @param tildeSeparatedBeginInclusiveEndExclusive yyyy-MM-dd~yyyy-MM-dd
-     * @return time span
-     */
-    public static TimeSpan build(String tildeSeparatedBeginInclusiveEndExclusive) throws ParseException {
-        TimeSpan ts = new TimeSpan();
-        if (!isTimeSpan(tildeSeparatedBeginInclusiveEndExclusive)) {
-            return ts;
-        }
-        String[] dates = tildeSeparatedBeginInclusiveEndExclusive.split("~");
-        if(dates.length<2){
-            return ts;
-        }
-        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-        Date begin = sf.parse(dates[0]);
-        Date end= sf.parse(dates[1]);
-        Calendar cb= Calendar.getInstance();
-        cb.setTime(begin);
-        Calendar ce= Calendar.getInstance();
-        ce.setTime(end);
-        ts.init(cb,ce);
-
-        return ts;
     }
 
     private void getSeparatedParams(HttpServletRequest request) {
@@ -490,12 +480,6 @@ public class TimeSpan implements ISqlConditionType {
         this.iconPath = iconpath;
     }
 
-    public static boolean isTimeSpan(String tildeSeparatedDates){
-        String regex = "(\\d{4}-\\d{1,2}-\\d{1,2})?~(\\d{4}-\\d{1,2}-\\d{1,2})?";
-        return tildeSeparatedDates!=null &&
-                tildeSeparatedDates.matches(regex);
-    }
-
     private void getParams(HttpServletRequest request) {
         if (ParameterUtils.getCookieAndRequestInt(request, getBYearName(), 0) > 0) {
 
@@ -548,7 +532,7 @@ public class TimeSpan implements ISqlConditionType {
                 return this.getMysqlSqlCondition(sqlFieldName);
             case BaseDao.ORACLE:
                 return this.getOracleSqlCondition(sqlFieldName);
-            default:{
+            default: {
                 Log log = LogFactory.getLog(TimeSpan.class);
                 log.warn("databaseType=" + databaseType + " not implement in  TimeSpan");
                 return this.getMysqlSqlCondition(sqlFieldName);

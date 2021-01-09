@@ -1,1 +1,2 @@
-<%@ taglib uri="sitemesh-decorator" prefix="decorator" %><decorator:body/>
+<%@ taglib uri="sitemesh-decorator" prefix="decorator" %>
+<decorator:body/>

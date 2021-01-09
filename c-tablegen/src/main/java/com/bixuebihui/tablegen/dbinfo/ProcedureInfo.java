@@ -3,6 +3,9 @@ package com.bixuebihui.tablegen.dbinfo;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+/**
+ * @author xwx
+ */
 public class ProcedureInfo extends DatabaseObjectInfo implements IProcedureInfo
 {
 	/**
@@ -33,7 +36,6 @@ public class ProcedureInfo extends DatabaseObjectInfo implements IProcedureInfo
 		this.procType = procType;
 	}
 
-//TODO: Rename to getProcedureType().
 	@Override
 	public int getProcedureType()
 	{
@@ -46,7 +48,6 @@ public class ProcedureInfo extends DatabaseObjectInfo implements IProcedureInfo
 		return remarks;
 	}
 
-//TODO: Rename to getProcedureTypeDescription().
 	@Override
 	public String getProcedureTypeDescription()
 	{

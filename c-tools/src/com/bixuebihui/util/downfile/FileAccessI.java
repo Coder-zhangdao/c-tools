@@ -29,7 +29,7 @@ public class FileAccessI
         oSavedFile.seek(nPos);
     }
 
-    public synchronized int write(byte b[], int nStart, int nLen) {
+    public synchronized int write(byte[] b, int nStart, int nLen) {
         int n = -1;
         try {
             oSavedFile.write(b, nStart, nLen);

@@ -22,15 +22,15 @@ import org.jmesa.view.html.component.HtmlColumn;
 import org.jmesa.view.html.editor.HtmlHeaderEditor;
 
 /**
- * @since 2.2
  * @author Jeff Johnston
+ * @since 2.2
  */
 public class CustomHeaderEditor extends HtmlHeaderEditor {
 
     /**
      * @param currentOrder The current sort Order.
-     * @param column The current column.
-     * @param limit The current limit.
+     * @param column       The current column.
+     * @param limit        The current limit.
      * @return The JavaScript to get the next Order when invoking the onlick command.
      */
     @Override
@@ -41,7 +41,7 @@ public class CustomHeaderEditor extends HtmlHeaderEditor {
             html.onclick("removeSortFromLimit('" + limit.getId() + "','" + column.getProperty() + "');onInvokeAction('" + limit.getId() + "')");
         } else {
             html.onclick("addOrderedSortToLimit('" + limit.getId() + "','" + column.getProperty() + "','" + currentOrder.toParam() + "');"
-                + getOnInvokeActionJavaScript(limit));
+                    + getOnInvokeActionJavaScript(limit));
         }
 
         return html.toString();

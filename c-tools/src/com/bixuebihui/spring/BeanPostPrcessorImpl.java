@@ -47,11 +47,7 @@ public class BeanPostPrcessorImpl implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
-
             throws BeansException {
-
-        //System.out.println("对象" + beanName + "实例化完成");
-        //<bean class="com.spring.test.di.BeanPostPrcessorImpl"/>
 
         return bean;
 

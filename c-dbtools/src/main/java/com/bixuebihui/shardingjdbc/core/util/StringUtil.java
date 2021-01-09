@@ -17,7 +17,6 @@
 
 package com.bixuebihui.shardingjdbc.core.util;
 
-//import com.google.common.base.Splitter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,6 +78,5 @@ public final class StringUtil {
     public static List<String> splitWithComma(final String value) {
     	return Arrays.asList(org.apache.commons.lang3.StringUtils.stripAll(
     			org.apache.commons.lang3.StringUtils.split(value, ",")));
-       // return Splitter.on(",").trimResults().splitToList(value);
     }
 }

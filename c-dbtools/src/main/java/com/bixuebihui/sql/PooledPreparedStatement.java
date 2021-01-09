@@ -143,7 +143,7 @@ public class PooledPreparedStatement extends PooledStatement
      * @throws java.sql.SQLException if any.
      */
     @Override
-    public void setBytes(int i, byte abyte0[])
+    public void setBytes(int i, byte[] abyte0)
             throws SQLException {
         pstmt.setBytes(i, abyte0);
     }

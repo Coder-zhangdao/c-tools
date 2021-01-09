@@ -5,15 +5,13 @@ import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
- * User: Administrator
  * Date: 13-4-18
  * Time: 下午6:04
  * To change this template use File | Settings | File Templates.
- *
+ * 简单的数据库查询
  * @author xingwx
  * @version $Id: $Id
  */
-//简单的数据库查询
 public interface SimpleStatement<T,V> {
 
 

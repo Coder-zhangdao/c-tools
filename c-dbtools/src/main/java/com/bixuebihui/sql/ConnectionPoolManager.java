@@ -3,6 +3,7 @@ package com.bixuebihui.sql;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -54,7 +55,7 @@ public final class ConnectionPoolManager
      */
     public void addAlias(String _alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
                          int checkoutMilliSeconds)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
         addAlias(_alias, driverName, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, 0);
     }
 
@@ -77,7 +78,7 @@ public final class ConnectionPoolManager
      */
     public void addAlias(String _alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
                          int checkoutMilliSeconds, int _maxCheckout)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
         addAlias(_alias, driverName, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, _maxCheckout, true);
 
     }
@@ -102,8 +103,8 @@ public final class ConnectionPoolManager
      */
     public void addAlias(String _alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
                          int checkoutMilliSeconds, int _maxCheckout, boolean cacheStatements)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-        DriverManager.registerDriver((Driver) Class.forName(driverName).newInstance());
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
+        DriverManager.registerDriver((Driver) Class.forName(driverName).getDeclaredConstructor().newInstance());
 
         ConnectionPool connectionpool = new ConnectionPool(_alias, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, _maxCheckout);
         connectionpool.setTracing(true);

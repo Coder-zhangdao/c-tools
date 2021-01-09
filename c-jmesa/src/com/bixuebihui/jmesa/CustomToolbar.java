@@ -15,9 +15,6 @@
  */
 package com.bixuebihui.jmesa;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jmesa.core.CoreContext;
 import org.jmesa.view.html.HtmlUtils;
 import org.jmesa.view.html.toolbar.AbstractImageToolbarItem;
@@ -25,6 +22,9 @@ import org.jmesa.view.html.toolbar.SeparatorToolbarItem;
 import org.jmesa.view.html.toolbar.SimpleToolbar;
 import org.jmesa.view.html.toolbar.ToolbarItem;
 import org.jmesa.web.WebContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Jeff Johnston
@@ -40,49 +40,49 @@ public class CustomToolbar extends SimpleToolbar {
 
 
     @Override
-	protected List<ToolbarItem> getToolbarItems() {
-    	List<ToolbarItem> items = super.getToolbarItems();
+    protected List<ToolbarItem> getToolbarItems() {
+        List<ToolbarItem> items = super.getToolbarItems();
 
-	   	 if (enableSeparators) {
-	         items.add(new SeparatorToolbarItem());
-	     }
-		 for(String actionCode:buttons) {
-			 items.add(createButton(actionCode));
-		 }
-		return items;
+        if (enableSeparators) {
+            items.add(new SeparatorToolbarItem());
+        }
+        for (String actionCode : buttons) {
+            items.add(createButton(actionCode));
+        }
+        return items;
     }
 
     /**
      * to use this function, you must add to table_zh_CN.properties strings
-     *   html.toolbar.tooltip.ACTIONCODE
-     *   html.toolbar.text.ACTIONCODE
+     * html.toolbar.tooltip.ACTIONCODE
+     * html.toolbar.text.ACTIONCODE
      * and add a button image with name as image/table/ACTIONCODE.gif
      *
      * @param actionCode
      * @return
      */
-    protected ImageToolbarItem createButton(final String actionCode){
-    	ImageToolbarItem item =  new ImageToolbarItem(this.getCoreContext());
+    protected ImageToolbarItem createButton(final String actionCode) {
+        ImageToolbarItem item = new ImageToolbarItem(this.getCoreContext());
 
         item.setCode(actionCode);
-        item.setTooltip(this.getCoreContext().getMessage("html.toolbar.tooltip."+actionCode));
+        item.setTooltip(this.getCoreContext().getMessage("html.toolbar.tooltip." + actionCode));
 
-        item.setImage(getImage(actionCode+".gif", getWebContext(), getCoreContext()));
-        item.setAlt(this.getCoreContext().getMessage("html.toolbar.text."+actionCode));
+        item.setImage(getImage(actionCode + ".gif", getWebContext(), getCoreContext()));
+        item.setAlt(this.getCoreContext().getMessage("html.toolbar.text." + actionCode));
         //item.setToolbarItemRenderer();
 
         return item;
     }
 
-    public void addButton(String actionCode){
-    	if(buttons==null){
-    		buttons =  new ArrayList<String>();
-    		buttons.add(EDIT);
-    		buttons.add(INSERT);
-    		buttons.add(COPY);
-    		buttons.add(DELETE);
-    	}
-    	buttons.add(actionCode);
+    public void addButton(String actionCode) {
+        if (buttons == null) {
+            buttons = new ArrayList<String>();
+            buttons.add(EDIT);
+            buttons.add(INSERT);
+            buttons.add(COPY);
+            buttons.add(DELETE);
+        }
+        buttons.add(actionCode);
     }
 
 
@@ -91,17 +91,20 @@ public class CustomToolbar extends SimpleToolbar {
         return imagesPath + image;
     }
 
-	public class ImageToolbarItem extends AbstractImageToolbarItem{
+    public class ImageToolbarItem extends AbstractImageToolbarItem {
 
-	    public ImageToolbarItem(CoreContext coreContext) {
-	        super(coreContext);
-	    }
-		@Override
-		public String render() {
-	        StringBuilder action = new StringBuilder("javascript:" + getOnInvokeActionJavaScript());
-	        return enabled(action.toString());
-		}
+        public ImageToolbarItem(CoreContext coreContext) {
+            super(coreContext);
+        }
 
-	};
+        @Override
+        public String render() {
+            StringBuilder action = new StringBuilder("javascript:" + getOnInvokeActionJavaScript());
+            return enabled(action.toString());
+        }
+
+    }
+
+    ;
 
 }

@@ -1,81 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans spring-beans-2.5.xsd">
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans spring-beans-2.5.xsd">
 
 
-	<!-- Dictionary cache
-		如果形名与实名一致，则不需要在此定义，直接用表名取数据即可！
-		private String id_name="MS_ID";
-		private String value_name="MS_VALUE";
-		private String sort_name="MS_SORT";
-	-->
-	<bean id="ziduan" class="com.bixuebihui.cache.DictionaryDefine">
-		<property name="tableName">
-			<value>KUOZHANBIAOXINXI</value>
-		</property>
-		<property name="idFieldName">
-			<value>KZ_ZDM</value>
-		</property>
-		<property name="valueFieldName">
-			<value>KZ_ZDSM</value>
-		</property>
-		<property name="sortFieldName">
-			<value>KZ_ID</value>
-		</property>
-		<property name="addCondition">
-			<value></value>
-		</property>
-	</bean>
+    <!-- Dictionary cache
+        如果形名与实名一致，则不需要在此定义，直接用表名取数据即可！
+        private String id_name="MS_ID";
+        private String value_name="MS_VALUE";
+        private String sort_name="MS_SORT";
+    -->
+    <bean id="ziduan" class="com.bixuebihui.cache.DictionaryDefine">
+        <property name="tableName">
+            <value>KUOZHANBIAOXINXI</value>
+        </property>
+        <property name="idFieldName">
+            <value>KZ_ZDM</value>
+        </property>
+        <property name="valueFieldName">
+            <value>KZ_ZDSM</value>
+        </property>
+        <property name="sortFieldName">
+            <value>KZ_ID</value>
+        </property>
+        <property name="addCondition">
+            <value></value>
+        </property>
+    </bean>
 
-	<bean id="ziduan_kzbm_id"
-		class="com.bixuebihui.cache.DictionaryDefine">
-		<property name="tableName">
-			<value>KUOZHANBIAOXINXI</value>
-		</property>
-		<property name="idFieldName">
-			<value>KZ_ZDM</value>
-		</property>
-		<property name="valueFieldName">
-			<value>KZ_ZDSM</value>
-		</property>
-		<property name="sortFieldName">
-			<value>KZ_ID</value>
-		</property>
-		<property name="addCondition">
-			<value>and kz_bmid={0}</value>
-		</property>
-	</bean>
+    <bean id="ziduan_kzbm_id"
+          class="com.bixuebihui.cache.DictionaryDefine">
+        <property name="tableName">
+            <value>KUOZHANBIAOXINXI</value>
+        </property>
+        <property name="idFieldName">
+            <value>KZ_ZDM</value>
+        </property>
+        <property name="valueFieldName">
+            <value>KZ_ZDSM</value>
+        </property>
+        <property name="sortFieldName">
+            <value>KZ_ID</value>
+        </property>
+        <property name="addCondition">
+            <value>and kz_bmid={0}</value>
+        </property>
+    </bean>
 
-	<bean id="objtest" class="com.bixuebihui.cache.DictionaryDefine">
-		<property name="tableName">
-			<value>KUOZHANBIAOXINXI</value>
-		</property>
-		<property name="idFieldName">
-			<value>KZ_ID</value>
-		</property>
-		<property name="valueFieldName">
-			<value>KZ_ZDM</value>
-		</property>
-		<property name="sortFieldName">
-			<value>KZ_ZDSM</value>
-		</property>
-		<property name="addCondition">
-			<value></value>
-		</property>
-		<property name="serviceClass">
-			<bean class="com.bixuebihui.cache.DictionaryList">
-				<constructor-arg>
-					<ref bean="objtest" />
-				</constructor-arg>
-			</bean>
-		</property>
-		<property name="maxCapacity">
-			<value>100</value>
-		</property>
+    <bean id="objtest" class="com.bixuebihui.cache.DictionaryDefine">
+        <property name="tableName">
+            <value>KUOZHANBIAOXINXI</value>
+        </property>
+        <property name="idFieldName">
+            <value>KZ_ID</value>
+        </property>
+        <property name="valueFieldName">
+            <value>KZ_ZDM</value>
+        </property>
+        <property name="sortFieldName">
+            <value>KZ_ZDSM</value>
+        </property>
+        <property name="addCondition">
+            <value></value>
+        </property>
+        <property name="serviceClass">
+            <bean class="com.bixuebihui.cache.DictionaryList">
+                <constructor-arg>
+                    <ref bean="objtest"/>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="maxCapacity">
+            <value>100</value>
+        </property>
 
-	</bean>
-
+    </bean>
 
 
 </beans>

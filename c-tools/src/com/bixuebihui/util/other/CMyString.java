@@ -89,12 +89,12 @@ public class CMyString {
         if (_strSrc == null) {
             return null;
         }
-        char srcBuff[] = _strSrc.toCharArray();
+        char[] srcBuff = _strSrc.toCharArray();
         int nSrcLen = srcBuff.length;
         if (nSrcLen == 0) {
             return "";
         }
-        char oldStrBuff[] = _strOld.toCharArray();
+        char[] oldStrBuff = _strOld.toCharArray();
         int nOldStrLen = oldStrBuff.length;
         if (nOldStrLen == 0 || nOldStrLen > nSrcLen) {
             return _strSrc;
@@ -141,7 +141,7 @@ public class CMyString {
         if (nSrcLen == 0) {
             return "";
         }
-        char oldStrBuff[] = _strOld.toCharArray();
+        char[] oldStrBuff = _strOld.toCharArray();
         int nOldStrLen = oldStrBuff.length;
         if (nOldStrLen == 0 || nOldStrLen > nSrcLen) {
             return _strSrc.toString();
@@ -221,7 +221,7 @@ public class CMyString {
     }
 
     public static byte[] getUTF8Bytes(String _string) {
-        char c[] = _string.toCharArray();
+        char[] c = _string.toCharArray();
         int len = c.length;
         int count = 0;
         for (char ch : c) {
@@ -234,7 +234,7 @@ public class CMyString {
             }
         }
 
-        byte b[] = new byte[count];
+        byte[] b = new byte[count];
         int off = 0;
         for (int i = 0; i < len; i++) {
             int ch = c[i];
@@ -253,11 +253,11 @@ public class CMyString {
         return b;
     }
 
-    public static String getUTF8String(byte b[]) {
+    public static String getUTF8String(byte[] b) {
         return getUTF8String(b, 0, b.length);
     }
 
-    public static String getUTF8String(byte b[], int off, int len) {
+    public static String getUTF8String(byte[] b, int off, int len) {
         int count = 0;
         int max = off + len;
         int i;
@@ -305,7 +305,7 @@ public class CMyString {
         if (i != max) {
             throw new IllegalArgumentException();
         }
-        char cs[] = new char[count];
+        char[] cs = new char[count];
         i = 0;
         while (off < max) {
             int c = b[off++] & 0xff;
@@ -342,11 +342,11 @@ public class CMyString {
         return new String(cs, 0, count);
     }
 
-    public static String byteToHexString(byte _bytes[]) {
+    public static String byteToHexString(byte[] _bytes) {
         return byteToHexString(_bytes, ',');
     }
 
-    public static String byteToHexString(byte _bytes[], char _delim) {
+    public static String byteToHexString(byte[] _bytes, char _delim) {
         String sRet = "";
         for (int i = 0; i < _bytes.length; i++) {
             if (i > 0) {
@@ -358,7 +358,7 @@ public class CMyString {
         return sRet;
     }
 
-    public static String byteToString(byte _bytes[], char _delim, int _radix) {
+    public static String byteToString(byte[] _bytes, char _delim, int _radix) {
         String sRet = "";
         for (int i = 0; i < _bytes.length; i++) {
             if (i > 0) {
@@ -378,7 +378,7 @@ public class CMyString {
         if (_sContent == null) {
             return "";
         }
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         int nSrcLen = srcBuff.length;
         StringBuffer retBuff = new StringBuffer(nSrcLen * 2);
         for (int i = 0; i < nSrcLen; i++) {
@@ -442,7 +442,7 @@ public class CMyString {
         }
         boolean bIsQuote = false;
         boolean bIsNewLine = true;
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         int nSrcLen = srcBuff.length;
         StringBuffer retBuff = new StringBuffer((int) ((double) nSrcLen * 1.8D));
         for (int i = 0; i < nSrcLen; i++) {
@@ -514,7 +514,7 @@ public class CMyString {
         if (_sContent == null) {
             return "";
         }
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         int nSrcLen = srcBuff.length;
         StringBuffer retBuff = new StringBuffer((int) ((double) nSrcLen * 1.5D));
         for (int i = 0; i < nSrcLen; i++) {
@@ -545,7 +545,7 @@ public class CMyString {
         if (_strSrc == null) {
             return "";
         }
-        char buff[] = new char[_strSrc.length()];
+        char[] buff = new char[_strSrc.length()];
         for (int i = 0; i < buff.length; i++) {
             buff[i] = p_chrMark;
         }
@@ -561,7 +561,7 @@ public class CMyString {
         if (nLen == 0) {
             return "";
         }
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         StringBuffer retBuff = new StringBuffer((int) ((double) nLen * 1.5D));
         for (int i = 0; i < nLen; i++) {
             char cTemp = srcBuff[i];
@@ -600,7 +600,7 @@ public class CMyString {
         if (_sContent == null) {
             return "";
         }
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         int nLen = srcBuff.length;
         if (nLen == 0) {
             return "";
@@ -642,7 +642,7 @@ public class CMyString {
         if (_sContent == null) {
             return "";
         }
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         int nLen = srcBuff.length;
         if (nLen == 0) {
             return "";
@@ -689,7 +689,7 @@ public class CMyString {
         if (_sContent == null) {
             return "";
         }
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         int nLen = srcBuff.length;
         if (nLen == 0) {
             return "";
@@ -731,7 +731,7 @@ public class CMyString {
         if (_sContent == null) {
             return "";
         }
-        char srcBuff[] = _sContent.toCharArray();
+        char[] srcBuff = _sContent.toCharArray();
         int nLen = srcBuff.length;
         if (nLen == 0) {
             return "";
@@ -833,7 +833,7 @@ public class CMyString {
             return _string;
         }
         int nMaxLen = (_maxLength - nExtLen) + 1;
-        char srcBuff[] = _string.toCharArray();
+        char[] srcBuff = _string.toCharArray();
         int nLen = srcBuff.length;
         StringBuilder dstBuff = new StringBuilder(nLen + 2);
         int nGet = 0;
@@ -885,7 +885,7 @@ public class CMyString {
         if (_string == null) {
             return null;
         }
-        char srcBuff[] = _string.toCharArray();
+        char[] srcBuff = _string.toCharArray();
         int nLen = srcBuff.length;
         StringBuilder dstBuff = new StringBuilder(nLen);
         for (int i = 0; i < nLen; i++) {
@@ -902,7 +902,7 @@ public class CMyString {
         if (_string == null) {
             return 0;
         }
-        char srcBuff[] = _string.toCharArray();
+        char[] srcBuff = _string.toCharArray();
         int nGet = 0;
         for (int i = 0; i < srcBuff.length; i++) {
             char aChar = srcBuff[i];
@@ -937,7 +937,7 @@ public class CMyString {
         if (nSize == 0) {
             return new String[0];
         }
-        String str[] = new String[nSize];
+        String[] str = new String[nSize];
         for (int i = 0; stTemp.hasMoreElements(); i++) {
             str[i] = stTemp.nextToken();
         }
@@ -945,7 +945,7 @@ public class CMyString {
         return str;
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             split("5,dfsfda,fdaffasf", ",");
             split("", ",");
@@ -992,14 +992,14 @@ public class CMyString {
         System.out.println("Integer.toString(16)=" + Integer.toString(10, 16));
         try {
             String sValue = "\u4F60";
-            byte b[] = getUTF8Bytes(sValue);
+            byte[] b = getUTF8Bytes(sValue);
             System.out.println("UTF8Bytes=" + byteToHexString(b));
             System.out.println("UTF8   -->" + byteToHexString(sValue.getBytes("UTF8")));
             System.out.println("default-->" + byteToHexString(sValue.getBytes()));
             System.out.println("gb2312 -->" + byteToHexString(sValue.getBytes("gb2312")));
             System.out.println("GBK    -->" + byteToHexString(sValue.getBytes("GBK")));
             System.out.println("ISO8859-->" + byteToHexString(sValue.getBytes("ISO-8859-1")));
-            char c[] = new char[sValue.length()];
+            char[] c = new char[sValue.length()];
             sValue.getChars(0, sValue.length(), c, 0);
             sValue = getUTF8String(b, 0, b.length);
             System.out.println("UTF8String=" + sValue);

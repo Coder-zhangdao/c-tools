@@ -183,7 +183,7 @@ public class HtmlDocument {
         FileUtils.write(new File(_sFilePathName), strDoc, Charset.defaultCharset());
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         HtmlDocument htmlDoc = new HtmlDocument();
         HtmlElement element;
         List elements;

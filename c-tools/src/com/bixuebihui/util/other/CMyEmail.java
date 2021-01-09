@@ -1,8 +1,3 @@
-// Decompiled by DJ v3.8.8.85 Copyright 2005 Atanas Neshkov  Date: 2006-1-26 15:56:54
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3)
-// Source File Name:   CMyEmail.java
-
 package com.bixuebihui.util.other;
 
 import java.io.*;
@@ -12,7 +7,26 @@ import java.util.Date;
 import java.util.StringTokenizer;
 
 
+/**
+ * @author xwx
+ */
 public class CMyEmail {
+    private static char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray();
+    private static byte[] codes;
+    private String sUsername;
+    private String sPassword;
+    private String sSmtpServer;
+    private String sFrom;
+    private String sReplyTo;
+    private String sTo;
+    private String sCc;
+    private String sBcc;
+    private String sSubject;
+    private String sBody;
+    private String sLogs;
+    private String sAttachFilename;
+    private int iMailFormat;
+
 
     public CMyEmail() {
         sUsername = "";
@@ -87,7 +101,7 @@ public class CMyEmail {
         iMailFormat = mailFormat;
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             CMyEmail sm = new CMyEmail();
             sm.setSMTPServer("localhost");
@@ -144,8 +158,8 @@ public class CMyEmail {
         }
     }
 
-    private char[] encodeBase64(byte data[]) {
-        char out[] = new char[((data.length + 2) / 3) * 4];
+    private char[] encodeBase64(byte[] data) {
+        char[] out = new char[((data.length + 2) / 3) * 4];
         int i = 0;
         for (int index = 0; i < data.length; index += 4) {
             boolean quad = false;
@@ -186,21 +200,7 @@ public class CMyEmail {
         }
     }
 
-    private String sUsername;
-    private String sPassword;
-    private String sSmtpServer;
-    private String sFrom;
-    private String sReplyTo;
-    private String sTo;
-    private String sCc;
-    private String sBcc;
-    private String sSubject;
-    private String sBody;
-    private String sLogs;
-    private String sAttachFilename;
-    private int iMailFormat;
-    private static char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray();
-    private static byte codes[];
+
 
     public boolean send() throws CMyException {
         boolean bStatus;
@@ -278,7 +278,7 @@ public class CMyEmail {
                             DataInputStream dis = new DataInputStream(fis);
                         ){
                             int len = (int) attachFile.length();
-                            byte buf[] = new byte[len];
+                            byte[] buf = new byte[len];
                             dis.readFully(buf);
                             sendBuffer(out, new String(encodeBase64(buf)));
                         } catch (IOException e) {
@@ -304,7 +304,7 @@ public class CMyEmail {
                             DataInputStream dis = new DataInputStream(fis);
                         ){
                             int len = (int) attachFile.length();
-                            byte buf[] = new byte[len];
+                            byte[] buf = new byte[len];
                             dis.readFully(buf);
                             sendBuffer(out, new String(encodeBase64(buf)));
                             //throw new CMyException(0, "\u8BFB\u53D6\u9644\u4EF6\u6587\u4EF6\u65F6\u53D1\u751F\u9519\u8BEF", e);

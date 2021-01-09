@@ -7,7 +7,7 @@ import org.jmesa.view.html.HtmlSnippets;
 /**
  * @author Jeff Johnston
  */
-public class SimpleView  extends AbstractHtmlView {
+public class SimpleView extends AbstractHtmlView {
 
     @Override
     public Object render() {

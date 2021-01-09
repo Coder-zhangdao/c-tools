@@ -76,7 +76,7 @@ public class SMTPMXLookup {
         while (en.hasMore()) {
             String mailhost;
             String x = (String) en.next();
-            String f[] = x.split(" ");
+            String[] f = x.split(" ");
             //  THE fix *************
             if (f.length == 1) {
                 mailhost = f[0];

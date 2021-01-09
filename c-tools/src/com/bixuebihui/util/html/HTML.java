@@ -14,6 +14,10 @@ import java.io.Serializable;
 import java.util.Hashtable;
 
 public class HTML {
+    public static final String NULL_ATTRIBUTE_VALUE = "#DEFAULT";
+    private static final Hashtable tagHashtable;
+    private static final Hashtable attHashtable;
+
     static {
         tagHashtable = new Hashtable(73);
         for (int i = 0; i < Tag.allTags.length; i++) {
@@ -36,7 +40,7 @@ public class HTML {
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         Tag tag = getTag("TR");
         if (tag == null) {
             System.out.println("Tag not found!");
@@ -50,7 +54,7 @@ public class HTML {
     }
 
     public static Tag[] getAllTags() {
-        Tag tags[] = new Tag[Tag.allTags.length];
+        Tag[] tags = new Tag[Tag.allTags.length];
         System.arraycopy(Tag.allTags, 0, tags, 0, Tag.allTags.length);
         return tags;
     }
@@ -66,7 +70,7 @@ public class HTML {
     }
 
     public static Attribute[] getAllAttributeKeys() {
-        Attribute attributes[] = new Attribute[Attribute.allAttributes.length];
+        Attribute[] attributes = new Attribute[Attribute.allAttributes.length];
         System.arraycopy(Attribute.allAttributes, 0, attributes, 0, Attribute.allAttributes.length);
         return attributes;
     }
@@ -160,7 +164,7 @@ public class HTML {
         public static final Attribute ENDTAG;
         public static final Attribute COMMENT;
         static final Attribute MEDIA;
-        static final Attribute allAttributes[];
+        static final Attribute[] allAttributes;
 
         static {
             SIZE = new Attribute("size");
@@ -302,9 +306,7 @@ public class HTML {
         }
     }
 
-    private static final Hashtable tagHashtable;
-    public static final String NULL_ATTRIBUTE_VALUE = "#DEFAULT";
-    private static final Hashtable attHashtable;
+
 
     public static class Tag {
 
@@ -416,7 +418,7 @@ public class HTML {
         public static final Tag IMPLIED = new Tag("p-implied");
         public static final Tag CONTENT = new Tag("content");
         public static final Tag COMMENT = new Tag("comment");
-        static final Tag allTags[];
+        static final Tag[] allTags;
 
         static {
             A = new Tag("a");

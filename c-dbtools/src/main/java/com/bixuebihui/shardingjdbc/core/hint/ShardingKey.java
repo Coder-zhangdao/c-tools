@@ -26,7 +26,6 @@ import java.util.Objects;
  * @author zhangliang
  * @version $Id: $Id
  */
-// TODO move to a suitable package
 public final class ShardingKey {
 
     /**

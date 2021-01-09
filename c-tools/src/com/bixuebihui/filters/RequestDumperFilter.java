@@ -108,7 +108,7 @@ public final class RequestDumperFilter implements Filter {
 		while (names.hasMoreElements()) {
 			String name = (String) names.nextElement();
 			writer.print("         parameter=" + name + "=");
-			String values[] = request.getParameterValues(name);
+			String[] values = request.getParameterValues(name);
 			for (int i = 0; i < values.length; i++) {
 				if (i > 0) {
                     writer.print(", ");
@@ -130,7 +130,7 @@ public final class RequestDumperFilter implements Filter {
 			writer.println("---------------------------------------------");
 			HttpServletRequest req = (HttpServletRequest) request;
 			writer.println("       contextPath=" + req.getContextPath());
-			Cookie cookies[] = req.getCookies();
+			Cookie[] cookies = req.getCookies();
 			if (cookies == null) {
                 cookies = new Cookie[0];
             }

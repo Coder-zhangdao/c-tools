@@ -66,8 +66,6 @@ public class CMyStringEx {
                 0xD4D1,
                 0xD7FA
         };
-        //new String(flag.getBytes("GB2312"), "GB2312").getBytes();
-        //System.out.println("new_text length:="+new_text.length);
         for (int k = 0; k < new_text.length - 1; k++) {
 
             int from = new_text[k];
@@ -79,20 +77,10 @@ public class CMyStringEx {
                 String zi = new String(new byte[]{high, low}, "GB2312");
                 String yin = String.valueOf(flag_py.charAt(k));
                 if (zi.length() == 1) {
-
-                    // System.out.println(zi+" "+yin+" "
-                    //		  +  Integer.toHexString(high).substring(6)+" "
-                    //		  +  Integer.toHexString(low).substring(6));
-                    // if(!ht.containsKey(zi)){
                     ht.put(zi, yin);
-                    //}else
-                    // {
-                    //	  System.out.println("字已存在:"+zi+ht.get(zi));
-                    // }
                 }
             }
         }
-        //  return ht;
 
     }
 
@@ -195,7 +183,7 @@ public class CMyStringEx {
         return sb.toString();
     }
 
-    public static void main(String args[]) throws UnsupportedEncodingException {
+    public static void main(String[] args) throws UnsupportedEncodingException {
 
 
         //System.out.println( unicodeFlag());

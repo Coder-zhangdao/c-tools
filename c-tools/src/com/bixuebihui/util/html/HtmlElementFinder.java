@@ -1,12 +1,5 @@
-// Decompiled by DJ v3.8.8.85 Copyright 2005 Atanas Neshkov  Date: 2006-1-26 15:57:00
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3)
-// Source File Name:   HtmlElementFinder.java
-
 package com.bixuebihui.util.html;
 
-// Referenced classes of package com.bixuebihui.util.html:
-//            HtmlElement
 
 import org.apache.commons.io.FileUtils;
 
@@ -28,22 +21,24 @@ public class HtmlElementFinder {
         setHtmlSrc(_src);
     }
 
-    public HtmlElementFinder(char _src[]) {
+    private char[] srcBuffer;
+
+    public HtmlElementFinder(char[] _src) {
         srcBuffer = null;
         nCurrPos = 0;
         conBuffer = null;
         setHtmlSrc(_src);
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             String sFileName = "D:\\test.html";
             String strSrc = FileUtils.readFileToString(new File(sFileName), Charset.defaultCharset());
             System.out
                     .println("\n\n*****************  Result *********************");
-            String arTagName[] = new String[7];
+            String[] arTagName = new String[7];
             arTagName[0] = "TR";
-            String arTagSrcName[] = new String[7];
+            String[] arTagSrcName = new String[7];
             arTagSrcName[0] = "SRC";
             arTagSrcName[1] = "BACKGROUND";
             arTagSrcName[2] = "BACKGROUND";
@@ -87,12 +82,6 @@ public class HtmlElementFinder {
         } catch (Exception ex) {
             ex.printStackTrace(System.out);
         }
-    }
-
-    public HtmlElementFinder setHtmlSrc(char _src[]) {
-        srcBuffer = _src;
-        conBuffer = new StringBuffer();
-        return this;
     }
 
     public HtmlElementFinder setHtmlSrc(String _src) {
@@ -167,7 +156,11 @@ public class HtmlElementFinder {
         return this;
     }
 
-    private char srcBuffer[];
+    public HtmlElementFinder setHtmlSrc(char[] _src) {
+        srcBuffer = _src;
+        conBuffer = new StringBuffer();
+        return this;
+    }
 
     private int nCurrPos;
 

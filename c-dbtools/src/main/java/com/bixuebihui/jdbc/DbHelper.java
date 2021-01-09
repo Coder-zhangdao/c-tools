@@ -498,7 +498,7 @@ public class DbHelper implements IDbHelper {
 		int iColumnNumber = rsmdQuery.getColumnCount();
 
 		while (rs.next()) {
-			Map<String, Object> mapColumn = new HashMap<>();
+			Map<String, Object> mapColumn = new HashMap<>(32);
 			for (int i = 1; i <= iColumnNumber; i++) {
 
 				String colTypeName = rsmdQuery.getColumnTypeName(i).toUpperCase();
@@ -564,7 +564,8 @@ public class DbHelper implements IDbHelper {
 						if (rs.getTimestamp(i) != null) {
 							mapColumn.put(colName, rs.getTimestamp(i));
 						} else {
-							Timestamp d1970 = new Timestamp(0); // 1970 year
+							// 1970 year
+							Timestamp d1970 = new Timestamp(0);
 							mapColumn.put(colName, d1970);
 						}
 						break;

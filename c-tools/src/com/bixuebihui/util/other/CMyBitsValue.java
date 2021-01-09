@@ -10,6 +10,8 @@ import java.math.BigInteger;
 public class CMyBitsValue
         implements Cloneable {
 
+    protected long value;
+
     public CMyBitsValue() {
         value = 0L;
         value = 0L;
@@ -28,15 +30,6 @@ public class CMyBitsValue
     public CMyBitsValue(CMyBitsValue _myBitsValue) {
         value = 0L;
         copy(_myBitsValue);
-    }
-
-    public void copy(CMyBitsValue _myBitsValue) {
-        setValue(_myBitsValue.getValue());
-    }
-
-    @Override
-    public Object clone() {
-        return new CMyBitsValue(this);
     }
 
     public static boolean getBitOfInt(int _value, int _index) {
@@ -76,93 +69,7 @@ public class CMyBitsValue
         }
     }
 
-    public long getValue() {
-        return value;
-    }
-
-    public int getValueAsInt() {
-        return (int) value;
-    }
-
-    public void setValue(long _nValue) {
-        value = _nValue;
-    }
-
-    public void setValue(String _sValue) {
-        if (_sValue == null) {
-            return;
-        }
-        BigInteger bigInt = BigInteger.valueOf(0L);
-        int nLen = _sValue.length();
-        int nBitPos = nLen - 1;
-        for (int i = 0; i < nLen; i++) {
-            if (_sValue.charAt(i) == '1') {
-                bigInt = bigInt.setBit(nBitPos);
-            }
-            nBitPos--;
-        }
-
-        value = bigInt.longValue();
-    }
-
-    public boolean getBit(int _index) {
-        return getBit(value, _index);
-    }
-
-    public CMyBitsValue setBit(int _index, boolean _bValue) {
-        value = setBit(value, _index, _bValue);
-        return this;
-    }
-
-    public void and(CMyBitsValue _myBitsValue) {
-        if (_myBitsValue == null) {
-        } else {
-            and(_myBitsValue.getValue());
-        }
-    }
-
-    public void and(long _value) {
-        BigInteger bigInt = BigInteger.valueOf(value);
-        bigInt = bigInt.and(BigInteger.valueOf(_value));
-        value = bigInt.longValue();
-    }
-
-    public void or(CMyBitsValue _myBitsValue) {
-        if (_myBitsValue == null) {
-        } else {
-            or(_myBitsValue.getValue());
-        }
-    }
-
-    public void or(long _value) {
-        BigInteger bigInt = BigInteger.valueOf(value);
-        bigInt = bigInt.or(BigInteger.valueOf(_value));
-        value = bigInt.longValue();
-    }
-
-    public int getRealLength() {
-        return BigInteger.valueOf(value).bitLength();
-    }
-
-    @Override
-    public String toString() {
-        return toString(getRealLength());
-    }
-
-    public String toString(int _nLength) {
-        StringBuffer strBuffer = new StringBuffer(_nLength);
-        String sValue = Long.toBinaryString(value);
-        if (_nLength > getRealLength()) {
-            sValue = CMyString.expandStr(sValue, _nLength, '0', true);
-        }
-        for (int i = _nLength - 1; i > -1; i--) {
-            strBuffer.append(sValue.charAt(i));
-        }
-
-        return strBuffer.toString();
-    }
-
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         CMyBitsValue myBitsValue = new CMyBitsValue(0L);
         System.out.println(myBitsValue.toString(10));
         myBitsValue.setBit(31, true);
@@ -233,5 +140,98 @@ public class CMyBitsValue
         System.out.println("and = " + myBitsValue.toString());
     }
 
-    protected long value;
+    public void copy(CMyBitsValue _myBitsValue) {
+        setValue(_myBitsValue.getValue());
+    }
+
+    @Override
+    public Object clone() {
+        return new CMyBitsValue(this);
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public void setValue(long _nValue) {
+        value = _nValue;
+    }
+
+    public void setValue(String _sValue) {
+        if (_sValue == null) {
+            return;
+        }
+        BigInteger bigInt = BigInteger.valueOf(0L);
+        int nLen = _sValue.length();
+        int nBitPos = nLen - 1;
+        for (int i = 0; i < nLen; i++) {
+            if (_sValue.charAt(i) == '1') {
+                bigInt = bigInt.setBit(nBitPos);
+            }
+            nBitPos--;
+        }
+
+        value = bigInt.longValue();
+    }
+
+    public int getValueAsInt() {
+        return (int) value;
+    }
+
+    public boolean getBit(int _index) {
+        return getBit(value, _index);
+    }
+
+    public CMyBitsValue setBit(int _index, boolean _bValue) {
+        value = setBit(value, _index, _bValue);
+        return this;
+    }
+
+    public void and(CMyBitsValue _myBitsValue) {
+        if (_myBitsValue == null) {
+        } else {
+            and(_myBitsValue.getValue());
+        }
+    }
+
+    public void and(long _value) {
+        BigInteger bigInt = BigInteger.valueOf(value);
+        bigInt = bigInt.and(BigInteger.valueOf(_value));
+        value = bigInt.longValue();
+    }
+
+    public void or(CMyBitsValue _myBitsValue) {
+        if (_myBitsValue == null) {
+        } else {
+            or(_myBitsValue.getValue());
+        }
+    }
+
+    public void or(long _value) {
+        BigInteger bigInt = BigInteger.valueOf(value);
+        bigInt = bigInt.or(BigInteger.valueOf(_value));
+        value = bigInt.longValue();
+    }
+
+    public int getRealLength() {
+        return BigInteger.valueOf(value).bitLength();
+    }
+
+    @Override
+    public String toString() {
+        return toString(getRealLength());
+    }
+
+    public String toString(int _nLength) {
+        StringBuffer strBuffer = new StringBuffer(_nLength);
+        String sValue = Long.toBinaryString(value);
+        if (_nLength > getRealLength()) {
+            sValue = CMyString.expandStr(sValue, _nLength, '0', true);
+        }
+        for (int i = _nLength - 1; i > -1; i--) {
+            strBuffer.append(sValue.charAt(i));
+        }
+
+        return strBuffer.toString();
+    }
 }

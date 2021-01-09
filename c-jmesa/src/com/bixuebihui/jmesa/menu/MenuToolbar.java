@@ -5,9 +5,9 @@ import org.jmesa.view.html.toolbar.SimpleToolbar;
 /**
  * Created by super on 14-3-20.
  */
-public class MenuToolbar extends SimpleToolbar{
+public class MenuToolbar extends SimpleToolbar {
 
-        @Override
+    @Override
     public String render() {
 //        super.render();
 //        if (enableSeparators) {

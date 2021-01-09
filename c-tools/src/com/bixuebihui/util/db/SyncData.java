@@ -33,8 +33,8 @@ public class SyncData {
     /**
      * 用表名和字段名形成select语句
      *
-     * @param tableName 表名
-     * @param fields  字段名
+     * @param tableName   表名
+     * @param fields      字段名
      * @param whereClause 条件语句
      * @return 生成select用的sql语句
      */
@@ -55,8 +55,8 @@ public class SyncData {
     /**
      * 用表名和字段名形成update语句
      *
-     * @param tableName 表名
-     * @param fields 字段名
+     * @param tableName   表名
+     * @param fields      字段名
      * @param whereClause 条件语句
      * @return 生成update用的sql语句
      */
@@ -100,10 +100,10 @@ public class SyncData {
     /**
      * 同步两个库中同一个表的数据
      *
-     * @param tableName 表名
-     * @param fields  字段名
+     * @param tableName   表名
+     * @param fields      字段名
      * @param whereClause 条件语句
-     * @param primaryKey 主键
+     * @param primaryKey  主键
      * @return 同步的记录数
      * @throws SQLException 数据库异常
      */

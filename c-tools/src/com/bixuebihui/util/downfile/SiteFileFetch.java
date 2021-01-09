@@ -158,9 +158,9 @@ public class SiteFileFetch extends Thread {
     }
 
     SiteInfoBean siteInfoBean;
-    long nStartPos[];
-    long nEndPos[];
-    FileSplitterFetch fileSplitterFetch[];
+    long[] nStartPos;
+    long[] nEndPos;
+    FileSplitterFetch[] fileSplitterFetch;
     long nFileLength;
     boolean bFirst;
     boolean bStop;

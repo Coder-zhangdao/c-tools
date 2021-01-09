@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -111,7 +112,7 @@ public class ConnectionManager {
                     log.error("bad format " + CONFIG_FILE + " file, expected Alias element but not found");
                 }
             }
-        } catch (IllegalAccessException | ClassNotFoundException | InstantiationException e) {
+        } catch (IllegalAccessException | ClassNotFoundException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             log.error(e);
         }
         return cpm;
@@ -218,7 +219,7 @@ public class ConnectionManager {
      */
     public static synchronized void addAlias(DatabaseConfig cfg)
             throws ClassNotFoundException, InstantiationException,
-            IllegalAccessException, SQLException {
+            IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
         if (cpm == null) {
             cpm = new ConnectionPoolManager(cfg.getSleepIntervalInSeconds());
         }

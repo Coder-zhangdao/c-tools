@@ -86,7 +86,7 @@ public class CMyErrors {
         return buff.toString();
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         CMyErrors errors = new CMyErrors();
         CMyException ex = new CMyException(1, "My Exception");
         errors.add("This is an error message!");

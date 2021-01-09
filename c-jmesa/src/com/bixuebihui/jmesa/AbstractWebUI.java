@@ -1,9 +1,9 @@
 package com.bixuebihui.jmesa;
 
 
+import com.bixuebihui.jdbc.ClobString;
 import com.bixuebihui.jdbc.IBaseListService;
 import com.bixuebihui.jdbc.SqlFilter;
-import com.bixuebihui.jdbc.ClobString;
 import com.bixuebihui.jdbc.SqlSort;
 import com.bixuebihui.jsp.TimeSpan;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -22,7 +22,10 @@ import org.jmesa.view.component.Row;
 import org.jmesa.view.component.Table;
 import org.jmesa.view.editor.CellEditor;
 import org.jmesa.view.html.component.HtmlColumn;
-import org.jmesa.worksheet.*;
+import org.jmesa.worksheet.UniqueProperty;
+import org.jmesa.worksheet.Worksheet;
+import org.jmesa.worksheet.WorksheetColumn;
+import org.jmesa.worksheet.WorksheetUtils;
 import org.jmesa.worksheet.editor.CheckboxWorksheetEditor;
 import org.jmesa.worksheet.editor.WorksheetCheckboxHeaderEditor;
 
@@ -40,8 +43,12 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
     public static final String VAR_NAME = "row";
     private static final String TABLE_I18N = "tables";
-
-    // The unique table id.
+    public static final String CHECK_BOX_ID = "chkbox";
+    protected static ConvertUtilsBean converter = new ConvertUtilsBean();
+    protected static Log log = LogFactory.getLog(BasicWebUI.class);
+    /**
+     * The unique table id.
+      */
     protected String id;
 
     protected String successView;
@@ -51,12 +58,72 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
     protected String actionParam = "ac";
     protected String editableParam = "editable";
     protected Map<String, String> colsTemplate;
-    protected static ConvertUtilsBean converter = new ConvertUtilsBean();
-    protected static Log log = LogFactory.getLog(BasicWebUI.class);
+    protected String tableCaption = null;
+
+    public AbstractWebUI() {
+    }
+
+    /**
+     * A very custom way to filter the items. The PresidentFilter acts as a
+     * command for the Hibernate criteria object. There are probably many ways
+     * to do this, but this is the most flexible way I have found. The point is
+     * you need to somehow take the Limit information and filter the rows.
+     *
+     * @param limit The Limit to use.
+     */
+    public static SqlFilter getFilter(Limit limit) {
+        SqlFilter sqlFilter = new SqlFilter();
+        FilterSet filterSet = limit.getFilterSet();
+        java.util.Collection<Filter> filters = filterSet.getFilters();
+
+        for (Filter filter : filters) {
+            String property = filter.getProperty();
+            String value = filter.getValue();
+            sqlFilter.addFilter(property, value);
+        }
+        return sqlFilter;
+    }
+
+    public static SqlFilter getFilter(Limit limit, String tableAlias) throws ParseException {
+        SqlFilter sqlFilter = new SqlFilter();
+        FilterSet filterSet = limit.getFilterSet();
+        java.util.Collection<Filter> filters = filterSet.getFilters();
+
+        for (Filter filter : filters) {
+            String property = filter.getProperty();
+            String value = filter.getValue();
+            String prop = tableAlias + "." + property;
+            if (TimeSpan.isTimeSpan(value)) {
+                TimeSpan ts = TimeSpan.build(value);
+                sqlFilter.addFilter(prop, ts);
+            } else {
+                sqlFilter.addFilter(prop, value);
+            }
+        }
+        return sqlFilter;
+    }
+
+    /**
+     * A very custom way to sort the items. The PresidentSort acts as a command
+     * for the Hibernate criteria object. There are probably many ways to do
+     * this, but this is the most flexible way I have found. The point is you
+     * need to somehow take the Limit information and sort the rows.
+     *
+     * @param limit The Limit to use.
+     */
+    public static SqlSort getSort(Limit limit) {
+        SqlSort sqlSort = new SqlSort();
+        SortSet sortSet = limit.getSortSet();
+        java.util.Collection<Sort> sorts = sortSet.getSorts();
+        for (Sort sort : sorts) {
+            String property = sort.getProperty();
+            String order = sort.getOrder().toParam();
+            sqlSort.addSort(property, order);
+        }
+        return sqlSort;
+    }
 
     protected abstract String[] getColNames();
-
-    protected String tableCaption = null;
 
     public void setTitles(org.jmesa.view.component.Table table,
                           String tableName, String[] colNames, boolean skipFirst) {
@@ -84,9 +151,6 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
     public void setService(IBaseListService<T, V> service) {
         this.service = service;
-    }
-
-    public AbstractWebUI() {
     }
 
     protected abstract V[] getKeys(HttpServletRequest request);
@@ -149,7 +213,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             // anything.
             return null;
         } else {
-            HtmlColumn chkbox = (HtmlColumn) row.getColumn("chkbox");
+            HtmlColumn chkbox = (HtmlColumn) row.getColumn(CHECK_BOX_ID);
             chkbox.setHeaderEditor(new WorksheetCheckboxHeaderEditor());
 
             chkbox.setCellEditor((item, property, rowcount) -> {
@@ -181,7 +245,6 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         tableModel.render();
     }
 
-
     public String getTableCaption(String tableName) {
         if (tableCaption == null) {
             ResourceBundle bundle = ResourceBundle.getBundle(TABLE_I18N);
@@ -201,7 +264,6 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
     }
 
     protected abstract String getUniquePropertyName();
-
 
     /**
      * user must override this method for use like below:
@@ -227,66 +289,6 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             // request for the JSP.
         }
         return mv;
-    }
-
-    /**
-     * A very custom way to filter the items. The PresidentFilter acts as a
-     * command for the Hibernate criteria object. There are probably many ways
-     * to do this, but this is the most flexible way I have found. The point is
-     * you need to somehow take the Limit information and filter the rows.
-     *
-     * @param limit The Limit to use.
-     */
-    public static SqlFilter getFilter(Limit limit) {
-        SqlFilter sqlFilter = new SqlFilter();
-        FilterSet filterSet = limit.getFilterSet();
-        java.util.Collection<Filter> filters = filterSet.getFilters();
-
-        for (Filter filter : filters) {
-            String property = filter.getProperty();
-            String value = filter.getValue();
-            sqlFilter.addFilter(property, value);
-        }
-        return sqlFilter;
-    }
-
-    public static SqlFilter getFilter(Limit limit, String tableAlias) throws ParseException {
-        SqlFilter sqlFilter = new SqlFilter();
-        FilterSet filterSet = limit.getFilterSet();
-        java.util.Collection<Filter> filters = filterSet.getFilters();
-
-        for (Filter filter : filters) {
-            String property = filter.getProperty();
-            String value = filter.getValue();
-            String prop = tableAlias + "." + property;
-            if(TimeSpan.isTimeSpan(value)) {
-                TimeSpan ts = TimeSpan.build(value);
-                sqlFilter.addFilter(prop, ts);
-            }else {
-                sqlFilter.addFilter(prop, value);
-            }
-        }
-        return sqlFilter;
-    }
-
-    /**
-     * A very custom way to sort the items. The PresidentSort acts as a command
-     * for the Hibernate criteria object. There are probably many ways to do
-     * this, but this is the most flexible way I have found. The point is you
-     * need to somehow take the Limit information and sort the rows.
-     *
-     * @param limit The Limit to use.
-     */
-    public static SqlSort getSort(Limit limit) {
-        SqlSort sqlSort = new SqlSort();
-        SortSet sortSet = limit.getSortSet();
-        java.util.Collection<Sort> sorts = sortSet.getSorts();
-        for (Sort sort : sorts) {
-            String property = sort.getProperty();
-            String order = sort.getOrder().toParam();
-            sqlSort.addSort(property, order);
-        }
-        return sqlSort;
     }
 
     public void setSuccessView(String successView) {
@@ -436,7 +438,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         if (request == null) {
             return Collections.emptyMap();
         }
-        Map<String, Object> context = new HashMap<String, Object>();
+        Map<String, Object> context = new HashMap<>(16);
         context.putAll(request.getParameterMap());
         Enumeration<?> en = request.getAttributeNames();
         while (en.hasMoreElements()) {

@@ -7,7 +7,7 @@ import org.jmesa.view.html.HtmlSnippets;
 /**
  * @author Jeff Johnston
  */
-public class CustomView  extends AbstractHtmlView {
+public class CustomView extends AbstractHtmlView {
 
     @Override
     public Object render() {

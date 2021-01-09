@@ -24,36 +24,36 @@ package com.bixuebihui.tablegen;
  * Released under GPL. See LICENSE for full details.
  */
 
-import com.bixuebihui.BeanFactory;
 import com.bixuebihui.algorithm.LRULinkedHashMap;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.cache.DictionaryItem;
 import com.bixuebihui.datasource.BitmechanicDataSource;
 import com.bixuebihui.dbcon.DatabaseConfig;
+import com.bixuebihui.generated.tablegen.business.T_metatableManager;
+import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
+import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 import com.bixuebihui.jdbc.*;
-import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;
 import com.bixuebihui.tablegen.dbinfo.ProcedureGen;
 import com.bixuebihui.tablegen.dbinfo.ProcedureInfo;
 import com.bixuebihui.tablegen.dbinfo.ProcedureParameterInfo;
 import com.bixuebihui.tablegen.dbinfo.ProcedureUtils;
 import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import com.bixuebihui.util.other.CMyFile;
-import com.bixuebihui.generated.tablegen.business.T_metatableManager;
-import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
-import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.CollectionUtils;
 
 import javax.validation.constraints.NotNull;
 import java.io.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 import static com.bixuebihui.tablegen.NameUtils.columnNameToFieldName;
@@ -106,7 +106,10 @@ public class TableGen implements DiffHandler {
 	List<String> pojo_state_interface_list;
 	List<String> pojo_uuid_interface_list;
 	List<String> pojo_modifydate_interface_list;
-	// names of tables to generate for. If null we do all.
+
+	/**
+	 * names of tables to generate for. If null we do all.
+ 	 */
 	Map<String, String> tablesList;
 	Map<String, String> excludeTablesList;
 	/**

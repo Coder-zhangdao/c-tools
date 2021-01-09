@@ -64,7 +64,8 @@ public class DatabaseTools extends BaseOperator
      * @return Sequence获得唯一值
      */
     public int getNextSequence(String seq_name) {
-        String seqsql = "select "+seq_name+".NEXTVAL from DUAL";			//CURRVAL
+        //CURRVAL
+        String seqsql = "select "+seq_name+".NEXTVAL from DUAL";
         try {
             getResultSet(seqsql);
             if(rst.next()) {

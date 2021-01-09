@@ -1,16 +1,7 @@
 package com.bixuebihui.jmesa;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.ServletRequestAttributeEvent;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
+import com.bixuebihui.jdbc.IBaseListService;
+import com.bixuebihui.util.ParameterUtils;
 import org.jmesa.core.preference.Preferences;
 import org.jmesa.limit.Limit;
 import org.jmesa.limit.LimitFactory;
@@ -21,149 +12,144 @@ import org.jmesa.view.component.Column;
 import org.jmesa.view.component.Row;
 import org.jmesa.view.component.Table;
 
-import com.bixuebihui.jdbc.IBaseListService;
-import com.bixuebihui.util.ParameterUtils;
-import org.springframework.web.bind.ServletRequestUtils;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author xwx
  */
 public class BasicWebUI extends AbstractWebUI<Object, Long> {
 
-	private String uniquePropertyName;
+    /**
+     * @see json query, use LimitFactoryJsonImpl
+     */
+    public static String JSON_QUERY = "JSON_QUERY";
+    protected int maxRows = 0;
+    protected int[] maxRowsIncrements = new int[]{maxRows};
+    private String uniquePropertyName;
+    /**
+     * @see SimpleView  Only simple table, not toolbar and etc
+     */
+    private boolean useSimpleView = false;
+    /**
+     * 是否使用日期区间控件，如使用则每个控件增加两个参数：起始和截止日期，与coreSql里的参数相对应
+     * 参数需按顺序放在最后
+     * // every dateRange increase the params by 2
+     */
+    private int useDateRange = 0;
+    /**
+     * comma separated string
+     */
+    private String colsList;
 
-	/**
-	 * @see  json query, use LimitFactoryJsonImpl
-	 */
-	public static String JSON_QUERY = "JSON_QUERY";
-	/**
-	 * @see   SimpleView  Only simple table, not toolbar and etc
-	 */
-	private boolean useSimpleView = false;
+    @Override
+    protected String getUniquePropertyName() {
+        return uniquePropertyName;
+    }
 
+    public void setUniquePropertyName(String uniquePropertyName) {
+        this.uniquePropertyName = uniquePropertyName;
+    }
 
-	/**
-	 * 是否使用日期区间控件，如使用则每个控件增加两个参数：起始和截止日期，与coreSql里的参数相对应
-	 * 参数需按顺序放在最后
-	 * // every dateRange increase the params by 2
-	 */
-	private int useDateRange =0;
+    @Override
+    protected String render(HttpServletRequest request,
+                            HttpServletResponse response) {
 
-	protected int maxRows=0;
-	protected int[] maxRowsIncrements=new int[]{maxRows};
+        TableModel tableFacade = new TableModel(id, request, response);
 
-	@Override
-	protected String getUniquePropertyName() {
-		return uniquePropertyName;
-	}
+        Object json = request.getAttribute(JSON_QUERY);
+        if (json != null) {
+            LimitFactory limitFactory = json instanceof Map ? new LimitFactory(id, (Map<String, Object>) json) :
+                    new LimitFactory(id, json.toString());
+            Limit limit = limitFactory.createLimit();
+            tableFacade.setLimit(limit);
+        }
 
-	/**
-	 * comma separated string
- 	 */
-	private String colsList;
+        tableFacade.setExportTypes(ExportTypes.CSV, ExportTypes.EXCEL);
 
-	@Override
-	protected String render(HttpServletRequest request,
-			HttpServletResponse response) {
+        Preferences preferences = null;
+        tableFacade.setPreferences(preferences);
 
-		TableModel tableFacade = new TableModel(id, request, response);
+        if (maxRows > 0) {
+            tableFacade.setMaxRows(maxRows);
+            tableFacade.setMaxRowsIncrements(maxRowsIncrements);
+        }
 
-		Object json = request.getAttribute(JSON_QUERY);
-		if(json!=null){
-			LimitFactory limitFactory = json instanceof Map ? new LimitFactory(id, (Map<String, Object>) json) :
-					  new LimitFactory(id, json.toString());
-			Limit limit = limitFactory.createLimit();
-			tableFacade.setLimit(limit);
-		}
+        // exports to use.
+        String[] colNames = getColNames();
+        Table table = tableFacade.isExporting() ? TableModelUtils.createTable(colNames) : TableModelUtils.createHtmlTable(colNames);
 
-		tableFacade.setExportTypes(ExportTypes.CSV,ExportTypes.EXCEL);
+        tableFacade.setTable(table);
 
-		Preferences preferences = null;
-		tableFacade.setPreferences(preferences);
-
-		if(maxRows>0){
-			tableFacade.setMaxRows(maxRows);
-			tableFacade.setMaxRowsIncrements(maxRowsIncrements);
-		}
-
-		// exports to use.
-		String[] colNames = getColNames();
-		Table table = tableFacade.isExporting()? TableModelUtils.createTable(colNames):TableModelUtils.createHtmlTable(colNames);
-
-		tableFacade.setTable(table);
-
-		setDataAndLimitVariables(tableFacade);
-
-
-        if(isUseSimpleView()) {
-			tableFacade.setView(new SimpleView());
-		}
-
-		this.setTitles(table, id, getColNames(), true);
-		final Row row = table.getRow();
-		row.setUniqueProperty(getUniquePropertyName());
-
-		List<Column> cols = row.getColumns();
-
-		Map<String, Object> context = getContext(request);
-
-		for(Column col : cols){
-			renderCell(col, context);
-		}
+        setDataAndLimitVariables(tableFacade);
 
 
-		if (tableFacade.isExporting()) {
-			 // Will write the export data out to the response.
-			exportRender(tableFacade);
-			// In Spring return null tells the controller not to do anything.
-			return null;
-		} else {
-			return tableFacade.render();
-		}
-	}
+        if (isUseSimpleView()) {
+            tableFacade.setView(new SimpleView());
+        }
+
+        this.setTitles(table, id, getColNames(), true);
+        final Row row = table.getRow();
+        row.setUniqueProperty(getUniquePropertyName());
+
+        List<Column> cols = row.getColumns();
+
+        Map<String, Object> context = getContext(request);
+
+        for (Column col : cols) {
+            renderCell(col, context);
+        }
 
 
-	public String getColsList() {
-		return colsList;
-	}
+        if (tableFacade.isExporting()) {
+            // Will write the export data out to the response.
+            exportRender(tableFacade);
+            // In Spring return null tells the controller not to do anything.
+            return null;
+        } else {
+            return tableFacade.render();
+        }
+    }
 
-	public void setColsList(String colsList) {
-		this.colsList = colsList;
-	}
+    public String getColsList() {
+        return colsList;
+    }
 
-	public void setUniquePropertyName(String uniquePropertyName) {
-		this.uniquePropertyName = uniquePropertyName;
-	}
+    public void setColsList(String colsList) {
+        this.colsList = colsList;
+    }
 
-	public IBaseListService<?, ?> getListService() {
-		return this.service;
-	}
+    public IBaseListService<?, ?> getListService() {
+        return this.service;
+    }
 
-	@Override
-	protected String[] getColNames() {
-		return getColsList().split("\\,");
-	}
+    @Override
+    protected String[] getColNames() {
+        return getColsList().split("\\,");
+    }
 
-	@Override
-	protected Long[] getKeys(HttpServletRequest request) {
-		return ParameterUtils.getArrayLong(request,checkboxName);
-	}
+    @Override
+    protected Long[] getKeys(HttpServletRequest request) {
+        return ParameterUtils.getArrayLong(request, checkboxName);
+    }
 
-	public boolean isUseSimpleView() {
-		return useSimpleView;
-	}
+    public boolean isUseSimpleView() {
+        return useSimpleView;
+    }
 
-	public void setUseSimpleView(boolean useSimpleView) {
-		this.useSimpleView = useSimpleView;
-	}
+    public void setUseSimpleView(boolean useSimpleView) {
+        this.useSimpleView = useSimpleView;
+    }
 
-	public int getUseDateRange() {
-		return useDateRange;
-	}
+    public int getUseDateRange() {
+        return useDateRange;
+    }
 
-	public void setUseDateRange(int useDateRange) {
-		this.useDateRange = useDateRange;
-	}
+    public void setUseDateRange(int useDateRange) {
+        this.useDateRange = useDateRange;
+    }
 
 
 }

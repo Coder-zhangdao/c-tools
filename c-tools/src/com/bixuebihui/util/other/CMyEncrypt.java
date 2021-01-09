@@ -114,15 +114,15 @@ public class CMyEncrypt {
         return strEnc.toUpperCase();
     }
 
-    private void md5Final() {
-        byte bits[] = new byte[8];
-        Encode(bits, count, 8);
-        int index = (int) (count[0] >>> 3) & 0x3f;
-        int padLen = index >= 56 ? 120 - index : 56 - index;
-        md5Update(PADDING, padLen);
-        md5Update(bits, 8);
-        Encode(digest, state, 16);
-    }
+    static final byte[] PADDING = {
+            -128, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0
+    };
 
     public static String RASDecrypt(String _sSrc) {
         String strDec = "";
@@ -143,13 +143,132 @@ public class CMyEncrypt {
         strDec = strDec.toUpperCase();
         return strDec;
     }
+    private long[] state;
+    private long[] count;
+    private byte[] buffer;
 
-    private void md5Transform(byte block[]) {
+    public static long b2iu(byte b) {
+        return b >= 0 ? b : b & 0xff;
+    }
+    private byte[] digest;
+
+    public String getMD5OfStr(String inbuf) {
+        md5Update(inbuf.getBytes(), inbuf.length());
+        md5Final();
+        digestHexStr = "";
+        for (int i = 0; i < 16; i++) {
+            digestHexStr += byteHEX(digest[i]);
+        }
+
+        return digestHexStr;
+    }
+
+    public static String byteHEX(byte ib) {
+        char[] Digit = {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'A', 'B', 'C', 'D', 'E', 'F'
+        };
+        char[] ob = new char[2];
+        ob[0] = Digit[ib >>> 4 & 0xf];
+        ob[1] = Digit[ib & 0xf];
+        String s = new String(ob);
+        return s;
+    }
+
+    public static void main(String[] args) {
+        CMyEncrypt m = new CMyEncrypt();
+        long nMac = MacAddressHelper.getMyMacAsLong();
+        System.out.println("Mac=" + nMac);
+        String ras = "TRSWCM" + String.valueOf(nMac);
+        ras = ras.replace('0', 'x');
+        ras = ras.replace('1', 'y');
+        System.out.println("RAS Encrypt String=" + ras);
+        //CMyEncrypt _tmp = m;
+        ras = RASEncrypt(ras);
+        System.out.println("RAS Encrypt String=" + ras);
+        // CMyEncrypt _tmp1 = m;
+        String sDec = RASDecrypt(ras);
+        sDec = sDec.replace('X', '0');
+        sDec = sDec.replace('Y', '1');
+        System.out.println("RASDecrypt String=" + sDec);
+        ras = "0123456789";
+        //CMyEncrypt _tmp2 = m;
+        ras = RASEncrypt(ras);
+        System.out.println("RAS Encrypt String=" + ras);
+        //CMyEncrypt _tmp3 = m;
+        sDec = RASDecrypt(ras);
+        System.out.println("RASDecrypt String=" + sDec);
+        ras = "0123456789";
+        // CMyEncrypt _tmp4 = m;
+        ras = RASEncrypt(ras);
+        System.out.println("RAS Encrypt String=" + ras);
+        //CMyEncrypt _tmp5 = m;
+        sDec = RASDecrypt(ras);
+        System.out.println("RASDecrypt String=" + sDec);
+        String strSrc = "00-10-A4-7A-7C-0A";
+        // CMyEncrypt _tmp6 = m;
+        String s = setAnotherChar(strSrc);
+        ///CMyEncrypt _tmp7 = m;
+        String s1 = setAnotherChar(s);
+        System.out.println("Encrypt String=" + s);
+        System.out.println("Decrypt String=" + s1);
+        System.out.println(m.getMD5OfStr(strSrc));
+        System.out.println(m.getMD5OfStr("00-10-A4-7A-7C-0A"));
+        System.out.println(m.getMD5OfStr(m.getMD5OfStr("00-10-A4-7A-7C-0A")));
+        System.out.println(m.getMD5OfStr("1234567"));
+    }
+
+    private static double Mult(double x, double p, double m) {
+        double y = 1.0D;
+        try {
+            for (; p > 0.0D; p--) {
+                while (p / 2D == (double) (int) (p / 2D)) {
+                    x = (x * x) % m;
+                    p /= 2D;
+                }
+                y = (x * y) % m;
+            }
+
+            return y;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return 0.0D;
+    }
+
+    private void md5Final() {
+        byte[] bits = new byte[8];
+        Encode(bits, count, 8);
+        int index = (int) (count[0] >>> 3) & 0x3f;
+        int padLen = index >= 56 ? 120 - index : 56 - index;
+        md5Update(PADDING, padLen);
+        md5Update(bits, 8);
+        Encode(digest, state, 16);
+    }
+
+    static final int S11 = 7;
+    static final int S12 = 12;
+    static final int S13 = 17;
+    static final int S14 = 22;
+    static final int S21 = 5;
+    static final int S22 = 9;
+    static final int S23 = 14;
+    static final int S24 = 20;
+    static final int S31 = 4;
+    static final int S32 = 11;
+    static final int S33 = 16;
+    static final int S34 = 23;
+    static final int S41 = 6;
+    static final int S42 = 10;
+    static final int S43 = 15;
+    static final int S44 = 21;
+
+    private void md5Transform(byte[] block) {
         long a = state[0];
         long b = state[1];
         long c = state[2];
         long d = state[3];
-        long x[] = new long[16];
+        long[] x = new long[16];
         Decode(x, block, 64);
         a = FF(a, b, c, d, x[0], 7L, 0xd76aa478L);
         d = FF(d, a, b, c, x[1], 12L, 0xe8c7b756L);
@@ -221,7 +340,7 @@ public class CMyEncrypt {
         state[3] += d;
     }
 
-    private void Encode(byte output[], long input[], int len) {
+    private void Encode(byte[] output, long[] input, int len) {
         int i = 0;
         for (int j = 0; j < len; j += 4) {
             output[j] = (byte) (int) (input[i] & 255L);
@@ -233,7 +352,7 @@ public class CMyEncrypt {
 
     }
 
-    private void Decode(long output[], byte input[], int len) {
+    private void Decode(long[] output, byte[] input, int len) {
         int i = 0;
         for (int j = 0; j < len; j += 4) {
             output[i] = b2iu(input[j]) | b2iu(input[j + 1]) << 8 | b2iu(input[j + 2]) << 16 | b2iu(input[j + 3]) << 24;
@@ -242,35 +361,8 @@ public class CMyEncrypt {
 
     }
 
-    public static long b2iu(byte b) {
-        return b >= 0 ? b : b & 0xff;
-    }
-
-    public static String byteHEX(byte ib) {
-        char Digit[] = {
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                'A', 'B', 'C', 'D', 'E', 'F'
-        };
-        char ob[] = new char[2];
-        ob[0] = Digit[ib >>> 4 & 0xf];
-        ob[1] = Digit[ib & 0xf];
-        String s = new String(ob);
-        return s;
-    }
-
-    public String getMD5OfStr(String inbuf) {
-        md5Update(inbuf.getBytes(), inbuf.length());
-        md5Final();
-        digestHexStr = "";
-        for (int i = 0; i < 16; i++) {
-            digestHexStr += byteHEX(digest[i]);
-        }
-
-        return digestHexStr;
-    }
-
-    private void md5Update(byte inbuf[], int inputLen) {
-        byte block[] = new byte[64];
+    private void md5Update(byte[] inbuf, int inputLen) {
+        byte[] block = new byte[64];
         int index = (int) (count[0] >>> 3) & 0x3f;
         if ((count[0] += inputLen << 3) < (long) (inputLen << 3)) {
             count[1]++;
@@ -292,105 +384,14 @@ public class CMyEncrypt {
         }
         md5Memcpy(buffer, inbuf, index, i, inputLen - i);
     }
+    public String digestHexStr;
 
-    private void md5Memcpy(byte output[], byte input[], int outpos, int inpos, int len) {
+    private void md5Memcpy(byte[] output, byte[] input, int outpos, int inpos, int len) {
         for (int i = 0; i < len; i++) {
             output[outpos + i] = input[inpos + i];
         }
 
     }
-
-    private static double Mult(double x, double p, double m) {
-        double y = 1.0D;
-        try {
-            for (; p > 0.0D; p--) {
-                while (p / 2D == (double) (int) (p / 2D)) {
-                    x = (x * x) % m;
-                    p /= 2D;
-                }
-                y = (x * y) % m;
-            }
-
-            return y;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return 0.0D;
-    }
-
-    public static void main(String args[]) {
-        CMyEncrypt m = new CMyEncrypt();
-        long nMac = MacAddressHelper.getMyMacAsLong();
-        System.out.println("Mac=" + nMac);
-        String ras = "TRSWCM" + String.valueOf(nMac);
-        ras = ras.replace('0', 'x');
-        ras = ras.replace('1', 'y');
-        System.out.println("RAS Encrypt String=" + ras);
-        //CMyEncrypt _tmp = m;
-        ras = RASEncrypt(ras);
-        System.out.println("RAS Encrypt String=" + ras);
-        // CMyEncrypt _tmp1 = m;
-        String sDec = RASDecrypt(ras);
-        sDec = sDec.replace('X', '0');
-        sDec = sDec.replace('Y', '1');
-        System.out.println("RASDecrypt String=" + sDec);
-        ras = "0123456789";
-        //CMyEncrypt _tmp2 = m;
-        ras = RASEncrypt(ras);
-        System.out.println("RAS Encrypt String=" + ras);
-        //CMyEncrypt _tmp3 = m;
-        sDec = RASDecrypt(ras);
-        System.out.println("RASDecrypt String=" + sDec);
-        ras = "0123456789";
-        // CMyEncrypt _tmp4 = m;
-        ras = RASEncrypt(ras);
-        System.out.println("RAS Encrypt String=" + ras);
-        //CMyEncrypt _tmp5 = m;
-        sDec = RASDecrypt(ras);
-        System.out.println("RASDecrypt String=" + sDec);
-        String strSrc = "00-10-A4-7A-7C-0A";
-        // CMyEncrypt _tmp6 = m;
-        String s = setAnotherChar(strSrc);
-        ///CMyEncrypt _tmp7 = m;
-        String s1 = setAnotherChar(s);
-        System.out.println("Encrypt String=" + s);
-        System.out.println("Decrypt String=" + s1);
-        System.out.println(m.getMD5OfStr(strSrc));
-        System.out.println(m.getMD5OfStr("00-10-A4-7A-7C-0A"));
-        System.out.println(m.getMD5OfStr(m.getMD5OfStr("00-10-A4-7A-7C-0A")));
-        System.out.println(m.getMD5OfStr("1234567"));
-    }
-
-    static final int S11 = 7;
-    static final int S12 = 12;
-    static final int S13 = 17;
-    static final int S14 = 22;
-    static final int S21 = 5;
-    static final int S22 = 9;
-    static final int S23 = 14;
-    static final int S24 = 20;
-    static final int S31 = 4;
-    static final int S32 = 11;
-    static final int S33 = 16;
-    static final int S34 = 23;
-    static final int S41 = 6;
-    static final int S42 = 10;
-    static final int S43 = 15;
-    static final int S44 = 21;
-    static final byte PADDING[] = {
-            -128, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0
-    };
-    private long state[];
-    private long count[];
-    private byte buffer[];
-    public String digestHexStr;
-    private byte digest[];
     static double ulE = 84716293D;
     static double ulD = 16587853D;
     static double ulN = 59987833D;

@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DataSourceH2 {
     DataSource ds;
     DbHelper db = new DbHelper();
-    IBaseListService service =  new BasicListService(db);
+    IBaseListService service = new BasicListService(db);
 
-    public DataSource getDataSource(){
+    public DataSource getDataSource() {
         DatabaseConfig databaseConfig = new DatabaseConfig();
         databaseConfig.setAlias("h2");
         databaseConfig.setClassName("org.h2.Driver");
@@ -42,7 +42,7 @@ public class DataSourceH2 {
         db.setDataSource(ds);
 
         service.getDbHelper().executeNoQuery(
-                new String (Files.readAllBytes(Paths.get(ResourceUtils.getFile("classpath:config/db/create_db.sql").getAbsolutePath()))));
+                new String(Files.readAllBytes(Paths.get(ResourceUtils.getFile("classpath:config/db/create_db.sql").getAbsolutePath()))));
 
     }
 

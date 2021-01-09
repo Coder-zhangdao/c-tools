@@ -1,230 +1,234 @@
 package com.bixuebihui.cache;
 
 
+import com.bixuebihui.jdbc.BaseDao;
+import com.bixuebihui.jdbc.RowMapperResultReader;
+import com.bixuebihui.sequence.SequenceUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.bixuebihui.jdbc.BaseDao;
-import com.bixuebihui.jdbc.RowMapperResultReader;
-import com.bixuebihui.sequence.SequenceUtils;
-
 /**
  * DictionaryItem
- *
+ * <p>
  * WARNING! Automatically generated file!
  * Do not edit the pojo and dal packages,use bixuebihui-smartable!
  * Code Generator by J.A.Carter
  * Modified by Xing Wanxiang 2008
+ *
  * @author xwx
  */
-public class DictionaryList extends BaseList<DictionaryItem, String>  {
+public class DictionaryList extends BaseList<DictionaryItem, String> {
 
-	private final DictionaryDefine def;
+    private final DictionaryDefine def;
 
-	public DictionaryList(DictionaryDefine define){
-		this.def = define;
-	}
+    public DictionaryList(DictionaryDefine define) {
+        this.def = define;
+    }
 
-    DictionaryList(){//for test
-		def = new DictionaryDefine();
-	}
+    DictionaryList() {//for test
+        def = new DictionaryDefine();
+    }
 
-	/**
-	 * Updates the object from a selected ResultSet.
-	 */
-	@Override
-	public DictionaryItem mapRow(ResultSet r, int index) throws SQLException {
-		DictionaryItem res = new DictionaryItem();
-		res.setMs_id(r.getString(def.getIdFieldName()));
-		res.setMs_value(r.getString(def.getValueFieldName()));
-		res.setMs_sort(r.getString(def.getSortFieldName()));
-		return res;
-	}
+    /**
+     * Updates the object from a selected ResultSet.
+     */
+    @Override
+    public DictionaryItem mapRow(ResultSet r, int index) throws SQLException {
+        DictionaryItem res = new DictionaryItem();
+        res.setMs_id(r.getString(def.getIdFieldName()));
+        res.setMs_value(r.getString(def.getValueFieldName()));
+        res.setMs_sort(r.getString(def.getSortFieldName()));
+        return res;
+    }
 
-	private String getSelectSql(){
-		if(def.getIdFieldName().equalsIgnoreCase(def.getSortFieldName())||
-				def.getValueFieldName().equalsIgnoreCase(def.getSortFieldName())) {
-			return "select "+def.getIdFieldName()+", "+def.getValueFieldName()
-			+" from ";
-		} else {
-			return "select "+def.getIdFieldName()+", "+def.getValueFieldName()
-			+", "+def.getSortFieldName() +" from ";
-		}
-	}
+    private String getSelectSql() {
+        if (def.getIdFieldName().equalsIgnoreCase(def.getSortFieldName()) ||
+                def.getValueFieldName().equalsIgnoreCase(def.getSortFieldName())) {
+            return "select " + def.getIdFieldName() + ", " + def.getValueFieldName()
+                    + " from ";
+        } else {
+            return "select " + def.getIdFieldName() + ", " + def.getValueFieldName()
+                    + ", " + def.getSortFieldName() + " from ";
+        }
+    }
 
-	/**
-	 * Select from the database for table "getTableName()"
-	 */
-	@Override
+    /**
+     * Select from the database for table "getTableName()"
+     */
+    @Override
     public List<DictionaryItem> select(String whereClause, String orderbyClause,
                                        int beginNum, int endNum) throws SQLException {
 
-		if(StringUtils.trimToNull(whereClause)==null) {
-			whereClause=" where 1=1 ";
-		}
+        if (StringUtils.trimToNull(whereClause) == null) {
+            whereClause = " where 1=1 ";
+        }
 
-		String query = getSelectSql() + getTableName() + " " + whereClause+" "+def.getSqlCondition();
-		if (this.getDBTYPE() != BaseDao.DERBY) {
-			query += orderbyClause;
-		}
-		query = getPagingSql(query, beginNum, endNum);
-		return dbHelper.executeQuery(query, null, new RowMapperResultReader<>(
-				this));
-	}
-
-
-	/**
-	 * Select from the database for table "DictionaryItem"
-	 */
-	@Override
-	public List<DictionaryItem> selectAll() throws SQLException {
-		String query = getSelectSql() + getTableName()+" where 1=1 "+def.getSqlCondition();
-
-		if(StringUtils.trimToNull(def.getSortFieldName())!=null){
-			query += " order by "+def.getSortFieldName();
-		}
-		return dbHelper.executeQuery(query, null, new RowMapperResultReader<>(
-				this));
-	}
-
-	/**
-	 * Select from the database for table "dictionary"
-	 * @param id 扩展表 id
-	 * @return DictionaryItem
-	 */
-	public DictionaryItem selectByKey(long id) throws SQLException {
-		String query = getSelectSql() + getTableName() + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
-		List<DictionaryItem> info = dbHelper.executeQuery(query, new Object[] { id },
-				new RowMapperResultReader<>(this));
-		if (info != null && info.size() > 0) {
-			return info.get(0);
-		}
-		return null;
-	}
-
-	/**
-	 * Select from the database for table "getTableName()"
-	 * @param id id
-	 * @return List of DictionaryItem
-	 */
-	public List<DictionaryItem> selectAllLikeKey(long id)
-			throws SQLException {
-		String query = getSelectSql() + getTableName() + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
-		return dbHelper.executeQuery(query, new Object[] { id },
-				new RowMapperResultReader<>(this));
-	}
-
-	/**
-	 * Updates the current object values into the database.
-	 * @param info DictionaryItem
-	 * @return true success
-	 */
-	@Override
-	public boolean updateByKey(DictionaryItem info) throws SQLException {
-		String query = "update " + getTableName() + " set " + def.getIdFieldName()+"=?" + ","
-				+def.getValueFieldName()+ "=?" + "," + def.getSortFieldName()+"=?" + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
-		return 1 == dbHelper.executeNoQuery(query, new Object[] {
-				info.getMs_id(), info.getMs_value(), info.getMs_sort(),
-				info.getMs_id() });
-	}
+        String query = getSelectSql() + getTableName() + " " + whereClause + " " + def.getSqlCondition();
+        if (this.getDBTYPE() != BaseDao.DERBY) {
+            query += orderbyClause;
+        }
+        query = getPagingSql(query, beginNum, endNum);
+        return dbHelper.executeQuery(query, null, new RowMapperResultReader<>(
+                this));
+    }
 
 
+    /**
+     * Select from the database for table "DictionaryItem"
+     */
+    @Override
+    public List<DictionaryItem> selectAll() throws SQLException {
+        String query = getSelectSql() + getTableName() + " where 1=1 " + def.getSqlCondition();
 
-	/**
-	 * Deletes from the database for table "KUOZHANBIAOMING"
-	 * @param  id id
-	 * @return true if succcess
-	 */
-	public boolean deleteByKey(long id) throws SQLException {
-		String query = "delete from " + getTableName() + " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
-		return 1 <= dbHelper.executeNoQuery(query, new Object[] { id });
-	}
+        if (StringUtils.trimToNull(def.getSortFieldName()) != null) {
+            query += " order by " + def.getSortFieldName();
+        }
+        return dbHelper.executeQuery(query, null, new RowMapperResultReader<>(
+                this));
+    }
 
-	@Override
-	public String getNextKey(){
-		return SequenceUtils.getInstance().getNextKeyValue(this.getTableName() + "_ms_id", dbHelper)+"";
-	}
+    /**
+     * Select from the database for table "dictionary"
+     *
+     * @param id 扩展表 id
+     * @return DictionaryItem
+     */
+    public DictionaryItem selectByKey(long id) throws SQLException {
+        String query = getSelectSql() + getTableName() + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
+        List<DictionaryItem> info = dbHelper.executeQuery(query, new Object[]{id},
+                new RowMapperResultReader<>(this));
+        if (info != null && info.size() > 0) {
+            return info.get(0);
+        }
+        return null;
+    }
 
+    /**
+     * Select from the database for table "getTableName()"
+     *
+     * @param id id
+     * @return List of DictionaryItem
+     */
+    public List<DictionaryItem> selectAllLikeKey(long id)
+            throws SQLException {
+        String query = getSelectSql() + getTableName() + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
+        return dbHelper.executeQuery(query, new Object[]{id},
+                new RowMapperResultReader<>(this));
+    }
 
-
-	/**
-	 * Counts the number of entries for this table in the database.
-	 * @param id id
-	 * @return count
-	 */
-	public int countByKey(long id) throws SQLException {
-		String query = "select count(*) from " + getTableName()
-				+ " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
-		Object o = dbHelper.executeScalar(query, new Object[] { id });
-		return o == null ? 0 : Integer.parseInt(o.toString());
-	}
-
-	/**
-	 * Counts the number of entries for this table in the database.
-	 * @param id id
-	 * @return  count
-	 */
-	public int countLikeKey(long id) throws SQLException {
-		String query = "select count(*) from " + getTableName()
-				+ " where "+def.getIdFieldName()+"=?"+" "+def.getSqlCondition();
-		Object o = dbHelper.executeScalar(query, new Object[] { id });
-		return o == null ? 0 : Integer.parseInt(o.toString());
-	}
-
-
-
-	/**
-	 * Inserts the DictionaryItem object values into the database.
-	 * @param info DictionaryItem
-	 * @return  true if success
-	 */
-	@Override
-	public boolean insert(DictionaryItem info) throws SQLException {
-		String query = "insert into " + getTableName()
-				+ " ( "+def.getIdFieldName()+","+def.getValueFieldName()+","+def.getSortFieldName()+" ) values ( ?,?,? )";
-		return 1 == dbHelper.executeNoQuery(query, new Object[] {
-				info.getMs_id(), info.getMs_value(), info.getMs_sort() });
-	}
-
-	/**
-	 * Inserts the dummy record of DictionaryItem object values into the
-	 * database.
-	 * @return true if success
-	 */
-	@Override
-	public boolean insertDummy() throws SQLException {
-		DictionaryItem info = new DictionaryItem();
-		 java.util.Random rnd = new java.util.Random();
-		info.setMs_value(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));
-		info.setMs_id(getNextKey()+"");
-		return this.insert(info);
-	}
+    /**
+     * Updates the current object values into the database.
+     *
+     * @param info DictionaryItem
+     * @return true success
+     */
+    @Override
+    public boolean updateByKey(DictionaryItem info) throws SQLException {
+        String query = "update " + getTableName() + " set " + def.getIdFieldName() + "=?" + ","
+                + def.getValueFieldName() + "=?" + "," + def.getSortFieldName() + "=?" + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
+        return 1 == dbHelper.executeNoQuery(query, new Object[]{
+                info.getMs_id(), info.getMs_value(), info.getMs_sort(),
+                info.getMs_id()});
+    }
 
 
-	@Override
-	public String getTableName() {
-		return def.getTableName();
-	}
+    /**
+     * Deletes from the database for table "KUOZHANBIAOMING"
+     *
+     * @param id id
+     * @return true if succcess
+     */
+    public boolean deleteByKey(long id) throws SQLException {
+        String query = "delete from " + getTableName() + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
+        return 1 <= dbHelper.executeNoQuery(query, new Object[]{id});
+    }
+
+    @Override
+    public String getNextKey() {
+        return SequenceUtils.getInstance().getNextKeyValue(this.getTableName() + "_ms_id", dbHelper) + "";
+    }
 
 
-	@Override
-	public String getId(DictionaryItem info) {
-		return info.getMs_id();
-	}
+    /**
+     * Counts the number of entries for this table in the database.
+     *
+     * @param id id
+     * @return count
+     */
+    public int countByKey(long id) throws SQLException {
+        String query = "select count(*) from " + getTableName()
+                + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
+        Object o = dbHelper.executeScalar(query, new Object[]{id});
+        return o == null ? 0 : Integer.parseInt(o.toString());
+    }
 
-	@Override
-	public void setId(DictionaryItem info, String id) {
-		 info.setMs_id(id);
-	}
+    /**
+     * Counts the number of entries for this table in the database.
+     *
+     * @param id id
+     * @return count
+     */
+    public int countLikeKey(long id) throws SQLException {
+        String query = "select count(*) from " + getTableName()
+                + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
+        Object o = dbHelper.executeScalar(query, new Object[]{id});
+        return o == null ? 0 : Integer.parseInt(o.toString());
+    }
 
-	@Override
-	public String getKeyName() {
-		return def.getIdFieldName();
-	}
 
+    /**
+     * Inserts the DictionaryItem object values into the database.
+     *
+     * @param info DictionaryItem
+     * @return true if success
+     */
+    @Override
+    public boolean insert(DictionaryItem info) throws SQLException {
+        String query = "insert into " + getTableName()
+                + " ( " + def.getIdFieldName() + "," + def.getValueFieldName() + "," + def.getSortFieldName() + " ) values ( ?,?,? )";
+        return 1 == dbHelper.executeNoQuery(query, new Object[]{
+                info.getMs_id(), info.getMs_value(), info.getMs_sort()});
+    }
+
+    /**
+     * Inserts the dummy record of DictionaryItem object values into the
+     * database.
+     *
+     * @return true if success
+     */
+    @Override
+    public boolean insertDummy() throws SQLException {
+        DictionaryItem info = new DictionaryItem();
+        java.util.Random rnd = new java.util.Random();
+        info.setMs_value(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));
+        info.setMs_id(getNextKey() + "");
+        return this.insert(info);
+    }
+
+
+    @Override
+    public String getTableName() {
+        return def.getTableName();
+    }
+
+
+    @Override
+    public String getId(DictionaryItem info) {
+        return info.getMs_id();
+    }
+
+    @Override
+    public void setId(DictionaryItem info, String id) {
+        info.setMs_id(id);
+    }
+
+    @Override
+    public String getKeyName() {
+        return def.getIdFieldName();
+    }
 
 
 }

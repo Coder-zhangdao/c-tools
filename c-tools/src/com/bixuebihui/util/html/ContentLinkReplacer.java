@@ -16,26 +16,38 @@ import java.nio.charset.Charset;
 import java.util.Hashtable;
 
 public class ContentLinkReplacer {
-    private class LinkMapItem {
+    public static final int PRIORITY_MAX = 10;
+    public static final int PRIORITY_NORM = 5;
+    public static final int PRIORITY_MIN = 1;
+    public static int KEY_LEN_LIMIT = 20;
+    private static String[] TAGS_TOSKIP_ARRAY = {
+            "A", "APPLET", "MAP", "OBJECT", "SELECT", "TEXTAREA", "SCRIPT", "OPTION", "INPUT", "STYLE"
+    };
+    private static Hashtable TAGS_TOSKIP;
+    private Hashtable hLinkMap;
+    private boolean[] haveKeysStartWith;
+    private boolean[] haveKeysWithLen;
+    private int nMaxKeyLen;
 
-        char keywords[];
-        String link;
-        int priority;
-        LinkMapItem conjugate;
-        LinkMapItem pre;
-        LinkMapItem next;
+    public static void main(String[] args) {
+        String sLinkMapFile = "d:\\test\\link\\link_table.ini";
+        String srcFile = "d:\\test\\link\\news911.htm";
+        String dstFile = "d:\\test\\link\\dst.htm";
+        String sHtmlDst = null;
+        try {
+            ContentLinkReplacer replacer = new ContentLinkReplacer();
+            replacer.loadLinkMap(sLinkMapFile);
+            String sHtmlSrc = FileUtils.readFileToString(new File(srcFile), Charset.defaultCharset());
+            for (int i = 0; i < 20; i++) {
+                long lStartTime = System.currentTimeMillis();
+                sHtmlDst = replacer.replaceLink(sHtmlSrc);
+                long lEndTime = System.currentTimeMillis();
+                System.out.println("[" + i + "] Used time: " + (lEndTime - lStartTime) + " ms");
+            }
 
-        public LinkMapItem(String _keywords, String _link) {
-            this(_keywords, _link, 5);
-        }
-
-        public LinkMapItem(String _keywords, String _link, int _priority) {
-            conjugate = null;
-            pre = null;
-            next = null;
-            keywords = _keywords.toCharArray();
-            link = _link;
-            priority = _priority;
+            FileUtils.write(new File(dstFile), sHtmlDst, Charset.defaultCharset());
+        } catch (Exception ex) {
+            ex.printStackTrace(System.out);
         }
     }
 
@@ -123,12 +135,12 @@ public class ContentLinkReplacer {
 
     public String replaceLink(String _srcContent, String _extraLinkAttributes)
             throws CMyException {
-        char srcBuff[];
+        char[] srcBuff;
         int nLen;
         StringBuffer retBuff;
         int nextPos;
         int currFlag;
-        char sQuoteStack[];
+        char[] sQuoteStack;
         int nQuoteDeep;
         int FLAG_NORM = 0;
         int FLAG_WAIT_TAG_GT = 1;
@@ -160,7 +172,6 @@ public class ContentLinkReplacer {
                     }
                     retBuff.append(currChar);
                 } else {
-                    // boolean bToSkip = false;
                     switch (currChar) {
                         case 34: // '"'
                         case 39: // '\''
@@ -278,40 +289,30 @@ public class ContentLinkReplacer {
         }
     }
 
-    public static void main(String args[]) {
-        String sLinkMapFile = "d:\\test\\link\\link_table.ini";
-        String srcFile = "d:\\test\\link\\news911.htm";
-        String dstFile = "d:\\test\\link\\dst.htm";
-        String sHtmlDst = null;
-        try {
-            ContentLinkReplacer replacer = new ContentLinkReplacer();
-            replacer.loadLinkMap(sLinkMapFile);
-            String sHtmlSrc = FileUtils.readFileToString(new File(srcFile), Charset.defaultCharset());
-            for (int i = 0; i < 20; i++) {
-                long lStartTime = System.currentTimeMillis();
-                sHtmlDst = replacer.replaceLink(sHtmlSrc);
-                long lEndTime = System.currentTimeMillis();
-                System.out.println("[" + i + "] Used time: " + (lEndTime - lStartTime) + " ms");
-            }
+    private class LinkMapItem {
 
-            FileUtils.write(new File(dstFile), sHtmlDst, Charset.defaultCharset());
-        } catch (Exception ex) {
-            ex.printStackTrace(System.out);
+        char[] keywords;
+        String link;
+        int priority;
+        LinkMapItem conjugate;
+        LinkMapItem pre;
+        LinkMapItem next;
+
+        public LinkMapItem(String _keywords, String _link) {
+            this(_keywords, _link, 5);
+        }
+
+        public LinkMapItem(String _keywords, String _link, int _priority) {
+            conjugate = null;
+            pre = null;
+            next = null;
+            keywords = _keywords.toCharArray();
+            link = _link;
+            priority = _priority;
         }
     }
 
-    public static int KEY_LEN_LIMIT = 20;
-    public static final int PRIORITY_MAX = 10;
-    public static final int PRIORITY_NORM = 5;
-    public static final int PRIORITY_MIN = 1;
-    private Hashtable hLinkMap;
-    private boolean haveKeysStartWith[];
-    private boolean haveKeysWithLen[];
-    private int nMaxKeyLen;
-    private static String TAGS_TOSKIP_ARRAY[] = {
-            "A", "APPLET", "MAP", "OBJECT", "SELECT", "TEXTAREA", "SCRIPT", "OPTION", "INPUT", "STYLE"
-    };
-    private static Hashtable TAGS_TOSKIP;
+
 
     public boolean loadLinkMap(String _linkMapFile)
             throws CMyException {

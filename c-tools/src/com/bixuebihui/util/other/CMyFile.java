@@ -128,7 +128,7 @@ public class CMyFile {
             return false;
         }
         if (_bDeleteChildren) {
-            File files[] = file.listFiles();
+            File[] files = file.listFiles();
             if (files != null) {
                 for (int i = 0; i < files.length; i++) {
                     if (files[i].isDirectory()) {
@@ -199,7 +199,7 @@ public class CMyFile {
                             ex);
                 }
             }
-            byte buffer[] = new byte[4096];
+            byte[] buffer = new byte[4096];
             int i;
             while ((i = fis.read(buffer, 0, 4096)) > 0) {
                 fos.write(buffer, 0, i);
@@ -275,16 +275,7 @@ public class CMyFile {
         return copyFile(_sSrcFile, _sDstFile, true);
     }
 
-    public File[] listFiles(String _dir, String _extendName) {
-        File fDir = new File(_dir);
-        if (_extendName.charAt(0) != '.') {
-            _extendName = "." + _extendName;
-        }
-        File Files[] = fDir.listFiles(new CMyFilenameFilter(_extendName));
-        return Files;
-    }
-
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             String sSrcFile = "d:\\temp\\InfoRadar.pdf";
             String sDstFile = "d:\\temp\\sub\\InfoRadar_old.pdf";
@@ -296,5 +287,14 @@ public class CMyFile {
         } catch (CMyException ex) {
             ex.printStackTrace(System.out);
         }
+    }
+
+    public File[] listFiles(String _dir, String _extendName) {
+        File fDir = new File(_dir);
+        if (_extendName.charAt(0) != '.') {
+            _extendName = "." + _extendName;
+        }
+        File[] Files = fDir.listFiles(new CMyFilenameFilter(_extendName));
+        return Files;
     }
 }

@@ -84,7 +84,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             beforeChange(info);
         }
     }
-    // That's right.
+
     private static final Set<Class> BUILT_IN_SET = new HashSet<>();
 
     /**
@@ -811,7 +811,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         // access properties as Map
         Map<String, String> properties = BeanUtils.describe(receiver);
-        Map<String, Object> values = new HashMap<>();
+        Map<String, Object> values = new HashMap<>(16);
         for (Map.Entry<String, ?> e : properties.entrySet()) {
             Object o = h.get(e.getKey());
             values.put(e.getKey(), o);
@@ -893,7 +893,6 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             for (Map<String, Object> h : v) {
                 try {
                     v1.add(convertCaseSensitive(h, clz.getDeclaredConstructor().newInstance()));
-                    //clz.newInstance()));
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
                     throw new SQLException(e);
                 }
@@ -1161,7 +1160,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
         java.util.Collection<T> infos = selectAllWhere(
                 WHERE + uniquePropertyName + " in(" + filterForSQL(ids) + ")");
-        Map<String, T> map = new HashMap<>();
+        Map<String, T> map = new HashMap<>(16);
         for (T info : infos) {
             map.put("" + getId(info), info);
         }

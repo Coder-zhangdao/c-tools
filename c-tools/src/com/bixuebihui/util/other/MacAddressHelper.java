@@ -231,7 +231,7 @@ public class MacAddressHelper {
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             String s = "";
             String line = "        ether 0:3:ba:23:ec:7d";

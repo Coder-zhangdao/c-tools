@@ -24,7 +24,7 @@ public class CompressHexString {
         hexString = hexString.toLowerCase();
         int max = 15;
         for (int i = 0; i < hexString.length(); i += max) {
-            int end = i + max > hexString.length() ? hexString.length() : i + max;
+            int end = Math.min(i + max, hexString.length());
             chunk = hexString.substring(i, end);
 
             intChunk = Long.parseLong(chunk, HEX);

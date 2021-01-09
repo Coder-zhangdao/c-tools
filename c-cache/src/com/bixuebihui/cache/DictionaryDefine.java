@@ -8,99 +8,100 @@ import com.bixuebihui.util.other.CMyString;
  */
 public class DictionaryDefine {
 
-	private String addCondition="";
+    private String addCondition = "";
 
-	private String conditionValue;
+    private String conditionValue;
 
-	private String idFieldName ="MS_ID";
-	private String valueFieldName ="MS_VALUE";
-	private String sortFieldName ="MS_SORT";
-	private IBaseListService<DictionaryItem, String> serviceClass;
-	private int maxCapacity=5000;
+    private String idFieldName = "MS_ID";
+    private String valueFieldName = "MS_VALUE";
+    private String sortFieldName = "MS_SORT";
+    private IBaseListService<DictionaryItem, String> serviceClass;
+    private int maxCapacity = 5000;
+    private String tableName;
 
-	public DictionaryDefine(String tableName, String idFieldName, String valueName, String sortName, String addCondition){
-		this.tableName = tableName;
-		this.idFieldName = idFieldName;
-		this.valueFieldName = valueName;
-		this.sortFieldName = sortName;
-		this.addCondition = addCondition;
-	}
+    public DictionaryDefine(String tableName, String idFieldName, String valueName, String sortName, String addCondition) {
+        this.tableName = tableName;
+        this.idFieldName = idFieldName;
+        this.valueFieldName = valueName;
+        this.sortFieldName = sortName;
+        this.addCondition = addCondition;
+    }
 
-	public String getIdFieldName() {
-		return idFieldName;
-	}
+    public DictionaryDefine(String tableName) {
+        this.tableName = tableName;
+    }
 
-	public void setIdFieldName(String idName) {
-		this.idFieldName = idName;
-	}
+    public DictionaryDefine() {
+    }
 
-	public String getValueFieldName() {
-		return valueFieldName;
-	}
+    public String getIdFieldName() {
+        return idFieldName;
+    }
 
-	public void setValueFieldName(String valueName) {
-		this.valueFieldName = valueName;
-	}
+    public void setIdFieldName(String idName) {
+        this.idFieldName = idName;
+    }
 
-	public String getSortFieldName() {
-		return sortFieldName;
-	}
+    public String getValueFieldName() {
+        return valueFieldName;
+    }
 
-	private String tableName;
+    public void setValueFieldName(String valueName) {
+        this.valueFieldName = valueName;
+    }
 
-	public String getTableName() {
-		return tableName;
-	}
+    public String getSortFieldName() {
+        return sortFieldName;
+    }
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
+    public void setSortFieldName(String sortFieldName) {
+        this.sortFieldName = sortFieldName;
+    }
 
-	public void setSortFieldName(String sortFieldName) {
-		this.sortFieldName = sortFieldName;
-	}
-	public DictionaryDefine(String tableName){
-		this.tableName = tableName;
-	}
-	public DictionaryDefine(){
-	}
+    public String getTableName() {
+        return tableName;
+    }
 
-	protected String getAddCondition() {
-		return addCondition;
-	}
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
-	public void setAddCondition(String addCondition) {
-		this.addCondition = addCondition;
-	}
+    protected String getAddCondition() {
+        return addCondition;
+    }
 
-	public String getConditionValue() {
-		return conditionValue;
-	}
+    public void setAddCondition(String addCondition) {
+        this.addCondition = addCondition;
+    }
 
-	public void setConditionValue(String conditionValue) {
-		this.conditionValue = conditionValue;
-	}
+    public String getConditionValue() {
+        return conditionValue;
+    }
 
-	public String getSqlCondition(){
-		if(this.conditionValue!=null){
-			return CMyString.replaceStr(this.getAddCondition(), "{0}", this.conditionValue);
-		}
-		return this.getAddCondition();
-	}
+    public void setConditionValue(String conditionValue) {
+        this.conditionValue = conditionValue;
+    }
 
-	public IBaseListService<DictionaryItem, String> getServiceClass() {
-		return serviceClass;
-	}
+    public String getSqlCondition() {
+        if (this.conditionValue != null) {
+            return CMyString.replaceStr(this.getAddCondition(), "{0}", this.conditionValue);
+        }
+        return this.getAddCondition();
+    }
 
-	public void setServiceClass(IBaseListService<DictionaryItem, String> serviceClass) {
-		this.serviceClass = serviceClass;
-	}
+    public IBaseListService<DictionaryItem, String> getServiceClass() {
+        return serviceClass;
+    }
 
-	public int getMaxCapacity() {
-		return maxCapacity;
-	}
+    public void setServiceClass(IBaseListService<DictionaryItem, String> serviceClass) {
+        this.serviceClass = serviceClass;
+    }
 
-	public void setMaxCapacity(int  maxCapacity) {
-		this.maxCapacity = maxCapacity;
-	}
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
 }

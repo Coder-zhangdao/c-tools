@@ -46,7 +46,7 @@ public class PathTools {
         return resource;
     }
 
-    /* 返回给应用当前classes路径 */
+    /** 返回给应用当前classes路径 */
     public String getAppClassesPath() {
             try {
                 return getFullPathRelateClass("../../..",

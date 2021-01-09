@@ -240,7 +240,7 @@ public class ParameterUtils {
         Map<String, List<String>> fieldsMap;
         fieldsMap = (Map<String, List<String>>) request.getAttribute(ServletFileUpload.MULTIPART_FORM_DATA);
         if (fieldsMap == null) {
-            fieldsMap = new HashMap<>();
+            fieldsMap = new HashMap<>(16);
             request.setAttribute(ServletFileUpload.MULTIPART_FORM_DATA, fieldsMap);
         } else {
             return fieldsMap;

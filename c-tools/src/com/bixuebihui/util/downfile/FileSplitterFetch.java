@@ -38,7 +38,7 @@ public class FileSplitterFetch extends Thread {
                 httpConnection.setRequestProperty("RANGE", sProperty);
                 Utility.log(sProperty);
                 InputStream input = httpConnection.getInputStream();
-                byte b[] = new byte[1024];
+                byte[] b = new byte[1024];
                 int i;
                 for (; (i = input.read(b, 0, 1024)) > 0 && nStartPos < nEndPos && !bStop; nStartPos += fileAccessI.write(b, 0, i)) {
                     ;

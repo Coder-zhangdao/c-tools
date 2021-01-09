@@ -5,6 +5,7 @@ import com.bixuebihui.ConnectionManager;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -117,7 +118,7 @@ public class BitmechanicDataSource implements DataSource, INamingPool {
         try {
             ConnectionManager.addAlias(cfg);
             lastSuccessConfig = cfg;
-        } catch (IllegalAccessException | ClassNotFoundException | SQLException | InstantiationException e) {
+        } catch (IllegalAccessException | ClassNotFoundException | SQLException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             getParentLogger().log(Level.WARNING,"连接池配置出错", e);
         }
     }

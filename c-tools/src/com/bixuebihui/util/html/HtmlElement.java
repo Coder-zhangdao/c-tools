@@ -458,6 +458,17 @@ public class HtmlElement
         return textContent.toString();
     }
 
+    public static void main(String[] args) {
+        HtmlElement element = new HtmlElement();
+        try {
+            String strSrc = IOUtils.resourceToString("d:\\test\\sina.htm", Charset.defaultCharset());
+            element.fromString("<BODY>" + strSrc + "</BODY>");
+            System.out.println(element.toString(false, true));
+        } catch (Exception ex) {
+            ex.printStackTrace(System.out);
+        }
+    }
+
     public int fromString(String _strSrc)
             throws CMyException {
         if (attributes != null) {
@@ -470,13 +481,13 @@ public class HtmlElement
         if (nLen < 1) {
             return 0;
         } else {
-            char srcBuffer[] = new char[nLen + 1];
+            char[] srcBuffer = new char[nLen + 1];
             _strSrc.getChars(0, nLen, srcBuffer, 0);
             return fromString(srcBuffer, 0);
         }
     }
 
-    public int fromString(char _srcBuffer[], int _nStart)
+    public int fromString(char[] _srcBuffer, int _nStart)
             throws CMyException {
         if (_nStart < 0) {
             return -1;
@@ -578,7 +589,7 @@ public class HtmlElement
         return nPos;
     }
 
-    private int readAttributes(char _srcBuffer[], int _nStart) {
+    private int readAttributes(char[] _srcBuffer, int _nStart) {
         int nPos = _nStart;
         int nLen = _srcBuffer.length;
         StringBuffer conBuffer = null;
@@ -618,8 +629,8 @@ public class HtmlElement
         return ++nPos;
     }
 
-    private int checkAtEndTag(char _srcBuffer[], int _nPos) {
-        char tagName[] = ("</" + name + ">").toLowerCase().toCharArray();
+    private int checkAtEndTag(char[] _srcBuffer, int _nPos) {
+        char[] tagName = ("</" + name + ">").toLowerCase().toCharArray();
         int nPos = _nPos;
         for (int i = 0; i < tagName.length && nPos < _srcBuffer.length; i++) {
             if (Character.toLowerCase(_srcBuffer[nPos++]) != tagName[i]) {
@@ -628,17 +639,6 @@ public class HtmlElement
         }
 
         return nPos;
-    }
-
-    public static void main(String args[]) {
-        HtmlElement element = new HtmlElement();
-        try {
-            String strSrc = IOUtils.resourceToString("d:\\test\\sina.htm", Charset.defaultCharset());
-            element.fromString("<BODY>" + strSrc + "</BODY>");
-            System.out.println(element.toString(false, true));
-        } catch (Exception ex) {
-            ex.printStackTrace(System.out);
-        }
     }
 
     protected static final boolean ISDEBUG = false;

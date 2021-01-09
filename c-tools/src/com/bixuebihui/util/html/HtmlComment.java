@@ -88,7 +88,7 @@ public class HtmlComment
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         String strSrc = " <!-- this is a comment -->  ";
         HtmlComment comment = new HtmlComment();
         comment.fromString(strSrc);

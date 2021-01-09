@@ -1,8 +1,3 @@
-// Decompiled by DJ v3.8.8.85 Copyright 2005 Atanas Neshkov  Date: 2006-1-26 15:56:54
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3)
-// Source File Name:   CMyDateTime.java
-
 package com.bixuebihui.util.other;
 
 import java.io.Serializable;
@@ -86,7 +81,7 @@ public class CMyDateTime
     }
 
     @SuppressWarnings("AliControlFlowStatementWithoutBraces")
-    private static String extractFormat(String _sValue, char _formatChar[]) {
+    private static String extractFormat(String _sValue, char[] _formatChar) {
         if (_sValue == null) {
             return null;
         }
@@ -187,7 +182,7 @@ public class CMyDateTime
     }
 
     @SuppressWarnings("AliControlFlowStatementWithoutBraces")
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         CMyDateTime myDateTime = new CMyDateTime();
         try {
             CMyDateTime now = now();
@@ -227,8 +222,6 @@ public class CMyDateTime
             System.out.println(myDateTime.getDateTimeAsString(DEF_TIME_FORMAT_PRG));
             myDateTime.setTimeWithString("00:25", 2);
             System.out.println(myDateTime.getDateTimeAsString(DEF_DATETIME_FORMAT_PRG));
-            //java.sql.Date dDate = new java.sql.Date(0L);
-            //Time tTime = new Time(0L);
             java.sql.Date dDate = java.sql.Date.valueOf("1978-02-04");
             Time tTime = Time.valueOf("12:00:20");
             System.out.println(myDateTime.getDateTimeAsString("yyyy/MM/dd HH:mm:ss"));
@@ -239,7 +232,7 @@ public class CMyDateTime
             myDateTime.setDateTimeWithCurrentTime();
             System.out.println("End:" + myDateTime.getDateTimeAsString("yyyy/MM/dd HH:mm:ss"));
             CMyDateTime myDateTime2 = new CMyDateTime();
-            int nFields[] = {
+            int[] nFields = {
                     1, 2, 3, 4, 5, 6, 11, 12
             };
             myDateTime2.setDateTimeWithString("2001-02-07 14:34:00", DEF_DATETIME_FORMAT_PRG);
@@ -274,7 +267,7 @@ public class CMyDateTime
             }
 
             System.out.println("\n\n===== test for CMyDateTime.set() ====== ");
-            String sValues[] = {
+            String[] sValues = {
                     "2002.06.13 12:00:12", "1900.2.4 3:4:5", "1901-03-15 23:05:10", "1978-2-4 5:6:7", "2001/12/31 21:08:22", "1988/2/5 9:1:2", "1986.12.24", "0019.2.8", "2002-12-20", "1999-8-1",
                     "2001/12/21", "2000/1/5", "78.02.04", "89.2.6", "99-12-31", "22-3-6", "01/02/04", "02/5/8"
             };

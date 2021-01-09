@@ -5,10 +5,9 @@
 
 package com.bixuebihui.util;
 
-import org.apache.commons.configuration2.*;
-//import org.apache.commons.configuration2.event.ConfigurationEvent;
-//import org.apache.commons.configuration2.event.EventListener;
-//import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.CompositeConfiguration;
+import org.apache.commons.configuration2.DatabaseConfiguration;
+import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,16 +28,12 @@ import java.util.*;
  */
 public class Config implements AutoCloseable {
 
-    private static final String CONFIG_ZOOKEEPER_KEY = "config.zookeeper";
-    private static final String ZK_CONFIG_APP_PROPERTIES = "/config/app.properties";
     private static final String DEFAULT_CONFIG = "/ApplicationResources.properties";
     private static final String CUSTOM_PROPERTIES = "/custom.properties";
     private static final String CUSTOM_JVM_PARAM = "custom.config";
 
     private static CompositeConfiguration config = null;
     private static DatabaseConfiguration dbconfig = null;
-
-//    private static CuratorFramework client;
 
     private static final Log mLogger = LogFactory.getLog(Config.class);
 
@@ -81,12 +76,6 @@ public class Config implements AutoCloseable {
                 if (initFileBaseConfig()) {
                     STAGE |= CONFIG_LOCAL;
 
-//                    String zookeeper_url = config.getConfiguration(0).getString(CONFIG_ZOOKEEPER_KEY);
-//                    useZooKeeper = !StringUtils.isEmpty(zookeeper_url);
-//
-//                    if (useZooKeeper) {
-//                        if (initZookeeperConfig()) STAGE |= CONFIG_ZOOKEEPER;
-//                    }
                 }
 
                 if (((STAGE & CONFIG_ZOOKEEPER) != 0)
@@ -95,7 +84,6 @@ public class Config implements AutoCloseable {
                         STAGE |= CONFIG_DB;
                     }
                 }
-            // -----
 
 
         } catch (Exception e) {
@@ -103,22 +91,6 @@ public class Config implements AutoCloseable {
         }
     }
 
-
-
-
-//    private static boolean initZookeeperConfig() {
-//        String zookeeper_url = getProperty(CONFIG_ZOOKEEPER_KEY);
-//        if (StringUtils.trimToNull(zookeeper_url) != null) {
-//            mLogger.debug("尝试加载zookeeper配置");
-//            Configuration zooConfig = initZookeeper(zookeeper_url, ZK_CONFIG_APP_PROPERTIES);
-//            if (zooConfig != null) {
-//                config.addConfiguration(zooConfig);
-//                mLogger.debug("加载zookeeper配置完成");
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     public static boolean initDbConfig() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         if (!dbInitPhase) {
@@ -331,31 +303,6 @@ public class Config implements AutoCloseable {
         }
     }
 
-//    protected static byte[] getRawData(String path) {
-//        try {
-//            if (client != null && client.getState() == CuratorFrameworkState.STARTED)
-//                return client.getData().forPath(path);
-//        } catch (Exception e) {
-//            mLogger.warn("Load config from ZooKeeper error",e);
-//        }
-//        return new byte[0];
-//    }
-
-//    protected static String getRawDataAsString(String path) {
-//        return new String(getRawData(path));
-//    }
-
-//    public static Properties getZooProperties(String path) {
-//        String res = getRawDataAsString(path);
-//        Properties p = new Properties();
-//        try (Reader in = new StringReader(res)) {
-//            p.load(in);
-//        } catch (IOException e) {
-//            mLogger.debug("Could not load properties from zookeeper: [" + path + "].");
-//        }
-//        return p;
-//
-//    }
 
     /**
      * Set the "uploads.dir" property at runtime.

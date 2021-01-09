@@ -12,8 +12,8 @@ public class UrlUtil {
     /**
      * 增加url后面的get参数
      *
-     * @param url 需要修改的 url
-     * @param name 参数名
+     * @param url   需要修改的 url
+     * @param name  参数名
      * @param value 参数值
      * @return url及参数
      */
