@@ -21,6 +21,7 @@ public class AbstractBaseDao extends BaseDao<Object, Long> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object mapRow(ResultSet rs, int index) throws SQLException {
         throw new SQLException("not implement!");
     }
@@ -32,11 +33,13 @@ public class AbstractBaseDao extends BaseDao<Object, Long> {
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public boolean insertDummy() throws SQLException {
         throw new SQLException("not implement!");
     }
 
     /** {@inheritDoc} */
+    @Override
     public Long getId(Object info) {
         return 0L;
     }
@@ -47,6 +50,7 @@ public class AbstractBaseDao extends BaseDao<Object, Long> {
      * @param info a {@link java.lang.Object} object.
      * @param id a {@link java.lang.Long} object.
      */
+    @Override
     public void setId(Object info, Long id) {
         //must override if the table has a primary key!
     }
@@ -71,8 +75,9 @@ public class AbstractBaseDao extends BaseDao<Object, Long> {
      * @throws java.sql.SQLException if any.
      */
     public String getDummySql() throws SQLException {
-        if(this.getDBTYPE() == ORACLE)
+        if(this.getDBTYPE() == ORACLE) {
             return " from dual";
+        }
         return "";
     }
 

@@ -21,8 +21,9 @@ public class CMyFile {
             throws CMyException {
         URL url = Thread.currentThread().getContextClassLoader().getResource(
                 _resource);
-        if (url == null)
+        if (url == null) {
             throw new CMyException(55, "文件[" + _resource + "]没有找到！");
+        }
         String sPath = getUrlFileString(url);
         return sPath;
     }
@@ -31,8 +32,9 @@ public class CMyFile {
         String sPath = null;
         try {
             sPath = url.getFile();
-            if (sPath.indexOf('%') >= 0)
+            if (sPath.indexOf('%') >= 0) {
                 sPath = URLDecoder.decode(url.getFile(), "UTF-8");
+            }
         } catch (Exception ex) {
             throw new CMyException(55, "文件[" + url.getFile() + "]转换失败！", ex);
         }
@@ -42,8 +44,9 @@ public class CMyFile {
     public static String mapResouceFullPath(String _resource, Class _currClass)
             throws CMyException {
         URL url = _currClass.getResource(_resource);
-        if (url == null)
+        if (url == null) {
             throw new CMyException(55, "文件[" + _resource + "]没有找到！");
+        }
         String sPath = getUrlFileString(url);
         return sPath;
     }
@@ -85,13 +88,15 @@ public class CMyFile {
 
     public static String extractFileDrive(String _sFilePathName) {
         int nLen = _sFilePathName.length();
-        if (nLen > 2 && _sFilePathName.charAt(1) == ':')
+        if (nLen > 2 && _sFilePathName.charAt(1) == ':') {
             return _sFilePathName.substring(0, 2);
+        }
         if (nLen > 2 && _sFilePathName.charAt(0) == File.separatorChar
                 && _sFilePathName.charAt(1) == File.separatorChar) {
             int nPos = _sFilePathName.indexOf(File.separatorChar, 2);
-            if (nPos >= 0)
+            if (nPos >= 0) {
                 nPos = _sFilePathName.indexOf(File.separatorChar, nPos + 1);
+            }
             return nPos < 0 ? _sFilePathName : _sFilePathName
                     .substring(0, nPos);
         } else {
@@ -106,10 +111,11 @@ public class CMyFile {
 
     public static boolean makeDir(String _sDir, boolean _bCreateParentDir) {
         File file = new File(_sDir);
-        if (_bCreateParentDir)
+        if (_bCreateParentDir) {
             return file.mkdirs();
-        else
+        } else {
             return file.mkdir();
+        }
     }
 
     public static boolean deleteDir(String _sDir) {
@@ -118,28 +124,23 @@ public class CMyFile {
 
     public static boolean deleteDir(String _sDir, boolean _bDeleteChildren) {
         File file = new File(_sDir);
-        if (!file.exists())
+        if (!file.exists()) {
             return false;
+        }
         if (_bDeleteChildren) {
             File files[] = file.listFiles();
             if (files != null) {
-                for (int i = 0; i < files.length; i++)
-                    if (files[i].isDirectory())
+                for (int i = 0; i < files.length; i++) {
+                    if (files[i].isDirectory()) {
                         deleteDir(files[i].getAbsolutePath(), _bDeleteChildren);
-                    else
+                    } else {
                         files[i].delete();
+                    }
+                }
             }
 
         }
         return file.delete();
-    }
-
-    public File[] listFiles(String _dir, String _extendName) {
-        File fDir = new File(_dir);
-        if (_extendName.charAt(0) != '.')
-            _extendName = "." + _extendName;
-        File Files[] = fDir.listFiles(new CMyFilenameFilter(_extendName));
-        return Files;
     }
 
     public static String readFile(String _sFileName) throws CMyException {
@@ -151,10 +152,11 @@ public class CMyFile {
         ) {
             String s;
             while ((s = buffReader.readLine()) != null) {
-                if (buffContent == null)
+                if (buffContent == null) {
                     buffContent = new StringBuffer();
-                else
+                } else {
                     buffContent.append("\n");
+                }
                 buffContent.append(s);
             }
             s1 = buffContent != null ? buffContent.toString() : "";
@@ -170,6 +172,54 @@ public class CMyFile {
         }
         return s1;
 
+    }
+
+    public static boolean copyFile(String _sSrcFile, String _sDstFile,
+                                   boolean _bMakeDirIfNotExists) throws CMyException {
+        FileOutputStream fos =null;
+        try ( FileInputStream fis = new FileInputStream(_sSrcFile) ) {
+            try {
+                fos = new FileOutputStream(_sDstFile);
+            } catch (FileNotFoundException ex) {
+                if (_bMakeDirIfNotExists) {
+                    if (!makeDir(extractFilePath(_sDstFile), true)) {
+                        throw new CMyException(
+                                50,
+                                "\u4E3A\u76EE\u6807\u6587\u4EF6["
+                                        + _sDstFile
+                                        + "]\u521B\u5EFA\u76EE\u5F55\u5931\u8D25\uFF01");
+                    }
+                    fos = new FileOutputStream(_sDstFile);
+                } else {
+                    throw new CMyException(
+                            50,
+                            "\u6307\u5B9A\u76EE\u6807\u6587\u4EF6["
+                                    + _sDstFile
+                                    + "]\u6240\u5728\u76EE\u5F55\u4E0D\u5B58\u5728\uFF01",
+                            ex);
+                }
+            }
+            byte buffer[] = new byte[4096];
+            int i;
+            while ((i = fis.read(buffer, 0, 4096)) > 0) {
+                fos.write(buffer, 0, i);
+            }
+        } catch (FileNotFoundException ex) {
+            throw new CMyException(
+                    55,
+                    "\u8981\u590D\u5236\u7684\u539F\u6587\u4EF6\u6CA1\u6709\u53D1\u73B0(CMyFile.copyFile)",
+                    ex);
+        } catch (IOException ex) {
+            throw new CMyException(
+                    50,
+                    "\u590D\u5236\u6587\u4EF6\u65F6\u53D1\u751F\u5F02\u5E38(CMyFile.copyFile)",
+                    ex);
+        } finally {
+            IOUtils.closeQuietly(fos);
+
+        }
+
+        return true;
     }
 
     public static boolean writeFile(String _sFileName, String _sFileContent)
@@ -225,50 +275,13 @@ public class CMyFile {
         return copyFile(_sSrcFile, _sDstFile, true);
     }
 
-    public static boolean copyFile(String _sSrcFile, String _sDstFile,
-                                   boolean _bMakeDirIfNotExists) throws CMyException {
-        FileOutputStream fos =null;
-        try ( FileInputStream fis = new FileInputStream(_sSrcFile) ) {
-            try {
-                fos = new FileOutputStream(_sDstFile);
-            } catch (FileNotFoundException ex) {
-                if (_bMakeDirIfNotExists) {
-                    if (!makeDir(extractFilePath(_sDstFile), true))
-                        throw new CMyException(
-                                50,
-                                "\u4E3A\u76EE\u6807\u6587\u4EF6["
-                                        + _sDstFile
-                                        + "]\u521B\u5EFA\u76EE\u5F55\u5931\u8D25\uFF01");
-                    fos = new FileOutputStream(_sDstFile);
-                } else {
-                    throw new CMyException(
-                            50,
-                            "\u6307\u5B9A\u76EE\u6807\u6587\u4EF6["
-                                    + _sDstFile
-                                    + "]\u6240\u5728\u76EE\u5F55\u4E0D\u5B58\u5728\uFF01",
-                            ex);
-                }
-            }
-            byte buffer[] = new byte[4096];
-            int i;
-            while ((i = fis.read(buffer, 0, 4096)) > 0)
-                fos.write(buffer, 0, i);
-        } catch (FileNotFoundException ex) {
-            throw new CMyException(
-                    55,
-                    "\u8981\u590D\u5236\u7684\u539F\u6587\u4EF6\u6CA1\u6709\u53D1\u73B0(CMyFile.copyFile)",
-                    ex);
-        } catch (IOException ex) {
-            throw new CMyException(
-                    50,
-                    "\u590D\u5236\u6587\u4EF6\u65F6\u53D1\u751F\u5F02\u5E38(CMyFile.copyFile)",
-                    ex);
-        } finally {
-            IOUtils.closeQuietly(fos);
-
+    public File[] listFiles(String _dir, String _extendName) {
+        File fDir = new File(_dir);
+        if (_extendName.charAt(0) != '.') {
+            _extendName = "." + _extendName;
         }
-
-        return true;
+        File Files[] = fDir.listFiles(new CMyFilenameFilter(_extendName));
+        return Files;
     }
 
     public static void main(String args[]) {

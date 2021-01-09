@@ -27,7 +27,6 @@ public class DataSourceH2 {
     public DataSource getDataSource(){
         DatabaseConfig databaseConfig = new DatabaseConfig();
         databaseConfig.setAlias("h2");
-        //databaseConfig.setDburl("jdbc:h2:~/test");
         databaseConfig.setClassName("org.h2.Driver");
         databaseConfig.setDburl("jdbc:h2:mem:test;MODE=MySQL");
         databaseConfig.setUsername("sa");

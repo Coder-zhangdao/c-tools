@@ -32,10 +32,11 @@ public class FKDefinition
 	{
 		FKtable = pFKTable;
 		PKtable = pPKTable;
-		if ( pFKName != null )
-			FKname = pFKName;
-		else
-			FKname = FKtable + PKtable;
+		if ( pFKName != null ) {
+            FKname = pFKName;
+        } else {
+            FKname = FKtable + PKtable;
+        }
 		FKfields = new ArrayList<>();
 		PKfields = new ArrayList<>();
 	}

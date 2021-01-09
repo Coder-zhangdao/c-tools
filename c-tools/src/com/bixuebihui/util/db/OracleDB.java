@@ -23,99 +23,121 @@ public class OracleDB extends DBType {
         super(_sName, _sDriverClass, true);
     }
 
+    @Override
     public String encodeStrToWrite(String _strSrc) {
         return _strSrc;
     }
 
+    @Override
     public boolean canWriteTextDirectly() {
         return false;
     }
 
+    @Override
     public DataType[] getAllDataTypes() {
         return m_allDataTypes;
     }
 
+    @Override
     public DataType[] getSupportedDataTypes() {
         return m_supportedDataTypes;
     }
 
+    @Override
     public String sqlConcatStr(String _strSQL1, String _strSQL2) {
         return "CONCAT(" + _strSQL1 + "," + _strSQL2 + ")";
     }
 
+    @Override
     public String sqlConcatStr(String _strSQL1, String _strSQL2, String _strSQL3) {
         return "CONCAT(CONCAT(" + _strSQL1 + "," + _strSQL2 + ")," + _strSQL3 + ")";
     }
 
+    @Override
     public String sqlConcatStr(String _strSQLs[]) {
         String sRet = "CONCAT(" + _strSQLs[0] + "," + _strSQLs[1] + ")";
-        for (int i = 2; i < _strSQLs.length; i++)
+        for (int i = 2; i < _strSQLs.length; i++) {
             sRet = "CONCAT(" + sRet + "," + _strSQLs[i] + ")";
+        }
 
         return sRet;
     }
 
+    @Override
     public String sqlFilterForClob(String _sFieldName, String _sValue) {
         return " dbms_lob.instr(" + _sFieldName + ",'" + CMyString.filterForSQL(_sValue) + "',1,1)>0 ";
     }
 
+    @Override
     public String sqlAddField(String _sTableName, String _sFieldName, String _sFieldType, int _nMaxLength, boolean _bNullable, String _sDefaultValue, int _nScale) {
         String strSQL = "ALTER TABLE " + _sTableName + " ADD( " + _sFieldName + " " + _sFieldType;
         DataType dataType = getDataType(_sFieldType);
-        if (dataType == null)
+        if (dataType == null) {
             return null;
-        if (dataType.isLengthDefinedByUser())
-            if (_nScale > 0)
+        }
+        if (dataType.isLengthDefinedByUser()) {
+            if (_nScale > 0) {
                 strSQL = strSQL + "(" + _nMaxLength + ", " + _nScale + ")";
-            else
+            } else {
                 strSQL = strSQL + "(" + _nMaxLength + ")";
+            }
+        }
         if (_bNullable) {
             strSQL = strSQL + " NULL";
         } else {
             if (_sDefaultValue != null) {
                 strSQL = strSQL + " DEFAULT ";
-                if (dataType.isCharData())
+                if (dataType.isCharData()) {
                     strSQL = strSQL + "'" + CMyString.filterForSQL(_sDefaultValue) + "'";
-                else
+                } else {
                     strSQL = strSQL + _sDefaultValue;
+                }
             }
             strSQL = strSQL + " NOT NULL ";
         }
         return strSQL + ")";
     }
 
+    @Override
     public String sqlDropField(String _sTableName, String _sFieldNames)
             throws Exception {
         return "ALTER TABLE " + _sTableName + " DROP( " + _sFieldNames + " )";
     }
 
+    @Override
     public String sqlGetSysDate() {
         return "SYSDATE";
     }
 
+    @Override
     public String sqlFilterOneDay(String _sFieldName, String _sDateTime, String _sFormat) {
         return _sFieldName + " like to_date('" + _sDateTime + "','" + _sFormat + "')";
     }
 
+    @Override
     public String sqlDateTime(String _sDateTime, String _sFormat) {
         return "to_date('" + _sDateTime + "','" + _sFormat + "')";
     }
 
+    @Override
     public String sqlDate(String _sDateTime) {
         return sqlDateTime(_sDateTime, "yyyy-MM-dd HH24:MI:SS");
     }
 
+    @Override
     public String sqlDateField(String _sDateField) {
         return _sDateField;
     }
 
+    @Override
     public String initQuerySQL(String _strSql, int _nStartIndex, int _nSize) {
         StringBuffer querySQL = new StringBuffer();
         // OracleDB _tmp = this;
-        if (_nSize != 9999)
+        if (_nSize != 9999) {
             querySQL.append("select * from (select my_table.*,rownum as my_rownum from(").append(_strSql).append(") my_table where rownum<").append(_nStartIndex + _nSize).append(") where my_rownum>=").append(_nStartIndex);
-        else
+        } else {
             querySQL.append("select * from (select my_table.*,rownum as my_rownum from(").append(_strSql).append(") my_table ").append(") where my_rownum>=").append(_nStartIndex);
+        }
         return querySQL.toString();
     }
 
@@ -156,11 +178,13 @@ public class OracleDB extends DBType {
         });
     }
 
+    @Override
     public boolean setClob(Connection connection, String s, String s1, String s2, String s3, String s4) throws CMyException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean setClob(Connection connection, String s, String s1, String s2, String[] as) throws CMyException {
         // TODO Auto-generated method stub
         return false;

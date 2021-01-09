@@ -31,7 +31,7 @@ import java.util.Locale;
  * the associated servlet context log file, before allowing the servlet to
  * process the request in the usual way. This can be installed as needed to
  * assist in debugging problems.
- * 
+ *
  * @author Craig McClanahan
  * @version $Revision: 1.2 $ $Date: 2004/03/18 16:40:28 $
  */
@@ -51,6 +51,7 @@ public final class RequestDumperFilter implements Filter {
 	/**
 	 * Take this filter out of service.
 	 */
+	@Override
 	public void destroy() {
 
 		this.filterConfig = null;
@@ -60,24 +61,26 @@ public final class RequestDumperFilter implements Filter {
 	/**
 	 * Time the processing that is performed by all subsequent com.bixuebihui.filters in the
 	 * current filter stack, including the ultimately invoked servlet.
-	 * 
+	 *
 	 * @param request
 	 *            The servlet request we are processing
 	 * @param response
 	 *            The servlet response we are creating
 	 * @param chain
 	 *            The filter chain we are processing
-	 * 
+	 *
 	 * @exception IOException
 	 *                if an input/output error occurs
 	 * @exception ServletException
 	 *                if a servlet error occurs
 	 */
+	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+						 FilterChain chain) throws IOException, ServletException {
 
-		if (filterConfig == null)
-			return;
+		if (filterConfig == null) {
+            return;
+        }
 
 		// Render the generic servlet request properties
 		StringWriter sw = new StringWriter();
@@ -93,10 +96,11 @@ public final class RequestDumperFilter implements Filter {
 		boolean first = true;
 		while (locales.hasMoreElements()) {
 			Locale locale = (Locale) locales.nextElement();
-			if (first)
-				first = false;
-			else
-				writer.print(", ");
+			if (first) {
+                first = false;
+            } else {
+                writer.print(", ");
+            }
 			writer.print(locale.toString());
 		}
 		writer.println();
@@ -106,8 +110,9 @@ public final class RequestDumperFilter implements Filter {
 			writer.print("         parameter=" + name + "=");
 			String values[] = request.getParameterValues(name);
 			for (int i = 0; i < values.length; i++) {
-				if (i > 0)
-					writer.print(", ");
+				if (i > 0) {
+                    writer.print(", ");
+                }
 				writer.print(values[i]);
 			}
 			writer.println();
@@ -126,8 +131,9 @@ public final class RequestDumperFilter implements Filter {
 			HttpServletRequest req = (HttpServletRequest) request;
 			writer.println("       contextPath=" + req.getContextPath());
 			Cookie cookies[] = req.getCookies();
-			if (cookies == null)
-				cookies = new Cookie[0];
+			if (cookies == null) {
+                cookies = new Cookie[0];
+            }
 			for (int i = 0; i < cookies.length; i++) {
 				writer.println("            cookie=" + cookies[i].getName()
 						+ "=" + cookies[i].getValue());
@@ -164,10 +170,11 @@ public final class RequestDumperFilter implements Filter {
 
 	/**
 	 * Place this filter into service.
-	 * 
+	 *
 	 * @param filterConfig
 	 *            The filter configuration object
 	 */
+	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 
 		this.filterConfig = filterConfig;
@@ -177,10 +184,12 @@ public final class RequestDumperFilter implements Filter {
 	/**
 	 * Return a String representation of this object.
 	 */
+	@Override
 	public String toString() {
 
-		if (filterConfig == null)
-			return ("RequestDumperFilter()");
+		if (filterConfig == null) {
+            return ("RequestDumperFilter()");
+        }
 		StringBuilder sb = new StringBuilder("RequestDumperFilter(");
 		sb.append(filterConfig);
 		sb.append(")");

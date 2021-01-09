@@ -27,8 +27,9 @@ public class CookieUtil {
     public static void setCookie(String name, String value, Integer time, HttpServletResponse response) {
         try {
             //关键点
-            if (value != null)
+            if (value != null) {
                 value = java.net.URLEncoder.encode(value, "UTF-8");
+            }
         } catch (java.io.UnsupportedEncodingException e) {
         }
         Cookie cookie = new Cookie(name, value);
@@ -54,8 +55,9 @@ public class CookieUtil {
 
                         //关键点
                         value = c.getValue();
-                        if (value != null)
+                        if (value != null) {
                             value = java.net.URLDecoder.decode(value, "UTF-8");
+                        }
 
 
                     } catch (java.io.UnsupportedEncodingException e) {

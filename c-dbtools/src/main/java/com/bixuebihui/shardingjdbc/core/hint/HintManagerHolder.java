@@ -46,7 +46,9 @@ public final class HintManagerHolder {
      * @param hintManager hint manager instance
      */
     public static void setHintManager(final HintManager hintManager) {
-        if(null != HINT_MANAGER_HOLDER.get()) throw new RuntimeException( "HintManagerHolder has previous value, please clear first.");
+        if(null != HINT_MANAGER_HOLDER.get()) {
+            throw new RuntimeException( "HintManagerHolder has previous value, please clear first.");
+        }
         HINT_MANAGER_HOLDER.set(hintManager);
     }
 

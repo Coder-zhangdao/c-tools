@@ -17,6 +17,27 @@ public class ColumnData implements Serializable {
   boolean isAutoIncrement;
 
 
+  //注释
+  String remarks;
+
+// NB "TEXT" is my own add on!
+  static String[] sqlTypes = { "CHAR","TINYINT","BIGINT","INT",
+                               "SMALLINT","FLOAT","REAL","DOUBLE",
+                               "NUMERIC","DECIMAL","DATE","VARCHAR",
+                               "LONGVARCHAR","TIMESTAMP","TIME","BIT",
+                               "BINARY","VARBINARY","LONGVARBINARY","NULL",
+                               "OTHER","TEXT", "CLOB","NVARCHAR",
+                               "NTEXT","DATETIME","SYSNAME", "VARBINARY",
+                               "NCHAR"};
+  //sysname in sql server is nvarchar(128) NOT NULL
+
+
+  long cid;
+  int type;
+  long columns;//数字类型的位数或字符类型的最大长度
+  long decimalDigits =0;
+  String name;
+  boolean isNullable;
 /**
   * Standard constructor.
   * Requires name, XOPEN type, number of columns.
@@ -48,14 +69,16 @@ public class ColumnData implements Serializable {
 
     case 2:
     	  if(columns>1) {
-              type = 3; //derby numeric(n), added by Xing
+              //derby numeric(n), added by Xing
+              type = 3;
           } else {
               type=16;
           }
     	break;
     case 3:
   	  if(decimalDigits>0) {
-          type = 8; //mysql decimal(n, decimalDigits);
+          //mysql decimal(n, decimalDigits);
+          type = 8;
       }
 
   	break;
@@ -160,25 +183,7 @@ public class ColumnData implements Serializable {
       type = 12;
     }
   }
-
-// NB "TEXT" is my own add on!
-  static String[] sqlTypes = { "CHAR","TINYINT","BIGINT","INT",
-                               "SMALLINT","FLOAT","REAL","DOUBLE",
-                               "NUMERIC","DECIMAL","DATE","VARCHAR",
-                               "LONGVARCHAR","TIMESTAMP","TIME","BIT",
-                               "BINARY","VARBINARY","LONGVARBINARY","NULL",
-                               "OTHER","TEXT", "CLOB","NVARCHAR",
-                               "NTEXT","DATETIME","SYSNAME", "VARBINARY",
-                               "NCHAR"};
-  //sysname in sql server is nvarchar(128) NOT NULL
-
-
-  long cid;
-  int type;
-  long columns;//数字类型的位数或字符类型的最大长度
-  long decimalDigits =0;
-  String name;
-  boolean isNullable;
+  String defaultValue;
 /**
   * Constructor with column type as a String.
   * Requires name, type, number of columns.
@@ -192,12 +197,15 @@ public class ColumnData implements Serializable {
 
     int i=0;
     boolean quit = false;
-    this.type = -1;  // invalid
+
+    // invalid
+    this.type = -1;
     while (!quit)
     {
       if (coltype.toUpperCase().compareTo(sqlTypes[i]) == 0)
       {
-        this.type = i+1;  // starts at 1
+        // starts at 1
+        this.type = i+1;
         quit = true;
       }
 
@@ -211,8 +219,6 @@ public class ColumnData implements Serializable {
         System.out.println("Column name : "+name+" Type : "+coltype+" is unknown");
     }
   }
-  String defaultValue;
-  String remarks;//注释
 
 
   public static ColumnData valueOf(T_metacolumn src){

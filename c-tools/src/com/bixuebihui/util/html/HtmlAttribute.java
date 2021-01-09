@@ -100,41 +100,49 @@ public class HtmlAttribute
 
     public boolean getBooleanValue()
             throws CMyException {
-        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("on") || value.equalsIgnoreCase("yes"))
+        if ("true".equalsIgnoreCase(value) || "on".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value)) {
             return true;
-        if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("off") || value.equalsIgnoreCase("no"))
+        }
+        if ("false".equalsIgnoreCase(value) || "off".equalsIgnoreCase(value) || "no".equalsIgnoreCase(value)) {
             return false;
-        else
+        } else {
             throw new CMyException(2, "\u6570\u636E\u8F6C\u6362\u9519\u8BEF\uFF1A\u65E0\u6548\u7684boolean\u503C\uFF08HtmlAttribute.getBooleanValue\uFF09");
+        }
     }
 
     public HtmlDocument getDocument() {
-        if (parent != null)
+        if (parent != null) {
             return parent.getDocument();
-        else
+        } else {
             return null;
+        }
     }
 
+    @Override
     public Object clone() {
         HtmlAttribute attribute = new HtmlAttribute(name, value);
         attribute.setParent(null);
         return attribute;
     }
 
+    @Override
     public final String toString() {
         char chrQuote = '"';
-        if (value != null && value.indexOf('"') >= 0)
+        if (value != null && value.indexOf('"') >= 0) {
             chrQuote = '\'';
-        if (value != null && value.indexOf('\'') < 0)
+        }
+        if (value != null && value.indexOf('\'') < 0) {
             chrQuote = '\'';
+        }
         return name + '=' + chrQuote + value + chrQuote;
     }
 
     public boolean fromString(String _strSrc) {
         _strSrc = _strSrc.trim();
         int nPos = _strSrc.indexOf('=');
-        if (nPos < 0)
+        if (nPos < 0) {
             return false;
+        }
         name = _strSrc.substring(0, nPos).trim();
         int nEnd = _strSrc.length();
         boolean bDelHead = false;
@@ -144,8 +152,9 @@ public class HtmlAttribute
             bDelHead = true;
         }
         value = _strSrc.substring(nPos + 1, nEnd).trim();
-        if (bDelHead && value.length() > 0 && value.charAt(0) == chrLast)
+        if (bDelHead && value.length() > 0 && value.charAt(0) == chrLast) {
             value = value.substring(1);
+        }
         return true;
     }
 

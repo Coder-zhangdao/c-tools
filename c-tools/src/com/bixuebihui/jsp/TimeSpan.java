@@ -336,10 +336,12 @@ public class TimeSpan implements ISqlConditionType {
         String color1 = " class=\"modified span1\" ";
         String color2 = " class=\"modified span1\" ";
 
-        if (this.beginDate == null)
+        if (this.beginDate == null) {
             color1 = "class=\"span1\"";
-        if (this.endDate == null)
+        }
+        if (this.endDate == null) {
             color2 = "class=\"span1\"";
+        }
 
         if (title != null) {
             sb.append("<span title=").append(Util.makeQuotedStr(title)).append(">");
@@ -506,8 +508,9 @@ public class TimeSpan implements ISqlConditionType {
 
             Calendar begin_date = new GregorianCalendar(beginYear,
                     beginMonth - 1, beginDay, 0, 0, 0);
-            if (beginYear > MIN_BEGIN_YEAR)
+            if (beginYear > MIN_BEGIN_YEAR) {
                 beginDate = begin_date.getTime();
+            }
         }
 
         if (ParameterUtils.getCookieAndRequestInt(request, getEYearName(), 0) > 0) {
@@ -545,12 +548,13 @@ public class TimeSpan implements ISqlConditionType {
                 return this.getMysqlSqlCondition(sqlFieldName);
             case BaseDao.ORACLE:
                 return this.getOracleSqlCondition(sqlFieldName);
+            default:{
+                Log log = LogFactory.getLog(TimeSpan.class);
+                log.warn("databaseType=" + databaseType + " not implement in  TimeSpan");
+                return this.getMysqlSqlCondition(sqlFieldName);
+            }
         }
-        Log log = LogFactory.getLog(TimeSpan.class);
 
-        log.warn("databaseType=" + databaseType + " not implement in  TimeSpan");
-
-        return this.getMysqlSqlCondition(sqlFieldName);
     }
 
     @Override

@@ -1,11 +1,16 @@
 package com.bixuebihui.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
 
+/**
+ * @author xwx
+ */
 public class DateConverter {
 
     public static final String DATE_SEP = "-";
@@ -36,13 +41,24 @@ public class DateConverter {
         String month = "";
         String day = "";
 
-        if (strDate.contains(" ")) strDate = strDate.replaceAll(" ", DATE_SEP);
-        if (strDate.contains(".")) strDate = strDate.replaceAll("\\.", DATE_SEP);
-        if (strDate.contains("．")) strDate = strDate.replaceAll("．", DATE_SEP);
-        if (strDate.contains("、")) strDate = strDate.replaceAll("、", DATE_SEP);
-        if (strDate.contains("--")) strDate = strDate.replaceAll("--", DATE_SEP);
+        if (strDate.contains(" ")) {
+            strDate = strDate.replaceAll(" ", DATE_SEP);
+        }
+        if (strDate.contains(".")) {
+            strDate = strDate.replaceAll("\\.", DATE_SEP);
+        }
+        if (strDate.contains("．")) {
+            strDate = strDate.replaceAll("．", DATE_SEP);
+        }
+        if (strDate.contains("、")) {
+            strDate = strDate.replaceAll("、", DATE_SEP);
+        }
+        if (strDate.contains("--")) {
+            strDate = strDate.replaceAll("--", DATE_SEP);
+        }
 
-        if (isNumeric(strDate) && strDate.length() == 8) { //format yyyyMMdd
+        if (isNumeric(strDate) && strDate.length() == 8) {
+            //format yyyyMMdd
             strDate = strDate.substring(0, 4) + DATE_SEP + strDate.substring(4, 6) + DATE_SEP + strDate.substring(6, 8);
         }
 
@@ -72,12 +88,15 @@ public class DateConverter {
             return cal.getTime();
         }
 
-        if (year.equals(""))
+        if ("".equals(year)) {
             year = "1900";
-        if (month.equals(""))
+        }
+        if ("".equals(month)) {
             month = "01";
-        if (day.equals(""))
+        }
+        if ("".equals(day)) {
             day = "01";
+        }
 
 
         return makeDate(year, month, day);
@@ -104,7 +123,7 @@ public class DateConverter {
         java.sql.Date dt = null;
         try {
             SimpleDateFormat formatter = new java.text.SimpleDateFormat(
-                    "yyyy-MM-dd"); // 格式化日期
+                    "yyyy-MM-dd");
             java.util.Date kz_zdValueDate = formatter.parse(postTime);
 
             dt = new java.sql.Date(kz_zdValueDate.getTime());
@@ -116,10 +135,8 @@ public class DateConverter {
     }
 
 
-    // 利用正規表達式比對輸入的資料是否為數字
     public static boolean isNumeric(String str) {
-        Pattern pattern = Pattern.compile("[0-9]+");
-        return pattern.matcher(str).matches();
+        return StringUtils.isNumeric(str);
     }
 
 }

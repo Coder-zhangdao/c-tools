@@ -23,6 +23,7 @@ public class PagePublisher implements Job {
         return LastWriteDate;
     }
 
+    @Override
     public void execute(JobExecutionContext jxContext)
             throws JobExecutionException {
         try {

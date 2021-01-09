@@ -19,14 +19,16 @@ public class CMyErrors {
     }
 
     public CMyErrors add(String _sError) {
-        if (_sError != null)
+        if (_sError != null) {
             vErrors.add(_sError);
+        }
         return this;
     }
 
     public CMyErrors add(Exception _ex) {
-        if (_ex != null)
+        if (_ex != null) {
             vErrors.add(_ex);
+        }
         return this;
     }
 
@@ -55,25 +57,29 @@ public class CMyErrors {
         return this;
     }
 
+    @Override
     public String toString() {
         return toString(true);
     }
 
     public String toString(boolean _bIncludingNo) {
-        if (vErrors.size() == 0)
+        if (vErrors.size() == 0) {
             return "";
+        }
         StringBuffer buff = new StringBuffer();
         for (int i = 0; i < vErrors.size(); i++) {
             Object objError = vErrors.get(i);
             if (objError != null) {
-                if (_bIncludingNo)
+                if (_bIncludingNo) {
                     buff.append("(" + i + ")");
-                if (objError instanceof String)
+                }
+                if (objError instanceof String) {
                     buff.append((String) objError).append("\n");
-                else if (objError instanceof CMyException)
+                } else if (objError instanceof CMyException) {
                     buff.append(((CMyException) objError).toString()).append("\n");
-                else if (objError instanceof Exception)
+                } else if (objError instanceof Exception) {
                     buff.append(((Exception) objError).toString()).append("\n");
+                }
             }
         }
 

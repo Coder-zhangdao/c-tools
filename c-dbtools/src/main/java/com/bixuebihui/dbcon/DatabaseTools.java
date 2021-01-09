@@ -20,8 +20,9 @@ public class DatabaseTools extends BaseOperator
      */
     public String getMaxvalue(String tblname, String colname, String condition) {
         String sqlstr = "select MAX("+colname+") from "+tblname;
-        if(condition != null && condition.length()>3)
+        if(condition != null && condition.length()>3) {
             sqlstr = sqlstr + " where "+condition;
+        }
         try {
             getResultSet(sqlstr);
             if(rst.next()) {
@@ -66,8 +67,9 @@ public class DatabaseTools extends BaseOperator
         String seqsql = "select "+seq_name+".NEXTVAL from DUAL";			//CURRVAL
         try {
             getResultSet(seqsql);
-            if(rst.next())
+            if(rst.next()) {
                 return rst.getInt(1);
+            }
         } catch(SQLException sqle) {
             System.out.println("SQL Error@DT.getNextSequence:"+sqle.getMessage());
         } finally {

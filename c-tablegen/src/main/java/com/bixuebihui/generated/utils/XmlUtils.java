@@ -99,8 +99,9 @@ public class XmlUtils {
 	            Element nodesElement = document.getRootElement();
 
 	            Element subNodeElement = getSubNode(subNodeName, nodesElement);
-	            if(subNodeElement==null)
-	            	return null;
+	            if(subNodeElement==null) {
+                    return null;
+                }
 
 	            List nodes = subNodeElement.elements();
 	            for (Iterator its = nodes.iterator(); its.hasNext();) {
@@ -119,14 +120,16 @@ public class XmlUtils {
 		private static Element getSubNode(String subNodeName,
 				Element nodesElement) {
 			Element subNodeElement =null;
-			if(subNodeName.indexOf('/')<0)
-				subNodeElement = nodesElement.element(subNodeName);
-			else{
+			if(subNodeName.indexOf('/')<0) {
+                subNodeElement = nodesElement.element(subNodeName);
+            } else{
 				String[] paths = subNodeName.split("\\/");
 				subNodeElement = nodesElement;
 				for(String p:paths){
 					subNodeElement = subNodeElement.element(p);
-					if(subNodeElement==null) break;
+					if(subNodeElement==null) {
+                        break;
+                    }
 				}
 			}
 			return subNodeElement;

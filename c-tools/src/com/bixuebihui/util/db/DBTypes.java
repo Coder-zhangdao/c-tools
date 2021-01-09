@@ -16,10 +16,11 @@ public class DBTypes {
     }
 
     public static DBType getDBType(int _nDBType) {
-        if (_nDBType < 1 || _nDBType > allDBTypes.length)
+        if (_nDBType < 1 || _nDBType > allDBTypes.length) {
             return null;
-        else
+        } else {
             return allDBTypes[_nDBType - 1];
+        }
     }
 
     public static void main(String args[]) {

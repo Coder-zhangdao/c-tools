@@ -2,7 +2,11 @@ package com.bixuebihui.cache;
 
 public class CacheConfig {
 
-	int capacity = 10000;//max number of items to cache
+	/**
+	 *
+	max number of items to cache
+	 */
+	int capacity = 10000;
 
 
 

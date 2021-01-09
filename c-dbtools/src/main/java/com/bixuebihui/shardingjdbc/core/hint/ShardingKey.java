@@ -18,6 +18,8 @@
 package com.bixuebihui.shardingjdbc.core.hint;
 
 
+import java.util.Objects;
+
 /**
  * Sharding key.
  *
@@ -46,5 +48,22 @@ public final class ShardingKey {
     public ShardingKey(final String logicTable, final String shardingColumn) {
         this.logicTable = logicTable.toLowerCase();
         this.shardingColumn = shardingColumn.toLowerCase();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ShardingKey that = (ShardingKey) o;
+        return logicTable.equals(that.logicTable) && shardingColumn.equals(that.shardingColumn);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(logicTable, shardingColumn);
     }
 }

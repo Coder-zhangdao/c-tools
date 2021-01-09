@@ -23,6 +23,7 @@ public class PooledStatement
      *
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public void close()
             throws SQLException {
         stmt.setMaxRows(0);
@@ -53,6 +54,7 @@ public class PooledStatement
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultSet executeQuery(String s)
             throws SQLException {
         lastQuerySQL = s;
@@ -60,6 +62,7 @@ public class PooledStatement
     }
 
     /** {@inheritDoc} */
+    @Override
     public int executeUpdate(String s)
             throws SQLException {
         lastUpdateSQL = s;
@@ -72,12 +75,14 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getMaxFieldSize()
             throws SQLException {
         return stmt.getMaxFieldSize();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setMaxFieldSize(int i)
             throws SQLException {
         stmt.setMaxFieldSize(i);
@@ -89,18 +94,21 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getMaxRows()
             throws SQLException {
         return stmt.getMaxRows();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setMaxRows(int i)
             throws SQLException {
         stmt.setMaxRows(i);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setEscapeProcessing(boolean flag)
             throws SQLException {
         stmt.setEscapeProcessing(flag);
@@ -112,12 +120,14 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getQueryTimeout()
             throws SQLException {
         return stmt.getQueryTimeout();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setQueryTimeout(int i)
             throws SQLException {
         stmt.setQueryTimeout(i);
@@ -128,6 +138,7 @@ public class PooledStatement
      *
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public void cancel()
             throws SQLException {
         stmt.cancel();
@@ -139,6 +150,7 @@ public class PooledStatement
      * @return a {@link java.sql.SQLWarning} object.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public SQLWarning getWarnings()
             throws SQLException {
         return stmt.getWarnings();
@@ -149,18 +161,21 @@ public class PooledStatement
      *
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public void clearWarnings()
             throws SQLException {
         stmt.clearWarnings();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setCursorName(String s)
             throws SQLException {
         stmt.setCursorName(s);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean execute(String s)
             throws SQLException {
         return stmt.execute(s);
@@ -172,6 +187,7 @@ public class PooledStatement
      * @return a {@link java.sql.ResultSet} object.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public ResultSet getResultSet()
             throws SQLException {
         return stmt.getResultSet();
@@ -183,6 +199,7 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getUpdateCount()
             throws SQLException {
         return stmt.getUpdateCount();
@@ -194,6 +211,7 @@ public class PooledStatement
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public boolean getMoreResults()
             throws SQLException {
         return stmt.getMoreResults();
@@ -221,9 +239,17 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getFetchDirection()
             throws SQLException {
         return stmt.getFetchDirection();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setFetchDirection(int i)
+            throws SQLException {
+        stmt.setFetchDirection(i);
     }
 
     /**
@@ -232,15 +258,10 @@ public class PooledStatement
      * @return an array of int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int[] executeBatch()
             throws SQLException {
         return stmt.executeBatch();
-    }
-
-    /** {@inheritDoc} */
-    public void setFetchSize(int i)
-            throws SQLException {
-        stmt.setFetchSize(i);
     }
 
     /**
@@ -248,12 +269,14 @@ public class PooledStatement
      *
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public void clearBatch()
             throws SQLException {
         stmt.clearBatch();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void addBatch(String s)
             throws SQLException {
         stmt.addBatch(s);
@@ -265,15 +288,10 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getResultSetConcurrency()
             throws SQLException {
         return stmt.getResultSetConcurrency();
-    }
-
-    /** {@inheritDoc} */
-    public void setFetchDirection(int i)
-            throws SQLException {
-        stmt.setFetchDirection(i);
     }
 
     /**
@@ -282,9 +300,17 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getFetchSize()
             throws SQLException {
         return stmt.getFetchSize();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setFetchSize(int i)
+            throws SQLException {
+        stmt.setFetchSize(i);
     }
 
     /**
@@ -293,6 +319,7 @@ public class PooledStatement
      * @return a {@link java.sql.Connection} object.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public Connection getConnection()
             throws SQLException {
         return stmt.getConnection();
@@ -304,6 +331,7 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getResultSetType()
             throws SQLException {
         return stmt.getResultSetType();
@@ -332,6 +360,7 @@ public class PooledStatement
     // added by [xing]
 
     /** {@inheritDoc} */
+    @Override
     public boolean execute(String p, int x)throws SQLException{
         return stmt.execute(p, x);
     }
@@ -344,6 +373,7 @@ public class PooledStatement
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public boolean execute(String p, int[] x)throws SQLException	{
         return stmt.execute(p, x);
     }
@@ -356,6 +386,7 @@ public class PooledStatement
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public boolean execute(String p, String[] x)throws SQLException{
         return stmt.execute(p, x);
     }
@@ -368,6 +399,7 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int executeUpdate(String p, int x)throws SQLException{
         return stmt.executeUpdate(p, x);
     }
@@ -380,6 +412,7 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int executeUpdate(String p, int[] x)	throws SQLException{
         return stmt.executeUpdate(p, x);
     }
@@ -392,6 +425,7 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int executeUpdate(String p, String[] x)throws SQLException{
         return stmt.executeUpdate(p, x);
     }
@@ -402,11 +436,13 @@ public class PooledStatement
      * @return a {@link java.sql.ResultSet} object.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public ResultSet getGeneratedKeys()throws SQLException{
         return stmt.getGeneratedKeys();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getMoreResults(int i)	throws SQLException{
         return stmt.getMoreResults(i);
     }
@@ -417,6 +453,7 @@ public class PooledStatement
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int getResultSetHoldability()	throws SQLException	{
         return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
@@ -427,6 +464,7 @@ public class PooledStatement
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public boolean isClosed() throws SQLException {
         return stmt.isClosed();
     }
@@ -438,17 +476,20 @@ public class PooledStatement
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public boolean isPoolable() throws SQLException {
         return stmt.isPoolable();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setPoolable(boolean poolable) throws SQLException {
         stmt.setPoolable(poolable);
     }
 
 
     /** {@inheritDoc} */
+    @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return stmt.unwrap(iface);
     }
@@ -458,6 +499,7 @@ public class PooledStatement
      *
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public void closeOnCompletion() throws SQLException {
         stmt.closeOnCompletion();
 
@@ -469,6 +511,7 @@ public class PooledStatement
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public boolean isCloseOnCompletion() throws SQLException {
         return stmt.isCloseOnCompletion();
     }

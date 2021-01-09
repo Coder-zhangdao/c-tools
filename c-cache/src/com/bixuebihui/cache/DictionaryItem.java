@@ -38,7 +38,8 @@ public class DictionaryItem {
 	    return s.toString();
 	}
 
-	public String toString(){
+	@Override
+    public String toString(){
 		return "{"+ms_id+","+ms_value+","+ms_sort+"}";
 	}
 }

@@ -18,7 +18,9 @@ public class UrlUtil {
      * @return url及参数
      */
     public static String addOrReplaceParam(String url, String name, String value) {
-        if (value == null || "".equals(value)) return url;
+        if (value == null || "".equals(value)) {
+            return url;
+        }
 
         try {
             value = URLEncoder.encode(value, "UTF-8");
@@ -41,10 +43,11 @@ public class UrlUtil {
             }
             return url;
         } else {
-            if (url.contains("?"))
+            if (url.contains("?")) {
                 return url + "&" + name + "=" + value;
-            else
+            } else {
                 return url + "?" + name + "=" + value;
+            }
         }
 
     }

@@ -17,15 +17,17 @@ public class MacAddressHelper {
     }
 
     public static long getMyMacAsLong(String _sMac) {
-        if (_sMac == null || _sMac.length() <= 0)
+        if (_sMac == null || _sMac.length() <= 0) {
             return 0L;
+        }
         String sMac = _sMac;
         sMac = CMyString.replaceStr(sMac, "-", "");
         long nMac = Long.parseLong(sMac, 16);
         sMac = "" + nMac;
         if (sMac.length() > 12) {
-            for (sMac = sMac.substring(0, 12); sMac.charAt(0) == '0' && sMac.length() > 0; sMac = sMac.substring(1, sMac.length()))
+            for (sMac = sMac.substring(0, 12); sMac.charAt(0) == '0' && sMac.length() > 0; sMac = sMac.substring(1, sMac.length())) {
                 ;
+            }
             nMac = Long.parseLong(sMac);
         }
         return nMac;
@@ -40,8 +42,9 @@ public class MacAddressHelper {
             String nextLine;
             for (String line = bufferedreader.readLine(); line != null; line = nextLine) {
                 nextLine = bufferedreader.readLine();
-                if (line.indexOf("Physical Address") <= 0)
+                if (line.indexOf("Physical Address") <= 0) {
                     continue;
+                }
                 int i = line.indexOf("Physical Address") + 36;
                 s = line.substring(i);
                 break;
@@ -66,8 +69,9 @@ public class MacAddressHelper {
             String line = res != null ? res.toUpperCase() : null;
             for (; line != null; line = nextLine.toUpperCase()) {
                 nextLine = bufferedreader.readLine();
-                if (line.indexOf("HWADDR") <= 0)
+                if (line.indexOf("HWADDR") <= 0) {
                     continue;
+                }
                 int i = line.indexOf("HWADDR") + 7;
                 s = line.substring(i);
                 break;
@@ -95,8 +99,9 @@ public class MacAddressHelper {
             for (; line != null; line = nextLine.toUpperCase()) {
                 nextLine = bufferedreader.readLine();
                 int nPose = line.indexOf("0X");
-                if (nPose <= 0)
+                if (nPose <= 0) {
                     continue;
+                }
                 int nStart = nPose + 2;
                 int nEnd = line.indexOf(" ", nStart);
                 s = line.substring(nStart, nEnd);
@@ -123,20 +128,23 @@ public class MacAddressHelper {
         for (; line != null; line = nextLine) {
             res = bufferedreader.readLine();
             nextLine = res != null ? res.toUpperCase() : "";
-            if (line.indexOf("NEI0") <= 0)
+            if (line.indexOf("NEI0") <= 0) {
                 continue;
+            }
             int nStart = nextLine.indexOf("INET") + 5;
             if (nStart >= 5) {
                 int nEnd = nextLine.indexOf(" ", nStart);
-                if (nEnd > nStart)
+                if (nEnd > nStart) {
                     s = nextLine.substring(nStart, nEnd);
+                }
             }
             break;
         }
 
         bufferedreader.close();
-        if (s.length() <= 8)
+        if (s.length() <= 8) {
             return getMacOnSolaris2();
+        }
         try {
             process.waitFor();
         } catch (Exception ex) {
@@ -158,12 +166,14 @@ public class MacAddressHelper {
             for (; line != null; line = bufferedreader.readLine()) {
                 line = line.toUpperCase();
                 int nStart = line.indexOf("ETHER");
-                if (nStart < 0)
+                if (nStart < 0) {
                     continue;
+                }
                 nStart += 6;
                 int nEnd = line.indexOf(" ", nStart);
-                if (nEnd <= 0)
+                if (nEnd <= 0) {
                     nEnd = line.length();
+                }
                 s = line.substring(nStart, nEnd).trim();
                 break;
             }
@@ -198,22 +208,27 @@ public class MacAddressHelper {
 
     public static String getMyMac() {
         String sOs = ((String) System.getProperties().get("os.name")).toUpperCase();
-        if (sOs.contains("WINDOWS"))
+        if (sOs.contains("WINDOWS")) {
             return getMacOnWindow();
-        if (sOs.contains("HP"))
+        }
+        if (sOs.contains("HP")) {
             return getMacOnHP();
-        if (sOs.contains("LINUX"))
+        }
+        if (sOs.contains("LINUX")) {
             return getMacOnLinux();
-        if (sOs.contains("SOLARIS"))
+        }
+        if (sOs.contains("SOLARIS")) {
             try {
                 return getMacOnSolaris();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        if (sOs.contains("AIX"))
+        }
+        if (sOs.contains("AIX")) {
             return getMacOnAIX();
-        else
+        } else {
             return "";
+        }
     }
 
     public static void main(String args[]) {
@@ -225,8 +240,9 @@ public class MacAddressHelper {
             if (nStart >= 0) {
                 nStart += 6;
                 int nEnd = line.indexOf(" ", nStart);
-                if (nEnd <= 0)
+                if (nEnd <= 0) {
                     nEnd = line.length();
+                }
                 s = line.substring(nStart, nEnd);
             }
             s = CMyString.replaceStr(s, ".", "");

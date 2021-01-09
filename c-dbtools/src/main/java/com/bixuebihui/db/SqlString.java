@@ -42,6 +42,7 @@ public class SqlString {
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String toString() {
         return content;
     }

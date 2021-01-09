@@ -17,11 +17,13 @@ import javax.servlet.http.HttpSessionBindingListener;
 import java.util.Date;
 import java.util.Vector;
 
+/**
+ * @author xwx
+ */
 public class OnLineUser
         implements HttpSessionBindingListener, HttpSessionAttributeListener, ServletContextListener {
 
     Log __log = LogFactory.getLog(OnLineUser.class);
-    ScheduleMonitor cm = null;
 
     public OnLineUser() {
     }
@@ -38,7 +40,7 @@ public class OnLineUser
         users.trimToSize();
         boolean existUser = false;
         for (int i = 0; i < users.capacity(); i++) {
-            if (userName.equals((String) users.get(i))) {
+            if (userName.equals(users.get(i))) {
                 existUser = true;
                 break;
             }
@@ -51,7 +53,7 @@ public class OnLineUser
         if (existUser(userName)) {
             int currUserIndex = -1;
             for (int i = 0; i < users.capacity(); i++) {
-                if (userName.equals((String) users.get(i))) {
+                if (userName.equals(users.get(i))) {
                     currUserIndex = i;
                     break;
                 }
@@ -69,6 +71,7 @@ public class OnLineUser
         return users;
     }
 
+    @Override
     public void valueBound(HttpSessionBindingEvent e) {
         addUser(e.getName());
     }
@@ -85,6 +88,7 @@ public class OnLineUser
         }
     }
 
+    @Override
     public void valueUnbound(HttpSessionBindingEvent e) {
         users.trimToSize();
         String userName = e.getName();
@@ -93,21 +97,17 @@ public class OnLineUser
         __log.info("会话结束：" + userName + "\t 退出系统\t" + (new Date()) + " 在线用户数为：" + getCount());
     }
 
+    @Override
     public void attributeAdded(HttpSessionBindingEvent arg0) {
 
-        //System.out.println("Add Source:"+arg0.getSource());
-        //System.out.println("Name:"+arg0.getName());
-        //System.out.println("Value:"+arg0.getValue());
         if ("user_id".equals(arg0.getName())) {
             addUser(arg0.getValue().toString());
         }
     }
 
+    @Override
     public void attributeRemoved(HttpSessionBindingEvent arg0) {
 
-        //System.out.println("Remove Source:"+arg0.getSource());
-        //System.out.println("Name:"+arg0.getName());
-        //System.out.println("Value:"+arg0.getValue());
         if ("user_id".equals(arg0.getName())) {
             deleteUser(arg0.getValue().toString());
             __log.info("attributeRemoved: " + arg0.getValue().toString() + "\t 退出系统\t" + (new Date()));
@@ -116,6 +116,7 @@ public class OnLineUser
 
     }
 
+    @Override
     public void attributeReplaced(HttpSessionBindingEvent arg0) {
 
         if ("user_id".equals(arg0.getName())) {
@@ -125,6 +126,7 @@ public class OnLineUser
     }
 
 
+    @Override
     public void contextDestroyed(ServletContextEvent event) {
         try {
             ScheduleMonitor.shutdown();
@@ -137,13 +139,12 @@ public class OnLineUser
     }
 
 
+    @Override
     public void contextInitialized(ServletContextEvent event) {
         __log.info("[CYC]系统启动...");
         __log.info(event.getServletContext().getRealPath("/"));
-        //System.out.println("[CYC] Application Listener has been actived!");
-        cm = new ScheduleMonitor();
         try {
-            __log.info("[CYC] 自动监控任务启动:" + cm.run());
+            __log.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
         } catch (Exception e) {
             __log.error(e.getMessage());
         }

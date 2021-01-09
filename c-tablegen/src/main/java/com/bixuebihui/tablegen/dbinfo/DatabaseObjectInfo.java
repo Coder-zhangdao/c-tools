@@ -45,36 +45,42 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
 		_dboType = dboType;
 	}
 
-	public String toString()
+	@Override
+    public String toString()
 	{
 		return getSimpleName();
 	}
 
-	public String getCatalogName()
+	@Override
+    public String getCatalogName()
 	{
 		return _catalog;
 	}
 
-	public String getSchemaName()
+	@Override
+    public String getSchemaName()
 	{
 		return _schema;
 	}
 
-	public String getSimpleName()
+	@Override
+    public String getSimpleName()
 	{
 		return _simpleName;
 	}
 
 
 
-	public DatabaseObjectType getDatabaseObjectType()
+	@Override
+    public DatabaseObjectType getDatabaseObjectType()
 	{
 		return _dboType;
 	}
 
 
 
-	public boolean equals(Object obj)
+	@Override
+    public boolean equals(Object obj)
 	{
 		if (obj instanceof DatabaseObjectInfo)
 		{
@@ -101,13 +107,15 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
 		return false;
 	}
 
-	public int compareTo(Object o)
+	@Override
+    public int compareTo(Object o)
 	{
 		DatabaseObjectInfo other = (DatabaseObjectInfo) o;
 		return _simpleName.compareTo(other._simpleName);
 	}
 
-	public String getQualifiedName() {
+	@Override
+    public String getQualifiedName() {
 		return _simpleName;
 	}
 }

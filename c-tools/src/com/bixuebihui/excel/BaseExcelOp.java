@@ -1,10 +1,10 @@
 package com.bixuebihui.excel;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
+/**
+ * @author xwx
+ */
 public class BaseExcelOp {
 
     protected Workbook workbook = null;
@@ -25,21 +25,21 @@ public class BaseExcelOp {
 
     public Cell createStringCell(Row row, int col, String value) {
         Cell cell = row.createCell(col);
-        cell.setCellType(Cell.CELL_TYPE_STRING);
+        cell.setCellType(CellType.STRING);
         cell.setCellValue(value);
         return cell;
     }
 
     public Cell createNumericalCell(Row row, int col, int value) {
         Cell cell = row.createCell(col);
-        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+        cell.setCellType(CellType.NUMERIC);
         cell.setCellValue(value);
         return cell;
     }
 
     public Cell createNumericalCell(Row row, int col, double value) {
         Cell cell = row.createCell(col);
-        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+        cell.setCellType(CellType.NUMERIC);
         cell.setCellValue(value);
         return cell;
     }

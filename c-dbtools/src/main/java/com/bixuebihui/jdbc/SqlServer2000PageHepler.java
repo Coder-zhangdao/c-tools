@@ -103,16 +103,18 @@ public class SqlServer2000PageHepler {
 		StringBuilder sb = new StringBuilder(substring.length()*2);
 		for (int i = 0; i < arr.length; i++) {
 			sb.append(toggleOrder(arr[i]));
-			if(i != arr.length-1) sb.append(",");
+			if(i != arr.length-1) {
+                sb.append(",");
+            }
 		}
 		return sb.toString();
 	}
 
 	private static String toggleOrder(String ascdesc){
 		ascdesc = ascdesc.trim();
-		if(ascdesc.endsWith(DESC))
-			return ascdesc.substring(0, ascdesc.lastIndexOf(DESC));
-		else if(ascdesc.endsWith(" asc")){
+		if(ascdesc.endsWith(DESC)) {
+            return ascdesc.substring(0, ascdesc.lastIndexOf(DESC));
+        } else if(ascdesc.endsWith(" asc")){
 			ascdesc = ascdesc.substring(0, ascdesc.lastIndexOf(" asc"));
 		}
 		return ascdesc+DESC;

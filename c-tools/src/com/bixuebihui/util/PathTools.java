@@ -117,8 +117,9 @@ public class PathTools {
      * 获取类的class文件位置的URL。这个方法是本类最基础的方法，供其它方法调用。
      */
     private static URL getClassLocationURL(final Class cls) {
-        if (cls == null)
+        if (cls == null) {
             throw new IllegalArgumentException("null input: cls");
+        }
         URL result = null;
         final String clsAsResource = cls.getName().replace('.', '/')
                 .concat(".class");
@@ -132,8 +133,9 @@ public class PathTools {
             final CodeSource cs = pd.getCodeSource();
             // 'cs' can be null depending on
             // the classloader behavior:
-            if (cs != null)
+            if (cs != null) {
                 result = cs.getLocation();
+            }
 
             if (result != null) {
                 // Convert a code source location into
@@ -142,12 +144,13 @@ public class PathTools {
                 if ("file".equals(result.getProtocol())) {
                     try {
                         if (result.toExternalForm().endsWith(".jar")
-                                || result.toExternalForm().endsWith(".zip"))
+                                || result.toExternalForm().endsWith(".zip")) {
                             result = new URL("jar:"
                                     .concat(result.toExternalForm())
                                     .concat("!/").concat(clsAsResource));
-                        else if (new File(result.getFile()).isDirectory())
+                        } else if (new File(result.getFile()).isDirectory()) {
                             result = new URL(result, clsAsResource);
+                        }
                     } catch (MalformedURLException ignore) {
                         mLog.warn(ignore);
                     }

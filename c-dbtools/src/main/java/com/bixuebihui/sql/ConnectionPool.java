@@ -24,6 +24,7 @@ import java.util.concurrent.Executor;
  * @author xingwx
  * @version $Id: $Id
  */
+@SuppressWarnings("AliControlFlowStatementWithoutBraces")
 public class ConnectionPool {
 
     private static final int MIN_TIMEOUT_MILLI_SECONDS = 100;
@@ -119,14 +120,51 @@ public class ConnectionPool {
         return connVector.size();
     }
 
-    private void debug(Exception e) {
-        if (trace)
-            log.debug(e);
+    /**
+     * <p>Constructor for ConnectionPool.</p>
+     *
+     * @param alias a {@link java.lang.String} object.
+     * @param url a {@link java.lang.String} object.
+     * @param username a {@link java.lang.String} object.
+     * @param password a {@link java.lang.String} object.
+     * @param maxConn a int.
+     * @param timeoutMilliSeconds a int.
+     * @param checkoutMilliSeconds a int.
+     * @param maxCheckout a int.
+     * @param maxPrepStmts a int.
+     */
+    public ConnectionPool(String alias, String url, String username,
+                          String password, int maxConn, int timeoutMilliSeconds, int checkoutMilliSeconds,
+                          int maxCheckout, int maxPrepStmts) {
+        numConnectionFaults = 0;
+        prefetchSize = -1;
+        this.timeoutMilliSeconds = timeoutMilliSeconds;
+        if (this.timeoutMilliSeconds < CONNECTION_TIMEOUT) {
+            this.timeoutMilliSeconds = CONNECTION_TIMEOUT;
+        }
+
+        this.checkoutMilliSeconds = checkoutMilliSeconds;
+        this.alias = alias;
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.maxConn = maxConn;
+        this.maxCheckout = maxCheckout;
+        numRequests = 0;
+        numWaits = 0;
+        numCheckoutTimeout = 0;
+        connVector = new Vector<>(maxConn);
+
+        trace = false;
+        cacheStatements = true;
+
+        this.maxPrepStmts = maxPrepStmts;
     }
 
-    private void debug(String msg) {
-        if (trace)
-            log.debug(CONNECTION_POOL + alias + " " + msg);
+    private void debug(Exception e) {
+        if (trace) {
+            log.debug(e);
+        }
     }
 
     private void warn(String warning) {
@@ -185,15 +223,10 @@ public class ConnectionPool {
         debug(" reapIdleConnections() finished");
     }
 
-    /**
-     * <p>removeAllConnections.</p>
-     */
-    public synchronized void removeAllConnections() {
-        debug(" removeAllConnections() called");
-        PooledConnection pooledconnection;
-        for (; !connVector.isEmpty(); removeConnection(pooledconnection))
-            pooledconnection = connVector.firstElement();
-
+    private void debug(String msg) {
+        if (trace) {
+            log.debug(CONNECTION_POOL + alias + " " + msg);
+        }
     }
 
     private void removeConnection(PooledConnection pooledconnection) {
@@ -216,6 +249,36 @@ public class ConnectionPool {
     }
 
     /**
+     * <p>removeAllConnections.</p>
+     */
+    public synchronized void removeAllConnections() {
+        debug(" removeAllConnections() called");
+        PooledConnection pooledconnection;
+        for (; !connVector.isEmpty(); removeConnection(pooledconnection)) {
+            pooledconnection = connVector.firstElement();
+        }
+
+    }
+
+    private synchronized Connection releaseConnection(PooledConnection pooledconnection) {
+        if (trace) {
+            //pooledconnection.setTraceException(ExceptionUtils.getFullStackTrace(new Throwable()));
+            pooledconnection.setTraceException(ExceptionUtils.getStackTrace(new Throwable()));
+        }
+        return pooledconnection;
+    }
+
+
+    /**
+     * Set the setNetworkTimeout little bit longer than my own SQL execution timeout
+     *
+     * @return timeoutMilliSeconds*15/10
+     */
+    private int getNetworkTimeout() {
+        return timeoutMilliSeconds * 15 / 10;
+    }
+
+    /**
      * <p>getConnection.</p>
      *
      * @return a {@link java.sql.Connection} object.
@@ -229,8 +292,9 @@ public class ConnectionPool {
             do {
                 for (int i = 0; i < connVector.size(); i++) {
                     PooledConnection pooledconnection = connVector.elementAt(i);
-                    if (pooledconnection.getLock())
+                    if (pooledconnection.getLock()) {
                         return releaseConnection(pooledconnection);
+                    }
                 }
 
                 debug(" all connections locked.  calling" + " createConnection()");
@@ -247,7 +311,9 @@ public class ConnectionPool {
                             pooledconnection1.setNetworkTimeout(executor, getNetworkTimeout());
                             debug("create connection with timeoutMiliSeconds = " + timeoutMilliSeconds);
                         } catch (SQLException e) {
-                            if (trace) log.warn(e);
+                            if (trace) {
+                                log.warn(e);
+                            }
                         }
                     } else {
                         debug(" timeoutMiliSeconds = " + timeoutMilliSeconds + ", which is too small to set ");
@@ -269,37 +335,6 @@ public class ConnectionPool {
         } while (true);
     }
 
-    private synchronized Connection releaseConnection(PooledConnection pooledconnection) {
-        if (trace) {
-            //pooledconnection.setTraceException(ExceptionUtils.getFullStackTrace(new Throwable()));
-            pooledconnection.setTraceException(ExceptionUtils.getStackTrace(new Throwable()));
-        }
-        return pooledconnection;
-    }
-
-
-    /**
-     * Set the setNetworkTimeout little bit longer than my own SQL execution timeout
-     *
-     * @return timeoutMilliSeconds*15/10
-     */
-    private int getNetworkTimeout() {
-        return timeoutMilliSeconds * 15 / 10;
-    }
-
-    Connection createDriverConnection()
-            throws SQLException {
-        Connection cn = DriverManager.getConnection(url, username, password);
-        if (timeoutMilliSeconds > MIN_TIMEOUT_MILLI_SECONDS) {
-            try {
-                cn.setNetworkTimeout(executor, getNetworkTimeout());
-            } catch (Exception e) {
-                if (trace) log.warn(e);
-            }
-        }
-        return cn;
-    }
-
     /**
      * <p>returnConnection.</p>
      *
@@ -315,37 +350,29 @@ public class ConnectionPool {
         notifyAll();
     }
 
+    Connection createDriverConnection()
+            throws SQLException {
+        Connection cn = DriverManager.getConnection(url, username, password);
+        if (timeoutMilliSeconds > MIN_TIMEOUT_MILLI_SECONDS) {
+            try {
+                cn.setNetworkTimeout(executor, getNetworkTimeout());
+            } catch (Exception e) {
+                if (trace) {
+                    log.warn(e);
+                }
+            }
+        }
+        return cn;
+    }
+
     /**
      * <p>toString.</p>
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String toString() {
         return "{ url:'" + url + "', username:'" + username + "', password:'" + StringUtils.abbreviate(password, 4) + "'}";
-    }
-
-    /**
-     * <p>dumpInfo.</p>
-     *
-     * @return a {@link java.lang.String} object.
-     */
-    public String dumpInfo() {
-        String s = System.getProperty("line.separator");
-        String s1 = "Pool: " + toString() + s;
-        s1 += "\tAlias: " + getAlias() + s;
-        s1 += "\tMax connections: " + getMaxConn() + s;
-        s1 += "\tCheckouts: " + getNumRequests() + s;
-        s1 += "\tThread waits: " + getNumWaits() + s;
-        s1 += "\tConnections found closed: " + numConnectionFaults + s;
-        s1 += "\tConnections reaped by timeout: " + getNumCheckoutTimeouts() + s;
-        s1 += "\tConnections currently in pool: " + size() + s;
-        StringBuilder sb = new StringBuilder(s1);
-        for (PooledConnection pooledConnection : connVector) {
-            if (pooledConnection != null)
-                sb.append(pooledConnection.dumpInfo());
-        }
-
-        return sb.toString();
     }
 
     /**
@@ -386,42 +413,28 @@ public class ConnectionPool {
     }
 
     /**
-     * <p>Constructor for ConnectionPool.</p>
+     * <p>dumpInfo.</p>
      *
-     * @param alias a {@link java.lang.String} object.
-     * @param url a {@link java.lang.String} object.
-     * @param username a {@link java.lang.String} object.
-     * @param password a {@link java.lang.String} object.
-     * @param maxConn a int.
-     * @param timeoutMilliSeconds a int.
-     * @param checkoutMilliSeconds a int.
-     * @param maxCheckout a int.
-     * @param maxPrepStmts a int.
+     * @return a {@link java.lang.String} object.
      */
-    public ConnectionPool(String alias, String url, String username,
-                          String password, int maxConn, int timeoutMilliSeconds, int checkoutMilliSeconds,
-                          int maxCheckout, int maxPrepStmts) {
-        numConnectionFaults = 0;
-        prefetchSize = -1;
-        this.timeoutMilliSeconds = timeoutMilliSeconds;
-        if (this.timeoutMilliSeconds < CONNECTION_TIMEOUT) this.timeoutMilliSeconds = CONNECTION_TIMEOUT;
+    public String dumpInfo() {
+        String s = System.getProperty("line.separator");
+        String s1 = "Pool: " + toString() + s;
+        s1 += "\tAlias: " + getAlias() + s;
+        s1 += "\tMax connections: " + getMaxConn() + s;
+        s1 += "\tCheckouts: " + getNumRequests() + s;
+        s1 += "\tThread waits: " + getNumWaits() + s;
+        s1 += "\tConnections found closed: " + numConnectionFaults + s;
+        s1 += "\tConnections reaped by timeout: " + getNumCheckoutTimeouts() + s;
+        s1 += "\tConnections currently in pool: " + size() + s;
+        StringBuilder sb = new StringBuilder(s1);
+        for (PooledConnection pooledConnection : connVector) {
+            if (pooledConnection != null) {
+                sb.append(pooledConnection.dumpInfo());
+            }
+        }
 
-        this.checkoutMilliSeconds = checkoutMilliSeconds;
-        this.alias = alias;
-        this.url = url;
-        this.username = username;
-        this.password = password;
-        this.maxConn = maxConn;
-        this.maxCheckout = maxCheckout;
-        numRequests = 0;
-        numWaits = 0;
-        numCheckoutTimeout = 0;
-        connVector = new Vector<>(maxConn);
-
-        trace = false;
-        cacheStatements = true;
-
-        this.maxPrepStmts = maxPrepStmts;
+        return sb.toString();
     }
 
     Vector<PooledConnection> connVector;

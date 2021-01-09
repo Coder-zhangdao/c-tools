@@ -24,18 +24,22 @@ public abstract class BaseSessionManager implements ISessionManager {
         super();
     }
 
+    @Override
     public boolean isAutoGC() {
         return true;
     }
 
+    @Override
     public void close() {
 
     }
 
+    @Override
     public void open() {
         gc((new Date()).getTime());
     }
 
+    @Override
     public SimpleSession createUUIDSession() {
         SimpleSession ss = new SimpleSession();
         ss.setS_id(UUID.randomUUID().toString());
@@ -45,15 +49,17 @@ public abstract class BaseSessionManager implements ISessionManager {
         return ss;
     }
 
+    @Override
     public boolean write(SimpleSession ss) throws CMyException {
 
-        if (update(ss.getS_id()) == false) {
+        if (!update(ss.getS_id())) {
             if (SINGLE_LOGIN) {
                 destroy(ss.getS_id());
             }
             return insert(ss);
-        } else
-            return true;
+        }
+
+        return true;
     }
 
 }

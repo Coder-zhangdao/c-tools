@@ -113,8 +113,9 @@ public class Util {
         msg = CMyString.filterForJs(msg);
         writeHead(out);
         writeAlert(out, msg);
-        if (doAfterStr != null && !doAfterStr.equals(""))
+        if (doAfterStr != null && !"".equals(doAfterStr)) {
             writeJump(out, doAfterStr);
+        }
         writeTail(out);
 
     }
@@ -239,10 +240,12 @@ public class Util {
     }
 
     private static String convertHtmlChar(String pStr){
-            if (pStr == null)
+            if (pStr == null) {
                 pStr = "";
-            if (pStr.equals(""))
+            }
+            if ("".equals(pStr)) {
                 return "";
+            }
             java.text.StringCharacterIterator sciter = new java.text.StringCharacterIterator(
                     pStr);
             String rt = "";
@@ -279,10 +282,12 @@ public class Util {
      */
     public static String tripQuotedString(String src) {
         String des = src.trim();
-        if (des.startsWith("'"))
+        if (des.startsWith("'")) {
             des = des.substring(1);
-        if (des.endsWith("'"))
+        }
+        if (des.endsWith("'")) {
             des = des.substring(0, des.length() - 1);
+        }
         return des;
     }
 
@@ -293,11 +298,13 @@ public class Util {
      * @return 合并后的字符串
      */
     public static String mergeStrArray(Object ... s) {
-        if (s == null || s.length == 0)
+        if (s == null || s.length == 0) {
             return "";
+        }
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < s.length - 1; i++)
+        for (int i = 0; i < s.length - 1; i++) {
             sb.append(s[i]).append(",");
+        }
         sb.append(s[s.length - 1]);
         return sb.toString();
     }
@@ -335,13 +342,15 @@ public class Util {
     }
 
     public static String convertValue2Name(Map ht, String values) {
-        if (values == null || ht == null)
+        if (values == null || ht == null) {
             return "";
+        }
         String[] vs = values.split(",");
         String[] ns = new String[vs.length];
 
-        for (int i = 0; i < vs.length; i++)
+        for (int i = 0; i < vs.length; i++) {
             ns[i] = (String) ht.get(vs[i]);
+        }
         vs = null;
         return mergeStrArray(ns);
     }

@@ -4,9 +4,12 @@ package com.bixuebihui.tablegen.dbinfo;
  */
 public interface IIdentifier {
 
-	boolean equals(Object rhs);
+	@Override
+    boolean equals(Object rhs);
 
-	String toString();
+	@Override
+    String toString();
 
-	int hashCode();
+	@Override
+    int hashCode();
 }

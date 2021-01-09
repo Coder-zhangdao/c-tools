@@ -26,11 +26,7 @@ public class ConnectionPoolTest {
 			ds.getMaxActive(), _timeoutMililSeconds, _checkoutSeconds * 1000, ds.getMaxCheckOutCount(), _maxPrepStmts);
 
 	@Before
-	public void setUp() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-
-		//Class.forName(ds.getClassName());
-
-
+	public void setUp() {
 		cp.setTracing(true);
 	}
 
@@ -179,9 +175,7 @@ public class ConnectionPoolTest {
 	}
 
 	@Test
-	public void testMaxIdle() throws InterruptedException, SQLException {
-		// dataSource.setValidationQuery(isDBOracle() ? "select 1 from dual" :
-		// "select 1");
+	public void testMaxIdle() throws InterruptedException {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;

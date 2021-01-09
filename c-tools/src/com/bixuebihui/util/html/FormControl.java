@@ -86,22 +86,27 @@ public class FormControl {
         String strList = "";
         boolean ifDefault = false;
         boolean ifCondition = false;
-        if (strConditionSelect != null && !strConditionSelect.equals(""))
+        if (strConditionSelect != null && !"".equals(strConditionSelect)) {
             ifCondition = true;
-        else if (strDefaultSelect != null && !strDefaultSelect.equals(""))
+        } else if (strDefaultSelect != null && !"".equals(strDefaultSelect)) {
             ifDefault = true;
+        }
 
-        if (valueArray.length == 0) return "<option value='0'>(未知)</option>";
+        if (valueArray.length == 0) {
+            return "<option value='0'>(未知)</option>";
+        }
         for (int loop = 0; loop < valueArray.length; loop++) {
 
             String isSelected = "";
 
             if (ifCondition) {
-                if ((valueArray[loop] + "").equals(strConditionSelect))
+                if ((valueArray[loop] + "").equals(strConditionSelect)) {
                     isSelected = "selected";
+                }
             } else if (ifDefault) {
-                if ((valueArray[loop] + "").equals(strDefaultSelect))
+                if ((valueArray[loop] + "").equals(strDefaultSelect)) {
                     isSelected = "selected";
+                }
             }
             strList += "<option value='" + valueArray[loop] + "' " + isSelected + " title=\"" + nameArray[loop] + "\">" + nameArray[loop] + "</option>";
         }
@@ -116,22 +121,27 @@ public class FormControl {
         String strList = "";
         boolean ifDefault = false;
         boolean ifCondition = false;
-        if (strConditionSelect != null && !strConditionSelect.equals(""))
+        if (strConditionSelect != null && !"".equals(strConditionSelect)) {
             ifCondition = true;
-        else if (strDefaultSelect != null && !strDefaultSelect.equals(""))
+        } else if (strDefaultSelect != null && !"".equals(strDefaultSelect)) {
             ifDefault = true;
+        }
 
-        if (valueArray.length == 0) return "<option value='0'>(未知)</option>";
+        if (valueArray.length == 0) {
+            return "<option value='0'>(未知)</option>";
+        }
         for (int loop = 0; loop < valueArray.length; loop++) {
 
             String isSelected = "";
 
             if (ifCondition) {
-                if ((valueArray[loop] + "").equals(strConditionSelect))
+                if ((valueArray[loop] + "").equals(strConditionSelect)) {
                     isSelected = "selected";
+                }
             } else if (ifDefault) {
-                if ((valueArray[loop] + "").equals(strDefaultSelect))
+                if ((valueArray[loop] + "").equals(strDefaultSelect)) {
                     isSelected = "selected";
+                }
             }
             strList += "<option value='" + valueArray[loop] + "' " + isSelected + "  title=\"" + nameArray[loop] + "\">" + nameArray[loop] + "</option>";
         }
@@ -154,10 +164,11 @@ public class FormControl {
         String strList = "";
         boolean ifDefault = false;
         boolean ifCondition = false;
-        if (strConditionSelect != null && !strConditionSelect.equals(""))
+        if (strConditionSelect != null && !"".equals(strConditionSelect)) {
             ifCondition = true;
-        else if (strDefaultSelect != null && !strDefaultSelect.equals(""))
+        } else if (strDefaultSelect != null && !"".equals(strDefaultSelect)) {
             ifDefault = true;
+        }
 
 
         for (int loop = 0; loop < valueArray.length; loop++) {
@@ -165,11 +176,13 @@ public class FormControl {
             String isSelected = "";
 
             if (ifCondition) {
-                if ((valueArray[loop] + "").equals(strConditionSelect))
+                if ((valueArray[loop] + "").equals(strConditionSelect)) {
                     isSelected = "checked";
+                }
             } else if (ifDefault) {
-                if ((valueArray[loop] + "").equals(strDefaultSelect))
+                if ((valueArray[loop] + "").equals(strDefaultSelect)) {
                     isSelected = "checked";
+                }
             }
             strList += "<input type=checkbox  name='" + name + "' id='" + name + loop
                     + "' value='" + valueArray[loop] + "' " + isSelected + "><label for='" + name + loop + "'>" + nameArray[loop] + "</label>" + separator;

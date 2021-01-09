@@ -30,6 +30,7 @@ protected T_metatableList()
 /**
   * Get table name / key name.
   */
+@Override
 public String getTableName()
 {
     return "t_metatable";
@@ -47,6 +48,7 @@ public String getKeyName()
 /**
   * Updates the object from a selected ResultSet.
   */
+@Override
 public T_metatable mapRow (ResultSet r, int index) throws SQLException
 {
       T_metatable res = new T_metatable();
@@ -63,11 +65,13 @@ public T_metatable mapRow (ResultSet r, int index) throws SQLException
       return res;
 }
 
+@Override
 public Long getId(T_metatable info) {
 	return  info.getTid();
 }
 
 
+@Override
 public void setId(T_metatable info, Long id) {
 	info.setTid(id);
 }
@@ -174,6 +178,7 @@ public boolean insertBatch (T_metatable[] infos, Connection cn) throws SQLExcept
 /**
   * Inserts the dummy record of T_metatable object values into the database.
   */
+@Override
 public boolean insertDummy() throws SQLException
 {
      T_metatable  info = new T_metatable();

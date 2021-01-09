@@ -273,14 +273,16 @@ public String getDescription()
      s.append("EXTRASUPERCLASSES=\"").append(CMyString.filterForXML(this.getExtrasuperclasses())).append("\" ");
      s.append("DESCRIPTION=\"").append(CMyString.filterForXML(this.getDescription())).append("\" ");
      s.append(">").append(ln);
-     if(columns!=null)
-     for(T_metacolumn col:columns.values()){
-    	 s.append(col.toXml()).append(ln);
+     if(columns!=null) {
+         for(T_metacolumn col:columns.values()){
+             s.append(col.toXml()).append(ln);
+         }
      }
      s.append("</T_METATABLE>");
      s.append(ln);
     return s.toString();
  	}
+ @Override
  public String toString(){
 	 return this.toXml();
  }

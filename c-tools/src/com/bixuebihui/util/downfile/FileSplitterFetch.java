@@ -27,8 +27,9 @@ public class FileSplitterFetch extends Thread {
         fileAccessI = new FileAccessI(sName, nStartPos);
     }
 
+    @Override
     public void run() {
-        while (nStartPos < nEndPos && !bStop)
+        while (nStartPos < nEndPos && !bStop) {
             try {
                 URL url = new URL(sURL);
                 HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
@@ -39,13 +40,15 @@ public class FileSplitterFetch extends Thread {
                 InputStream input = httpConnection.getInputStream();
                 byte b[] = new byte[1024];
                 int i;
-                for (; (i = input.read(b, 0, 1024)) > 0 && nStartPos < nEndPos && !bStop; nStartPos += fileAccessI.write(b, 0, i))
+                for (; (i = input.read(b, 0, 1024)) > 0 && nStartPos < nEndPos && !bStop; nStartPos += fileAccessI.write(b, 0, i)) {
                     ;
+                }
                 Utility.log("Thread " + nThreadID + " is over!");
                 bDownOver = true;
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
     }
 
     public void logResponseHead(HttpURLConnection con) {

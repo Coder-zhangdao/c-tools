@@ -21,11 +21,13 @@ public class MemoSessionManager extends BaseSessionManager {
         memoStore = new Hashtable(1000);
     }
 
+    @Override
     public boolean destroy(String s_id) {
         memoStore.remove(s_id);
         return true;
     }
 
+    @Override
     public int gc(long time) {
 
         Enumeration en = memoStore.elements();
@@ -43,10 +45,12 @@ public class MemoSessionManager extends BaseSessionManager {
 
     }
 
+    @Override
     public void close() {
         memoStore.clear();
     }
 
+    @Override
     public SimpleSession read(String s_id) {
         //synchronized (memoStore) {
         // if(!memoStore.containsKey(s_id)) return null;
@@ -54,6 +58,7 @@ public class MemoSessionManager extends BaseSessionManager {
         //}
     }
 
+    @Override
     public boolean insert(SimpleSession ss) {
         //synchronized (memoStore) {
         insert_counter++;
@@ -62,17 +67,20 @@ public class MemoSessionManager extends BaseSessionManager {
             insert_counter = 0;
         }
 
-        if (memoStore.containsKey(ss.getS_id()))
+        if (memoStore.containsKey(ss.getS_id())) {
             return false;
+        }
         memoStore.put(ss.getS_id(), ss);
         return true;
         //}
     }
 
+    @Override
     public boolean update(String s_id) {
         //synchronized (memoStore) {
-        if (!memoStore.containsKey(s_id))
+        if (!memoStore.containsKey(s_id)) {
             return false;
+        }
         ((SimpleSession) memoStore.get(s_id)).setS_expire((new Date())
                 .getTime()
                 + SimpleSession.SESSION_LIFE);
@@ -80,6 +88,7 @@ public class MemoSessionManager extends BaseSessionManager {
         //}
     }
 
+    @Override
     public int getCount() throws CMyException {
         return memoStore.size();
     }

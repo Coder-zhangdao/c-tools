@@ -53,6 +53,7 @@ public final class ListShardingValue<T extends Comparable<?>> implements Shardin
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getLogicTableName() {
         return logicTableName;
     }
@@ -62,6 +63,7 @@ public final class ListShardingValue<T extends Comparable<?>> implements Shardin
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getColumnName() {
         return columnName;
     }

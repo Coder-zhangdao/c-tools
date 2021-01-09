@@ -64,6 +64,7 @@ public final class ExampleFilter implements Filter {
     /**
      * Take this filter out of service.
      */
+    @Override
     public void destroy() {
 
         this.attribute = null;
@@ -83,13 +84,15 @@ public final class ExampleFilter implements Filter {
      * @exception IOException if an input/output error occurs
      * @exception ServletException if a servlet error occurs
      */
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain)
 	throws IOException, ServletException {
 
 	// Store ourselves as a request attribute (if requested)
-	if (attribute != null)
-	    request.setAttribute(attribute, this);
+	if (attribute != null) {
+        request.setAttribute(attribute, this);
+    }
 
 	// Time and log the subsequent processing
 	long startTime = System.currentTimeMillis();
@@ -107,6 +110,7 @@ public final class ExampleFilter implements Filter {
      *
      * @param filterConfig The filter configuration object
      */
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
 	this.filterConfig = filterConfig;
@@ -118,10 +122,12 @@ public final class ExampleFilter implements Filter {
     /**
      * Return a String representation of this object.
      */
+    @Override
     public String toString() {
 
-	if (filterConfig == null)
-	    return ("InvokerFilter()");
+	if (filterConfig == null) {
+        return ("InvokerFilter()");
+    }
 	StringBuffer sb = new StringBuffer("InvokerFilter(");
 	sb.append(filterConfig);
 	sb.append(")");

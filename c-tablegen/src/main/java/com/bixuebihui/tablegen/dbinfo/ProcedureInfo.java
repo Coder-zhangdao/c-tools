@@ -20,37 +20,37 @@ public class ProcedureInfo extends DatabaseObjectInfo implements IProcedureInfo
 	}
 
 	/** Procedure Type. */
-	private final int _procType;
+	private final int procType;
 
 	/** Procedure remarks. */
-	private final String _remarks;
+	private final String remarks;
 
 	ProcedureInfo(String catalog, String schema, String simpleName,
 							String remarks, int procType) throws SQLException
 	{
 		super(catalog, schema, simpleName, DatabaseObjectType.PROCEDURE);
-		_remarks = remarks;
-		_procType = procType;
+		this.remarks = remarks;
+		this.procType = procType;
 	}
 
 //TODO: Rename to getProcedureType().
 	@Override
-	public int getType()
+	public int getProcedureType()
 	{
-		return _procType;
+		return procType;
 	}
 
 	@Override
     public String getRemarks()
 	{
-		return _remarks;
+		return remarks;
 	}
 
 //TODO: Rename to getProcedureTypeDescription().
 	@Override
-	public String getTypeDescription()
+	public String getProcedureTypeDescription()
 	{
-		switch (_procType)
+		switch (procType)
 		{
 			case DatabaseMetaData.procedureNoResult :
 				return i18n.DOESNT_RETURN;
@@ -63,16 +63,17 @@ public class ProcedureInfo extends DatabaseObjectInfo implements IProcedureInfo
 		}
 	}
 
-	public boolean equals(Object obj)
+	@Override
+    public boolean equals(Object obj)
 	{
 		if (super.equals(obj) && obj instanceof ProcedureInfo)
 		{
 			ProcedureInfo info = (ProcedureInfo) obj;
-			if ((info._remarks == null && _remarks == null)
-				|| ((info._remarks != null && _remarks != null)
-					&& info._remarks.equals(_remarks)))
+			if ((info.remarks == null && remarks == null)
+				|| ((info.remarks != null && remarks != null)
+					&& info.remarks.equals(remarks)))
 			{
-				return info._procType == _procType;
+				return info.procType == procType;
 			}
 		}
 		return false;

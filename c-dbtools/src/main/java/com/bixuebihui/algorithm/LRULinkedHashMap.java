@@ -56,8 +56,8 @@ public class LRULinkedHashMap<K, V> extends LinkedHashMap<K, V>
     /** {@inheritDoc} */
     @Override
     public V get(Object key) {
+        lock.lock();
         try {
-            lock.lock();
             return super.get(key);
         } finally {
             lock.unlock();
@@ -67,8 +67,8 @@ public class LRULinkedHashMap<K, V> extends LinkedHashMap<K, V>
     /** {@inheritDoc} */
     @Override
     public V put(K key, V value) {
+        lock.lock();
         try {
-            lock.lock();
             return super.put(key, value);
         } finally {
             lock.unlock();

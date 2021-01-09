@@ -28,6 +28,7 @@ protected T_metacolumnList()
 /**
   * Get table name / key name.
   */
+@Override
 public String getTableName()
 {
     return "t_metacolumn";
@@ -45,6 +46,7 @@ public String getKeyName()
 /**
   * Updates the object from a selected ResultSet.
   */
+@Override
 public T_metacolumn mapRow (ResultSet r, int index) throws SQLException
 {
       T_metacolumn res = new T_metacolumn();
@@ -60,11 +62,13 @@ public T_metacolumn mapRow (ResultSet r, int index) throws SQLException
       return res;
 }
 
+@Override
 public Long getId(T_metacolumn info) {
 	return  info.getCid();
 }
 
 
+@Override
 public void setId(T_metacolumn info, Long id) {
 	info.setCid(id);
 }
@@ -170,6 +174,7 @@ public boolean insertBatch (T_metacolumn[] infos, Connection cn) throws SQLExcep
 /**
   * Inserts the dummy record of T_metacolumn object values into the database.
   */
+@Override
 public boolean insertDummy() throws SQLException
 {
      T_metacolumn  info = new T_metacolumn();

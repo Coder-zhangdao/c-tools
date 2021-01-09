@@ -38,7 +38,8 @@ public class BaseExcelInput {
             return cell.getRichStringCellValue().getString().trim();
         } else if (celltype == CellType.NUMERIC) {
             double v = cell.getNumericCellValue();
-            if (v > 1e6) {//可能为手机号或身份证号等，避免生成科学记数法的格式，如1.3910010327e10
+            if (v > 1e6) {
+                //可能为手机号或身份证号等，避免生成科学记数法的格式，如1.3910010327e10
                 return new DecimalFormat("#").format(v);
             }
             return "" + v;
@@ -182,7 +183,7 @@ public class BaseExcelInput {
         Date res = null;
         try {
             SimpleDateFormat formatter = new SimpleDateFormat(
-                    "yyyy-MM-dd"); // 格式化日期
+                    "yyyy-MM-dd");
             java.util.Date date = formatter.parse(postTime);
              res = new Date(date.getTime());
         } catch (ParseException e) {
@@ -235,18 +236,18 @@ public class BaseExcelInput {
 
             File excelFile = new File(fileName);
 
-            if (!excelFile.exists()) { // 文件不存在
+            if (!excelFile.exists()) {
                 log.warn("检测到文件不存在");
                 return ht;
             }
-            getExcelContent = new FileInputStream(excelFile); // 把文件通过输入流读取出来;
+            getExcelContent = new FileInputStream(excelFile);
+            // 把文件通过输入流读取出来;
             POIFSFileSystem fileSystem = new POIFSFileSystem(getExcelContent);
 
             // 从POIFSFileSystem获得一个HSSF workbook;
             if(fileName.endsWith(".xls")) {
                 workbook = new HSSFWorkbook(fileSystem);
             }else if( fileName.endsWith(".xlsx")){
-               // workbook = new XSSWorkbook(fileSystem);
                 throw new IllegalArgumentException("to support xlsx add jars, and change this line of code");
             }else{
                 throw new IllegalArgumentException("unknown file extension");
@@ -258,7 +259,8 @@ public class BaseExcelInput {
             Row row;
 
             for (int i = 0; i < skipLines; i++) {
-                rowIterator.next();// skip first line!
+                rowIterator.next();
+                // skip first line!
             }
             while (rowIterator.hasNext()) {
                 row = rowIterator.next();
@@ -302,7 +304,8 @@ public class BaseExcelInput {
             return null;
         }
         if (src.matches("^[0-9a-zA-Z].*")) {
-            return src; //如是英文或数字，略去最后一步
+            //如是英文或数字，略去最后一步
+            return src;
         }
         //去掉中文中的空格，主要是两字人名时要用去中间对齐用的空格。
         return src.replaceAll("\\ ", "").replaceAll("\u00A0", "");

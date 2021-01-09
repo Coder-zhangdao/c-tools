@@ -5,7 +5,10 @@
 
 package com.bixuebihui.util.other;
 
+import org.graalvm.compiler.nodes.NodeView;
+
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 
 
@@ -31,10 +34,11 @@ public class CMyString {
     }
 
     public static String showObjNull(Object _sValue, String _sReplaceIfNull) {
-        if (_sValue == null)
+        if (_sValue == null) {
             return _sReplaceIfNull;
-        else
+        } else {
             return _sValue.toString();
+        }
     }
 
     public static String showNull(String p_sValue) {
@@ -47,54 +51,65 @@ public class CMyString {
 
     public static String expandStr(String _string, int _length, char _chrFill, boolean _bFillOnLeft) {
         int nLen = _string.length();
-        if (_length <= nLen)
+        if (_length <= nLen) {
             return _string;
+        }
         String sRet = _string;
-        for (int i = 0; i < _length - nLen; i++)
+        for (int i = 0; i < _length - nLen; i++) {
             sRet = _bFillOnLeft ? _chrFill + sRet : sRet + _chrFill;
+        }
 
         return sRet;
     }
 
     public static String setStrEndWith(String _string, char _chrEnd) {
-        if (_string == null)
+        if (_string == null) {
             return null;
-        if (_string.charAt(_string.length() - 1) != _chrEnd)
+        }
+        if (_string.charAt(_string.length() - 1) != _chrEnd) {
             return _string + _chrEnd;
-        else
+        } else {
             return _string;
+        }
     }
 
     public static String makeBlanks(int _length) {
-        if (_length < 1)
+        if (_length < 1) {
             return "";
+        }
         StringBuilder buffer = new StringBuilder(_length);
-        for (int i = 0; i < _length; i++)
+        for (int i = 0; i < _length; i++) {
             buffer.append(' ');
+        }
 
         return buffer.toString();
     }
 
     public static String replaceStr(String _strSrc, String _strOld, String _strNew) {
-        if (_strSrc == null)
+        if (_strSrc == null) {
             return null;
+        }
         char srcBuff[] = _strSrc.toCharArray();
         int nSrcLen = srcBuff.length;
-        if (nSrcLen == 0)
+        if (nSrcLen == 0) {
             return "";
+        }
         char oldStrBuff[] = _strOld.toCharArray();
         int nOldStrLen = oldStrBuff.length;
-        if (nOldStrLen == 0 || nOldStrLen > nSrcLen)
+        if (nOldStrLen == 0 || nOldStrLen > nSrcLen) {
             return _strSrc;
+        }
         StringBuilder retBuff = new StringBuilder(nSrcLen * (1 + _strNew.length() / nOldStrLen));
         boolean bIsFound;
         for (int i = 0; i < nSrcLen; ) {
             bIsFound = false;
             if (srcBuff[i] == oldStrBuff[0]) {
                 int j;
-                for (j = 1; j < nOldStrLen; j++)
-                    if (i + j >= nSrcLen || srcBuff[i + j] != oldStrBuff[j])
+                for (j = 1; j < nOldStrLen; j++) {
+                    if (i + j >= nSrcLen || srcBuff[i + j] != oldStrBuff[j]) {
                         break;
+                    }
+                }
 
                 bIsFound = j == nOldStrLen;
             }
@@ -103,12 +118,14 @@ public class CMyString {
                 i += nOldStrLen;
             } else {
                 int nSkipTo;
-                if (i + nOldStrLen >= nSrcLen)
+                if (i + nOldStrLen >= nSrcLen) {
                     nSkipTo = nSrcLen - 1;
-                else
+                } else {
                     nSkipTo = i;
-                for (; i <= nSkipTo; i++)
+                }
+                for (; i <= nSkipTo; i++) {
                     retBuff.append(srcBuff[i]);
+                }
 
             }
         }
@@ -117,24 +134,29 @@ public class CMyString {
     }
 
     public static String replaceStr(StringBuffer _strSrc, String _strOld, String _strNew) {
-        if (_strSrc == null)
+        if (_strSrc == null) {
             return null;
+        }
         int nSrcLen = _strSrc.length();
-        if (nSrcLen == 0)
+        if (nSrcLen == 0) {
             return "";
+        }
         char oldStrBuff[] = _strOld.toCharArray();
         int nOldStrLen = oldStrBuff.length;
-        if (nOldStrLen == 0 || nOldStrLen > nSrcLen)
+        if (nOldStrLen == 0 || nOldStrLen > nSrcLen) {
             return _strSrc.toString();
+        }
         StringBuilder retBuff = new StringBuilder(nSrcLen * (1 + _strNew.length() / nOldStrLen));
         boolean bIsFound;
         for (int i = 0; i < nSrcLen; ) {
             bIsFound = false;
             if (_strSrc.charAt(i) == oldStrBuff[0]) {
                 int j;
-                for (j = 1; j < nOldStrLen; j++)
-                    if (i + j >= nSrcLen || _strSrc.charAt(i + j) != oldStrBuff[j])
+                for (j = 1; j < nOldStrLen; j++) {
+                    if (i + j >= nSrcLen || _strSrc.charAt(i + j) != oldStrBuff[j]) {
                         break;
+                    }
+                }
 
                 bIsFound = j == nOldStrLen;
             }
@@ -143,12 +165,14 @@ public class CMyString {
                 i += nOldStrLen;
             } else {
                 int nSkipTo;
-                if (i + nOldStrLen >= nSrcLen)
+                if (i + nOldStrLen >= nSrcLen) {
                     nSkipTo = nSrcLen - 1;
-                else
+                } else {
                     nSkipTo = i;
-                for (; i <= nSkipTo; i++)
+                }
+                for (; i <= nSkipTo; i++) {
                     retBuff.append(_strSrc.charAt(i));
+                }
 
             }
         }
@@ -165,12 +189,12 @@ public class CMyString {
     }
 
     public static String getStr(String _strSrc, String _encoding) {
-        if (_encoding == null || _encoding.length() == 0)
+        if (_encoding == null || _encoding.length() == 0) {
             return _strSrc;
-        byte byteStr[];
+        }
+        byte[] byteStr;
         try {
-            byteStr = new byte[_strSrc.length()];
-            _strSrc.getBytes(0, _strSrc.length(), byteStr, 0);
+            byteStr = _strSrc.getBytes();
             return new String(byteStr, _encoding);
         } catch (Exception ex) {
         }
@@ -178,10 +202,11 @@ public class CMyString {
     }
 
     public static String toISO_8859(String _strSrc) {
-        if (_strSrc == null)
+        if (_strSrc == null) {
             return null;
+        }
         try {
-            return new String(_strSrc.getBytes(), "ISO-8859-1");
+            return new String(_strSrc.getBytes(), StandardCharsets.ISO_8859_1);
         } catch (Exception ex) {
         }
         return _strSrc;
@@ -200,21 +225,22 @@ public class CMyString {
         int len = c.length;
         int count = 0;
         for (char ch : c) {
-            if (ch <= 127)
+            if (ch <= 127) {
                 count++;
-            else if (ch <= 2047)
+            } else if (ch <= 2047) {
                 count += 2;
-            else
+            } else {
                 count += 3;
+            }
         }
 
         byte b[] = new byte[count];
         int off = 0;
         for (int i = 0; i < len; i++) {
             int ch = c[i];
-            if (ch <= 127)
+            if (ch <= 127) {
                 b[off++] = (byte) ch;
-            else if (ch <= 2047) {
+            } else if (ch <= 2047) {
                 b[off++] = (byte) (ch >> 6 | 0xc0);
                 b[off++] = (byte) (ch & 0x3f | 0x80);
             } else {
@@ -251,16 +277,19 @@ public class CMyString {
 
                 case 12: // '\f'
                 case 13: // '\r'
-                    if ((b[i++] & 0xc0) != 128)
+                    if ((b[i++] & 0xc0) != 128) {
                         throw new IllegalArgumentException();
+                    }
                     count++;
                     break;
 
                 case 14: // '\016'
-                    if ((b[i++] & 0xc0) != 128)
+                    if ((b[i++] & 0xc0) != 128) {
                         throw new IllegalArgumentException();
-                    if ((b[i++] & 0xc0) != 128)
-                         throw new IllegalArgumentException();
+                    }
+                    if ((b[i++] & 0xc0) != 128) {
+                        throw new IllegalArgumentException();
+                    }
                     count++;
                     break;
 
@@ -273,8 +302,9 @@ public class CMyString {
             }
         }
 
-        if (i != max)
+        if (i != max) {
             throw new IllegalArgumentException();
+        }
         char cs[] = new char[count];
         i = 0;
         while (off < max) {
@@ -319,8 +349,9 @@ public class CMyString {
     public static String byteToHexString(byte _bytes[], char _delim) {
         String sRet = "";
         for (int i = 0; i < _bytes.length; i++) {
-            if (i > 0)
+            if (i > 0) {
                 sRet = sRet + ",";
+            }
             sRet = sRet + Integer.toHexString(_bytes[i]);
         }
 
@@ -330,8 +361,9 @@ public class CMyString {
     public static String byteToString(byte _bytes[], char _delim, int _radix) {
         String sRet = "";
         for (int i = 0; i < _bytes.length; i++) {
-            if (i > 0)
+            if (i > 0) {
                 sRet = sRet + ",";
+            }
             sRet = sRet + Integer.toString(_bytes[i], _radix);
         }
 
@@ -343,8 +375,9 @@ public class CMyString {
     }
 
     public static String transDisplay(String _sContent, boolean _bChangeBlank) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         char srcBuff[] = _sContent.toCharArray();
         int nSrcLen = srcBuff.length;
         StringBuffer retBuff = new StringBuffer(nSrcLen * 2);
@@ -381,8 +414,9 @@ public class CMyString {
                         }
                     }
 
-                    if (!bUnicode)
+                    if (!bUnicode) {
                         retBuff.append("&amp;");
+                    }
                     break;
 
                 case 9: // '\t'
@@ -403,8 +437,9 @@ public class CMyString {
     }
 
     public static String transDisplay_bbs(String _sContent, String p_sQuoteColor, boolean _bChangeBlank) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         boolean bIsQuote = false;
         boolean bIsNewLine = true;
         char srcBuff[] = _sContent.toCharArray();
@@ -469,14 +504,16 @@ public class CMyString {
             }
         }
 
-        if (bIsQuote)
+        if (bIsQuote) {
             retBuff.append("</font>");
+        }
         return retBuff.toString();
     }
 
     public static String transJsDisplay(String _sContent) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         char srcBuff[] = _sContent.toCharArray();
         int nSrcLen = srcBuff.length;
         StringBuffer retBuff = new StringBuffer((int) ((double) nSrcLen * 1.5D));
@@ -505,21 +542,25 @@ public class CMyString {
     }
 
     public static String transDisplayMark(String _strSrc, char p_chrMark) {
-        if (_strSrc == null)
+        if (_strSrc == null) {
             return "";
+        }
         char buff[] = new char[_strSrc.length()];
-        for (int i = 0; i < buff.length; i++)
+        for (int i = 0; i < buff.length; i++) {
             buff[i] = p_chrMark;
+        }
 
         return new String(buff);
     }
 
     public static String filterForSQL(String _sContent) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         int nLen = _sContent.length();
-        if (nLen == 0)
+        if (nLen == 0) {
             return "";
+        }
         char srcBuff[] = _sContent.toCharArray();
         StringBuffer retBuff = new StringBuffer((int) ((double) nLen * 1.5D));
         for (int i = 0; i < nLen; i++) {
@@ -534,14 +575,16 @@ public class CMyString {
                     for (int j = i + 1; j < nLen && !bSkip; j++) {
                         char cTemp2 = srcBuff[j];
                         if (cTemp2 != ' ') {
-                            if (cTemp2 == '&')
+                            if (cTemp2 == '&') {
                                 retBuff.append(';');
+                            }
                             bSkip = true;
                         }
                     }
 
-                    if (!bSkip)
+                    if (!bSkip) {
                         retBuff.append(';');
+                    }
                     break;
 
                 default:
@@ -554,12 +597,14 @@ public class CMyString {
     }
 
     public static String filterForXML(String _sContent) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         char srcBuff[] = _sContent.toCharArray();
         int nLen = srcBuff.length;
-        if (nLen == 0)
+        if (nLen == 0) {
             return "";
+        }
         StringBuffer retBuff = new StringBuffer((int) ((double) nLen * 1.8D));
         for (int i = 0; i < nLen; i++) {
             char cTemp = srcBuff[i];
@@ -594,12 +639,14 @@ public class CMyString {
     }
 
     public static String filterForHTMLValue(String _sContent) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         char srcBuff[] = _sContent.toCharArray();
         int nLen = srcBuff.length;
-        if (nLen == 0)
+        if (nLen == 0) {
             return "";
+        }
         StringBuffer retBuff = new StringBuffer((int) ((double) nLen * 1.8D));
         for (int i = 0; i < nLen; i++) {
             char cTemp = srcBuff[i];
@@ -607,10 +654,11 @@ public class CMyString {
                 case 38: // '&'
                     if (i + 1 < nLen) {
                         cTemp = srcBuff[i + 1];
-                        if (cTemp == '#')
+                        if (cTemp == '#') {
                             retBuff.append("&");
-                        else
+                        } else {
                             retBuff.append("&amp;");
+                        }
                     } else {
                         retBuff.append("&amp;");
                     }
@@ -638,12 +686,14 @@ public class CMyString {
     }
 
     public static String filterForUrl(String _sContent) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         char srcBuff[] = _sContent.toCharArray();
         int nLen = srcBuff.length;
-        if (nLen == 0)
+        if (nLen == 0) {
             return "";
+        }
         StringBuffer retBuff = new StringBuffer((int) ((double) nLen * 1.8D));
         for (int i = 0; i < nLen; i++) {
             char cTemp = srcBuff[i];
@@ -678,12 +728,14 @@ public class CMyString {
     }
 
     public static String filterForJs(String _sContent) {
-        if (_sContent == null)
+        if (_sContent == null) {
             return "";
+        }
         char srcBuff[] = _sContent.toCharArray();
         int nLen = srcBuff.length;
-        if (nLen == 0)
+        if (nLen == 0) {
             return "";
+        }
         StringBuffer retBuff = new StringBuffer((int) ((double) nLen * 1.8D));
         for (int i = 0; i < nLen; i++) {
             char cTemp = srcBuff[i];
@@ -752,12 +804,14 @@ public class CMyString {
     }
 
     public static String circleStr(String _strSrc) {
-        if (_strSrc == null)
+        if (_strSrc == null) {
             return null;
+        }
         String sResult = "";
         int nLength = _strSrc.length();
-        for (int i = nLength - 1; i >= 0; i--)
+        for (int i = nLength - 1; i >= 0; i--) {
             sResult = sResult + _strSrc.charAt(i);
+        }
 
         return sResult;
     }
@@ -767,14 +821,17 @@ public class CMyString {
     }
 
     public static String truncateStr(String _string, int _maxLength, String _sExt) {
-        if (_string == null)
+        if (_string == null) {
             return null;
+        }
         String sExt = "..";
-        if (_sExt != null)
+        if (_sExt != null) {
             sExt = _sExt;
+        }
         int nExtLen = getBytesLength(sExt);
-        if (nExtLen >= _maxLength)
+        if (nExtLen >= _maxLength) {
             return _string;
+        }
         int nMaxLen = (_maxLength - nExtLen) + 1;
         char srcBuff[] = _string.toCharArray();
         int nLen = srcBuff.length;
@@ -787,8 +844,9 @@ public class CMyString {
             if (aChar == '&') {
                 for (j = i + 1; j < nLen && j < i + 9 && !bUnicode; j++) {
                     char cTemp = srcBuff[j];
-                    if (cTemp != ';')
+                    if (cTemp != ';') {
                         continue;
+                    }
                     if (j == i + 5) {
                         bUnicode = false;
                         j = 0;
@@ -804,8 +862,9 @@ public class CMyString {
             if (nGet >= nMaxLen) {
                 if (nGet == _maxLength && i == nLen - 1) {
                     dstBuff.append(aChar);
-                    for (; i < j - 1; i++)
+                    for (; i < j - 1; i++) {
                         dstBuff.append(srcBuff[i + 1]);
+                    }
 
                 } else {
                     dstBuff.append(sExt);
@@ -813,8 +872,9 @@ public class CMyString {
                 break;
             }
             dstBuff.append(aChar);
-            for (; i < j - 1; i++)
+            for (; i < j - 1; i++) {
                 dstBuff.append(srcBuff[i + 1]);
+            }
 
         }
 
@@ -822,23 +882,26 @@ public class CMyString {
     }
 
     public static String filterForJDOM(String _string) {
-        if (_string == null)
+        if (_string == null) {
             return null;
+        }
         char srcBuff[] = _string.toCharArray();
         int nLen = srcBuff.length;
         StringBuilder dstBuff = new StringBuilder(nLen);
         for (int i = 0; i < nLen; i++) {
             char aChar = srcBuff[i];
-            if (aChar >= ' ' || i != nLen - 1)
+            if (aChar >= ' ' || i != nLen - 1) {
                 dstBuff.append(aChar);
+            }
         }
 
         return dstBuff.toString();
     }
 
     public static int getBytesLength(String _string) {
-        if (_string == null)
+        if (_string == null) {
             return 0;
+        }
         char srcBuff[] = _string.toCharArray();
         int nGet = 0;
         for (int i = 0; i < srcBuff.length; i++) {
@@ -871,11 +934,13 @@ public class CMyString {
             throws Exception {
         StringTokenizer stTemp = new StringTokenizer(_str, _sDelim);
         int nSize = stTemp.countTokens();
-        if (nSize == 0)
+        if (nSize == 0) {
             return new String[0];
+        }
         String str[] = new String[nSize];
-        for (int i = 0; stTemp.hasMoreElements(); i++)
+        for (int i = 0; stTemp.hasMoreElements(); i++) {
             str[i] = stTemp.nextToken();
+        }
 
         return str;
     }
@@ -943,10 +1008,11 @@ public class CMyString {
             String sExcel = "123455";
             String sTRS = "$$HTMLCONTENT$$";
             int nPose = sValue.indexOf(sTRS);
-            if (nPose >= 0)
+            if (nPose >= 0) {
                 System.out.println(sValue.substring(0, nPose) + sExcel + sValue.substring(nPose + sTRS.length()));
-            else
+            } else {
                 System.out.println("no found");
+            }
             sValue = new String(sValue.getBytes("UTF8"), "UTF8");
             System.out.println("     GBK-->" + sValue);
             System.out.println(byteToHexString(sValue.getBytes("GBK")));

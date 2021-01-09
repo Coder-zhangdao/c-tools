@@ -22,16 +22,19 @@ public class DruidDataSourceAdapter extends DruidDataSource implements INamingPo
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getAlias() {
         return getName();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setAlias(String alias) {
         this.setName(alias);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setDatabaseConfig(DatabaseConfig cfg) {
         this.setAlias(cfg.getAlias());
         this.setDriverClassName(cfg.getClassName());

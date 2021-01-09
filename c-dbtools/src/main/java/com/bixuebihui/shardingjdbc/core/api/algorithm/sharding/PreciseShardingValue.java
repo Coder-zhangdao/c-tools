@@ -51,6 +51,7 @@ public final class PreciseShardingValue<T extends Comparable<?>> implements Shar
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getLogicTableName() {
         return logicTableName;
     }
@@ -60,6 +61,7 @@ public final class PreciseShardingValue<T extends Comparable<?>> implements Shar
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getColumnName() {
         return columnName;
     }

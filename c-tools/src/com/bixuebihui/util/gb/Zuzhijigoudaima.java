@@ -87,7 +87,9 @@ public class Zuzhijigoudaima {
             dwdm = dwdm.replaceAll("-", "");
         }
 
-        if (dwdm.length() != 9) return false;
+        if (dwdm.length() != 9) {
+            return false;
+        }
 
         return dwdm.charAt(8) == dwdmjym(dwdm.substring(0, 8));
     }

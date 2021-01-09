@@ -94,8 +94,9 @@ public class BaseOperator
      */
     public ResultSet getResultSet(String sqlstr) throws SQLException {
         initConn();
-        if(stmt==null)
+        if(stmt==null) {
             stmt = conn.createStatement();
+        }
         rst = stmt.executeQuery(sqlstr);
         return rst;
     }
@@ -131,8 +132,9 @@ public class BaseOperator
             throw new SQLException("dbHelper没有初始化");
         }
 
-        if(conn==null || conn.isClosed())
+        if(conn==null || conn.isClosed()) {
             conn = dbHelper.getConnection();
+        }
     }
 
 

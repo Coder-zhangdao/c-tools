@@ -35,8 +35,9 @@ public class HtmlDocument {
 
     public HtmlDocument setContent(List _newContent)
             throws CMyException {
-        if (_newContent == null)
+        if (_newContent == null) {
             return this;
+        }
         boolean bDidRoot = false;
         Iterator itr = _newContent.iterator();
         content = new ArrayList(INITIAL_ARRAY_SIZE);
@@ -49,30 +50,34 @@ public class HtmlDocument {
                 } else {
                     throw new CMyException(1, "\u6587\u5F53\u4E2D\u53EA\u80FD\u5B58\u5728\u4E00\u4E2A\u6839\u5143\u7D20(HtmlDocument.setContent)");
                 }
-            } else if (obj instanceof HtmlComment)
+            } else if (obj instanceof HtmlComment) {
                 addContent((HtmlComment) obj);
-            else
+            } else {
                 throw new CMyException(1, "\u65E0\u6548\u7684\u6587\u6863\u5185\u5BB9(HtmlDocument.setContent)");
+            }
         }
-        if (!bDidRoot)
+        if (!bDidRoot) {
             throw new CMyException(1, "\u6587\u6863\u7F3A\u5C11\u6839\u5143\u7D20\uFF08HtmlDocument.setContent\uFF09");
-        else
+        } else {
             return this;
+        }
     }
 
     public HtmlElement getRootElement() {
         for (Iterator itr = content.iterator(); itr.hasNext(); ) {
             Object obj = itr.next();
-            if (obj instanceof HtmlElement)
+            if (obj instanceof HtmlElement) {
                 return (HtmlElement) obj;
+            }
         }
 
         return null;
     }
 
     public HtmlDocument setRootElement(HtmlElement _rootElement) {
-        if (_rootElement == null)
+        if (_rootElement == null) {
             return this;
+        }
         boolean bHadRoot = false;
         ListIterator itr;
         for (itr = content.listIterator(); itr.hasNext(); ) {
@@ -86,16 +91,18 @@ public class HtmlDocument {
             }
         }
 
-        if (!bHadRoot)
+        if (!bHadRoot) {
             itr.add(_rootElement);
+        }
         _rootElement.setDocument(null);
         return this;
     }
 
     public HtmlDocument addContent(HtmlComment _comment)
             throws CMyException {
-        if (_comment == null)
+        if (_comment == null) {
             return this;
+        }
         if (_comment.getParent() != null || _comment.getDocument() != null) {
             throw new CMyException(1, "\u6DFB\u52A0\u7684\u5185\u5BB9\u5DF2\u7ECF\u5B58\u5728Parent\uFF08HtmlDocument.addContent\uFF09");
         } else {
@@ -106,22 +113,26 @@ public class HtmlDocument {
 
     public List getElementsByName(String _name) {
         HtmlElement root = getRootElement();
-        if (root == null)
+        if (root == null) {
             return new ArrayList(1);
-        else
+        } else {
             return root.getElementsByName(_name);
+        }
     }
 
+    @Override
     public String toString() {
-        if (content == null || content.size() < 1)
+        if (content == null || content.size() < 1) {
             return "";
+        }
         StringBuffer textContent = new StringBuffer();
         for (Iterator itr = content.iterator(); itr.hasNext(); textContent.append("\n")) {
             Object obj = itr.next();
-            if (obj instanceof HtmlComment)
+            if (obj instanceof HtmlComment) {
                 textContent.append(((HtmlComment) obj).toString());
-            else if (obj instanceof HtmlElement)
+            } else if (obj instanceof HtmlElement) {
                 textContent.append(((HtmlElement) obj).toString());
+            }
         }
 
         return textContent.toString();
@@ -129,20 +140,24 @@ public class HtmlDocument {
 
     public boolean fromString(String _strSrc)
             throws CMyException {
-        if (content != null)
+        if (content != null) {
             content.clear();
+        }
         _strSrc = _strSrc.trim();
-        if (_strSrc.length() < 1)
+        if (_strSrc.length() < 1) {
             return false;
+        }
         HtmlElement docElement = new HtmlElement();
-        if (docElement.fromString("<_DOM>" + _strSrc + "</_DOM>") < 1)
+        if (docElement.fromString("<_DOM>" + _strSrc + "</_DOM>") < 1) {
             return false;
+        }
         List lstContent = docElement.getContent();
-        if (lstContent == null)
+        if (lstContent == null) {
             return false;
+        }
         for (Iterator itr = lstContent.iterator(); itr.hasNext(); ) {
             Object obj = itr.next();
-            if (obj != null)
+            if (obj != null) {
                 if (obj instanceof HtmlComment) {
                     ((HtmlComment) obj).setParent(null);
                     addContent((HtmlComment) obj);
@@ -150,6 +165,7 @@ public class HtmlDocument {
                     ((HtmlElement) obj).setParent(null);
                     setRootElement((HtmlElement) obj);
                 }
+            }
         }
 
         return true;

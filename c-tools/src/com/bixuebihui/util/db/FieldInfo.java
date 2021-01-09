@@ -45,6 +45,7 @@ public class FieldInfo {
         return dataDefault;
     }
 
+    @Override
     public String toString() {
         return "DATATYPE:" + dataType + " DATALENGTH:" + dataLength + " ISNULLABLE:" + nullable + " COLUMNID:" + columnID + " DEFAULTDATA:" + dataDefault;
     }

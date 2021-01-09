@@ -37,22 +37,27 @@ public class SQLUtil
      * @return a {@link java.lang.String} object.
      */
     public static String escapeString(String s, int i) {
-        if(s == null)
+        if(s == null) {
             return EMPTY_STR;
-        if(s.length() > i)
+        }
+        if(s.length() > i) {
             s = s.substring(0, i);
+        }
         StringTokenizer stringtokenizer = new StringTokenizer(s, "'");
         StringBuilder stringbuffer = null;
-        for(; stringtokenizer.hasMoreTokens(); stringbuffer.append(stringtokenizer.nextToken()))
-            if(stringbuffer == null)
+        for(; stringtokenizer.hasMoreTokens(); stringbuffer.append(stringtokenizer.nextToken())) {
+            if(stringbuffer == null) {
                 stringbuffer = new StringBuilder(s.length() + 20);
-            else
+            } else {
                 stringbuffer.append("''");
+            }
+        }
 
-        if(stringbuffer == null)
+        if(stringbuffer == null) {
             return s;
-        else
+        } else {
             return stringbuffer.toString();
+        }
     }
 
     /**
@@ -62,10 +67,11 @@ public class SQLUtil
      * @return a {@link java.lang.String} object.
      */
     public static String notNull(String s) {
-        if(s == null)
+        if(s == null) {
             return EMPTY_STR;
-        else
+        } else {
             return s;
+        }
     }
 
     /**
@@ -75,9 +81,9 @@ public class SQLUtil
      * @return a {@link java.lang.String} object.
      */
     public static synchronized String formatMysqlDate(Date date) {
-        if(date == null)
+        if(date == null) {
             return "";
-        else {
+        } else {
             SimpleDateFormat mysqlFormat = new SimpleDateFormat("yyyy-MM-dd");
             return mysqlFormat.format(date);
         }
@@ -90,8 +96,9 @@ public class SQLUtil
      * @return a {@link java.util.Date} object.
      */
     public static synchronized Date parseMysqlDate(String s) {
-        if(s == null || s.equals("0000-00-00"))
+        if(s == null || "0000-00-00".equals(s)) {
             return null;
+        }
         try {
             SimpleDateFormat mysqlFormat = new SimpleDateFormat("yyyy-MM-dd");
             return mysqlFormat.parse(s);
@@ -107,9 +114,9 @@ public class SQLUtil
      * @return a {@link java.lang.String} object.
      */
     public static synchronized String formatHiResMysqlDate(Date date) {
-        if(date == null)
+        if(date == null) {
             return "";
-        else {
+        } else {
             SimpleDateFormat mysqlFormatHiRes = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             return mysqlFormatHiRes.format(date);
         }
@@ -122,10 +129,11 @@ public class SQLUtil
      * @return a {@link java.lang.String} object.
      */
     public static String booleanToString(boolean flag) {
-        if(flag)
+        if(flag) {
             return "y";
-        else
+        } else {
             return "n";
+        }
     }
 
     /**
@@ -135,7 +143,7 @@ public class SQLUtil
      * @return a boolean.
      */
     public static boolean stringToBoolean(String s) {
-        return s != null && s.equals("y");
+        return s != null && "y".equals(s);
     }
 
 

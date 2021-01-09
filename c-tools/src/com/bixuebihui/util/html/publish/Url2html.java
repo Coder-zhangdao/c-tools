@@ -11,7 +11,9 @@ public class Url2html {
 
     public void addFilter(IStringFilter filter) {
         if (filter != null) {
-            if (stringFilter == null) stringFilter = new ArrayList();
+            if (stringFilter == null) {
+                stringFilter = new ArrayList();
+            }
             stringFilter.add(filter);
         }
     }

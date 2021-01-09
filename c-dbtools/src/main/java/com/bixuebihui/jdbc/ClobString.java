@@ -42,6 +42,7 @@ public class ClobString {
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String toString() {
         return content;
     }

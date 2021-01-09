@@ -42,10 +42,11 @@ public class TableInfos {
     }
 
     public TableInfo getTableInfo(String _sTableName) {
-        if (_sTableName == null)
+        if (_sTableName == null) {
             return null;
-        else
+        } else {
             return (TableInfo) hTableInfos.get(_sTableName.trim());
+        }
     }
 
     public FieldInfo getFieldInfo(String _sTableName, String _sFieldName) {
@@ -71,17 +72,19 @@ public class TableInfos {
         hTableInfos.clear();
         String strSQL;
         if (_dbType == DBTypes.ORACLE) //oracle
+        {
             strSQL = "SELECT * FROM ALL_TAB_COLUMNS WHERE OWNER=? ORDER BY TABLE_NAME,COLUMN_ID";
-        else if (_dbType == DBTypes.SQLSERVER)
+        } else if (_dbType == DBTypes.SQLSERVER) {
             strSQL = "SELECT *, NUMERIC_SCALE AS DATA_SCALE FROM WCM_ViewCOLUMNS where 1=? ORDER BY TABLE_NAME, COLUMN_ID";
-        else if (_dbType == DBTypes.DB2UDB)
+        } else if (_dbType == DBTypes.DB2UDB) {
             strSQL = "SELECT c.tbname AS TABLE_NAME,c.colno AS COLUMN_ID,c.name AS COLUMN_NAME,c.typename AS DATA_TYPE," +
                     "c.longlength AS DATA_LENGTH, c.nulls AS NULLABLE,c.default AS DATA_DEFAULT,c.scale AS DATA_SCALE" +
                     " FROM sysibm.syscolumns c where c.tbcreator=? ORDER BY TABLE_NAME, COLUMN_ID";
-        else if (_dbType == DBTypes.SybaseASE)
+        } else if (_dbType == DBTypes.SybaseASE) {
             strSQL = "SELECT * FROM WCM_ViewCOLUMNS where 1=? ORDER BY TABLE_NAME, COLUMN_ID";
-        else
+        } else {
             throw new CMyException(1, "不支持该类型(" + _dbType + ")数据库！");
+        }
 
 
         try (PreparedStatement stmt = _oConn.prepareStatement(strSQL)) {
@@ -101,8 +104,9 @@ public class TableInfos {
                     int nDataLength = rs.getInt("DATA_LENGTH");
                     String sNullable = rs.getString("NULLABLE");
                     boolean isNullable = false;
-                    if (sNullable == null || sNullable.compareToIgnoreCase("Y") == 0)
+                    if (sNullable == null || sNullable.compareToIgnoreCase("Y") == 0) {
                         isNullable = true;
+                    }
                     String sDataDefault = rs.getString("DATA_DEFAULT");
                     int nScale = rs.getInt("DATA_SCALE");
                     fieldInfo = new FieldInfo(dbType, sDataType, nDataLength, isNullable, nColumnId, sDataDefault, nScale);
@@ -125,15 +129,17 @@ public class TableInfos {
             throws CMyException {
         String strSQL = null;
         if (_dbType == 1) //oracle
+        {
             strSQL = "SELECT TABLE_NAME,COLUMN_ID,COLUMN_NAME,DATA_TYPE,DATA_LENGTH,NULLABLE,DATA_DEFAULT, DATA_SCALE FROM ALL_TAB_COLUMNS WHERE OWNER='" + _sDBOwner + "' ORDER BY TABLE_NAME,COLUMN_ID";
-        else if (_dbType == 2)
+        } else if (_dbType == 2) {
             strSQL = "SELECT * FROM WCM_ViewCOLUMNS ORDER BY TABLE_NAME, COLUMN_ID";
-        else if (_dbType == 3)
+        } else if (_dbType == 3) {
             strSQL = "SELECT c.tbname AS TABLE_NAME,c.colno AS COLUMN_ID,c.name AS COLUMN_NAME,c.typename AS DATA_TYPE,c.longlength AS DATA_LENGTH, c.nulls AS NULLABLE,c.default AS DATA_DEFAULT,c.scale AS DATA_SCALE FROM sysibm.syscolumns c where c.tbcreator='TRSWCM' ORDER BY TABLE_NAME, COLUMN_ID";
-        else if (_dbType == 4)
+        } else if (_dbType == 4) {
             strSQL = "SELECT * FROM WCM_ViewCOLUMNS ORDER BY TABLE_NAME, COLUMN_ID";
-        else
+        } else {
             throw new CMyException(1, "不支持该类型数据库！");
+        }
         DBType dbType = DBTypes.getDBType(_dbType);
 
         try (Statement stmt = _oConn.createStatement(); ResultSet rs = stmt.executeQuery(strSQL)) {
@@ -155,8 +161,9 @@ public class TableInfos {
                 int nDataScale = rs.getInt("DATA_SCALE");
                 if (sLastTblName == null || sLastTblName.compareTo(sTableName) != 0) {
                     sLastTblName = sTableName;
-                    if (sLastTblName != null)
+                    if (sLastTblName != null) {
                         sHtml.append("\n</table>\n</p><br>");
+                    }
                     sHtml.append("\n<p><img border=\"0\" src=\"../images/blue-folder-open.gif\" align=\"absmiddle\"><b>" + i + ". " + sTableName + "</b>");
                     sHtml.append("\n<table border='0' cellspacing='2' cellpadding='2'>");
                     sHtml.append("\n<tr bgcolor=\"#dddddd\">");
@@ -176,10 +183,11 @@ public class TableInfos {
                 sHtml.append("\n    <td nowrap>" + fi.getColumnID() + "</td>");
                 sHtml.append("\n    <td nowrap>" + fi.getDataTypeName() + "</td>");
                 sHtml.append("\n    <td nowrap>" + fi.getDataLength() + "</td>");
-                if (fi.isNullable())
+                if (fi.isNullable()) {
                     sHtml.append("\n    <td nowrap><font color=#0000ff>Yes</font></td>");
-                else
+                } else {
                     sHtml.append("\n    <td nowrap><font color=#ff0000>No</font></td>");
+                }
                 sHtml.append("\n    <td nowrap>" + fi.getDataDefault() + "</td>");
             }
 

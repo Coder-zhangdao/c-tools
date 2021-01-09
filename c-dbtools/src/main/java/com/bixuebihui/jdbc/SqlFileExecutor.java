@@ -64,7 +64,7 @@ public class SqlFileExecutor {
 					.split("(;\\s*\\r\\n)|(;\\s*\\n)");
 			for (int i = 0; i < sqlArr.length; i++) {
 				String sql = sqlArr[i].replaceAll("--.*", "").trim();
-				if (!sql.equals("")) {
+				if (!"".equals(sql)) {
 					sqlList.add(sql);
 				}
 			}

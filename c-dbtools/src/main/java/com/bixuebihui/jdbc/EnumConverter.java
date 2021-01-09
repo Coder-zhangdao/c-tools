@@ -13,9 +13,12 @@ public class EnumConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object convert(@SuppressWarnings("rawtypes") Class type, Object value) {
 
-        if(value==null) return null;
+        if(value==null) {
+            return null;
+        }
 
         if(type.isEnum()) {
             int v = Integer.parseInt(value.toString());

@@ -8,26 +8,27 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpServlet;
 
 
+/**
+ * @author xwx
+ */
 public class AppStartListener extends HttpServlet implements ServletContextListener {
-    static ScheduleMonitor cm = null;
     private final static Log log = LogFactory.getLog(AppStartListener.class);
     /**
      *
      */
     private static final long serialVersionUID = 3105513079977240099L;
 
+    @Override
     public void contextInitialized(ServletContextEvent event) {
-        //System.out.println("[CYC] Application Listener has been actived!");
-        cm = new ScheduleMonitor();
         try {
-            log.info("[CYC] 自动监控任务启动:" + cm.run());
+            log.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
         } catch (Exception e) {
             log.warn(e);
         }
         event.getServletContext().log("AppStartListener Launch!");
-        //event.getServletContext().log("已经添加任务调度表");
     }
 
+    @Override
     public void contextDestroyed(ServletContextEvent event) {
         try {
             ScheduleMonitor.shutdown();

@@ -6,11 +6,20 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 
+/**
+ * @author xwx
+ */
 public class ScheduleMonitor {
     private static boolean scheduleon = false;
-    private static Scheduler sched = null;                    //唯一的时间表对象
-    private static long log_interval = 600000L;                //每1分钟写一次主页
-    private static long tou_interval = 300000L;                //每5分钟查一次超时用户
+
+    //唯一的时间表对象
+    private static Scheduler sched = null;
+
+    //每1分钟写一次主页
+    private static long log_interval = 600000L;
+
+    //每5分钟查一次超时用户
+    private static long tou_interval = 300000L;
 
     private static Log mLog = LogFactory.getLog(ScheduleMonitor.class);
 
@@ -28,10 +37,6 @@ public class ScheduleMonitor {
                 mLog.info("Schedule is running..->..Shutdown current schedule job!");
             }
             sched = StdSchedulerFactory.getDefaultScheduler();
-            //JobDetail job = new JobDetail("WriteStaticPage","WPAGE", PagePublisher.class);
-            //SimpleTrigger trigger = new SimpleTrigger("Trigger","WPAGE",SimpleTrigger.REPEAT_INDEFINITELY,log_interval);
-
-            //sched.scheduleJob(job, trigger);
 
             sched.start();
             scheduleon = sched.isStarted();

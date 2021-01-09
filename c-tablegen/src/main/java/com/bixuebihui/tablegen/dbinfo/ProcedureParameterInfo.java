@@ -3,6 +3,9 @@ package com.bixuebihui.tablegen.dbinfo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * @author xwx
+ */
 public class ProcedureParameterInfo extends DatabaseObjectInfo
 {
 	public static class  F{
@@ -262,7 +265,8 @@ public class ProcedureParameterInfo extends DatabaseObjectInfo
 	}
 
 
-	public String toString(){
+	@Override
+    public String toString(){
 		return this.getSimpleName()+" column_type="+this.column_type+" data_type="+this.data_type+" type_name="+this.type_name+" "+getColumn_typeDescription();
 	}
 

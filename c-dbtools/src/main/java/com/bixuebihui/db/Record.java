@@ -13,6 +13,9 @@ import java.util.List;
  * @version $Id: $Id
  */
 public interface Record<T> {
+	/**
+	 * group by function
+	 */
 	enum GroupFun{
 		AVG,//(column)	返回某列的平均值
 		//BINARY_CHECKSUM

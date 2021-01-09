@@ -12,14 +12,24 @@ import java.util.Random;
 
 public class CMyEncrypt {
 
-    public String getMD5OfStr(String inbuf) {
-        md5Update(inbuf.getBytes(), inbuf.length());
-        md5Final();
-        digestHexStr = "";
-        for (int i = 0; i < 16; i++)
-            digestHexStr += byteHEX(digest[i]);
+    public static String setAnotherChar(String _sSecret) {
+        String sReSecret = "";
+        for (int i = 0; i < _sSecret.length(); i++) {
+            char c = _sSecret.charAt(i);
+            int iAsc = c;
+            if (iAsc >= 97 && iAsc <= 109) {
+                iAsc += 13;
+            } else if (iAsc >= 110 && iAsc <= 122) {
+                iAsc -= 13;
+            } else if (iAsc >= 65 && iAsc <= 77) {
+                iAsc += 13;
+            } else if (iAsc >= 78 && iAsc <= 90) {
+                iAsc -= 13;
+            }
+            sReSecret = sReSecret + (char) iAsc;
+        }
 
-        return digestHexStr;
+        return sReSecret;
     }
 
     public CMyEncrypt() {
@@ -83,27 +93,25 @@ public class CMyEncrypt {
         return a;
     }
 
-    private void md5Update(byte inbuf[], int inputLen) {
-        byte block[] = new byte[64];
-        int index = (int) (count[0] >>> 3) & 0x3f;
-        if ((count[0] += inputLen << 3) < (long) (inputLen << 3))
-            count[1]++;
-        count[1] += inputLen >>> 29;
-        int partLen = 64 - index;
-        int i;
-        if (inputLen >= partLen) {
-            md5Memcpy(buffer, inbuf, index, 0, partLen);
-            md5Transform(buffer);
-            for (i = partLen; i + 63 < inputLen; i += 64) {
-                md5Memcpy(block, inbuf, 0, i, 64);
-                md5Transform(block);
-            }
-
-            index = 0;
-        } else {
-            i = 0;
+    public static String RASEncrypt(String _sSrc) {
+        Random aRand = new Random(System.currentTimeMillis());
+        String strEnc = "";
+        String strSrc = _sSrc;
+        String strTemp = "";
+        if (_sSrc.length() <= 0) {
+            return "";
         }
-        md5Memcpy(buffer, inbuf, index, i, inputLen - i);
+        int nIndex = 0;
+        for (int nCount = strSrc.length(); nIndex < nCount; nIndex++) {
+            strTemp = strSrc.substring(nIndex, nIndex + 1);
+            int nChar = Integer.parseInt(strTemp, 36);
+            strEnc = strEnc + (long) (Mult(nChar, ulE, ulN) + dDiff);
+            strEnc = strEnc + "-";
+        }
+
+        strTemp = String.valueOf(aRand.nextLong());
+        strEnc = strEnc + strTemp.substring(1, 8);
+        return strEnc.toUpperCase();
     }
 
     private void md5Final() {
@@ -116,10 +124,24 @@ public class CMyEncrypt {
         Encode(digest, state, 16);
     }
 
-    private void md5Memcpy(byte output[], byte input[], int outpos, int inpos, int len) {
-        for (int i = 0; i < len; i++)
-            output[outpos + i] = input[inpos + i];
+    public static String RASDecrypt(String _sSrc) {
+        String strDec = "";
+        String strSrc = _sSrc;
+        String strTemp = "";
+        int nIndex = 0;
+        int nFound = 0;
+        for (int nCount = strSrc.length(); nIndex < nCount; nIndex = nFound + 1) {
+            nFound = strSrc.indexOf("-", nIndex);
+            if (nFound == -1) {
+                break;
+            }
+            double dblTemp = Double.parseDouble(strSrc.substring(nIndex, nFound)) - dDiff;
+            strTemp = Integer.toString((int) Mult(dblTemp, ulD, ulN), 36);
+            strDec = strDec + strTemp;
+        }
 
+        strDec = strDec.toUpperCase();
+        return strDec;
     }
 
     private void md5Transform(byte block[]) {
@@ -236,62 +258,46 @@ public class CMyEncrypt {
         return s;
     }
 
-    public static String setAnotherChar(String _sSecret) {
-        String sReSecret = "";
-        for (int i = 0; i < _sSecret.length(); i++) {
-            char c = _sSecret.charAt(i);
-            int iAsc = c;
-            if (iAsc >= 97 && iAsc <= 109)
-                iAsc += 13;
-            else if (iAsc >= 110 && iAsc <= 122)
-                iAsc -= 13;
-            else if (iAsc >= 65 && iAsc <= 77)
-                iAsc += 13;
-            else if (iAsc >= 78 && iAsc <= 90)
-                iAsc -= 13;
-            sReSecret = sReSecret + (char) iAsc;
+    public String getMD5OfStr(String inbuf) {
+        md5Update(inbuf.getBytes(), inbuf.length());
+        md5Final();
+        digestHexStr = "";
+        for (int i = 0; i < 16; i++) {
+            digestHexStr += byteHEX(digest[i]);
         }
 
-        return sReSecret;
+        return digestHexStr;
     }
 
-    public static String RASEncrypt(String _sSrc) {
-        Random aRand = new Random(System.currentTimeMillis());
-        String strEnc = "";
-        String strSrc = _sSrc;
-        String strTemp = "";
-        if (_sSrc.length() <= 0)
-            return "";
-        int nIndex = 0;
-        for (int nCount = strSrc.length(); nIndex < nCount; nIndex++) {
-            strTemp = strSrc.substring(nIndex, nIndex + 1);
-            int nChar = Integer.parseInt(strTemp, 36);
-            strEnc = strEnc + (long) (Mult(nChar, ulE, ulN) + dDiff);
-            strEnc = strEnc + "-";
+    private void md5Update(byte inbuf[], int inputLen) {
+        byte block[] = new byte[64];
+        int index = (int) (count[0] >>> 3) & 0x3f;
+        if ((count[0] += inputLen << 3) < (long) (inputLen << 3)) {
+            count[1]++;
         }
+        count[1] += inputLen >>> 29;
+        int partLen = 64 - index;
+        int i;
+        if (inputLen >= partLen) {
+            md5Memcpy(buffer, inbuf, index, 0, partLen);
+            md5Transform(buffer);
+            for (i = partLen; i + 63 < inputLen; i += 64) {
+                md5Memcpy(block, inbuf, 0, i, 64);
+                md5Transform(block);
+            }
 
-        strTemp = String.valueOf(aRand.nextLong());
-        strEnc = strEnc + strTemp.substring(1, 8);
-        return strEnc.toUpperCase();
+            index = 0;
+        } else {
+            i = 0;
+        }
+        md5Memcpy(buffer, inbuf, index, i, inputLen - i);
     }
 
-    public static String RASDecrypt(String _sSrc) {
-        String strDec = "";
-        String strSrc = _sSrc;
-        String strTemp = "";
-        int nIndex = 0;
-        int nFound = 0;
-        for (int nCount = strSrc.length(); nIndex < nCount; nIndex = nFound + 1) {
-            nFound = strSrc.indexOf("-", nIndex);
-            if (nFound == -1)
-                break;
-            double dblTemp = Double.parseDouble(strSrc.substring(nIndex, nFound)) - dDiff;
-            strTemp = Integer.toString((int) Mult(dblTemp, ulD, ulN), 36);
-            strDec = strDec + strTemp;
+    private void md5Memcpy(byte output[], byte input[], int outpos, int inpos, int len) {
+        for (int i = 0; i < len; i++) {
+            output[outpos + i] = input[inpos + i];
         }
 
-        strDec = strDec.toUpperCase();
-        return strDec;
     }
 
     private static double Mult(double x, double p, double m) {

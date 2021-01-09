@@ -15,6 +15,7 @@ public class CMyFilenameFilter
         sExt = _extendName;
     }
 
+    @Override
     public boolean accept(File _dir, String _name) {
         return _name.endsWith(sExt);
     }

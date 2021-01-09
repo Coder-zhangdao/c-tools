@@ -64,8 +64,9 @@ public class PojoValidator<T> {
      * @return a {@link java.lang.String} object.
      */
     protected String valueObject2Text(Object obj){
-        if(obj==null)
+        if(obj==null) {
             return "";
+        }
 
         String str = obj.toString();
         return ", 实际传入值为:"+

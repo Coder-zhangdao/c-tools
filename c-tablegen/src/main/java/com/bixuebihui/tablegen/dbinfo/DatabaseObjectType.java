@@ -7,7 +7,7 @@ package com.bixuebihui.tablegen.dbinfo;
 public class DatabaseObjectType implements IHasIdentifier
 {
 	/** Factory to generate unique IDs for these objects. */
-	private final static IntegerIdentifierFactory s_idFactory = new IntegerIdentifierFactory();
+	private final static IntegerIdentifierFactory IDENTIFIER_FACTORY = new IntegerIdentifierFactory();
 
 	/** Other - general purpose. */
 	public final static DatabaseObjectType OTHER = createNewDatabaseObjectType();
@@ -66,7 +66,7 @@ public class DatabaseObjectType implements IHasIdentifier
 	private DatabaseObjectType()
 	{
 		super();
-		_id = s_idFactory.createIdentifier();
+		_id = IDENTIFIER_FACTORY.createIdentifier();
 	}
 
 	/**

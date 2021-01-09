@@ -31,20 +31,23 @@ public class SiteFileFetch extends Thread {
         }
     }
 
+    @Override
     public void run() {
         try {
             if (bFirst) {
                 nFileLength = getFileSize();
-                if (nFileLength == -1L)
+                if (nFileLength == -1L) {
                     System.err.println("File Length is not known!");
-                else if (nFileLength == -2L) {
+                } else if (nFileLength == -2L) {
                     System.err.println("File is not access!");
                 } else {
-                    for (int i = 0; i < nStartPos.length; i++)
+                    for (int i = 0; i < nStartPos.length; i++) {
                         nStartPos[i] = (long) i * (nFileLength / (long) nStartPos.length);
+                    }
 
-                    for (int i = 0; i < nEndPos.length - 1; i++)
+                    for (int i = 0; i < nEndPos.length - 1; i++) {
                         nEndPos[i] = nStartPos[i + 1];
+                    }
 
                     nEndPos[nEndPos.length - 1] = nFileLength;
                 }
@@ -62,14 +65,16 @@ public class SiteFileFetch extends Thread {
                 Utility.sleep(500);
                 breakWhile = true;
                 for (int i = 0; i < nStartPos.length; i++) {
-                    if (fileSplitterFetch[i].bDownOver)
+                    if (fileSplitterFetch[i].bDownOver) {
                         continue;
+                    }
                     breakWhile = false;
                     break;
                 }
 
-                if (breakWhile)
+                if (breakWhile) {
                     break;
+                }
             }
             System.err.println("文件下载结束！");
         } catch (Exception e) {
@@ -97,9 +102,10 @@ public class SiteFileFetch extends Thread {
             int i = 1;
             do {
                 String sHeader = httpConnection.getHeaderFieldKey(i);
-                if (sHeader == null)
+                if (sHeader == null) {
                     break;
-                if (sHeader.equals("Content-Length")) {
+                }
+                if ("Content-Length".equals(sHeader)) {
                     nFileLength = Integer.parseInt(httpConnection.getHeaderField(sHeader));
                     break;
                 }
@@ -145,8 +151,9 @@ public class SiteFileFetch extends Thread {
 
     public void siteStop() {
         bStop = true;
-        for (int i = 0; i < nStartPos.length; i++)
+        for (int i = 0; i < nStartPos.length; i++) {
             fileSplitterFetch[i].splitterStop();
+        }
 
     }
 

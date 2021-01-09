@@ -12,8 +12,6 @@ import java.sql.PreparedStatement;
 import java.util.Hashtable;
 
 
-// Referenced classes of package com.bixuebihui.util.database:
-//            DataType
 
 public abstract class DBType {
 
@@ -21,10 +19,11 @@ public abstract class DBType {
         sName = _sName;
         sDriverClass = _sDriverClass;
         bSupportStoredProc = _bSupportStoredProc;
-        DataType allDataTypes[] = getAllDataTypes();
+        DataType[] allDataTypes = getAllDataTypes();
         hDataTypes = new Hashtable(allDataTypes.length);
-        for (int i = 0; i < allDataTypes.length; i++)
+        for (int i = 0; i < allDataTypes.length; i++) {
             hDataTypes.put(allDataTypes[i].getName(), allDataTypes[i]);
+        }
 
     }
 

@@ -17,22 +17,25 @@ public class CSQLText {
 
     private static String getText(Reader p_reader)
             throws Exception {
-        if (p_reader == null)
+        if (p_reader == null) {
             return null;
+        }
         StringBuffer txtBuff = null;
         char buff[] = new char[50000];
         for (int nLen = -1; (nLen = p_reader.read(buff)) != -1; ) {
-            if (txtBuff == null)
+            if (txtBuff == null) {
                 txtBuff = new StringBuffer(nLen);
+            }
             txtBuff.append(buff, 0, nLen);
         }
 
         buff = null;
         p_reader.close();
-        if (txtBuff == null)
+        if (txtBuff == null) {
             return "";
-        else
+        } else {
             return txtBuff.toString();
+        }
     }
 
     public static String getText(ResultSet p_rsData, String p_sFieldName)

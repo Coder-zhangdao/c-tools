@@ -19,6 +19,7 @@ public class RemoveActionImpl implements IRemoveAction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean actionAfterRemove(Object val) {
         if(val instanceof PooledPreparedStatement){
             try {

@@ -102,7 +102,7 @@ public class UploadFile {
 
     public String getNewFileName(String oldName, int seq) {
         String flname = "";
-        if (oldName != null && !oldName.equals("")) {
+        if (oldName != null && !"".equals(oldName)) {
 
             // 获得文件后缀
 

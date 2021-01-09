@@ -17,16 +17,19 @@ public final class imageslt extends HttpServlet {
 
     Color getRandColor(int fc, int bc) {// ¸ø¶¨·¶Î§»ñµÃËæ»úÑÕÉ«
         Random random = new Random();
-        if (fc > 255)
+        if (fc > 255) {
             fc = 255;
-        if (bc > 255)
+        }
+        if (bc > 255) {
             bc = 255;
+        }
         int r = fc + random.nextInt(bc - fc);
         int g = fc + random.nextInt(bc - fc);
         int b = fc + random.nextInt(bc - fc);
         return new Color(r, g, b);
     }
 
+    @Override
     public void service(HttpServletRequest request, HttpServletResponse response)
             throws java.io.IOException, ServletException {
 

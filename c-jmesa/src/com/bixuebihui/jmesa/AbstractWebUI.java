@@ -40,7 +40,10 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
     public static final String VAR_NAME = "row";
     private static final String TABLE_I18N = "tables";
-    protected String id; // The unique table id.
+
+    // The unique table id.
+    protected String id;
+
     protected String successView;
     protected IBaseListService<T, V> service;
     protected Log mLog = LogFactory.getLog(AbstractWebUI.class);
@@ -322,17 +325,18 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         if (keys == null) {
             return;
         }
-        for (int i = 0; i < keys.length; i++) {
-            if (!service.deleteByKey(keys[i])) {
-                mLog.warn("fail to delete key=" + keys[i]);
+        for (V key : keys) {
+            if (!service.deleteByKey(key)) {
+                mLog.warn("fail to delete key=" + key);
             }
         }
     }
 
     protected void copySelected(V[] parameterValues) throws SQLException {
-        if (parameterValues == null)
+        if (parameterValues == null) {
             return;
-        java.util.ArrayList<String> list = new java.util.ArrayList<String>();
+        }
+        java.util.ArrayList<String> list = new java.util.ArrayList<>();
         for (V parameterValue : parameterValues) {
             list.add(parameterValue.toString());
         }
@@ -383,7 +387,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
                 }
                 String property = worksheetColumn.getProperty();
                 try {
-                    if (worksheetColumn.getProperty().equals("selected")) {
+                    if ("selected".equals(worksheetColumn.getProperty())) {
                         if (changedValue
                                 .equals(CheckboxWorksheetEditor.CHECKED)) {
                             PropertyUtils.setProperty(info, property, "y");
@@ -416,7 +420,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
 
     protected void setDataAndLimitVariables(TableModel tableModel) {
-        tableModel.setItems(new ItemsProvider<T>(this.getUniquePropertyName(), service));
+        tableModel.setItems(new ItemsProvider<>(this.getUniquePropertyName(), service));
     }
 
     public Map<String, String> getColsTemplate() {

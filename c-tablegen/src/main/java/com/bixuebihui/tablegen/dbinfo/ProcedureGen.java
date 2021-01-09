@@ -80,7 +80,7 @@ public class ProcedureGen {
 
     protected static String getReturnType(ProcedureInfo proc) {
         String res = "";
-        switch (proc.getType()) {
+        switch (proc.getProcedureType()) {
             case DatabaseMetaData.procedureNoResult:
                 res = "void";
                 break;

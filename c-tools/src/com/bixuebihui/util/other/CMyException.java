@@ -97,43 +97,51 @@ public class CMyException extends Exception {
 
             case ERR_NET_OPENSTREAM: // 'o'
                 return "ERR_NET_OPENSTREAM";
+            default:
+                return "ERR_UNKNOWN";
         }
-        return "ERR_UNKNOWN";
     }
 
     public String getMyMessage() {
         return super.getMessage();
     }
 
+    @Override
     public String getMessage() {
-        if (rootCause == null)
+        if (rootCause == null) {
             return "[" + errNo + "]" + super.getMessage();
-        else
+        } else {
             return "[" + errNo + "]" + super.getMessage() + ";\r\n <-- " + rootCause.toString();
+        }
     }
 
+    @Override
     public String getLocalizedMessage() {
         return getMessage();
     }
 
+    @Override
     public void printStackTrace(final PrintStream _ps) {
-        if (rootCause == null)
+        if (rootCause == null) {
             super.printStackTrace(_ps);
-        else
+        } else {
             synchronized (this) {
                 _ps.println(this);
                 rootCause.printStackTrace(_ps);
             }
+        }
     }
 
+    @Override
     public void printStackTrace(final PrintWriter _pw) {
-        if (rootCause == null)
+        if (rootCause == null) {
             super.printStackTrace(_pw);
-        else
+        } else {
             synchronized (this) {
                 _pw.println(this);
                 rootCause.printStackTrace(_pw);
             }
+        }
     }
 
     public static String getStackTraceText(Throwable _ex) {

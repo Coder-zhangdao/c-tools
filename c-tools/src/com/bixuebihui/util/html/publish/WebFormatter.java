@@ -24,8 +24,9 @@ public class WebFormatter implements IStringFilter {
         Token token = null;
         for (; ; ) {
             token = parse(data, start, previousIsPre);
-            if (token == null)
+            if (token == null) {
                 break;
+            }
             previousIsPre = token.isPreTag();
             sb = sb.append(token.getText());
             start += token.getLength();
@@ -34,8 +35,9 @@ public class WebFormatter implements IStringFilter {
     }
 
     private static Token parse(char[] data, int start, boolean previousIsPre) {
-        if (start >= data.length)
+        if (start >= data.length) {
             return null;
+        }
         // try to read next char:
         char c = data[start];
         if (c == '<') {
@@ -52,25 +54,29 @@ public class WebFormatter implements IStringFilter {
                 if (end_comment_index == (-1)) {
                     // illegal end, but treat as comment:
                     return new Token(Token.TOKEN_COMMENT, data, start, data.length, previousIsPre);
-                } else
+                } else {
                     return new Token(Token.TOKEN_COMMENT, data, start, end_comment_index + 3, previousIsPre);
+                }
             }
             String s_lowerCase = s.toLowerCase();
             if (s_lowerCase.startsWith("<script")) { // this is a script:
                 int end_script_index = indexOf(data, start + 1, "</script>");
                 if (end_script_index == (-1))
                     // illegal end, but treat as script:
+                {
                     return new Token(Token.TOKEN_SCRIPT, data, start, data.length, previousIsPre);
-                else
+                } else {
                     return new Token(Token.TOKEN_SCRIPT, data, start, end_script_index + 9, previousIsPre);
+                }
             } else { // this is a tag:
                 return new Token(Token.TOKEN_TAG, data, start, start + s.length(), previousIsPre);
             }
         }
         // this is a text:
         int next_tag_index = indexOf(data, start + 1, '<');
-        if (next_tag_index == (-1))
+        if (next_tag_index == (-1)) {
             return new Token(Token.TOKEN_TEXT, data, start, data.length, previousIsPre);
+        }
         return new Token(Token.TOKEN_TEXT, data, start, next_tag_index, previousIsPre);
     }
 
@@ -86,20 +92,23 @@ public class WebFormatter implements IStringFilter {
                     break;
                 }
             }
-            if (match)
+            if (match) {
                 return i;
+            }
         }
         return (-1);
     }
 
     private static int indexOf(char[] data, int start, char c) {
         for (int i = start; i < data.length; i++) {
-            if (data[i] == c)
+            if (data[i] == c) {
                 return i;
+            }
         }
         return (-1);
     }
 
+    @Override
     public String filter(String str) {
         return html2text(str);
     }
@@ -162,18 +171,19 @@ class Token {
     private void parseText(boolean previousIsPre) {
         if (type == TOKEN_TAG) {
             char[] cs = html.toCharArray();
-            if (compareTag(TAG_BR, cs) || compareTag(TAG_P, cs))
+            if (compareTag(TAG_BR, cs) || compareTag(TAG_P, cs)) {
                 text = "\n";
-            else if (compareTag(TAG_LI, cs))
+            } else if (compareTag(TAG_LI, cs)) {
                 text = "\n* ";
-            else if (compareTag(TAG_PRE, cs))
+            } else if (compareTag(TAG_PRE, cs)) {
                 isPre = true;
-            else if (compareTag(TAG_HR, cs))
+            } else if (compareTag(TAG_HR, cs)) {
                 text = "\n--------\n";
-            else if (compareString(END_TAG_TD, cs))
+            } else if (compareString(END_TAG_TD, cs)) {
                 text = "\t";
-            else if (compareString(END_TAG_TR, cs) || compareString(END_TAG_LI, cs))
+            } else if (compareString(END_TAG_TR, cs) || compareString(END_TAG_LI, cs)) {
                 text = "\n";
+            }
         }
         // text token:
         else if (type == TOKEN_TEXT) {
@@ -192,16 +202,20 @@ class Token {
         boolean continueSpace = false;
         char current, next;
         for (; ; ) {
-            if (start >= cs.length)
+            if (start >= cs.length) {
                 break;
+            }
             current = cs[start]; // read current char
             if (start + 1 < cs.length) // and next char
+            {
                 next = cs[start + 1];
-            else
+            } else {
                 next = '\0';
+            }
             if (current == ' ') {
-                if (isPre || !continueSpace)
+                if (isPre || !continueSpace) {
                     buffer = buffer.append(' ');
+                }
                 continueSpace = true;
                 // continue loop:
                 start++;
@@ -209,15 +223,17 @@ class Token {
             }
             // not ' ', so:
             if (current == '\r' && next == '\n') {
-                if (isPre)
+                if (isPre) {
                     buffer = buffer.append('\n');
+                }
                 // continue loop:
                 start += 2;
                 continue;
             }
             if (current == '\n' || current == '\r') {
-                if (isPre)
+                if (isPre) {
                     buffer = buffer.append('\n');
+                }
                 // continue loop:
                 start++;
                 continue;
@@ -280,8 +296,9 @@ class Token {
     // or null if not found:
     private int readUtil(final char[] cs, final int start, final char util, final int maxLength) {
         int end = start + maxLength;
-        if (end > cs.length)
+        if (end > cs.length) {
             end = cs.length;
+        }
         for (int i = start; i < start + maxLength; i++) {
             if (cs[i] == util) {
                 return i - start + 1;
@@ -292,32 +309,38 @@ class Token {
 
     // compare standard tag "<input" with tag "<INPUT value=aa>"
     private boolean compareTag(final char[] ori_tag, char[] tag) {
-        if (ori_tag.length >= tag.length)
+        if (ori_tag.length >= tag.length) {
             return false;
+        }
         for (int i = 0; i < ori_tag.length; i++) {
-            if (Character.toLowerCase(tag[i]) != ori_tag[i])
+            if (Character.toLowerCase(tag[i]) != ori_tag[i]) {
                 return false;
+            }
         }
         // the following char should not be a-z:
         if (tag.length > ori_tag.length) {
             char c = Character.toLowerCase(tag[ori_tag.length]);
-            if (c < 'a' || c > 'z')
+            if (c < 'a' || c > 'z') {
                 return true;
+            }
             return false;
         }
         return true;
     }
 
     private boolean compareString(final char[] ori, char[] comp) {
-        if (ori.length > comp.length)
+        if (ori.length > comp.length) {
             return false;
+        }
         for (int i = 0; i < ori.length; i++) {
-            if (Character.toLowerCase(comp[i]) != ori[i])
+            if (Character.toLowerCase(comp[i]) != ori[i]) {
                 return false;
+            }
         }
         return true;
     }
 
+    @Override
     public String toString() {
         return html;
     }

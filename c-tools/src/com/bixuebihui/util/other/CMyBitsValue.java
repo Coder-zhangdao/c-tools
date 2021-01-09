@@ -4,6 +4,9 @@ package com.bixuebihui.util.other;
 import java.math.BigInteger;
 
 
+/**
+ * @author xwx
+ */
 public class CMyBitsValue
         implements Cloneable {
 

@@ -139,8 +139,8 @@ public class TableGen implements DiffHandler {
 	private String propertiesFilename;
 	private Properties configProperties;
 
-	public TableGen(OutputStream _out) {
-		initConsole(_out);
+	public TableGen(OutputStream outputStream) {
+		initConsole(outputStream);
 	}
 
 	public TableGen() {
@@ -221,13 +221,13 @@ public class TableGen implements DiffHandler {
 		return  map;
 	}
 
-	private void initConsole(OutputStream _out) {
-		if (_out instanceof PrintStream) {
-			console = (PrintStream) _out;
-		} else if (_out == System.out) {
+	private void initConsole(OutputStream out) {
+		if (out instanceof PrintStream) {
+			console = (PrintStream) out;
+		} else if (out == System.out) {
 		    //do nothing
 		} else {
-			console = new PrintStream(_out);
+			console = new PrintStream(out);
 		}
 
 	}
@@ -263,8 +263,8 @@ public class TableGen implements DiffHandler {
 		run(filename, System.out);
 	}
 
-	public void run(String filename, OutputStream _out) throws SQLException {
-		initConsole(_out);
+	public void run(String filename, OutputStream out) throws SQLException {
+		initConsole(out);
 
 		if (filename != null && filename.length() > 0) {
 			init(filename);
@@ -2079,7 +2079,7 @@ public class TableGen implements DiffHandler {
 				continue;
 			}
 
-			objs.append("info.get" + firstUp(cd.getName()) + "()");
+			objs.append("info.get").append(firstUp(cd.getName())).append("()");
 
 			if (iterator.hasNext()) {
 				objs.append(",");

@@ -33,8 +33,9 @@ public class SqlFilter {
 	 */
 	protected StringBuilder toCondition(){
 		StringBuilder criteria = new StringBuilder();
-		if (filters==null || filters.isEmpty())
-			return criteria;
+		if (filters==null || filters.isEmpty()) {
+            return criteria;
+        }
 		for (Filter filter : filters) {
 			buildCriteria(criteria, filter.getProperty(), filter.getValue());
 		}
@@ -104,8 +105,12 @@ public class SqlFilter {
 	 * @return a {@link SqlFilter} object.
 	 */
 	public SqlFilter addFilter(String property, Object value) {
-		if(!useNullAsCondition && value==null) return this;
-		if(filters==null) filters = new ArrayList<>();
+		if(!useNullAsCondition && value==null) {
+            return this;
+        }
+		if(filters==null) {
+            filters = new ArrayList<>();
+        }
 		filters.add(new Filter(property, value));
 		return this;
 	}
@@ -122,7 +127,9 @@ public class SqlFilter {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 
-			if (ignoreNulls && value == null) continue;
+			if (ignoreNulls && value == null) {
+                continue;
+            }
 
 			addFilter(key, value);
 		}
@@ -156,7 +163,9 @@ public class SqlFilter {
 	 * @return a {@link SqlFilter} object.
 	 */
 	public SqlFilter or(SqlFilter cond){
-		if(orCond==null) orCond = new ArrayList<>();
+		if(orCond==null) {
+            orCond = new ArrayList<>();
+        }
 		this.orCond.add(cond);
 		return this;
 	}

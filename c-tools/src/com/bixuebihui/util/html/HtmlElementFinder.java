@@ -35,80 +35,6 @@ public class HtmlElementFinder {
         setHtmlSrc(_src);
     }
 
-    public HtmlElementFinder setHtmlSrc(String _src) {
-        if (_src == null)
-            _src = "";
-        return setHtmlSrc(_src.toCharArray());
-    }
-
-    public HtmlElementFinder setHtmlSrc(char _src[]) {
-        srcBuffer = _src;
-        conBuffer = new StringBuffer();
-        return this;
-    }
-
-    public String getContent() {
-        if (conBuffer == null)
-            return "";
-        else
-            return conBuffer.toString();
-    }
-
-    public HtmlElement findNextElement(String _sName) {
-        return findNextElement(_sName, false);
-    }
-
-    public HtmlElement findNextElement(String string, boolean i) {
-        string = "<" + string.trim().toLowerCase();
-        char[] jArr = string.toCharArray();
-        int k = srcBuffer.length;
-        for (; nCurrPos < k; ) {
-            char l = srcBuffer[nCurrPos];
-            if (l == '<') {
-                int m = 1;
-                int o;
-                HtmlElement htmlelement;
-                for (; m < jArr.length && nCurrPos + m < k; ) {
-                    if (Character.toLowerCase(srcBuffer[nCurrPos + m]) != jArr[m])
-                        break;
-
-                    m++;
-                }
-                if (m == jArr.length) {
-                    m = m + nCurrPos;
-                    if (m >= k && Character.isWhitespace(srcBuffer[m]) || srcBuffer[m] == '>') {
-                        htmlelement = new HtmlElement();
-                        htmlelement.ONLY_SEARCH_SELF = i;
-                        try {
-                            o = htmlelement.fromString(srcBuffer, nCurrPos);
-                            if (o > 0) {
-                                nCurrPos = o;
-                                return (htmlelement);
-                            }
-                        } catch (Exception exception) {
-                        }
-                    }
-                }
-            }
-            conBuffer.append(l);
-            nCurrPos = nCurrPos + 1;
-        }
-        return (null);
-    }
-
-
-    public HtmlElementFinder putElement(HtmlElement _element) {
-        if (_element != null)
-            conBuffer.append(_element.toString(true, false));
-        return this;
-    }
-
-    public HtmlElementFinder putHTML(String _sHTML) {
-        if (_sHTML != null)
-            conBuffer.append(_sHTML);
-        return this;
-    }
-
     public static void main(String args[]) {
         try {
             String sFileName = "D:\\test.html";
@@ -125,7 +51,7 @@ public class HtmlElementFinder {
             arTagSrcName[4] = "SRC";
             arTagSrcName[5] = "HREF";
             arTagSrcName[6] = "SRC";
-            for (int i = 0; i < arTagName.length; i++)
+            for (int i = 0; i < arTagName.length; i++) {
                 if (arTagName[i] != null) {
                     HtmlElementFinder imgReader = new HtmlElementFinder();
                     imgReader.setHtmlSrc(strSrc);
@@ -153,6 +79,7 @@ public class HtmlElementFinder {
                             + arTagName[i] + "]\u53D1\u73B0[" + nCount
                             + "]\u4E2A");
                 }
+            }
 
             System.out
                     .println("\n\n*****************  Result *********************");
@@ -160,6 +87,84 @@ public class HtmlElementFinder {
         } catch (Exception ex) {
             ex.printStackTrace(System.out);
         }
+    }
+
+    public HtmlElementFinder setHtmlSrc(char _src[]) {
+        srcBuffer = _src;
+        conBuffer = new StringBuffer();
+        return this;
+    }
+
+    public HtmlElementFinder setHtmlSrc(String _src) {
+        if (_src == null) {
+            _src = "";
+        }
+        return setHtmlSrc(_src.toCharArray());
+    }
+
+    public HtmlElement findNextElement(String _sName) {
+        return findNextElement(_sName, false);
+    }
+
+    public String getContent() {
+        if (conBuffer == null) {
+            return "";
+        } else {
+            return conBuffer.toString();
+        }
+    }
+
+    public HtmlElement findNextElement(String string, boolean i) {
+        string = "<" + string.trim().toLowerCase();
+        char[] jArr = string.toCharArray();
+        int k = srcBuffer.length;
+        for (; nCurrPos < k; ) {
+            char l = srcBuffer[nCurrPos];
+            if (l == '<') {
+                int m = 1;
+                int o;
+                HtmlElement htmlelement;
+                for (; m < jArr.length && nCurrPos + m < k; ) {
+                    if (Character.toLowerCase(srcBuffer[nCurrPos + m]) != jArr[m]) {
+                        break;
+                    }
+
+                    m++;
+                }
+                if (m == jArr.length) {
+                    m = m + nCurrPos;
+                    if (m >= k && Character.isWhitespace(srcBuffer[m]) || srcBuffer[m] == '>') {
+                        htmlelement = new HtmlElement();
+                        htmlelement.ONLY_SEARCH_SELF = i;
+                        try {
+                            o = htmlelement.fromString(srcBuffer, nCurrPos);
+                            if (o > 0) {
+                                nCurrPos = o;
+                                return (htmlelement);
+                            }
+                        } catch (Exception exception) {
+                        }
+                    }
+                }
+            }
+            conBuffer.append(l);
+            nCurrPos = nCurrPos + 1;
+        }
+        return (null);
+    }
+
+    public HtmlElementFinder putElement(HtmlElement _element) {
+        if (_element != null) {
+            conBuffer.append(_element.toString(true, false));
+        }
+        return this;
+    }
+
+    public HtmlElementFinder putHTML(String _sHTML) {
+        if (_sHTML != null) {
+            conBuffer.append(_sHTML);
+        }
+        return this;
     }
 
     private char srcBuffer[];

@@ -23,89 +23,110 @@ public class DB2UDB extends DBType {
         super(_sName, _sDriverClass, false);
     }
 
+    @Override
     public String sqlFilterForClob(String _sFieldName, String _sValue) {
         return "";
     }
 
+    @Override
     public String sqlConcatStr(String _strSQL1, String _strSQL2) {
         return "CONCAT(" + _strSQL1 + "," + _strSQL2 + ")";
     }
 
+    @Override
     public String sqlAddField(String _sTableName, String _sFieldName, String _sFieldType, int _nMaxLength, boolean _bNullable, String _sDefaultValue, int _nScale) {
         String strSQL = "ALTER TABLE " + _sTableName + " ADD " + _sFieldName + " " + _sFieldType;
         DataType dataType = getDataType(_sFieldType);
-        if (dataType == null)
+        if (dataType == null) {
             return null;
-        if (dataType.isLengthDefinedByUser())
-            if (_nScale > 0)
+        }
+        if (dataType.isLengthDefinedByUser()) {
+            if (_nScale > 0) {
                 strSQL = strSQL + "(" + _nMaxLength + ", " + _nScale + ")";
-            else
+            } else {
                 strSQL = strSQL + "(" + _nMaxLength + ")";
+            }
+        }
         if (!_bNullable) {
             strSQL = strSQL + " NOT NULL ";
             if (_sDefaultValue != null) {
                 strSQL = strSQL + " DEFAULT ";
-                if (dataType.isCharData())
+                if (dataType.isCharData()) {
                     strSQL = strSQL + "'" + CMyString.filterForSQL(_sDefaultValue) + "'";
-                else
+                } else {
                     strSQL = strSQL + _sDefaultValue;
+                }
             }
         }
         return strSQL;
     }
 
+    @Override
     public String sqlConcatStr(String _strSQLs[]) {
         String sRet = "CONCAT(" + _strSQLs[0] + "," + _strSQLs[1] + ")";
-        for (int i = 2; i < _strSQLs.length; i++)
+        for (int i = 2; i < _strSQLs.length; i++) {
             sRet = "CONCAT(" + sRet + "," + _strSQLs[i] + ")";
+        }
 
         return sRet;
     }
 
+    @Override
     public boolean canWriteTextDirectly() {
         return false;
     }
 
+    @Override
     public DataType[] getAllDataTypes() {
         return m_allDataTypes;
     }
 
+    @Override
     public DataType[] getSupportedDataTypes() {
         return m_supportedDataTypes;
     }
 
+    @Override
     public String sqlFilterOneDay(String _sFieldName, String _sDateTime, String _sFormat) {
         return "DAY(DATE(" + _sFieldName + ")-DATE('" + _sDateTime + "'))=0";
     }
 
+    @Override
     public String sqlDateTime(String _sDateTime, String _sFormat) {
-        if (_sFormat.equalsIgnoreCase("YYYY-MM-DD"))
+        if ("YYYY-MM-DD".equalsIgnoreCase(_sFormat)) {
             return "TIMESTAMP('" + _sDateTime + " 00:00:00')";
-        else
+        } else {
             return "TIMESTAMP('" + _sDateTime + "')";
+        }
     }
 
+    @Override
     public String sqlDate(String _sDateTime) {
         return "DATE('" + _sDateTime + "')";
     }
 
+    @Override
     public String sqlDateField(String _sDateField) {
         return "DATE(" + _sDateField + ")";
     }
 
+    @Override
     public String sqlConcatStr(String _strSQL1, String _strSQL2, String _strSQL3) {
         return "CONCAT(CONCAT(" + _strSQL1 + "," + _strSQL2 + ")," + _strSQL3 + ")";
     }
 
+    @Override
     public String sqlGetSysDate() {
         return "(CURRENT TIMESTAMP)";
     }
 
+    @Override
     public String sqlDropField(String _sTableName, String _sFieldNames)
             throws Exception {
         throw new Exception("DB2 Universal Database 7.2\u7248\u672C\u4E0D\u652F\u6301\u5B57\u6BB5\u5220\u9664\uFF01");
     }
 
+    @Override
     public String encodeStrToWrite(String _strSrc) {
         return _strSrc;
     }
@@ -114,6 +135,7 @@ public class DB2UDB extends DBType {
         new DB2UDB();
     }
 
+    @Override
     public String initQuerySQL(String _strSql, int _nStartIndex, int _nSize) {
         return _strSql;
     }
@@ -161,11 +183,13 @@ public class DB2UDB extends DBType {
         });
     }
 
+    @Override
     public boolean setClob(Connection connection, String s, String s1, String s2, String s3, String s4) throws CMyException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean setClob(Connection connection, String s, String s1, String s2, String[] as) throws CMyException {
         // TODO Auto-generated method stub
         return false;

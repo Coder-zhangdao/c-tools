@@ -77,7 +77,9 @@ public class ELFilter implements IFilter {
             value = basedir;
         } else {
             value = System.getProperty(expression);
-            if(value==null) value= System.getenv(expression);
+            if(value==null) {
+                value= System.getenv(expression);
+            }
         }
         if (value == null && properties != null) {
             // We will attempt to get nab a system property as a way to specify a
@@ -114,6 +116,7 @@ public class ELFilter implements IFilter {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String filter(String s) {
         return this.evaluate(s).toString();
     }

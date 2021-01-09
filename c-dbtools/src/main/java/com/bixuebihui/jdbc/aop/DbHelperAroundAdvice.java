@@ -27,15 +27,15 @@ public class DbHelperAroundAdvice implements MethodInterceptor{
     double totalTime = 0;
 
 
-    private static final Map<String, SqlStat> sqlStatStore = new LRUMap(1000);
+    private static final Map<String, SqlStat> SQL_STAT_MAP = new LRUMap(1000);
 
     /**
      * <p>Getter for the field <code>sqlStatStore</code>.</p>
      *
      * @return a {@link java.util.Map} object.
      */
-    public static Map<String, SqlStat> getSqlStatStore() {
-        return Collections.unmodifiableMap(sqlStatStore);
+    public static Map<String, SqlStat> getSqlStatMap() {
+        return Collections.unmodifiableMap(SQL_STAT_MAP);
     }
 
     protected static boolean isDebug(){
@@ -79,12 +79,12 @@ public class DbHelperAroundAdvice implements MethodInterceptor{
             if (ArrayUtils.isNotEmpty(args) && args[0] instanceof String) {
                 String sql = (String) args[0];
                 SqlStat ss;
-                synchronized (sqlStatStore) {
-                    if (sqlStatStore.containsKey(sql)) {
-                        ss = sqlStatStore.get(sql);
+                synchronized (SQL_STAT_MAP) {
+                    if (SQL_STAT_MAP.containsKey(sql)) {
+                        ss = SQL_STAT_MAP.get(sql);
                     } else {
                         ss = new SqlStat();
-                        sqlStatStore.put(sql, ss);
+                        SQL_STAT_MAP.put(sql, ss);
                     }
                 }
                 ss.setCount(ss.getCount() + 1);

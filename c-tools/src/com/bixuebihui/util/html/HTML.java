@@ -14,8 +14,66 @@ import java.io.Serializable;
 import java.util.Hashtable;
 
 public class HTML {
+    static {
+        tagHashtable = new Hashtable(73);
+        for (int i = 0; i < Tag.allTags.length; i++) {
+            tagHashtable.put(Tag.allTags[i].toString(), Tag.allTags[i]);
+        }
+
+        attHashtable = new Hashtable(77);
+        for (int i = 0; i < Attribute.allAttributes.length; i++) {
+            attHashtable.put(Attribute.allAttributes[i].toString(), Attribute.allAttributes[i]);
+        }
+
+    }
+
+    public static Attribute getAttributeKey(String attName) {
+        Object a = attHashtable.get(attName);
+        if (a == null) {
+            return null;
+        } else {
+            return (Attribute) a;
+        }
+    }
+
+    public static void main(String args[]) {
+        Tag tag = getTag("TR");
+        if (tag == null) {
+            System.out.println("Tag not found!");
+        } else {
+            System.out.println(tag.isBlock());
+        }
+    }
+
+
+    public HTML() {
+    }
+
+    public static Tag[] getAllTags() {
+        Tag tags[] = new Tag[Tag.allTags.length];
+        System.arraycopy(Tag.allTags, 0, tags, 0, Tag.allTags.length);
+        return tags;
+    }
+
+    public static Tag getTag(String tagName) {
+        if (tagName == null) {
+            return null;
+        } else {
+            tagName = tagName.trim().toLowerCase();
+            Object t = tagHashtable.get(tagName);
+            return t != null ? (Tag) t : null;
+        }
+    }
+
+    public static Attribute[] getAllAttributeKeys() {
+        Attribute attributes[] = new Attribute[Attribute.allAttributes.length];
+        System.arraycopy(Attribute.allAttributes, 0, attributes, 0, Attribute.allAttributes.length);
+        return attributes;
+    }
+
     public static final class Attribute {
 
+        @Override
         public String toString() {
             return name;
         }
@@ -207,15 +265,18 @@ public class HTML {
     public static class UnknownTag extends Tag
             implements Serializable {
 
+        @Override
         public int hashCode() {
             return toString().hashCode();
         }
 
+        @Override
         public boolean equals(Object obj) {
-            if (obj instanceof UnknownTag)
+            if (obj instanceof UnknownTag) {
                 return toString().equals(obj.toString());
-            else
+            } else {
                 return false;
+            }
         }
 
         private void writeObject(ObjectOutputStream s)
@@ -241,6 +302,10 @@ public class HTML {
         }
     }
 
+    private static final Hashtable tagHashtable;
+    public static final String NULL_ATTRIBUTE_VALUE = "#DEFAULT";
+    private static final Hashtable attHashtable;
+
     public static class Tag {
 
         public boolean isBlock() {
@@ -263,6 +328,7 @@ public class HTML {
             return CMyBitsValue.getBit(formatFlag, 1);
         }
 
+        @Override
         public String toString() {
             return name;
         }
@@ -458,62 +524,5 @@ public class HTML {
             blockTag = isBlock;
             formatFlag = _formatFlag;
         }
-    }
-
-
-    public HTML() {
-    }
-
-    public static Tag[] getAllTags() {
-        Tag tags[] = new Tag[Tag.allTags.length];
-        System.arraycopy(Tag.allTags, 0, tags, 0, Tag.allTags.length);
-        return tags;
-    }
-
-    public static Tag getTag(String tagName) {
-        if (tagName == null) {
-            return null;
-        } else {
-            tagName = tagName.trim().toLowerCase();
-            Object t = tagHashtable.get(tagName);
-            return t != null ? (Tag) t : null;
-        }
-    }
-
-    public static Attribute[] getAllAttributeKeys() {
-        Attribute attributes[] = new Attribute[Attribute.allAttributes.length];
-        System.arraycopy(Attribute.allAttributes, 0, attributes, 0, Attribute.allAttributes.length);
-        return attributes;
-    }
-
-    public static Attribute getAttributeKey(String attName) {
-        Object a = attHashtable.get(attName);
-        if (a == null)
-            return null;
-        else
-            return (Attribute) a;
-    }
-
-    public static void main(String args[]) {
-        Tag tag = getTag("TR");
-        if (tag == null)
-            System.out.println("Tag not found!");
-        else
-            System.out.println(tag.isBlock());
-    }
-
-    private static final Hashtable tagHashtable;
-    public static final String NULL_ATTRIBUTE_VALUE = "#DEFAULT";
-    private static final Hashtable attHashtable;
-
-    static {
-        tagHashtable = new Hashtable(73);
-        for (int i = 0; i < Tag.allTags.length; i++)
-            tagHashtable.put(Tag.allTags[i].toString(), Tag.allTags[i]);
-
-        attHashtable = new Hashtable(77);
-        for (int i = 0; i < Attribute.allAttributes.length; i++)
-            attHashtable.put(Attribute.allAttributes[i].toString(), Attribute.allAttributes[i]);
-
     }
 }

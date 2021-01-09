@@ -31,9 +31,9 @@ public class Config implements AutoCloseable {
 
     private static final String CONFIG_ZOOKEEPER_KEY = "config.zookeeper";
     private static final String ZK_CONFIG_APP_PROPERTIES = "/config/app.properties";
-    private static final String default_config = "/ApplicationResources.properties";
-    private static final String custom_config = "/custom.properties";
-    private static final String custom_jvm_param = "custom.config";
+    private static final String DEFAULT_CONFIG = "/ApplicationResources.properties";
+    private static final String CUSTOM_PROPERTIES = "/custom.properties";
+    private static final String CUSTOM_JVM_PARAM = "custom.config";
 
     private static CompositeConfiguration config = null;
     private static DatabaseConfiguration dbconfig = null;
@@ -162,12 +162,12 @@ public class Config implements AutoCloseable {
         Class<?> config_class = Class.forName("com.bixuebihui.util.Config");
 
         // first, lets load our default properties
-        loadPropertiesFromClasspathFile(default_config, props, config_class);
-        loadPropertiesFromClasspathFile(custom_config, props, config_class);
+        loadPropertiesFromClasspathFile(DEFAULT_CONFIG, props, config_class);
+        loadPropertiesFromClasspathFile(CUSTOM_PROPERTIES, props, config_class);
 
 
         // finally, check for an external config file
-        String env_file = System.getProperty(custom_jvm_param);
+        String env_file = System.getProperty(CUSTOM_JVM_PARAM);
 
         if (env_file != null && env_file.length() > 0) {
             File custom_config_file = new File(env_file);

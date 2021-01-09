@@ -10,10 +10,12 @@ import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jdbc.SqlObject;
 
+/**
+ * @author xwx
+ */
 public class BasicListService extends AbstractBaseDao  {
 
 	private SqlObject sqlObj=new SqlObject();
-
 
 
 	public BasicListService(IDbHelper dbHelper) {
@@ -22,19 +24,14 @@ public class BasicListService extends AbstractBaseDao  {
 
 	@Override
 	public String getTableName() {
-		//if(getDBTYPE()==ORACLE){
-			return "("+sqlObj.getSqlString()+") basiclistservice_table_alias";
-
-//		}else{
-//			return "("+sqlObj.getSqlString()+") as basiclistservice_table_alias";
-//
-//		}
+		return "("+sqlObj.getSqlString()+") basiclistservice_table_alias";
 	}
 
 	@Override
 	public int count(String where) throws NumberFormatException, SQLException{
-		if(this.getSqlParams()==null || this.getSqlParams().length==0)return super.count(where);
-		//String sql = "select count(*) from ("+this.getTableName()+" as t)  "+where;
+		if(this.getSqlParams()==null || this.getSqlParams().length==0){
+			return super.count(where);
+		}
 		String sql = "select count(*) from "+this.getTableName()+"   "+where;
 		return Integer.parseInt(this.getDbHelper().executeScalar(sql, sqlObj.getParameters()).toString());
 	}
@@ -54,7 +51,7 @@ public class BasicListService extends AbstractBaseDao  {
 			+(needOrderBy? orderBy:"");
 
 		List<Map<String, Object>> v = getDbHelper().executeQuery(this.getPagingSql(selectSql, rowStart, rowEnd),sqlObj.getParameters());
-		 ArrayList<Object> list = new ArrayList<Object>();
+		 ArrayList<Object> list = new ArrayList<>();
 		list.addAll(v);
 		return list;
 
@@ -78,7 +75,7 @@ public class BasicListService extends AbstractBaseDao  {
 	}
 
 	public Object[] getSqlParams() {
-		return (Object[]) sqlObj.getParameters();
+		return sqlObj.getParameters();
 	}
 
 	public void setSqlParams(Object[] sqlParameters) {

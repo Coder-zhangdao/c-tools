@@ -48,17 +48,20 @@ public class SqlSort {
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String toString() {
-        if (sorts.size() <= 0)
+        if (sorts.size() <= 0) {
             return "";
+        }
 
         StringBuilder criteria = new StringBuilder(" order by ");
         for (Sort sort : sorts) {
             buildCriteria(criteria, sort.getProperty(), sort.getOrder());
         }
 
-        if (criteria.lastIndexOf(",") == criteria.length() - 1)
+        if (criteria.lastIndexOf(",") == criteria.length() - 1) {
             return criteria.substring(0, criteria.length() - 1);
+        }
         return criteria.toString();
     }
 
@@ -101,7 +104,9 @@ public class SqlSort {
      * <p>clear.</p>
      */
     public void clear() {
-        if(sorts!=null)this.sorts.clear();
+        if(sorts!=null) {
+            this.sorts.clear();
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.bixuebihui.datasource;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 import org.apache.log4j.helpers.Loader;
@@ -22,7 +23,7 @@ public class H2DataSource {
 
 		RunScript.execute("jdbc:h2:mem:test", "sa", "sa",
 				configUrl.getPath(),
-				Charset.forName("UTF-8"),true);
+				StandardCharsets.UTF_8,true);
 		return this;
 	}
 

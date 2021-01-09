@@ -23,9 +23,9 @@ public class DbHelperAroundAdviceTest {
         Object b = advice.invoke(methodInvocation);
         assertEquals(a, b);
         if(advice.isDebug())
-            assertEquals(1, DbHelperAroundAdvice.getSqlStatStore().size());
+            assertEquals(1, DbHelperAroundAdvice.getSqlStatMap().size());
         else
-            assertEquals(0, DbHelperAroundAdvice.getSqlStatStore().size());
+            assertEquals(0, DbHelperAroundAdvice.getSqlStatMap().size());
     }
 
 }

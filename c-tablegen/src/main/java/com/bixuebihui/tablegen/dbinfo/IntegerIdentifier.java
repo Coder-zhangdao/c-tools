@@ -29,7 +29,8 @@ public class IntegerIdentifier implements IIdentifier {
 		return _id;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "" + _id;
 	}
 

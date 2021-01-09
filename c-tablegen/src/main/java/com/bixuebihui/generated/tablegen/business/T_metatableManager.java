@@ -34,8 +34,9 @@ public class T_metatableManager extends T_metatableList {
 
 	private String v2str(List<String> tableNames) {
 		StringBuilder sb = new StringBuilder();
-		for (String s : tableNames)
-			sb.append("'").append(s).append("'").append(",");
+		for (String s : tableNames) {
+            sb.append("'").append(s).append("'").append(",");
+        }
 
 		return StringUtils.stripEnd(sb.toString(), ",");
 	}

@@ -46,8 +46,9 @@ public class CustomToolbar extends SimpleToolbar {
 	   	 if (enableSeparators) {
 	         items.add(new SeparatorToolbarItem());
 	     }
-		 for(String actionCode:buttons)
+		 for(String actionCode:buttons) {
 			 items.add(createButton(actionCode));
+		 }
 		return items;
     }
 

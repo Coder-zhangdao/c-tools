@@ -27,16 +27,19 @@ public class BonecpDataSource extends BoneCPDataSource implements  INamingPool {
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getAlias() {
         return alias;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setAlias(String alias) {
         this.alias = alias;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setDatabaseConfig(DatabaseConfig cfg) {
         this.setAlias(cfg.getAlias());
         this.setDriverClass(cfg.getClassName());

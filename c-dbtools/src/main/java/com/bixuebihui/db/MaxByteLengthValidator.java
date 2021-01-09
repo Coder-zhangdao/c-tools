@@ -27,6 +27,7 @@ public class MaxByteLengthValidator implements ConstraintValidator<Size, String>
      *
      * @param constraintAnnotation a {@link javax.validation.constraints.Size} object.
      */
+    @Override
     public void initialize(Size constraintAnnotation) {
         this.max = constraintAnnotation.max();
     }
@@ -34,6 +35,7 @@ public class MaxByteLengthValidator implements ConstraintValidator<Size, String>
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isValid(String object, ConstraintValidatorContext constraintContext) {
         try {
             return object == null || object.getBytes(UTF_8).length <= this.max;

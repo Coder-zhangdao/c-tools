@@ -33,8 +33,9 @@ public class SqlPocket {
 		condition.append(fragment);
 		if (param instanceof Collection) {
 			params.addAll((Collection<?>) param);
-		} else
-			params.add(param);
+		} else {
+            params.add(param);
+        }
 		return this;
 	}
 

@@ -17,6 +17,8 @@ import java.util.Map.Entry;
  */
 public class SqlHelper {
 
+	List<BaseFilter> filters;
+
 	/**
 	 * <p>Constructor for SqlHelper.</p>
 	 *
@@ -25,17 +27,13 @@ public class SqlHelper {
 	public SqlHelper(SqlHelper src) {
 		this.filters = new ArrayList<>();
 		this.filters.addAll(src.filters);
-		if(orCond!=null){
-			this.orCond = new ArrayList<>();
-			this.orCond.addAll(src.orCond);
-		}
-		if(notCond!=null){
-			this.notCond = new ArrayList<>();
-			this.notCond.addAll(src.notCond);
-		}
+		this.orCond = new ArrayList<>();
+		this.orCond.addAll(src.orCond);
+		this.notCond = new ArrayList<>();
+		this.notCond.addAll(src.notCond);
+		this.databaseType = src.databaseType;
+		this.useNullAsCondition = src.useNullAsCondition;
 	}
-
-	List<Filter> filters;
 	private int databaseType = BaseDao.MYSQL;
 
 	List<SqlHelper> orCond = null;
@@ -47,7 +45,7 @@ public class SqlHelper {
 	 * <p>Constructor for SqlHelper.</p>
 	 */
 	public SqlHelper() {
-		filters = new ArrayList<Filter>();
+		filters = new ArrayList<>();
 	}
 
 	/**
@@ -58,9 +56,10 @@ public class SqlHelper {
 	 */
 	protected SqlPocket toCondition() throws SQLException {
 		SqlPocket criteria = new SqlPocket();
-		if (filters == null || filters.size() <= 0)
-			return criteria;
-		for (Filter filter : filters) {
+		if (filters == null || filters.size() <= 0) {
+            return criteria;
+        }
+		for (BaseFilter filter : filters) {
 			buildCriteria(criteria, filter);
 		}
 
@@ -106,8 +105,9 @@ public class SqlHelper {
 	 * @return a {@link java.lang.StringBuffer} object.
 	 */
 	protected StringBuffer trimWhere(StringBuffer trimCond) {
-		if(trimCond.indexOf(" where ")==0)
-			trimCond.delete(0, 7);
+		if(trimCond.indexOf(" where ")==0) {
+            trimCond.delete(0, 7);
+        }
 		return trimCond;
 	}
 
@@ -122,7 +122,7 @@ public class SqlHelper {
 		return toCondition();
 	}
 
-	private void buildCriteria(SqlPocket criteria, Filter f)
+	private void buildCriteria(SqlPocket criteria, BaseFilter f)
 			throws SQLException {
 		if (f.value != null || useNullAsCondition || f instanceof NullFilter ) {
 			f.build(criteria);
@@ -151,8 +151,9 @@ public class SqlHelper {
 		for (Entry<String, Object> entry:e) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
-			if (ignoreNulls && value == null)
-				continue;
+			if (ignoreNulls && value == null) {
+                continue;
+            }
 			eq(key, value);
 		}
 		return this;
@@ -184,8 +185,9 @@ public class SqlHelper {
 	 * @return a {@link SqlHelper} object.
 	 */
 	public SqlHelper or(SqlHelper cond) {
-		if (orCond == null)
-			orCond = new ArrayList<>();
+		if (orCond == null) {
+            orCond = new ArrayList<>();
+        }
 		this.orCond.add(cond);
 		return this;
 	}
@@ -197,8 +199,9 @@ public class SqlHelper {
 	 * @return a {@link SqlHelper} object.
 	 */
 	public SqlHelper not(SqlHelper cond) {
-		if (notCond == null)
-			notCond = new ArrayList<>();
+		if (notCond == null) {
+            notCond = new ArrayList<>();
+        }
 		this.notCond.add(cond);
 		return this;
 	}
@@ -319,9 +322,10 @@ public class SqlHelper {
 	 * @throws java.sql.SQLException if any.
 	 */
 	public SqlHelper eq(String[] fields, Object[] value) throws SQLException {
-		if (fields.length != value.length)
-			throw new SQLException("fields.length must equals value.length:"
-					+ StringUtils.join(fields,",") + "->" + StringUtils.join(value,","));
+		if (fields.length != value.length) {
+            throw new SQLException("fields.length must equals value.length:"
+                    + StringUtils.join(fields,",") + "->" + StringUtils.join(value,","));
+        }
 		int i = 0;
 		for (String field : fields) {
 			filters.add(new EqualsFilter(field, value[i++]));
@@ -381,11 +385,26 @@ public class SqlHelper {
 		this.useNullAsCondition = useNullAsCondition;
 	}
 
-	protected abstract static class Filter {
+	/**
+	 * <p>clear.</p>
+	 */
+	public void clear() {
+		if(filters!=null) {
+            this.filters.clear();
+        }
+		if(orCond!=null) {
+            this.orCond.clear();
+        }
+		if(notCond!=null) {
+            this.notCond.clear();
+        }
+	}
+
+	protected abstract static class BaseFilter {
 		protected final String property;
 		protected final Object value;
 
-		public Filter(String property, Object value) {
+		public BaseFilter(String property, Object value) {
 			this.property = property;
 			this.value = value;
 		}
@@ -394,7 +413,7 @@ public class SqlHelper {
 
 	}
 
-	protected static class InFilter extends Filter {
+	protected static class InFilter extends BaseFilter {
 		public InFilter(String property, Collection<Object> value) {
 			super(property, new HashSet<>(value)); //use Hashset to reduce duplicated values
 		}
@@ -408,10 +427,10 @@ public class SqlHelper {
 			if(value instanceof SqlString){
 				sb.getCondition().append(" and ").append(property).append(" in (").append(value).append(")");
 
-			}else if (!(value instanceof Collection))
-				throw new SQLException("InFilter must have a Collection value:"
-						+ value + "->" + value.getClass());
-			else {
+			}else if (!(value instanceof Collection)) {
+                throw new SQLException("InFilter must have a Collection value:"
+                        + value + "->" + value.getClass());
+            } else {
 				int size = ((Collection<?>) value).size();
 				sb.addFilter(" and "+
 						property + " in (" + StringUtils.repeat("?", ",", size)
@@ -421,10 +440,10 @@ public class SqlHelper {
 		}
 	}
 
-	protected static abstract class BiFilter extends Filter {
+	protected static abstract class AbstractBiFilter extends BaseFilter {
 		String sign;
 
-		public BiFilter(String property, Object value, String sign) {
+		public AbstractBiFilter(String property, Object value, String sign) {
 			super(property, value);
 			this.sign = sign;
 		}
@@ -446,38 +465,37 @@ public class SqlHelper {
 		}
 	}
 
-	protected static class GtFilter extends BiFilter {
+	protected static class GtFilter extends AbstractBiFilter {
 		public GtFilter(String property, Object value) {
 			super(property, value, " > ");
 		}
 	}
 
-	protected static class LtFilter extends BiFilter {
+	protected static class LtFilter extends AbstractBiFilter {
 		public LtFilter(String property, Object value) {
 			super(property, value, " < ");
 		}
 	}
 
-	protected static class EqualsFilter extends BiFilter {
+	protected static class EqualsFilter extends AbstractBiFilter {
 		public EqualsFilter(String property, Object value) {
 			super(property, value, " = ");
 		}
 	}
 
-	protected static class NotEqualsFilter extends BiFilter {
+	protected static class NotEqualsFilter extends AbstractBiFilter {
 		public NotEqualsFilter(String property, Object value) {
 			super(property, value, " != ");
 		}
 	}
 
-
-	protected static class NullFilter extends BiFilter {
+	protected static class NullFilter extends AbstractBiFilter {
 		public NullFilter(String property) {
 			super(property, null, " is ");
 		}
 	}
 
-	protected static class CondFilter extends Filter {
+	protected static class CondFilter extends BaseFilter {
 		int databaseType;
 
 		public CondFilter(String property, Object value, int databaseType) {
@@ -500,13 +518,14 @@ public class SqlHelper {
 		}
 	}
 
-	protected static abstract class BaseLikeFilter extends Filter {
+	protected static abstract class BaseLikeFilter extends BaseFilter {
 		public BaseLikeFilter(String property, Object value){
 			super(property, value);
 		}
 
 		public abstract String getConcat();
 
+		@Override
 		public SqlPocket build(SqlPocket sb) throws SQLException {
 			if (value != null && value instanceof String) {
 				sb.getCondition().append(" and ").append(property)
@@ -522,12 +541,12 @@ public class SqlHelper {
 
 	}
 
-
 	protected static class LikeFilter extends BaseLikeFilter {
 		public LikeFilter(String property, Object value){
 			super(property, value);
 		}
 
+		@Override
 		public String getConcat(){ return "concat('%',?,'%')"; }
 	}
 
@@ -536,18 +555,10 @@ public class SqlHelper {
 			super(property, value);
 		}
 
+		@Override
 		public String getConcat(){ return "concat(?,'%')";
 		}
 
-	}
-
-	/**
-	 * <p>clear.</p>
-	 */
-	public void clear() {
-		if(filters!=null)this.filters.clear();
-		if(orCond!=null)this.orCond.clear();
-		if(notCond!=null)this.notCond.clear();
 	}
 
 }

@@ -42,6 +42,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.Blob} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public Blob createBlob() throws SQLException {
 		return conn.createBlob();
 	}
@@ -52,6 +53,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.Clob} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public Clob createClob() throws SQLException {
 		return conn.createClob();
 	}
@@ -62,34 +64,28 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.util.Properties} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public Properties getClientInfo() throws SQLException {
 		return conn.getClientInfo();
 	}
 
 	/** {@inheritDoc} */
+	@Override
+	public void setClientInfo(Properties arg0) throws SQLClientInfoException {
+		conn.setClientInfo(arg0);
+
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public String getClientInfo(String name) throws SQLException {
 		return conn.getClientInfo(name);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean isValid(int timeout) throws SQLException {
 		return conn.isValid(timeout);
-	}
-
-	/**
-	 * <p>run.</p>
-	 */
-	public void run() {
-		try {
-			closeStatements();
-		} catch (SQLException e) {
-			log.warn(e);
-		}
-		try {
-			conn.close();
-		} catch (SQLException e1) {
-			log.warn(e1);
-		}
 	}
 
 	/**
@@ -171,13 +167,20 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/**
-	 * <p>close.</p>
-	 *
-	 * @throws java.sql.SQLException if any.
+	 * <p>run.</p>
 	 */
-	public void close() throws SQLException {
-		lastAccess = System.currentTimeMillis();
-		pool.returnConnection(this);
+	@Override
+	public void run() {
+		try {
+			closeStatements();
+		} catch (SQLException e) {
+			log.warn(e);
+		}
+		try {
+			conn.close();
+		} catch (SQLException e1) {
+			log.warn(e1);
+		}
 	}
 
 	/**
@@ -195,6 +198,17 @@ public class PooledConnection implements Connection, Runnable {
 	 */
 	public Connection getNativeConnection() {
 		return conn;
+	}
+
+	/**
+	 * <p>close.</p>
+	 *
+	 * @throws java.sql.SQLException if any.
+	 */
+	@Override
+	public void close() throws SQLException {
+		lastAccess = System.currentTimeMillis();
+		pool.returnConnection(this);
 	}
 
 	/**
@@ -226,8 +240,9 @@ public class PooledConnection implements Connection, Runnable {
 		s1 += "\t\t\tCheckout Stack Trace: ";
 		s1 += traceException==null? "Stacktrace  NOT set." : traceException;
 		s1 += s;
-		if (theStatement != null)
-			s1 += theStatement.dumpInfo();
+		if (theStatement != null) {
+            s1 += theStatement.dumpInfo();
+        }
 		return s1;
 	}
 
@@ -247,11 +262,12 @@ public class PooledConnection implements Connection, Runnable {
 			log.warn(method
 					+ "found closed Connection. "
 					+ "Statement information follows. Attempting to recover.");
-			if (theStatement != null)
-				log.warn(method
-						+ theStatement.dumpInfo());
-			else
-				log.warn(method+" statement was null");
+			if (theStatement != null) {
+                log.warn(method
+                        + theStatement.dumpInfo());
+            } else {
+                log.warn(method+" statement was null");
+            }
 			theStatement = null;
 			for (int i = 0; i < 3; i++) {
 				try {
@@ -271,12 +287,14 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.Statement} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public Statement createStatement() throws SQLException {
 		guardConnection();
 		totalStatements++;
 		if (pool.isCacheStatements()) {
-			if (theStatement == null)
-				theStatement = new PooledStatement(conn.createStatement());
+			if (theStatement == null) {
+                theStatement = new PooledStatement(conn.createStatement());
+            }
 			return theStatement;
 		} else {
 			return conn.createStatement();
@@ -284,6 +302,7 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public PreparedStatement prepareStatement(String s) throws SQLException {
 		guardConnection();
 
@@ -314,19 +333,22 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public PreparedStatement prepareStatement(String s, int resultSetType,
 											  int resultSetConcurrency) throws SQLException {
 		guardConnection();
 
-		if (pool.isCacheStatements())
-			preparedStatementMisses++;
-		else
-			preparedStatements++;
+		if (pool.isCacheStatements()) {
+            preparedStatementMisses++;
+        } else {
+            preparedStatements++;
+        }
 		return conn.prepareStatement(s,
 				resultSetType, resultSetConcurrency);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public CallableStatement prepareCall(String s) throws SQLException {
 		guardConnection();
 
@@ -335,6 +357,7 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public CallableStatement prepareCall(String s, int i, int j)
 			throws SQLException {
 		guardConnection();
@@ -344,19 +367,16 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Statement createStatement(int i, int j) throws SQLException {
 		totalStatements++;
 		return conn.createStatement(i, j);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public String nativeSQL(String s) throws SQLException {
 		return conn.nativeSQL(s);
-	}
-
-	/** {@inheritDoc} */
-	public void setAutoCommit(boolean flag) throws SQLException {
-		conn.setAutoCommit(flag);
 	}
 
 	/**
@@ -365,8 +385,15 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a boolean.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public boolean getAutoCommit() throws SQLException {
 		return conn.getAutoCommit();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void setAutoCommit(boolean flag) throws SQLException {
+		conn.setAutoCommit(flag);
 	}
 
 	/**
@@ -374,6 +401,7 @@ public class PooledConnection implements Connection, Runnable {
 	 *
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public void commit() throws SQLException {
 		conn.commit();
 	}
@@ -383,6 +411,7 @@ public class PooledConnection implements Connection, Runnable {
 	 *
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public void rollback() throws SQLException {
 		conn.rollback();
 	}
@@ -393,6 +422,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a boolean.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public boolean isClosed() throws SQLException {
 		return conn.isClosed();
 	}
@@ -403,13 +433,9 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.DatabaseMetaData} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public DatabaseMetaData getMetaData() throws SQLException {
 		return conn.getMetaData();
-	}
-
-	/** {@inheritDoc} */
-	public void setReadOnly(boolean flag) throws SQLException {
-		conn.setReadOnly(flag);
 	}
 
 	/**
@@ -418,13 +444,15 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a boolean.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public boolean isReadOnly() throws SQLException {
 		return conn.isReadOnly();
 	}
 
 	/** {@inheritDoc} */
-	public void setCatalog(String s) throws SQLException {
-		conn.setCatalog(s);
+	@Override
+	public void setReadOnly(boolean flag) throws SQLException {
+		conn.setReadOnly(flag);
 	}
 
 	/**
@@ -433,13 +461,15 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.lang.String} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public String getCatalog() throws SQLException {
 		return conn.getCatalog();
 	}
 
 	/** {@inheritDoc} */
-	public void setTransactionIsolation(int i) throws SQLException {
-		conn.setTransactionIsolation(i);
+	@Override
+	public void setCatalog(String s) throws SQLException {
+		conn.setCatalog(s);
 	}
 
 	/**
@@ -448,8 +478,15 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a int.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public int getTransactionIsolation() throws SQLException {
 		return conn.getTransactionIsolation();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void setTransactionIsolation(int i) throws SQLException {
+		conn.setTransactionIsolation(i);
 	}
 
 	/**
@@ -458,17 +495,9 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.SQLWarning} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public SQLWarning getWarnings() throws SQLException {
 		return conn.getWarnings();
-	}
-
-	/**
-	 * <p>clearWarnings.</p>
-	 *
-	 * @throws java.sql.SQLException if any.
-	 */
-	public void clearWarnings() throws SQLException {
-		conn.clearWarnings();
 	}
 
 	/**
@@ -540,7 +569,18 @@ public class PooledConnection implements Connection, Runnable {
 	// set save point
 	// added by [xing]
 
+	/**
+	 * <p>clearWarnings.</p>
+	 *
+	 * @throws java.sql.SQLException if any.
+	 */
+	@Override
+	public void clearWarnings() throws SQLException {
+		conn.clearWarnings();
+	}
+
 	/** {@inheritDoc} */
+	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrecy, int resultSetHoldability) throws SQLException {
 		return conn.createStatement(resultSetType, resultSetConcurrecy, resultSetHoldability);
 	}
@@ -551,23 +591,33 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a int.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public int getHoldability() throws SQLException {
 		return conn.getHoldability();
 	}
 
 	/** {@inheritDoc} */
+	@Override
+	public void setHoldability(int holdability) throws SQLException {
+		conn.setHoldability(holdability);
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrecy, int resultSetHoldability)
 			throws SQLException {
 		return conn.prepareCall(sql,resultSetType, resultSetConcurrecy, resultSetHoldability);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public PreparedStatement prepareStatement(String sql, int i, int j, int k)
 			throws SQLException {
 		return conn.prepareStatement(sql, i, j, k);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
 			throws SQLException {
 		return conn.prepareStatement(sql, autoGeneratedKeys);
@@ -581,6 +631,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.PreparedStatement} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public PreparedStatement prepareStatement(String sql, int[] x)
 			throws SQLException {
 		return conn.prepareStatement(sql, x);
@@ -594,12 +645,14 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.PreparedStatement} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public PreparedStatement prepareStatement(String p, String[] x)
 			throws SQLException {
 		return conn.prepareStatement(p, x);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void releaseSavepoint(Savepoint savepoint)
 			throws SQLException {
 		log.info(savepoint.toString());
@@ -607,13 +660,9 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void rollback(Savepoint p) throws SQLException {
 		conn.rollback(p);
-	}
-
-	/** {@inheritDoc} */
-	public void setHoldability(int holdability) throws SQLException {
-		conn.setHoldability(holdability);
 	}
 
 	/**
@@ -622,11 +671,13 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.Savepoint} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public Savepoint setSavepoint() throws SQLException {
 		return conn.setSavepoint();
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Savepoint setSavepoint(String p) throws SQLException {
 		return conn.setSavepoint(p);
 	}
@@ -639,6 +690,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.Array} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public Array createArrayOf(String typeName, Object[] elements)
 			throws SQLException {
 		return conn.createArrayOf(typeName, elements);
@@ -652,6 +704,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.Struct} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public Struct createStruct(String typeName, Object[] attributes)
 			throws SQLException {
 		return conn.createStruct(typeName, attributes);
@@ -663,6 +716,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.NClob} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public NClob createNClob() throws SQLException {
 		return conn.createNClob();
 	}
@@ -673,17 +727,13 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.sql.SQLXML} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public SQLXML createSQLXML() throws SQLException {
 		return conn.createSQLXML();
 	}
 
 	/** {@inheritDoc} */
-	public void setClientInfo(Properties arg0) throws SQLClientInfoException {
-		conn.setClientInfo(arg0);
-
-	}
-
-	/** {@inheritDoc} */
+	@Override
 	public void setClientInfo(String arg0, String arg1)
 			throws SQLClientInfoException {
 		conn.setClientInfo(arg0, arg1);
@@ -691,24 +741,21 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		return conn.unwrap(iface);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return conn.isWrapperFor(iface);
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
 		conn.setTypeMap(map);
-	}
-
-	/** {@inheritDoc} */
-	public void setSchema(String schema) throws SQLException {
-		conn.setSchema(schema);
-
 	}
 
 	/**
@@ -717,11 +764,20 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a {@link java.lang.String} object.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public String getSchema() throws SQLException {
 		return conn.getSchema();
 	}
 
 	/** {@inheritDoc} */
+	@Override
+	public void setSchema(String schema) throws SQLException {
+		conn.setSchema(schema);
+
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public void abort(Executor executor) throws SQLException {
 		if(this.theStatement!=null && !this.theStatement.isClosed()){
 			try{
@@ -735,6 +791,7 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void setNetworkTimeout(Executor executor, int milliseconds)
 			throws SQLException {
 		conn.setNetworkTimeout(executor, milliseconds);
@@ -747,6 +804,7 @@ public class PooledConnection implements Connection, Runnable {
 	 * @return a int.
 	 * @throws java.sql.SQLException if any.
 	 */
+	@Override
 	public int getNetworkTimeout() throws SQLException {
 		return conn.getNetworkTimeout();
 	}

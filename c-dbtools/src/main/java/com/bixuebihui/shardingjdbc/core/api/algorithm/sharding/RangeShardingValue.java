@@ -52,6 +52,7 @@ public final class RangeShardingValue<T extends Comparable<?>> implements Shardi
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getLogicTableName() {
         return logicTableName;
     }
@@ -61,6 +62,7 @@ public final class RangeShardingValue<T extends Comparable<?>> implements Shardi
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String getColumnName() {
         return columnName;
     }

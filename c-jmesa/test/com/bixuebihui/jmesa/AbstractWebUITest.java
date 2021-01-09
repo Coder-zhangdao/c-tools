@@ -13,7 +13,8 @@ public class AbstractWebUITest{
 	public void testConvert() {
 		AbstractWebUI<?, ?> ui = new AbstractWebUI<Object, Object>(){
 
-			protected String getUniquePropertyName() {
+			@Override
+            protected String getUniquePropertyName() {
 				// TODO Auto-generated method stub
 				return null;
 			}

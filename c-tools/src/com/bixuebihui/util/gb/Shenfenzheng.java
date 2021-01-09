@@ -2043,7 +2043,9 @@ public class Shenfenzheng {
     }
 
     public static boolean isValidCardID(String cardid) {
-        if( aCity==null)initCity();
+        if( aCity==null) {
+            initCity();
+        }
 
         String regexp = "(\\d{17}|\\d{14})(\\d|x|X|y|Y)";
         if (!cardid.matches(regexp)) {
@@ -2057,11 +2059,13 @@ public class Shenfenzheng {
         int iSum = 0;
         if (cardid.length() == 18) {
             cardid = cardid.replaceAll("(x|X)", "a");
-            for (int i = 17; i >= 0; i--)
+            for (int i = 17; i >= 0; i--) {
                 iSum += (Math.pow(2, i) % 11)
                         * Integer.parseInt("" + cardid.charAt(17 - i), 11);
-            if (iSum % 11 != 1)
+            }
+            if (iSum % 11 != 1) {
                 return false;
+            }
         }
         return true;
 
@@ -2152,8 +2156,9 @@ public class Shenfenzheng {
         int[] ps = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
         char[] ch = {'1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'};
 
-        for (int i = 0; i < 17; i++)
+        for (int i = 0; i < 17; i++) {
             iSum += (ps[i] * Integer.parseInt(cardid.charAt(i) + ""));
+        }
         ids.append(ch[iSum % 11]);
         return ids.toString();
     }

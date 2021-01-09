@@ -22,14 +22,17 @@ public class HtmlComment
     }
 
     public HtmlDocument getDocument() {
-        if (parent == null)
+        if (parent == null) {
             return null;
-        if (parent instanceof HtmlDocument)
+        }
+        if (parent instanceof HtmlDocument) {
             return (HtmlDocument) parent;
-        if (parent instanceof HtmlElement)
+        }
+        if (parent instanceof HtmlElement) {
             return ((HtmlElement) parent).getDocument();
-        else
+        } else {
             return null;
+        }
     }
 
     public HtmlComment setDocument(HtmlDocument _document) {
@@ -38,10 +41,11 @@ public class HtmlComment
     }
 
     public HtmlElement getParent() {
-        if (parent instanceof HtmlElement)
+        if (parent instanceof HtmlElement) {
             return (HtmlElement) parent;
-        else
+        } else {
             return null;
+        }
     }
 
     public HtmlComment setParent(HtmlElement _parent) {
@@ -62,12 +66,14 @@ public class HtmlComment
         return parent instanceof HtmlDocument;
     }
 
+    @Override
     public Object clone() {
         HtmlComment comment = new HtmlComment(text);
         comment.setParent(null);
         return comment;
     }
 
+    @Override
     public String toString() {
         return "<!--" + text + "-->";
     }

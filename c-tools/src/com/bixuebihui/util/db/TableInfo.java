@@ -5,63 +5,48 @@
 
 package com.bixuebihui.util.db;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 
+/**
+ * @author xwx
+ */
 public class TableInfo {
 
-    public TableInfo() {
-        sTableName = null;
-        hFieldInfos = null;
-        hFieldInfos = new Hashtable();
-    }
-
-    @Override
-    protected void finalize() {
-        clear();
-    }
+    private Map<String, FieldInfo> hFieldInfos;
 
     public String getTableName() {
         return sTableName;
     }
 
-    public void setTableName(String _sTableName) {
-        sTableName = _sTableName;
+    public TableInfo() {
+        sTableName = null;
+        hFieldInfos = null;
+        hFieldInfos = new ConcurrentHashMap<>();
     }
 
     public void clear() {
         hFieldInfos.clear();
     }
 
-    public void removeFieldInfo(String _sFieldName) {
-        if (hFieldInfos.containsKey(_sFieldName))
-            hFieldInfos.remove(_sFieldName);
+    public void setTableName(String tableName) {
+        sTableName = tableName;
     }
 
-    public void putFieldInfo(String _sFieldName, FieldInfo _fieldInfo) {
-        hFieldInfos.put(_sFieldName, _fieldInfo);
+    public void putFieldInfo(String sFieldName, FieldInfo fieldInfo) {
+        hFieldInfos.put(sFieldName, fieldInfo);
     }
 
-    public FieldInfo getFieldInfo(String _sFieldName) {
-        if (_sFieldName == null)
-            return null;
-        else
-            return (FieldInfo) hFieldInfos.get(_sFieldName.trim().toUpperCase());
-    }
-
-    public boolean isField(String _sFieldName) {
-        return null != getFieldInfo(_sFieldName);
-    }
-
-    public int getFieldCount() {
-        return hFieldInfos.size();
-    }
-
-    public Enumeration getFieldNames() {
-        return hFieldInfos.keys();
-    }
 
     private String sTableName;
-    private Hashtable hFieldInfos;
+
+    public FieldInfo getFieldInfo(String sFieldName) {
+        if (sFieldName == null) {
+            return null;
+        } else {
+            return hFieldInfos.get(sFieldName.trim().toUpperCase());
+        }
+    }
 }

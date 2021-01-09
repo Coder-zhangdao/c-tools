@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public final class HintManager implements AutoCloseable {
 
-    private final Map<ShardingKey, ShardingValue> databaseShardingValues = new HashMap<ShardingKey, ShardingValue>();
+    private final Map<ShardingKey, ShardingValue> databaseShardingValues = new HashMap<>();
 
     private final Map<ShardingKey, ShardingValue> tableShardingValues = new HashMap<ShardingKey, ShardingValue>();
 

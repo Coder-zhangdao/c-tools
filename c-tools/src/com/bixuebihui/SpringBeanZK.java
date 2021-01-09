@@ -84,8 +84,9 @@ public class SpringBeanZK {
             reader.loadBeanDefinitions(resource);
 
             URL configUrl = Loader.getResource(CONFIG_PROPERTIES);
-            if (configUrl == null)
+            if (configUrl == null) {
                 configUrl = this.getClass().getResource("/" + CONFIG_PROPERTIES);
+            }
 
             if (configUrl != null) {
                 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();

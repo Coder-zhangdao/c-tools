@@ -25,6 +25,7 @@ public class T_metatableWebUI  extends AbstractWebUI<T_metatable, Long>
 
 
 
+@Override
 protected String getUniquePropertyName(){return "tid";};
 
  public void setService(T_metatableManager service) {
@@ -35,7 +36,7 @@ protected String getUniquePropertyName(){return "tid";};
 */
 @Override
 protected void validateColumn(WorksheetColumn worksheetColumn, String changedValue) {
-    if (changedValue.equals("foo")) {
+    if ("foo".equals(changedValue)) {
         worksheetColumn.setErrorKey("foo.error");
     } else {
         worksheetColumn.removeError();
@@ -51,7 +52,9 @@ protected String[] getColNames() {
 @Override
 protected Long[] getKeys(HttpServletRequest request) {
 	String[] res = request.getParameterValues(checkboxName);
-	if(res==null) return new Long[0];
+	if(res==null) {
+        return new Long[0];
+    }
 
 return (Long[]) converter.convert(
 		request.getParameterValues(checkboxName), Long.class);

@@ -45,8 +45,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     protected static final Log mLog = LogFactory.getLog(BaseDao.class);
     protected final PojoValidator<T> pojoValidator = new PojoValidator<>();
 
-    /** Constant <code>UNKNOW=0</code> */
-    public static final int UNKNOW = 0;
+    /** Constant <code>UNKNOWN=0</code> */
+    public static final int UNKNOWN = 0;
     /** Constant <code>ORACLE=1</code> */
     public static final int ORACLE = 1;
     /** Constant <code>DERBY=2</code> */
@@ -84,8 +84,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             beforeChange(info);
         }
     }
-
-    private int dbtype = UNKNOW;
+    // That's right.
+    private static final Set<Class> BUILT_IN_SET = new HashSet<>();
 
     /**
      * <p>Getter for the field <code>dbHelper</code>.</p>
@@ -97,14 +97,15 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return dbHelper;
     }
 
-    /**
-     * <p>makeQueotedStr.</p>
-     *
-     * @param s a {@link java.lang.String} object.
-     * @return a {@link java.lang.String} object.
-     */
-    public static String makeQueotedStr(String s) {
-        return "'" + SQLUtil.escapeString(s) + "'";
+    static {
+        BUILT_IN_SET.add(Integer.class);
+        BUILT_IN_SET.add(Long.class);
+        BUILT_IN_SET.add(Double.class);
+        BUILT_IN_SET.add(Float.class);
+        BUILT_IN_SET.add(Boolean.class);
+        BUILT_IN_SET.add(Character.class);
+        BUILT_IN_SET.add(Byte.class);
+        BUILT_IN_SET.add(Short.class);
     }
 
     /**
@@ -162,22 +163,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return null;
     }
 
-    /**
-     * <p>addAlias.</p>
-     *
-     * @param tableName a {@link java.lang.String} object.
-     * @return a {@link java.lang.String} object.
-     * @throws java.sql.SQLException if any.
-     */
-    protected String addAlias(String tableName) throws SQLException {
-        // hack the
-        // " com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException:
-        // Every derived table must have its own alias]"
-        if (this.getDBTYPE() == MYSQL && StringUtils.startsWithIgnoreCase(tableName.trim(), "select ")) {
-            tableName = "(" + tableName + ") tablealias_in_basedao";
-        }
-        return tableName;
-    }
+    private int dbtype = UNKNOWN;
 
     /**
      * <p>getCount.</p>
@@ -197,6 +183,15 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         }
     }
 
+    /**
+     * <p>makeQuotedStr.</p>
+     *
+     * @param s a {@link java.lang.String} object.
+     * @return a {@link java.lang.String} object.
+     */
+    public static String makeQuotedStr(String s) {
+        return "'" + SQLUtil.escapeString(s) + "'";
+    }
 
     /**
      * <p>detectDbType.</p>
@@ -205,7 +200,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a int.
      */
     public static int detectDbType(String driverName) {
-        int res = UNKNOW;
+        int res = UNKNOWN;
         String name = driverName.toUpperCase();
         if (name.contains("ORACLE")) {
             res = ORACLE;
@@ -213,9 +208,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             res = DERBY;
         } else if (name.contains("MYSQL")) {
             res = MYSQL;
-        } else if (name.contains("SQLSERVER")) {// sqlserver 2000
+        } else if (name.contains("SQLSERVER")) {
+            // sqlserver 2000
             res = SQLSERVER;
-        } else if (name.contains("SQL SERVER")) { // sql server 2005
+        } else if (name.contains("SQL SERVER")) {
+            // sql server 2005
             res = SQLSERVER_2005_AND_UP;
         } else if (name.contains("POSTGRESQL")) {
             res = POSTGRESQL;
@@ -223,21 +220,6 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             res = ACCESS;
         }
         return res;
-    }
-
-    private void detectDbType() throws SQLException {
-        if (dbtype == UNKNOW) {
-            if (getDbHelper() != null) {
-                Connection cn = getDbHelper().getConnection();
-                try {
-                    dbtype = detectDbType(cn.getMetaData().getDriverName());
-                } finally {
-                    cn.close();
-                }
-            } else {
-                throw new SQLException("DbHelper not initialized!");
-            }
-        }
     }
 
     /**
@@ -340,8 +322,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * 2005来说非常新鲜并且看上去非常有用。下面一个例子显示从一个结果集得到20至19条记录。刚开始有一点惊奇，但是浏览了查询器后发现它是如此简单。
      * <p>
      * <p>
-     * With Cust AS ( SELECT CustomerID, CompanyName, ROW_NUMBER() OVER (order
-     * by CompanyName) as RowNumber FROM Customers ) select * from Cust Where
+     * With Customer AS ( SELECT CustomerID, CompanyName, ROW_NUMBER() OVER (order
+     * by CompanyName) as RowNumber FROM Customers ) select * from Customer Where
      * RowNumber Between 20 and 30
      * <p>
      * SQL Server 2005的WITH指定了一个临时命名的结果，很像SQL
@@ -607,50 +589,16 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     }
 
     /**
-     * <p>executeTransaction.</p>
+     * <p>registerConverters.</p>
      *
-     * @param sqlObjs an array of {@link SqlObject} objects.
-     * @return a boolean.
-     * @throws java.sql.SQLException if any.
+     * @param convertors a {@link java.util.Map} object.
      */
-    public boolean executeTransaction(SqlObject[] sqlObjs) throws SQLException {
-
-        Connection cn = null;
-        try {
-            cn = getDbHelper().getConnection();
-            cn.setAutoCommit(false);
-            for (SqlObject sqlObj : sqlObjs) {
-                int res = getDbHelper().executeNoQuery(sqlObj.getSqlString(), sqlObj.getParameters(), cn);
-
-                if (sqlObj.getExpectedResult() > 0 && sqlObj.getExpectedResult() != res) {
-                    cn.rollback();
-                    return false;
-                }
-            }
-
-            cn.commit();
-            return true;
-        } catch (SQLException sqle) {
-            try {
-                if(cn!=null) {
-                    cn.rollback();
-                }
-            } catch (Exception e) {
-                mLog.warn(e);
-            }
-            throw sqle;
-        } finally {
-            try {
-                if (cn != null) {
-                    cn.setAutoCommit(true);
-                }
-            } catch (Exception e) {
-                mLog.warn(e);
-            }
-
-            DbUtils.closeQuietly(cn);
+    @SuppressWarnings("rawtypes")
+    public static void registerConverters(Map<Class, Converter> convertors) {
+        BeanUtilsBean b = BeanUtilsBean.getInstance();
+        for (Entry<Class, Converter> entry : convertors.entrySet()) {
+            b.getConvertUtils().register(entry.getValue(), entry.getKey());
         }
-
     }
 
     /**
@@ -771,16 +719,80 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     }
 
     /**
-     * <p>registerConverters.</p>
+     * <p>addAlias.</p>
      *
-     * @param convs a {@link java.util.Map} object.
+     * @param tableName a {@link java.lang.String} object.
+     * @return a {@link java.lang.String} object.
+     * @throws java.sql.SQLException if any.
      */
-    @SuppressWarnings("rawtypes")
-    public static void registerConverters(Map<Class, Converter> convs) {
-        BeanUtilsBean b = BeanUtilsBean.getInstance();
-        for (Entry<Class, Converter> entry : convs.entrySet()) {
-            b.getConvertUtils().register(entry.getValue(), entry.getKey());
+    protected String addAlias(String tableName) throws SQLException {
+        // hack the
+        // " com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException:
+        // Every derived table must have its own alias]"
+        if (this.getDBTYPE() == MYSQL && StringUtils.startsWithIgnoreCase(tableName.trim(), "select ")) {
+            tableName = "(" + tableName + ") table_alias_in_base_dao";
         }
+        return tableName;
+    }
+
+    private void detectDbType() throws SQLException {
+        if (dbtype == UNKNOWN) {
+            if (getDbHelper() != null) {
+               try( Connection cn = getDbHelper().getConnection())
+               {
+                    dbtype = detectDbType(cn.getMetaData().getDriverName());
+                }
+            } else {
+                throw new SQLException("DbHelper not initialized!");
+            }
+        }
+    }
+
+    /**
+     * <p>executeTransaction.</p>
+     *
+     * @param sqlObjs an array of {@link SqlObject} objects.
+     * @return a boolean.
+     * @throws java.sql.SQLException if any.
+     */
+    public boolean executeTransaction(SqlObject[] sqlObjs) throws SQLException {
+
+        Connection cn = null;
+        try {
+            cn = getDbHelper().getConnection();
+            cn.setAutoCommit(false);
+            for (SqlObject sqlObj : sqlObjs) {
+                int res = getDbHelper().executeNoQuery(sqlObj.getSqlString(), sqlObj.getParameters(), cn);
+
+                if (sqlObj.getExpectedResult() > 0 && sqlObj.getExpectedResult() != res) {
+                    cn.rollback();
+                    return false;
+                }
+            }
+
+            cn.commit();
+            return true;
+        } catch (SQLException sqlException) {
+            try {
+                if(cn!=null) {
+                    cn.rollback();
+                }
+            } catch (Exception e) {
+                mLog.warn(e);
+            }
+            throw sqlException;
+        } finally {
+            try {
+                if (cn != null) {
+                    cn.setAutoCommit(true);
+                }
+            } catch (Exception e) {
+                mLog.warn(e);
+            }
+
+            DbUtils.closeQuietly(cn);
+        }
+
     }
 
     /**
@@ -788,24 +800,24 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      *
      * @param <K>      期待类型
      * @param h        源数据
-     * @param reciever 目标对象
+     * @param receiver 目标对象
      * @return 目标对象
      * @throws java.lang.IllegalAccessException    无法拷贝属性
      * @throws java.lang.reflect.InvocationTargetException 无法拷贝属性
      * @throws java.lang.NoSuchMethodException     无法拷贝属性
      */
     protected @NotNull
-    <K> K convertCaseSensitive(Map<String, Object> h, @NotNull K reciever)
+    <K> K convertCaseSensitive(Map<String, Object> h, @NotNull K receiver)
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         // access properties as Map
-        Map<String, String> properties = BeanUtils.describe(reciever);
+        Map<String, String> properties = BeanUtils.describe(receiver);
         Map<String, Object> values = new HashMap<>();
         for (Map.Entry<String, ?> e : properties.entrySet()) {
             Object o = h.get(e.getKey());
             values.put(e.getKey(), o);
         }
-        BeanUtils.populate(reciever, values);
-        return reciever;
+        BeanUtils.populate(receiver, values);
+        return receiver;
     }
 
     /**
@@ -813,13 +825,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      *
      * @param <K>    期待类型
      * @param h  源数据
-     * @param reciever 目标对象
+     * @param receiver 目标对象
      * @return 目标对象
      * @throws java.lang.IllegalAccessException 无法拷贝属性
      * @deprecated use convertCaseInsensitive
      */
     @Deprecated
-    protected <K> K convert(Map<String, Object> h, K reciever) throws IllegalAccessException {
+    protected <K> K convert(Map<String, Object> h, K receiver) throws IllegalAccessException {
         BeanUtilsBean b = BeanUtilsBean.getInstance();
 
         // 因大小写的问题,不能直接传入全部属性
@@ -834,33 +846,19 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             }
 
             try {
-                b.copyProperty(reciever, key.toLowerCase(), value);
+                b.copyProperty(receiver, key.toLowerCase(), value);
             } catch (IllegalAccessException e) {
                 mLog.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
-                        + ", ask xwx@live.cn to add a conveter for this type.");
+                        + ", ask xwx@live.cn to add a convertor for this type.");
                 throw e;
             } catch (InvocationTargetException e) {
                 mLog.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
-                        + ", ask xwx@live.cn to add a conveter for this type.");
+                        + ", ask xwx@live.cn to add a convertor for this type.");
                 mLog.error(e);
             }
         }
 
-        return reciever;
-    }
-
-    // That's right.
-    private static final Set<Class> builtInSet = new HashSet<>();
-
-    static {
-        builtInSet.add(Integer.class);
-        builtInSet.add(Long.class);
-        builtInSet.add(Double.class);
-        builtInSet.add(Float.class);
-        builtInSet.add(Boolean.class);
-        builtInSet.add(Character.class);
-        builtInSet.add(Byte.class);
-        builtInSet.add(Short.class);
+        return receiver;
     }
 
     /**
@@ -887,14 +885,15 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                 params);
 
         List<K> v1 = new ArrayList<>();
-        if (builtInSet.contains(clz)) {
+        if (BUILT_IN_SET.contains(clz)) {
             for (Map<String, Object> h : v) {
                 v1.add(clz.cast(h.values().toArray()[0]));
             }
         } else {
             for (Map<String, Object> h : v) {
                 try {
-                    v1.add(convertCaseSensitive(h, clz.newInstance()));
+                    v1.add(convertCaseSensitive(h, clz.getDeclaredConstructor().newInstance()));
+                    //clz.newInstance()));
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
                     throw new SQLException(e);
                 }
@@ -937,7 +936,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     public @NotNull
     List<T> select(String whereClause, Object[] params, String orderbyClause, int beginNum, int endNum)
             throws SQLException {
-        String query = getSeleteAllFromTable() + whereClause;
+        String query = getSelectAllFromTable() + whereClause;
         if (this.getDBTYPE() != BaseDao.DERBY) {
             query += orderbyClause;
         }
@@ -1044,7 +1043,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     }
 
     private String getSelectAllWhere() {
-        return getSeleteAllFromTable() + WHERE;
+        return getSelectAllFromTable() + WHERE;
     }
 
 
@@ -1186,7 +1185,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             String message = ex.getMessage();
 
             if (message.contains("Duplicate") && message.contains("PRIMARY")) {
-                repaisAndTry(info, 1);
+                repairAndTry(info, 1);
             }
         } catch (SQLException ex) {
             throw ex;
@@ -1194,7 +1193,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return false;
     }
 
-    private boolean repaisAndTry(T info, int tryCount) throws SQLException {
+    private boolean repairAndTry(T info, int tryCount) throws SQLException {
         if (tryCount++ > 3) {
             return false;
         }
@@ -1213,7 +1212,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                 try {
                     SequenceUtils.getInstance().moveKeyValueToCurrent(key, max,
                             this.getDbHelper());
-                    return repaisAndTry(info, tryCount);
+                    return repairAndTry(info, tryCount);
                 } catch (Exception e) {
                     throw new SQLException(ex);
                 }
@@ -1231,7 +1230,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     public @NotNull
     List<T> selectAllWhere(String where) throws SQLException {
-        String query = getSeleteAllFromTable() + where;
+        String query = getSelectAllFromTable() + where;
         return getDbHelper().executeQuery(query, null, new RowMapperResultReader<>(this));
     }
 
@@ -1245,7 +1244,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     public @NotNull
     List<T> selectAllWhere(String where, Object... objects) throws SQLException {
-        String query = getSeleteAllFromTable() + where;
+        String query = getSelectAllFromTable() + where;
         return getDbHelper().executeQuery(query, objects, new RowMapperResultReader<>(this));
     }
 
@@ -1296,14 +1295,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     public void processAllByStep(String where, String orderBy, int stepMax, ProcessHandler<T> handler,
                                  Object[] params, boolean alwaysFromBeginning) throws SQLException {
-        int perTimeCount = stepMax;
         List<T> list;
         int beginNum = 0;
-        for (list = select(where, params, orderBy, beginNum, beginNum + perTimeCount);
+        for (list = select(where, params, orderBy, beginNum, beginNum + stepMax);
              !list.isEmpty();
-             list = select(where, params, orderBy, beginNum, beginNum + perTimeCount)) {
+             list = select(where, params, orderBy, beginNum, beginNum + stepMax)) {
             if (!alwaysFromBeginning) {
-                beginNum = beginNum + perTimeCount;
+                beginNum = beginNum + stepMax;
             }
             mLog.debug("the size of " + this.getTableName() + " selectAllWhereByStep:" + list.size());
             handler.process(list);
@@ -1318,11 +1316,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     public @NotNull
     List<T> selectAll() throws SQLException {
-        String query = getSeleteAllFromTable();
+        String query = getSelectAllFromTable();
         return getDbHelper().executeQuery(query, null, new RowMapperResultReader<>(this));
     }
 
-    private String getSeleteAllFromTable() {
+    private String getSelectAllFromTable() {
         return SELECT_FROM + getTableName() + " ";
     }
 
@@ -1369,8 +1367,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             Object[] rec = new Object[clz.length];
             for (int i = 0; i < clz.length; i++) {
                 try {
-                    rec[i] = clz[i].newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
+                    rec[i] = clz[i].getDeclaredConstructor().newInstance();
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                     mLog.warn(e);
                 }
                 this.map2object(h, rec[i]);
@@ -1463,7 +1461,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     protected Object[] getInsertObjs(T info) {
         assert info!=null;
-        throw new IllegalArgumentException("this method must overrided!");
+        throw new IllegalArgumentException("this method must override!");
     }
 
     /**
