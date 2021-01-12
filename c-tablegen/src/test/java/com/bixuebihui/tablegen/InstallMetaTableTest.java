@@ -6,7 +6,7 @@ public class InstallKZTableTest {
 
 	@Test
 	public void testRun() throws Exception {
-		InstallKZTable name = new InstallKZTable();
+		InstallMetaTable name = new InstallMetaTable();
 		name.run();
 	}
 

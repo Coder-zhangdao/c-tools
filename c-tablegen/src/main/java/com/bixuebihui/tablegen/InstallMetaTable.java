@@ -9,6 +9,8 @@ import com.bixuebihui.jdbc.SqlFileExecutor;
 
 public class InstallKZTable {
 
+	public static final String KUOZHANBIAOMING = "KUOZHANBIAOMING";
+
 	public boolean run() throws Exception {
 		IDbHelper dbHelper = (IDbHelper) BeanFactory
 				.createObjectById("dbHelper");
@@ -16,7 +18,7 @@ public class InstallKZTable {
 		boolean res = false;
 		try {
 			conn = dbHelper.getConnection();
-			if (!JDBCUtils.tableOrViewExists(null, null, "KUOZHANBIAOMING",
+			if (!JDBCUtils.tableOrViewExists(null, null, KUOZHANBIAOMING,
 					conn)) {
 				SqlFileExecutor ex = new SqlFileExecutor();
 				String sqlFile = this.getClass().getResource("/dbscript.sql")
