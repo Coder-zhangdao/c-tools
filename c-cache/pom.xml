@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>c-cache</artifactId>
     <name>dictionary cache</name>
-    <version>1.0.1-RC8</version>
+    <version>1.0.1-RC9</version>
     <description>dictionary cache for database</description>
     <parent>
         <groupId>com.github.yujiaao</groupId>
@@ -127,12 +127,12 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-dbtools</artifactId>
-            <version>1.0.1-RC8</version>
+            <version>1.0.1-RC9</version>
         </dependency>
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-tools</artifactId>
-            <version>1.0.1-RC8</version>
+            <version>1.0.1-RC9</version>
         </dependency>
 
         <dependency>

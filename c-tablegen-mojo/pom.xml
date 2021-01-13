@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>tablegen</artifactId>
-            <version>1.0.1-RC8</version>
+            <version>1.0.1-RC9</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>

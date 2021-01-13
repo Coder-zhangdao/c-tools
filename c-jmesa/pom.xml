@@ -150,12 +150,12 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-tools</artifactId>
-            <version>1.0.1-RC8</version>
+            <version>1.0.1-RC9</version>
         </dependency>
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-dbtools</artifactId>
-            <version>1.0.1-RC8</version>
+            <version>1.0.1-RC9</version>
         </dependency>
         <dependency>
             <groupId>com.github.yujiaao</groupId>
@@ -288,7 +288,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-cache</artifactId>
-            <version>1.0.1-RC8</version>
+            <version>1.0.1-RC9</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
