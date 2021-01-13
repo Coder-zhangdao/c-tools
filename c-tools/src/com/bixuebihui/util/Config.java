@@ -131,26 +131,26 @@ public class Config implements AutoCloseable {
     public static boolean initFileBaseConfig() throws ClassNotFoundException, IOException{
         Properties props = new Properties();
         // we'll need this to get at our properties files in the classpath
-        Class<?> config_class = Class.forName("com.bixuebihui.util.Config");
+        Class<?> configClass = Class.forName("com.bixuebihui.util.Config");
 
         // first, lets load our default properties
-        loadPropertiesFromClasspathFile(DEFAULT_CONFIG, props, config_class);
-        loadPropertiesFromClasspathFile(CUSTOM_PROPERTIES, props, config_class);
+        loadPropertiesFromClasspathFile(DEFAULT_CONFIG, props, configClass);
+        loadPropertiesFromClasspathFile(CUSTOM_PROPERTIES, props, configClass);
 
 
         // finally, check for an external config file
-        String env_file = System.getProperty(CUSTOM_JVM_PARAM);
+        String envFile = System.getProperty(CUSTOM_JVM_PARAM);
 
-        if (env_file != null && env_file.length() > 0) {
-            File custom_config_file = new File(env_file);
+        if (envFile != null && envFile.length() > 0) {
+            File customConfigFile = new File(envFile);
             // make sure the file exists, then try and load it
-            if (custom_config_file.exists()) {
-                try (InputStream is = new FileInputStream(custom_config_file)) {
+            if (customConfigFile.exists()) {
+                try (InputStream is = new FileInputStream(customConfigFile)) {
                     props.load(is);
-                    mLogger.info("successfully loaded custom properties from " + custom_config_file.getAbsolutePath());
+                    mLogger.info("successfully loaded custom properties from " + customConfigFile.getAbsolutePath());
                 }
             } else {
-                mLogger.warn("failed to load custom properties from " + custom_config_file.getAbsolutePath());
+                mLogger.warn("failed to load custom properties from " + customConfigFile.getAbsolutePath());
             }
         } else {
             mLogger.info("no custom properties file specified via jvm option");
@@ -192,13 +192,13 @@ public class Config implements AutoCloseable {
         return props.size() > 0;
     }
 
-    private static void loadPropertiesFromClasspathFile(String fileName, Properties mConfig, Class<?> config_class) throws IOException {
-        InputStream is = config_class.getResourceAsStream(fileName);
+    private static void loadPropertiesFromClasspathFile(String fileName, Properties mConfig, Class<?> configClass) throws IOException {
+        InputStream is = configClass.getResourceAsStream(fileName);
         if (is != null) {
             mConfig.load(is);
             mLogger.info("successfully loaded default properties.");
         } else {
-            is = config_class.getClassLoader().getResourceAsStream(fileName);
+            is = configClass.getClassLoader().getResourceAsStream(fileName);
             if (is != null) {
                 mConfig.load(is);
                 is.close();

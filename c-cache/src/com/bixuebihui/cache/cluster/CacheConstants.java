@@ -1,6 +1,9 @@
 package com.bixuebihui.cache.cluster;
 
 
+/**
+ * @author xwx
+ */
 public class CacheConstants {
     /**
      * 添加缓存对象操作

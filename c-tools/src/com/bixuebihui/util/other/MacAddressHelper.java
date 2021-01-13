@@ -16,16 +16,16 @@ public class MacAddressHelper {
         return getMyMacAsLong(sMac);
     }
 
-    public static long getMyMacAsLong(String _sMac) {
-        if (_sMac == null || _sMac.length() <= 0) {
+    public static long getMyMacAsLong(String mac) {
+        if (mac == null || mac.length() <= 0) {
             return 0L;
         }
-        String sMac = _sMac;
+        String sMac = mac;
         sMac = CMyString.replaceStr(sMac, "-", "");
         long nMac = Long.parseLong(sMac, 16);
         sMac = "" + nMac;
         if (sMac.length() > 12) {
-            for (sMac = sMac.substring(0, 12); sMac.charAt(0) == '0' && sMac.length() > 0; sMac = sMac.substring(1, sMac.length())) {
+            for (sMac = sMac.substring(0, 12);   sMac.length() > 0 && sMac.charAt(0) == '0'; sMac = sMac.substring(1)) {
                 ;
             }
             nMac = Long.parseLong(sMac);

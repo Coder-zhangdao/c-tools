@@ -27,10 +27,14 @@ public class SqlHelper {
 	public SqlHelper(SqlHelper src) {
 		this.filters = new ArrayList<>();
 		this.filters.addAll(src.filters);
-		this.orCond = new ArrayList<>();
-		this.orCond.addAll(src.orCond);
-		this.notCond = new ArrayList<>();
-		this.notCond.addAll(src.notCond);
+		if(src.orCond!=null) {
+			this.orCond = new ArrayList<>();
+			this.orCond.addAll(src.orCond);
+		}
+		if(src.notCond!=null) {
+			this.notCond = new ArrayList<>();
+			this.notCond.addAll(src.notCond);
+		}
 		this.databaseType = src.databaseType;
 		this.useNullAsCondition = src.useNullAsCondition;
 	}
@@ -344,6 +348,10 @@ public class SqlHelper {
 		filters.add(new GtFilter(field, value));
 		return this;
 	}
+	public SqlHelper greaterOrEqualThan(String field, Object value) {
+		filters.add(new GeFilter(field, value));
+		return this;
+	}
 
 	/**
 	 * <p>smallerThan.</p>
@@ -356,6 +364,11 @@ public class SqlHelper {
 		filters.add(new LtFilter(field, value));
 		return this;
 	}
+	public SqlHelper smallerOrEqualThan(String field, Object value) {
+		filters.add(new LeFilter(field, value));
+		return this;
+	}
+
 
 	/**
 	 * 设置数据库类型
@@ -474,6 +487,18 @@ public class SqlHelper {
 	protected static class LtFilter extends AbstractBiFilter {
 		public LtFilter(String property, Object value) {
 			super(property, value, " < ");
+		}
+	}
+
+	protected static class GeFilter extends AbstractBiFilter {
+		public GeFilter(String property, Object value) {
+			super(property, value, " >= ");
+		}
+	}
+
+	protected static class LeFilter extends AbstractBiFilter {
+		public LeFilter(String property, Object value) {
+			super(property, value, " <= ");
 		}
 	}
 

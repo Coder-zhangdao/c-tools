@@ -99,7 +99,7 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
         Map<String, Object> context = getContext(request);
 
         for (Column col : cols) {
-            renderCell(col, context);
+            prepareCellEditor(col, context);
         }
 
 

@@ -5,6 +5,9 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+/**
+ * @author xwx
+ */
 public class CMyException extends Exception {
     public CMyException(String _sMsg, Throwable _rootCause) {
         super(_sMsg);

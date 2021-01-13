@@ -7,7 +7,7 @@
 
     <bean id="mysqlConfig" class="com.bixuebihui.dbcon.DatabaseConfig">
         <property name="alias">
-            <value>ssll</value>
+            <value>test</value>
         </property>
         <property name="className">
             <value>com.mysql.jdbc.Driver</value>
@@ -62,59 +62,6 @@
     </bean>
 
 
-    <bean id="counterDbHelper1" class="com.bixuebihui.jdbc.DbHelper">
-        <property name="dataSource">
-            <!-- 默认连接的数据源 -->
-            <bean class="com.bixuebihui.datasource.BitmechanicDataSource">
-                <property name="databaseConfig">
-                    <bean class="com.bixuebihui.dbcon.DatabaseConfig">
-                        <property name="alias">
-                            <value>counter</value>
-                        </property>
-                        <property name="className">
-                            <value>com.mysql.jdbc.Driver</value>
-                        </property>
-                        <property name="dburl">
-                            <value>${counterdburl}</value>
-                        </property>
-                        <property name="username">
-                            <value>${counterdbusername}</value>
-                        </property>
-                        <property name="password">
-                            <value>${counterdbpassword}</value>
-                        </property>
-                    </bean>
-                </property>
-            </bean>
-        </property>
-    </bean>
-
-    <bean id="jeecmsDbHelper1" class="com.bixuebihui.jdbc.DbHelper">
-        <property name="dataSource">
-            <!-- 默认连接的数据源 -->
-            <bean class="com.bixuebihui.datasource.BitmechanicDataSource">
-                <property name="databaseConfig">
-                    <bean class="com.bixuebihui.dbcon.DatabaseConfig">
-                        <property name="alias">
-                            <value>jeecms</value>
-                        </property>
-                        <property name="className">
-                            <value>com.mysql.jdbc.Driver</value>
-                        </property>
-                        <property name="dburl">
-                            <value>${jeecmsdburl}</value>
-                        </property>
-                        <property name="username">
-                            <value>${jeecmsdbusername}</value>
-                        </property>
-                        <property name="password">
-                            <value>${jeecmsdbpassword}</value>
-                        </property>
-                    </bean>
-                </property>
-            </bean>
-        </property>
-    </bean>
 
     <bean id="counterDbHelper" class="org.springframework.aop.framework.ProxyFactoryBean">
         <property name="proxyInterfaces">
@@ -126,21 +73,10 @@
             </list>
         </property>
         <property name="target">
-            <ref bean="counterDbHelper1"/>
+            <ref bean="dbHelper1"/>
         </property>
     </bean>
 
-    <bean id="jeecmsDbHelper" class="org.springframework.aop.framework.ProxyFactoryBean">
-        <property name="proxyInterfaces" value="com.bixuebihui.jdbc.IDbHelper"/>
-        <property name="interceptorNames">
-            <list>
-                <value>dbHelperAroundAdvice</value>
-            </list>
-        </property>
-        <property name="target">
-            <ref bean="jeecmsDbHelper1"/>
-        </property>
-    </bean>
 
 
     <alias name="dbHelper" alias="sequenceDbHelper"/>
@@ -149,9 +85,7 @@
     <alias name="dbHelper" alias="gamesDbHelper"/>
     <alias name="dbHelper" alias="cacheDbHelper"/>
     <alias name="dbHelper" alias="searchDbHelper"/>
-    <!-- more bean definitions go here -->
 
-    <alias name="counterDbHelper" alias="wishDbHelper"/>
 
 
 </beans>

@@ -1,5 +1,8 @@
 package com.bixuebihui.tablegen;
 
+/**
+ * @author xwx
+ */
 public class TableGenConfig {
 	public static final String METATABLE_DICT="t_metatable";
 	public static final String TABLENAME_DICT="metatable";

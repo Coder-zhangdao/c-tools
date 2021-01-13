@@ -12,6 +12,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 
 
+/**
+ * @author xwx
+ */
 public class CMyFile {
 
     public CMyFile() {

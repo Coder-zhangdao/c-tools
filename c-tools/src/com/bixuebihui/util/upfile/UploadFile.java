@@ -34,44 +34,41 @@ public class UploadFile {
         for (int i = 0; i < extArray.length; i++) {
             whiteList.put(extArray[i].toLowerCase(), extArray[i]);
         }
-        // filter.put(key, value);
     }
 
-    public static String extractFileExt(String _sFilePathName) {
+    public static String extractFileExt(String filePathName) {
         String sep = System.getProperty("file.separator");
-        if (_sFilePathName.lastIndexOf(sep) > 0) {
-            _sFilePathName = _sFilePathName.substring(_sFilePathName
+        if (filePathName.lastIndexOf(sep) > 0) {
+            filePathName = filePathName.substring(filePathName
                     .lastIndexOf(sep));
         }
 
         sep = "/";
 
-        if (_sFilePathName.lastIndexOf(sep) > 0) {
-            _sFilePathName = _sFilePathName.substring(_sFilePathName
+        if (filePathName.lastIndexOf(sep) > 0) {
+            filePathName = filePathName.substring(filePathName
                     .lastIndexOf(sep));
         }
-        int nPos = _sFilePathName.lastIndexOf('.');
-        return nPos < 0 ? "" : _sFilePathName.substring(nPos + 1);
+        int nPos = filePathName.lastIndexOf('.');
+        return nPos < 0 ? "" : filePathName.substring(nPos + 1);
     }
 
     public static String getFileStorePath(String relativePath)
             throws IOException {
 
-        SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy_MM"); // 格式化日期
-        java.util.Date currentTime = new java.util.Date();// 得到当前系统时间
+        SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy_MM");
+        java.util.Date currentTime = new java.util.Date();
         String strDate = sdf.format(currentTime);
-        // System.out.println(strDate);
-        String strAbsPath = relativePath;// strAbsPath是C:\tomcat5\webapps\zichangl
+        String strAbsPath = relativePath;
         String uploadPath = strAbsPath;
 
         String sep = System.getProperty("file.separator");
         String tempPath = strAbsPath + sep + "file_upload_store" + sep
-                + strDate + sep;// 最后结果是C:\tomcat5\webapps\zichangl\zichangl_hetong_file_upload
+                + strDate + sep;
 
         File f0 = new File(uploadPath);
         if (!f0.exists() || !f0.isDirectory()) {
-            if (f0.mkdirs() == false) {
-                f0 = null;
+            if (!f0.mkdirs()) {
                 throw new IOException("can' t make dir: " + uploadPath);
             } else {
                 mLog.log(Level.INFO, "Dir created:" + uploadPath);
@@ -80,7 +77,6 @@ public class UploadFile {
             mLog.log(Level.FINER, "Dir allready exists:" + uploadPath);
         }
 
-        f0 = null;
         f0 = new File(tempPath);
 
         if (!f0.exists() || !f0.isDirectory()) {
@@ -108,7 +104,6 @@ public class UploadFile {
 
             String fileType = "." + extractFileExt(oldName).toLowerCase();
 
-            // upload.setRepositoryPath(tempPath);
             String ss = (new Date()).getTime() + "";
 
             if (seq < 10) {
@@ -155,7 +150,7 @@ public class UploadFile {
         }
         int backslashIndex = fileName.lastIndexOf("\\");
         if (backslashIndex == -1) {
-            String sep = "/";// System.getProperty("file.separator");
+            String sep = "/";
             backslashIndex = fileName.lastIndexOf(sep);
         }
         if (colonIndex > -1 && backslashIndex > -1) {
@@ -172,11 +167,6 @@ public class UploadFile {
         List fileNameList = new ArrayList();
 
         int m = 0;
-        String flname = "";
-
-        // 取当前系统时间
-        // SimpleDateFormat formatter = new
-        // java.text.SimpleDateFormat("yyyy-MM-dd"); //格式化日期�
 
         boolean isMultipart = ServletFileUpload
                 .isMultipartContent(new ServletRequestContext(request));
@@ -194,12 +184,11 @@ public class UploadFile {
             diskFileItemFactory.setRepository(tempfile);
             ServletFileUpload upload = new ServletFileUpload(
                     diskFileItemFactory);
-            upload.setSizeMax(maxSize); // 设置文件大小;
+            // 设置文件大小;
+            upload.setSizeMax(maxSize);
 
             List /* FileItem */fileItems = upload.parseRequest(request);
 
-            // System.out.println("fileItems.size()=" + fileItems.size() +
-            // "<br>");
 
             Iterator i = fileItems.iterator();
 
@@ -207,7 +196,8 @@ public class UploadFile {
                 // 以下是一些变量定义
                 FileItem fi = (FileItem) i.next();
 
-                if (!fi.isFormField()) // 这里开始外理文件
+                // 这里开始外理文件
+                if (!fi.isFormField())
                 {
                     m = saveFileItem(fileNameList, m++, storePath, fi);
                 } else {
@@ -216,7 +206,6 @@ public class UploadFile {
                 }
             }
             if (fileNameList.size() == 0) {
-                //throw new CMyException("No file saved!");
                 mLog.info("No file saved!");
             }
             return (String[]) fileNameList.toArray(new String[0]);
@@ -237,20 +226,18 @@ public class UploadFile {
             request.setAttribute(ServletFileUpload.MULTIPART_FORM_DATA, fieldsMap);
         }
 
-        Vector<String> vec = new Vector<String>();
-        String fieldName = fi.getFieldName(); // 这里取得字段名称
+        Vector<String> vec = new Vector<>();
+        // 这里取得字段名称
+        String fieldName = fi.getFieldName();
         // 如果已经存在此字段信息（多选列表或多个同名的隐藏域等）
         if (fieldsMap.get(fieldName) != null) {
-            vec = (Vector<String>) fieldsMap.get(fieldName);
-            //mLog.info("name:" + fieldName + " value:"
-            //		+ fi.getString(request.getCharacterEncoding()));
+            vec = fieldsMap.get(fieldName);
+
             // 很重要!需要进行编码哦！！！
             vec.add(fi.getString(request.getCharacterEncoding()));
         }
         // 第一次取到这个名的字段
         else {
-            //mLog.info("name:" + fieldName + " value: "
-            //		+ fi.getString(request.getCharacterEncoding()));
             vec.add(fi.getString(request.getCharacterEncoding()));
             fieldsMap.put(fieldName, vec);
         }
@@ -258,7 +245,7 @@ public class UploadFile {
 
     public int saveFileItem(List<String> fileNames, int m, String storePath, FileItem fi)
             throws Exception {
-        String tempPath = getFileStorePath(storePath);// application.getRealPath(""));
+        String tempPath = getFileStorePath(storePath);
         String flname;
         flname = getNewFileName(fi.getName(), m);
         String original_name = getBaseFileName(fi.getName());
@@ -266,10 +253,8 @@ public class UploadFile {
         mLog.finest("DUMP:" + original_name);
 
         if (fi.getSize() > 0) {
-            fi.write(new File(tempPath + flname)); // 写文件到服务器.
-        } else {
-            //	mLog.finest("File size=0, No file saved! original file name is:"
-            //					+ original_name);
+            // 写文件到服务器.
+            fi.write(new File(tempPath + flname));
         }
         return m;
     }

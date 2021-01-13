@@ -21,6 +21,8 @@ import java.util.concurrent.Executor;
  */
 public class PooledConnection implements Connection, Runnable {
 
+	public static final int MAX_RETRIES_TO_CREATE_CONN = 3;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -269,7 +271,7 @@ public class PooledConnection implements Connection, Runnable {
                 log.warn(method+" statement was null");
             }
 			theStatement = null;
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < MAX_RETRIES_TO_CREATE_CONN; i++) {
 				try {
 					conn = pool.createDriverConnection();
 					log.info(method + "Recovered connection");

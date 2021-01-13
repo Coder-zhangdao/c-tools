@@ -489,8 +489,8 @@ public class DbHelper implements IDbHelper {
 	public @NotNull
 	List<Map<String, Object>> resultSet2Vector(ResultSet rs) throws SQLException {
 		List<Map<String, Object>> result = new ArrayList<>();
+		//System.out.println("No data"); //http://stackoverflow.com/a/6813771/1484621
 		if (!rs.isBeforeFirst() ) {
-			//System.out.println("No data"); //http://stackoverflow.com/a/6813771/1484621
 			return result;
 		}
 
@@ -510,7 +510,8 @@ public class DbHelper implements IDbHelper {
 				}
 
 				if(mapColumn.containsKey(colName) && rs.getObject(i)==null){
-					continue;//同一列名的已存在且不为空，则保留当前值，用于多表联合查询，但后表无记录的情况
+					//同一列名的已存在且不为空，则保留当前值，用于多表联合查询，但后表无记录的情况
+					continue;
 				}
 
 				switch (colTypeName) {

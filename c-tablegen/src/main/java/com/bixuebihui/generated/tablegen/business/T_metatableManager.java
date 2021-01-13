@@ -20,6 +20,9 @@ import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.generated.tablegen.dal.T_metatableList;
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 
+/**
+ * @author xwx
+ */
 public class T_metatableManager extends T_metatableList {
 	@SuppressWarnings("unchecked")
 	public Collection<T_metatable> getTableDataExt(List<String> tableNames)

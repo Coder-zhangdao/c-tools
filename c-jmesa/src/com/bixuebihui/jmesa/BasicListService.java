@@ -43,7 +43,7 @@ public class BasicListService extends AbstractBaseDao {
 
         boolean needOrderBy = true;
         String tableName = getTableName();
-        if (this.getDBTYPE() == BaseDao.DERBY || tableName.toUpperCase().indexOf("ORDER BY") > 0) {
+        if (this.getDbType() == BaseDao.DERBY || tableName.toUpperCase().indexOf("ORDER BY") > 0) {
             needOrderBy = false;
         }
 

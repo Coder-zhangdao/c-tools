@@ -43,7 +43,7 @@ public class CustomView extends AbstractHtmlView {
 
         html.append(snippets.themeEnd());
 
-        getWebContext().setRequestAttribute("jmesaonload", snippets.initJavascriptLimit());
+        getWebContext().setRequestAttribute("jmesaonload", snippets.hiddenFields());
 
         return html.toString();
     }

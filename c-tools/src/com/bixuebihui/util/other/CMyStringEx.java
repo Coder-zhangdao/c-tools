@@ -3,6 +3,9 @@ package com.bixuebihui.util.other;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 
+/**
+ * @author xwx
+ */
 public class CMyStringEx {
 
     private final static Hashtable ht = new Hashtable();
@@ -186,15 +189,11 @@ public class CMyStringEx {
     public static void main(String[] args) throws UnsupportedEncodingException {
 
 
-        //System.out.println( unicodeFlag());
         System.out.println(getPinYinUnicode("test"));
         System.out.println(getPinYinUnicode("测试"));
         System.out.println(getPinYinUnicode("测试1下"));
         System.out.println(getPinYinUnicode("测试TCL"));
         System.out.println(getPinYinUnicode("啊芭擦搭蛾发噶哈击喀垃妈拿哦啪期然撒塌挖昔压匝座"));
-        // System.out.println( getPinYin("测试"));
-        // System.out.println( getPinYin("测试1下"));
-        // System.out.println( getPinYin("测试TCL"));
         //啊把擦
         //\uF900 - \uFAFF
 

@@ -6,6 +6,9 @@ import org.jmesa.model.TableModel;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * @author xwx
+ */
 public class SimpleTable extends BasicWebUI {
 
     private PageItems items;

@@ -149,11 +149,6 @@ public final class RequestDumperFilter implements Filter {
 			writer.println("       queryString=" + req.getQueryString());
 			writer.println("        remoteUser=" + req.getRemoteUser());
 
-			//comment out because http://cwe.mitre.org/data/definitions/807
-			//https://www.sans.org/top25-software-errors/#cat3
-			// writer.println("requestedSessionId=" + req.getRequestedSessionId());
-			// sessionId 本身是cookie的一部分， 这个没有意义， 根据sonar提示， 注释掉了
-
 			writer.println("        requestURI=" + req.getRequestURI());
 			writer.println("       servletPath=" + req.getServletPath());
 		}

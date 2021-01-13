@@ -44,13 +44,13 @@ public class ObjectCacheTest extends TestCase {
 
     public void testUpdateByKey() throws SQLException {
         DictionaryItem info = (DictionaryItem) oc.selectById(key, "10101");
-        String oldsort = info.getMs_sort();
-        info.setMs_sort("123");
-        assertTrue(oc.updateByKey(key, info.getMs_id(), info));
-        assertEquals("123", info.getMs_sort());
-        info.setMs_sort(oldsort);
-        assertTrue(oc.updateByKey(key, info.getMs_id(), info));
-        assertEquals(oldsort, info.getMs_sort());
+        String oldsort = info.getSort();
+        info.setSort("123");
+        assertTrue(oc.updateByKey(key, info.getId(), info));
+        assertEquals("123", info.getSort());
+        info.setSort(oldsort);
+        assertTrue(oc.updateByKey(key, info.getId(), info));
+        assertEquals(oldsort, info.getSort());
     }
 
 

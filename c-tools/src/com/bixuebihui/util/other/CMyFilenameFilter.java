@@ -8,6 +8,9 @@ package com.bixuebihui.util.other;
 import java.io.File;
 import java.io.FilenameFilter;
 
+/**
+ * @author xwx
+ */
 public class CMyFilenameFilter
         implements FilenameFilter {
 

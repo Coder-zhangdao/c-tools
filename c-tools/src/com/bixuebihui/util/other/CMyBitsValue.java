@@ -17,55 +17,55 @@ public class CMyBitsValue
         value = 0L;
     }
 
-    public CMyBitsValue(long _lValue) {
+    public CMyBitsValue(long lValue) {
         value = 0L;
-        setValue(_lValue);
+        setValue(lValue);
     }
 
-    public CMyBitsValue(String _sValue) {
+    public CMyBitsValue(String sValue) {
         value = 0L;
-        setValue(_sValue);
+        setValue(sValue);
     }
 
-    public CMyBitsValue(CMyBitsValue _myBitsValue) {
+    public CMyBitsValue(CMyBitsValue myBitsValue) {
         value = 0L;
-        copy(_myBitsValue);
+        copy(myBitsValue);
     }
 
-    public static boolean getBitOfInt(int _value, int _index) {
-        if (_index < 0 || _index > 31) {
+    public static boolean getBitOfInt(int value, int index) {
+        if (index < 0 || index > 31) {
             return false;
         } else {
-            return BigInteger.valueOf(_value).testBit(_index);
+            return BigInteger.valueOf(value).testBit(index);
         }
     }
 
-    public static boolean getBit(long _value, int _index) {
-        if (_index < 0 || _index > 63) {
+    public static boolean getBit(long value, int index) {
+        if (index < 0 || index > 63) {
             return false;
         } else {
-            return BigInteger.valueOf(_value).testBit(_index);
+            return BigInteger.valueOf(value).testBit(index);
         }
     }
 
-    public static long setBit(long _value, int _index, boolean _bValue) {
-        if (_index < 0 || _index > 63) {
-            return _value;
+    public static long setBit(long value, int index, boolean bValue) {
+        if (index < 0 || index > 63) {
+            return value;
         }
-        BigInteger bigInt = BigInteger.valueOf(_value);
-        if (_bValue) {
-            bigInt = bigInt.setBit(_index);
+        BigInteger bigInt = BigInteger.valueOf(value);
+        if (bValue) {
+            bigInt = bigInt.setBit(index);
         } else {
-            bigInt = bigInt.clearBit(_index);
+            bigInt = bigInt.clearBit(index);
         }
         return bigInt.longValue();
     }
 
-    protected static int setBitOfInt(int _value, int _index, boolean _bValue) {
-        if (_index < 0 || _index > 31) {
-            return _value;
+    protected static int setBitOfInt(int value, int index, boolean bValue) {
+        if (index < 0 || index > 31) {
+            return value;
         } else {
-            return (int) setBit(_value, _index, _bValue);
+            return (int) setBit(value, index, bValue);
         }
     }
 
@@ -140,8 +140,8 @@ public class CMyBitsValue
         System.out.println("and = " + myBitsValue.toString());
     }
 
-    public void copy(CMyBitsValue _myBitsValue) {
-        setValue(_myBitsValue.getValue());
+    public void copy(CMyBitsValue bitsValue) {
+        setValue(bitsValue.getValue());
     }
 
     @Override
@@ -153,19 +153,19 @@ public class CMyBitsValue
         return value;
     }
 
-    public void setValue(long _nValue) {
-        value = _nValue;
+    public void setValue(long nValue) {
+        value = nValue;
     }
 
-    public void setValue(String _sValue) {
-        if (_sValue == null) {
+    public void setValue(String sValue) {
+        if (sValue == null) {
             return;
         }
         BigInteger bigInt = BigInteger.valueOf(0L);
-        int nLen = _sValue.length();
+        int nLen = sValue.length();
         int nBitPos = nLen - 1;
         for (int i = 0; i < nLen; i++) {
-            if (_sValue.charAt(i) == '1') {
+            if (sValue.charAt(i) == '1') {
                 bigInt = bigInt.setBit(nBitPos);
             }
             nBitPos--;
@@ -178,32 +178,32 @@ public class CMyBitsValue
         return (int) value;
     }
 
-    public boolean getBit(int _index) {
-        return getBit(value, _index);
+    public boolean getBit(int index) {
+        return getBit(value, index);
     }
 
-    public CMyBitsValue setBit(int _index, boolean _bValue) {
-        value = setBit(value, _index, _bValue);
+    public CMyBitsValue setBit(int index, boolean bValue) {
+        value = setBit(value, index, bValue);
         return this;
     }
 
-    public void and(CMyBitsValue _myBitsValue) {
-        if (_myBitsValue == null) {
+    public void and(CMyBitsValue bitsValue) {
+        if (bitsValue == null) {
         } else {
-            and(_myBitsValue.getValue());
+            and(bitsValue.getValue());
         }
     }
 
-    public void and(long _value) {
-        BigInteger bigInt = BigInteger.valueOf(value);
-        bigInt = bigInt.and(BigInteger.valueOf(_value));
-        value = bigInt.longValue();
+    public void and(long value) {
+        BigInteger bigInt = BigInteger.valueOf(this.value);
+        bigInt = bigInt.and(BigInteger.valueOf(value));
+        this.value = bigInt.longValue();
     }
 
-    public void or(CMyBitsValue _myBitsValue) {
-        if (_myBitsValue == null) {
+    public void or(CMyBitsValue myBitsValue) {
+        if (myBitsValue == null) {
         } else {
-            or(_myBitsValue.getValue());
+            or(myBitsValue.getValue());
         }
     }
 

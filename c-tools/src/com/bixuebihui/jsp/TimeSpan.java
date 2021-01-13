@@ -1,5 +1,6 @@
 package com.bixuebihui.jsp;
 
+import com.bixuebihui.db.MaxByteLengthValidator;
 import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.ISqlConditionType;
 import com.bixuebihui.util.ParameterUtils;
@@ -8,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -24,10 +26,10 @@ public class TimeSpan implements ISqlConditionType {
     public final static int MIN_BEGIN_YEAR = 1900;
 
     public final static int MAX_END_YEAR = 2100;
-    private static final String BYEAR = "byear";
+    private static final String BEGIN_YEAR = "byear";
     private static final String BMONTH = "bmonth";
     private static final String BDAY = "bday";
-    private static final String EYEAR = "eyear";
+    private static final String END_YEAR = "eyear";
     private static final String EMONTH = "emonth";
     private static final String EDAY = "eday";
     private static final String BDATE = "bdate";
@@ -71,23 +73,24 @@ public class TimeSpan implements ISqlConditionType {
      * @return time span
      */
     public static TimeSpan build(String tildeSeparatedBeginInclusiveEndExclusive) throws ParseException {
-        TimeSpan ts = new TimeSpan();
         if (!isTimeSpan(tildeSeparatedBeginInclusiveEndExclusive)) {
-            return ts;
+            return new TimeSpan();
         }
         String[] dates = tildeSeparatedBeginInclusiveEndExclusive.split("~");
-        if (dates.length < 2) {
-            return ts;
-        }
+        return build(dates[0], dates.length<2? MAX_END_YEAR+"-12-31": dates[1]);
+    }
+
+    public static TimeSpan build(String beginDate, String endDate) throws ParseException {
+        TimeSpan ts = new TimeSpan();
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-        Date begin = sf.parse(dates[0]);
-        Date end = sf.parse(dates[1]);
+        Date begin = sf.parse(beginDate);
         Calendar cb = Calendar.getInstance();
         cb.setTime(begin);
+
+        Date end = sf.parse(endDate==null? MAX_END_YEAR+"-12-31": endDate);
         Calendar ce = Calendar.getInstance();
         ce.setTime(end);
         ts.init(cb, ce);
-
         return ts;
     }
 
@@ -230,12 +233,12 @@ public class TimeSpan implements ISqlConditionType {
      */
     public String getOracleSqlCondition(String sqlFieldName) {
         String a = "";
-        if (hasBoth()) {
+        if (noBoth()) {
             a = "";
-        } else if (hasBegin()) {
+        } else if (noBegin()) {
             a = " and " + sqlFieldName + "<= to_date('" + endYear + "-" + endMonth
                     + "-" + endDay + "','yyyy-mm-dd')";
-        } else if (hasEnd()) {
+        } else if (noEnd()) {
             a = " and " + sqlFieldName + ">= to_date('" + beginYear + "-" + beginMonth
                     + "-" + beginDay + "','yyyy-mm-dd')";
         } else {
@@ -247,16 +250,16 @@ public class TimeSpan implements ISqlConditionType {
         return a;
     }
 
-    private boolean hasEnd() {
+    private boolean noEnd() {
         return endDate == null || endYear == MAX_END_YEAR;
     }
 
-    private boolean hasBegin() {
+    private boolean noBegin() {
         return beginDate == null || beginYear == MIN_BEGIN_YEAR;
     }
 
-    private boolean hasBoth() {
-        return hasBegin() && hasEnd();
+    private boolean noBoth() {
+        return noBegin() && noEnd();
     }
 
     /**
@@ -267,12 +270,12 @@ public class TimeSpan implements ISqlConditionType {
      */
     public String getDerbySqlCondition(String sqlFieldName) {
         String a = "";
-        if (hasBoth()) {
+        if (noBoth()) {
             a = "";
-        } else if (this.hasBegin()) {
+        } else if (this.noBegin()) {
             a = " and " + sqlFieldName + "<= date('" + endYear + "-" + endMonth
                     + "-" + endDay + "')";
-        } else if (this.hasEnd()) {
+        } else if (this.noEnd()) {
             a = " and " + sqlFieldName + ">= date('" + beginYear + "-" + beginMonth
                     + "-" + beginDay + "')";
         } else {
@@ -291,12 +294,12 @@ public class TimeSpan implements ISqlConditionType {
      */
     public String getMysqlSqlCondition(String sqlFieldName) {
         String a;
-        if (hasBoth()) {
+        if (noBoth()) {
             a = "";
-        } else if (this.hasBegin()) {
+        } else if (this.noBegin()) {
             a = " and " + sqlFieldName + "<= str_to_date('" + endYear + "-"
                     + endMonth + "-" + endDay + "','%Y-%m-%d')";
-        } else if (this.hasEnd()) {
+        } else if (this.noEnd()) {
             a = " and " + sqlFieldName + ">= str_to_date('" + beginYear + "-"
                     + beginMonth + "-" + beginDay + "','%Y-%m-%d')";
         } else {
@@ -409,7 +412,7 @@ public class TimeSpan implements ISqlConditionType {
     }
 
     private String getBYearName() {
-        return prefix + BYEAR;
+        return prefix + BEGIN_YEAR;
     }
 
     private String getBMonthName() {
@@ -421,7 +424,7 @@ public class TimeSpan implements ISqlConditionType {
     }
 
     private String getEYearName() {
-        return prefix + EYEAR;
+        return prefix + END_YEAR;
     }
 
     private String getEMonthName() {

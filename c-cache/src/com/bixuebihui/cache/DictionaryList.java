@@ -38,9 +38,9 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
     @Override
     public DictionaryItem mapRow(ResultSet r, int index) throws SQLException {
         DictionaryItem res = new DictionaryItem();
-        res.setMs_id(r.getString(def.getIdFieldName()));
-        res.setMs_value(r.getString(def.getValueFieldName()));
-        res.setMs_sort(r.getString(def.getSortFieldName()));
+        res.setId(r.getString(def.getIdFieldName()));
+        res.setValue(r.getString(def.getValueFieldName()));
+        res.setSort(r.getString(def.getSortFieldName()));
         return res;
     }
 
@@ -67,7 +67,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
         }
 
         String query = getSelectSql() + getTableName() + " " + whereClause + " " + def.getSqlCondition();
-        if (this.getDBTYPE() != BaseDao.DERBY) {
+        if (this.getDbType() != BaseDao.DERBY) {
             query += orderbyClause;
         }
         query = getPagingSql(query, beginNum, endNum);
@@ -130,8 +130,8 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
         String query = "update " + getTableName() + " set " + def.getIdFieldName() + "=?" + ","
                 + def.getValueFieldName() + "=?" + "," + def.getSortFieldName() + "=?" + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
         return 1 == dbHelper.executeNoQuery(query, new Object[]{
-                info.getMs_id(), info.getMs_value(), info.getMs_sort(),
-                info.getMs_id()});
+                info.getId(), info.getValue(), info.getSort(),
+                info.getId()});
     }
 
 
@@ -190,7 +190,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
         String query = "insert into " + getTableName()
                 + " ( " + def.getIdFieldName() + "," + def.getValueFieldName() + "," + def.getSortFieldName() + " ) values ( ?,?,? )";
         return 1 == dbHelper.executeNoQuery(query, new Object[]{
-                info.getMs_id(), info.getMs_value(), info.getMs_sort()});
+                info.getId(), info.getValue(), info.getSort()});
     }
 
     /**
@@ -203,8 +203,8 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
     public boolean insertDummy() throws SQLException {
         DictionaryItem info = new DictionaryItem();
         java.util.Random rnd = new java.util.Random();
-        info.setMs_value(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));
-        info.setMs_id(getNextKey() + "");
+        info.setValue(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));
+        info.setId(getNextKey() + "");
         return this.insert(info);
     }
 
@@ -217,12 +217,12 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
 
     @Override
     public String getId(DictionaryItem info) {
-        return info.getMs_id();
+        return info.getId();
     }
 
     @Override
     public void setId(DictionaryItem info, String id) {
-        info.setMs_id(id);
+        info.setId(id);
     }
 
     @Override

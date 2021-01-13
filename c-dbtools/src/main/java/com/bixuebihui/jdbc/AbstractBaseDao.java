@@ -75,7 +75,7 @@ public class AbstractBaseDao extends BaseDao<Object, Long> {
      * @throws java.sql.SQLException if any.
      */
     public String getDummySql() throws SQLException {
-        if(this.getDBTYPE() == ORACLE) {
+        if(this.getDbType() == ORACLE) {
             return " from dual";
         }
         return "";

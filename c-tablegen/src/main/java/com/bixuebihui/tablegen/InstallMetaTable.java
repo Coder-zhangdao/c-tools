@@ -3,13 +3,16 @@ package com.bixuebihui.tablegen;
 import java.sql.Connection;
 
 import com.bixuebihui.BeanFactory;
+import com.bixuebihui.generated.tablegen.business.T_metatableManager;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jdbc.JDBCUtils;
 import com.bixuebihui.jdbc.SqlFileExecutor;
 
-public class InstallKZTable {
+/**
+ * @author xwx
+ */
+public class InstallMetaTable {
 
-	public static final String KUOZHANBIAOMING = "KUOZHANBIAOMING";
 
 	public boolean run() throws Exception {
 		IDbHelper dbHelper = (IDbHelper) BeanFactory
@@ -18,10 +21,11 @@ public class InstallKZTable {
 		boolean res = false;
 		try {
 			conn = dbHelper.getConnection();
-			if (!JDBCUtils.tableOrViewExists(null, null, KUOZHANBIAOMING,
+			T_metatableManager metatableManager = new T_metatableManager();
+			if (!JDBCUtils.tableOrViewExists(null, null, metatableManager.getTableName(),
 					conn)) {
 				SqlFileExecutor ex = new SqlFileExecutor();
-				String sqlFile = this.getClass().getResource("/dbscript.sql")
+				String sqlFile = this.getClass().getResource("/dbscript/dbscript.mysql.sql")
 						.getFile();
 				ex.execute(conn, sqlFile);
 				res = true;

@@ -363,6 +363,16 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 		return null;
 	}
 
+	@Override
+	public ActiveRecord<T> greaterOrEqualThan(String field, Object value) {
+		return null;
+	}
+
+	@Override
+	public ActiveRecord<T> smallerOrEqualThan(String field, Object value) {
+		return null;
+	}
+
 
 	/** {@inheritDoc} */
 	@Override

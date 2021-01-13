@@ -159,8 +159,8 @@ public class DictionaryCacheCaffeine {
         Iterator<DictionaryItem> iter = map.values().iterator();
         for (int i = 0; i < map.size(); i++) {
             DictionaryItem item = iter.next();
-            ids[i] = item.getMs_id() + "";
-            values[i] = item.getMs_value();
+            ids[i] = item.getId() + "";
+            values[i] = item.getValue();
         }
 
         return FormControl.getOptionList(values, ids, strConditionSelect,
@@ -215,9 +215,9 @@ public class DictionaryCacheCaffeine {
             Map<String, DictionaryItem> mmByValue = new LinkedHashMap<>(li.size());
 
             for (int i = 0; i < li.size(); i++) {
-                mmById.put(li.get(i).getMs_id() + "",
+                mmById.put(li.get(i).getId() + "",
                         li.get(i));
-                mmByValue.put(li.get(i).getMs_value()
+                mmByValue.put(li.get(i).getValue()
                         + "", li.get(i));
             }
 

@@ -2,6 +2,7 @@ package com.bixuebihui.jmesa;
 
 import com.bixuebihui.BeanFactory;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -18,7 +19,7 @@ public class BasicWebUITest {
     BasicWebUI ui = (BasicWebUI) BeanFactory.createObjectById(id);
     //IBaseListService service;
 
-    @BeforeAll
+    @BeforeEach
     public void setUp() {
 
         //ui.setService(service);

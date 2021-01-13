@@ -140,6 +140,10 @@ public interface ActiveRecord<T> extends Record<T> {
      */
     Record<T> last();
 
+    ActiveRecord<T> greaterOrEqualThan(String field, Object value);
+
+    ActiveRecord<T> smallerOrEqualThan(String field, Object value);
+
     /**
      * <p>getCondStack.</p>
      *

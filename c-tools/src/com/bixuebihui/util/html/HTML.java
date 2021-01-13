@@ -1,7 +1,3 @@
-// Decompiled by DJ v3.8.8.85 Copyright 2005 Atanas Neshkov  Date: 2006-1-26 15:57:00
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3)
-// Source File Name:   HTML.java
 
 package com.bixuebihui.util.html;
 

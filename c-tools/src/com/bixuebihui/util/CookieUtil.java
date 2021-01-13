@@ -4,6 +4,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * @author xwx
+ */
 public class CookieUtil {
     /**
      * 项目当中用到cookie保存中文，但是会报如下错误：

@@ -7,6 +7,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 
+/**
+ * @author xwx
+ */
 public class DownloadFileNameEncoder {
 
     private static String encoding = "UTF-8";

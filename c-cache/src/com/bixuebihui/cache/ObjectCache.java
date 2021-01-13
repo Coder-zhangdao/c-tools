@@ -31,9 +31,6 @@ public class ObjectCache {
         mLog = LogFactory.getLog(ObjectCache.class);
         if (admin == null) {
             mLog.info("create new cache administrator");
-            // Properties property = new Properties();
-            // property.setProperty("cache.blocking", "false");
-            // admin = new GeneralCacheAdministrator(property);
             admin = new GeneralCacheAdministrator();
         }
     }
@@ -85,8 +82,6 @@ public class ObjectCache {
                 }
             }
         } catch (NeedsRefreshException e) {
-            // TODO Auto-generated catch block
-            //e.printStackTrace();
             mLog.debug("not find in cache " + storeKey);
             admin.cancelUpdate(storeKey);
         }

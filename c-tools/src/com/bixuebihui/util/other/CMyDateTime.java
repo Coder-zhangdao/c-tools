@@ -12,6 +12,9 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 
+/**
+ * @author xwx
+ */
 public class CMyDateTime
         implements Cloneable, Serializable {
 

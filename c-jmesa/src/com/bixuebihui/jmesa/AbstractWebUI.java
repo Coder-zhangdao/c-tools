@@ -1,10 +1,8 @@
 package com.bixuebihui.jmesa;
 
 
-import com.bixuebihui.jdbc.ClobString;
-import com.bixuebihui.jdbc.IBaseListService;
-import com.bixuebihui.jdbc.SqlFilter;
-import com.bixuebihui.jdbc.SqlSort;
+import com.bixuebihui.cache.DictionaryCache;
+import com.bixuebihui.jdbc.*;
 import com.bixuebihui.jsp.TimeSpan;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
@@ -72,31 +70,40 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
      * @param limit The Limit to use.
      */
     public static SqlFilter getFilter(Limit limit) {
-        SqlFilter sqlFilter = new SqlFilter();
-        FilterSet filterSet = limit.getFilterSet();
-        java.util.Collection<Filter> filters = filterSet.getFilters();
-
-        for (Filter filter : filters) {
-            String property = filter.getProperty();
-            String value = filter.getValue();
-            sqlFilter.addFilter(property, value);
+        try {
+            return getFilter(limit, null);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        return sqlFilter;
+        return new SqlFilter();
     }
 
     public static SqlFilter getFilter(Limit limit, String tableAlias) throws ParseException {
         SqlFilter sqlFilter = new SqlFilter();
         FilterSet filterSet = limit.getFilterSet();
-        java.util.Collection<Filter> filters = filterSet.getFilters();
+        Collection<Filter> filters = filterSet.getFilters();
 
         for (Filter filter : filters) {
             String property = filter.getProperty();
-            String value = filter.getValue();
-            String prop = tableAlias + "." + property;
-            if (TimeSpan.isTimeSpan(value)) {
-                TimeSpan ts = TimeSpan.build(value);
+            Object value = filter.getValue();
+            String prop = tableAlias==null? property : tableAlias + "." + property;
+            if (TimeSpan.isTimeSpan(value.toString())) {
+                TimeSpan ts = TimeSpan.build(value.toString());
                 sqlFilter.addFilter(prop, ts);
-            } else {
+            } else if (NumberRange.isNumberRange(value.toString())){
+                NumberRange numberRange = NumberRange.build(value.toString());
+                sqlFilter.addFilter(prop, numberRange);
+            } else if (value instanceof RangeFilter.Pair){
+                RangeFilter.Pair v = (RangeFilter.Pair) value;
+                if(v.getStartValueInclusive().indexOf("-")>0){
+                    TimeSpan ts = TimeSpan.build(v.getStartValueInclusive(),v.getEndValueExclusive());
+                    sqlFilter.addFilter(prop, ts);
+                }else{
+                    NumberRange numberRange = NumberRange.build(v.getStartValueInclusive(),v.getEndValueExclusive());
+                    sqlFilter.addFilter(prop, numberRange);
+                }
+
+            }else {
                 sqlFilter.addFilter(prop, value);
             }
         }
@@ -114,7 +121,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
     public static SqlSort getSort(Limit limit) {
         SqlSort sqlSort = new SqlSort();
         SortSet sortSet = limit.getSortSet();
-        java.util.Collection<Sort> sorts = sortSet.getSorts();
+        Collection<Sort> sorts = sortSet.getSorts();
         for (Sort sort : sorts) {
             String property = sort.getProperty();
             String order = sort.getOrder().toParam();
@@ -283,9 +290,11 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         String mv = successView;
         String html = render(request, response);
         if (html == null) {
-            return null; // an export
+            // an export
+            return null;
         } else {
-            request.setAttribute(this.id, html); // Set the Html in the
+            request.setAttribute(this.id, html);
+            // Set the Html in the
             // request for the JSP.
         }
         return mv;
@@ -456,7 +465,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         return context;
     }
 
-    protected void renderCell(Column col, Map<String, ?> context) {
+    protected void prepareCellEditor(Column col, Map<String, ?> context) {
 
         String var = VAR_NAME;
 
@@ -466,11 +475,28 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             return;
         }
 
+        //replace %{abc} to ${abc}, to avoid spring xml escaping
         template = template.replaceAll("\\%\\{(.+?)\\}", "\\$\\{$1\\}");
 
         log.debug("after replace " + var + ":" + template);
-        CellEditor cellEditor = new ElExpressionExCellEditor(var, template, context);
+        CellEditor cellEditor = getCellEditor(context, col, var, template);
 
         col.setCellEditor(cellEditor);
+    }
+
+    /**
+     * DictionaryCache provided mainly to methods, DictionaryCache.byId and DictionaryCache.byValue
+     *  usage:
+     *     el-expression ${byId('dictname@1.'+item.some_id).value}
+     *     where dictname is a predefined dictionary using DictionaryDefine
+     * @param context additional environment variables
+     * @param col  current column
+     * @param var  var name, e.g. row item
+     * @param template template for current column
+     * @return a instance of cellEditor associated with current column
+     */
+    protected CellEditor getCellEditor(Map<String, ?> context, Column col, String var, String template) {
+        Class[] cacheClass =  {DictionaryCache.class};
+        return new ElExpressionExCellEditor(var, template, context, cacheClass);
     }
 }

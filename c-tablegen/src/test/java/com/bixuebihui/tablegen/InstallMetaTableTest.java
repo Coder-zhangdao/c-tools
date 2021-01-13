@@ -2,7 +2,7 @@ package com.bixuebihui.tablegen;
 
 import org.junit.Test;
 
-public class InstallKZTableTest {
+public class InstallMetaTableTest {
 
 	@Test
 	public void testRun() throws Exception {

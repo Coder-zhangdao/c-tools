@@ -7,6 +7,9 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * @author xwx
+ */
 public abstract class BaseSessionManager implements ISessionManager {
 
     protected Log mLog = LogFactory.getLog(BaseSessionManager.class);

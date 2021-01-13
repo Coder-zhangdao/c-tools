@@ -56,16 +56,6 @@ public class JavaGroupsBroadcastingListenerImpl extends
         }
     }
 
-    // @Override
-    // public void cacheEntryFlushed(CacheEntryEvent event) {
-    //
-    // super.cacheEntryFlushed(event);
-    // if(!CLUSTER_ORIGIN.equals(event.getOrigin())) {
-    // sendNotification(new
-    // ClusterNotification(CacheConstants.CLUSTER_ENTRY_ADD, new
-    // UcallCacheEvent(event.getMap(),event.getEntry(),CLUSTER_ORIGIN)));
-    // }
-    // }
 
     @Override
     public void cacheEntryRemoved(CacheEntryEvent event) {

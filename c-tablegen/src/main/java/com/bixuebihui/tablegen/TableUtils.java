@@ -67,7 +67,8 @@ public class TableUtils {
             String key;
             r = metaData.getPrimaryKeys(catalog, schema, tableName);
             while (r.next()) {
-                key = r.getString(4); // COLUMN_NAME
+                // COLUMN_NAME
+                key = r.getString(4);
 
                 boolean existsCol = false;
                 for (String dt : keyData) {
@@ -119,7 +120,8 @@ public class TableUtils {
             bMore = r.next();
             while (bMore) {
                 sFKName = r.getString(12);
-                sFKTable = r.getString(7); //这里返回的表名是小写的(5.6.21-enterprise-commercial-advanced mac os),不知为什么?
+                //这里返回的表名是小写的(mysql 5.6.21-enterprise-commercial-advanced mac os),不知为什么?
+                sFKTable = r.getString(7);
                 sPKTable = r.getString(3);
                 sequence = r.getShort(9);
                 oldSequence = 0;
@@ -147,7 +149,6 @@ public class TableUtils {
                         sequence = r.getShort(9);
                     }
                 }
-                // foreignKeyData.add( f );
                 foreignKeyData.add(f);
             }
         } finally {
@@ -470,17 +471,7 @@ public class TableUtils {
                     if (matchTableName(includeTablesList, tableName)) {
                         if (!isExcluded(excludeTablesList, tableName)) {
                             tableNames.add(tableName);
-                            // mLog.info("add table name = "+tableName);
-                        } else {
-                            // mLog
-                            // .info("Skip table name contain char $ or in
-                            // exclude
-                            // list: "
-                            // + tableName);
                         }
-                    } else {
-                        // mLog.info("Skip table not in include list: " +
-                        // tableName);
                     }
                 }
             }
@@ -592,7 +583,9 @@ public class TableUtils {
 
 
                 String colName = rs.getString(4);
-                if (colName.contains("#")) //oracle system columns
+
+                //oracle system columns
+                if (colName.contains("#"))
                 {
                     continue;
                 }

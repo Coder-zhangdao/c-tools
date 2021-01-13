@@ -43,7 +43,7 @@ public class MenuHtmlView extends AbstractHtmlView {
 
         html.append(snippets.themeEnd());
 
-        html.append(snippets.initJavascriptLimit());
+        html.append(snippets.hiddenFields());
 
         return html.toString();
     }

@@ -32,7 +32,7 @@ public class DictionaryCache {
     }
 
     @SuppressWarnings({"unchecked"})
-    static Map sortByValue(Map map) {
+    protected static Map sortByValue(Map map) {
         List list = new LinkedList(map.entrySet());
         Collections.sort(list, (Comparator) (o1, o2) -> ((Comparable) ((Map.Entry) (o1)).getValue())
                 .compareTo(((Map.Entry) (o2)).getValue()));
@@ -58,7 +58,7 @@ public class DictionaryCache {
         }
     }
 
-    private Dictionary parseKey(String key) {
+    private static Dictionary parseKey(String key) {
         Dictionary dict = new Dictionary();
 
         String[] keys = key.split("\\" + KEY_SEPARATOR);
@@ -88,22 +88,17 @@ public class DictionaryCache {
      * @return “表名.键值”，如果仅是表名，则返回整个表，否则只返回表的一条记录
      */
     @SuppressWarnings("unchecked")
-    public DictionaryItem getItemById(String key) {
+    public static DictionaryItem byId(String key) {
         return (DictionaryItem) getFromCache(key, true);
     }
 
-    public DictionaryItem getItemByValue(String key) {
-        return (DictionaryItem) getFromCache(key, false);
+    public static DictionaryItem byValue(String value) {
+        return (DictionaryItem) getFromCache(value, false);
     }
 
-    public DictionaryItem getItemByValue(String key, boolean doRefreshIfNotFindInCache) {
-        return (DictionaryItem) getFromCache(key, false, doRefreshIfNotFindInCache);
-    }
-
-    public Map<String, DictionaryItem> getDict(String tableBeanName) {
+    public static Map<String, DictionaryItem> getDict(String tableBeanName) {
         return (Map<String, DictionaryItem>) getFromCache(tableBeanName, true);
     }
-
 
     /**
      * 得到 "&lt;option&gt;&lt;/option&gt;"
@@ -113,7 +108,7 @@ public class DictionaryCache {
      * @param strConditionSelect condition selected item
      * @return　HTML option tag 字符串
      */
-    public String getOptionList(String tableBeanName, String strDefaultSelect,
+    public static String getOptionList(String tableBeanName, String strDefaultSelect,
                                 String strConditionSelect) {
         Map<String, DictionaryItem> map = getDict(tableBeanName);
         String[] ids = new String[map.size()];
@@ -121,20 +116,20 @@ public class DictionaryCache {
         Iterator<DictionaryItem> iter = map.values().iterator();
         for (int i = 0; i < map.size(); i++) {
             DictionaryItem item = iter.next();
-            ids[i] = item.getMs_id() + "";
-            values[i] = item.getMs_value();
+            ids[i] = item.getId() + "";
+            values[i] = item.getValue();
         }
 
         return FormControl.getOptionList(values, ids, strConditionSelect,
                 strConditionSelect);
     }
 
-    private Object getFromCache(String key, boolean isById) {
+    private static Object getFromCache(String key, boolean isById) {
         return getFromCache(key, isById, true);
     }
 
     @SuppressWarnings("unchecked")
-    private Object getFromCache(String key, boolean isById, boolean doRefreshIfNotFind) {
+    private static Object getFromCache(String key, boolean isById, boolean doRefreshIfNotFind) {
         Object[] myValue;
 
         Dictionary dict = parseKey(key);
@@ -185,18 +180,7 @@ public class DictionaryCache {
                 DictionaryList list = new DictionaryList(def);
                 try {
                     List<DictionaryItem> li = list.selectAll();
-                    Map<String, DictionaryItem>[] mm = new LinkedHashMap[2];
-                    mm[0] = new LinkedHashMap<>(li.size());
-                    mm[1] = new LinkedHashMap<>(li.size());
-
-                    for (int i = 0; i < li.size(); i++) {
-                        mm[0].put(li.get(i).getMs_id() + "",
-                                li.get(i));
-                        mm[1].put(li.get(i).getMs_value()
-                                + "", li.get(i));
-                    }
-
-                    admin.putInCache(storekey, mm);
+                    Map<String, DictionaryItem>[] mm = putInCache(storekey, li);
 
                     if (dict.keyName == null) {
                         return mm[isById ? 0 : 1];
@@ -223,13 +207,38 @@ public class DictionaryCache {
         }
     }
 
+    /**
+     * method for fill cache
+     * @param storekey
+     * @param li
+     * @return
+     */
+    public static Map<String, DictionaryItem>[] putInCache(String storekey, List<DictionaryItem> li) {
+        LinkedHashMap<String,DictionaryItem>[] mm = new LinkedHashMap[] {
+            new LinkedHashMap<>(li.size()),
+            new LinkedHashMap<>(li.size())
+        };
+
+        for (DictionaryItem dictionaryItem : li) {
+            mm[0].put(dictionaryItem.getId() + "", dictionaryItem);
+            mm[1].put(dictionaryItem.getValue() + "", dictionaryItem);
+        }
+
+        admin.putInCache(storekey, mm);
+        return mm;
+    }
+
+    public DictionaryItem byValue(String key, boolean doRefreshIfNotFindInCache) {
+        return (DictionaryItem) getFromCache(key, false, doRefreshIfNotFindInCache);
+    }
+
     public void destroy() {
         if (admin != null) {
             admin.destroy();
         }
     }
 
-    class Dictionary {
+    static class Dictionary {
         String tableName; // 表名
         String keyName; // 字段值
         String condition; // 附加条件

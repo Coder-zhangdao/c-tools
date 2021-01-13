@@ -227,7 +227,6 @@ public class Util {
         out.write("<html>");
         out.write("<head><title>系统信息提示：：：：：：：：：：：：：：：：：：</title>");
         out.write("<base target='self'>");
-        //out.write("<base target='_top'>");
         out.write("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />");
         out.write("</head>");
         out.write("<body>");

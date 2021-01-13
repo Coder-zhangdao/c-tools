@@ -34,7 +34,7 @@ public final class DataSourceUtil {
      * @throws java.lang.ReflectiveOperationException reflective operation exception
      */
     public static DataSource getDataSource(final String dataSourceClassName, final Map<String, Object> dataSourceProperties) throws ReflectiveOperationException {
-        DataSource result = (DataSource) Class.forName(dataSourceClassName).newInstance();
+        DataSource result = (DataSource) Class.forName(dataSourceClassName).getDeclaredConstructor().newInstance();
         for (Entry<String, Object> entry : dataSourceProperties.entrySet()) {
             callSetterMethod(result, getSetterMethodName(entry.getKey()), null == entry.getValue() ? null : entry.getValue().toString());
         }

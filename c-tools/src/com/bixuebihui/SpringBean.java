@@ -15,13 +15,13 @@ import java.net.URL;
 /**
  * @author xwx
  */
-public class SpringBeanZK {
+public class SpringBean {
     private GenericApplicationContext beanFactory;
 
 
     private String beanConfigFile = "beans.xml";
     private static final String CONFIG_PROPERTIES = "beans.properties";
-    private static final Log LOG = LogFactory.getLog(SpringBeanZK.class);
+    private static final Log LOG = LogFactory.getLog(SpringBean.class);
 
 
     public Object getBean(String resourceId) {

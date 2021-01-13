@@ -3,20 +3,15 @@ package com.bixuebihui.jmesa.menu;
 import org.jmesa.view.html.toolbar.SimpleToolbar;
 
 /**
- * Created by super on 14-3-20.
+ *
+ * @author super
+ * @date 14-3-20
  */
 public class MenuToolbar extends SimpleToolbar {
 
     @Override
     public String render() {
-//        super.render();
-//        if (enableSeparators) {
-//            addToolbarItem(ToolbarItemType.SEPARATOR);
-//        }
-//        for(String actionCode:buttons)
-//            addToolbarItem(createButton(actionCode));
-//
-//        return super.render();
+
         return "<table border=\"0\"  cellpadding=\"0\"  cellspacing=\"1\" >\n" +
                 "\t\t\t<tr>\n" +
                 "\t\t\t\t<td><button type='button' onclick=\"addMenuRow('edit_menu')\">新增</button></td>\n" +

@@ -7,7 +7,7 @@ public class DictionaryCacheTest extends TestCase {
 
     public void testGetValue() {
         DictionaryCache cache = new DictionaryCache();
-        System.out.println(cache.getItemById("ziduan.KZ_BM").getMs_value());
+        System.out.println(cache.byId("ziduan.KZ_BM").getValue());
         System.out.println(cache.getOptionList("ziduan", null, null));
         System.out.println(cache.getOptionList("ziduan", null, null));
 
@@ -21,7 +21,7 @@ public class DictionaryCacheTest extends TestCase {
         System.out.println("abcd=" + SequenceUtils.getInstance().getNextKeyValue("abcd", list.getDbHelper()));
 
 
-        System.out.println(cache.getItemById("sequence.abc"));
+        System.out.println(cache.byId("sequence.abc"));
 
 
     }

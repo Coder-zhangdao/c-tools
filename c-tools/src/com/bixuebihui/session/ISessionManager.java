@@ -3,6 +3,9 @@ package com.bixuebihui.session;
 import com.bixuebihui.util.other.CMyException;
 
 
+/**
+ * @author xwx
+ */
 public interface ISessionManager {
     SimpleSession read(String s_id);
 

@@ -1,5 +1,8 @@
 package com.bixuebihui.util.iso;
 
+/**
+ * @author xwx
+ */
 public class BankCardNumber {
 
     public static void main(String[] args) {

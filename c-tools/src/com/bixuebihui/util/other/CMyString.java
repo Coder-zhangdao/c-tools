@@ -5,8 +5,6 @@
 
 package com.bixuebihui.util.other;
 
-import org.graalvm.compiler.nodes.NodeView;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;

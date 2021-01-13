@@ -7,14 +7,14 @@ package com.bixuebihui.util.html;
  */
 public class FormControl {
 
-    public static String makeCheckBox(String idName, String name, String Value,
-                                      String title, boolean checked, boolean disable)//"chk")
+    public static String makeCheckBox(String idName, String name, String value,
+                                      String title, boolean checked, boolean disable)
     {
 
         return "<label for=" + idName + "><input title=" + title + " type=checkbox" +
                 " name=" + name
                 + " id=" + idName
-                + " value=\"" + (Value == null ? "" : Value)
+                + " value=\"" + (value == null ? "" : value)
                 + "\" width=\"120\" size=\"10\" " + (checked ? " checked='checked' " : " ")
                 + (disable ? " disable='disable' " : " ") + " >" + title + "</label>";
 
@@ -41,8 +41,6 @@ public class FormControl {
      * @return HTML代码
      */
     public static String dateControl(String idName, String controlName, String value, String title) {
-        //System.out.println("dateControl: "+value);
-        //return "<input onkeypress=\"return checkYear(this)\" type=\"text\" size=\"7\" name=\""+controlName
         return "<input type=\"text\" size=\"7\" name=\"" + controlName
                 + "\" id=\"" + idName + "\" value=\"" + ((value == null || "null".equals(value)) ? "" : value) + "\" title=\"" + title + "\">\r\n"
                 + "       <IMG id=\"imgDate1\" onmouseover=\"RaiseButton(this)\" style=\"cursor: pointer\" "
@@ -62,8 +60,6 @@ public class FormControl {
      * @return 新样式日期控件的HTML代码
      */
     public static String dateControlAlt(String idName, String controlName, String value, String title) {
-        //System.out.println("dateControl: "+value);
-        //return "<input onkeypress=\"return checkYear(this)\" type=\"text\" size=\"7\" name=\""+controlName
         return "<input type=\"text\" size=\"18\" name=\"" + controlName
                 + "\" id=\"" + idName + "\" value=\"" + ((value == null || "null".equals(value)) ? "" : value)
                 + "\" title=\"" + title
@@ -110,7 +106,6 @@ public class FormControl {
             }
             strList += "<option value='" + valueArray[loop] + "' " + isSelected + " title=\"" + nameArray[loop] + "\">" + nameArray[loop] + "</option>";
         }
-        //strList = "<option value='"+STATUS_CONST[loop]+"' "+isSelected+">"+STATUS_DISC[loop]+"</option>"+strList;
         return strList;
     }
 
@@ -145,7 +140,6 @@ public class FormControl {
             }
             strList += "<option value='" + valueArray[loop] + "' " + isSelected + "  title=\"" + nameArray[loop] + "\">" + nameArray[loop] + "</option>";
         }
-        //strList = "<option value='"+STATUS_CONST[loop]+"' "+isSelected+">"+STATUS_DISC[loop]+"</option>"+strList;
         return strList;
     }
 

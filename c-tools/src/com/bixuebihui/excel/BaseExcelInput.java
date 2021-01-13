@@ -19,6 +19,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * @author xwx
+ */
 public class BaseExcelInput {
 
     private static final  Log log = LogFactory.getLog(BaseExcelInput.class);

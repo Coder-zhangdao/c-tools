@@ -5,7 +5,11 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
+/**
+ * @author xwx
+ */
 public class HtmlElementFinder {
 
     public HtmlElementFinder() {
@@ -78,7 +82,7 @@ public class HtmlElementFinder {
 
             System.out
                     .println("\n\n*****************  Result *********************");
-            FileUtils.write(new File("d:\\result.html"), strSrc);
+            FileUtils.write(new File("d:\\result.html"), strSrc, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace(System.out);
         }

@@ -4,6 +4,7 @@ import org.hamcrest.core.Is;
 import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -100,7 +101,7 @@ public class ConnectionPoolManagerTest {
     }
 
     @Test
-    public void dumpInfo() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
+    public void dumpInfo() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         ConnectionPoolManager pm = new ConnectionPoolManager();
         pm.addAlias("h2", driverName,url,username,password,
                 100,1000,2000);
@@ -112,7 +113,7 @@ public class ConnectionPoolManagerTest {
     }
 
     @Test
-    public void tracing() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+    public void tracing() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
         ConnectionPoolManager pm = new ConnectionPoolManager();
         pm.addAlias("h2", driverName, url, username, password,
                 100, 1000, 2000);

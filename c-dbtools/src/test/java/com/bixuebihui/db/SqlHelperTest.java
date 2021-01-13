@@ -46,7 +46,7 @@ public class SqlHelperTest extends TestCase {
 
 	public void testEqualMapOfStringObjectBoolean() throws SQLException {
 		SqlHelper sp = new SqlHelper();
-		Map<String,Object> condition = new Hashtable<String, Object>();
+		Map<String,Object> condition = new Hashtable<>();
 		condition.put("abc", 123);
 		condition.put("abcd", "test");
 		boolean ignoreNulls = true;

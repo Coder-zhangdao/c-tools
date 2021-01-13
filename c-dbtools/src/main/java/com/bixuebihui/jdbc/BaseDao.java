@@ -176,7 +176,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     public int getCount(String tableName, String whereClause) throws SQLException {
 
         String strSql =SELECT_COUNT_FROM + addAlias(tableName) + " " + whereClause;
-        if (this.getDBTYPE() == ORACLE) {
+        if (this.getDbType() == ORACLE) {
             return ((BigDecimal) getDbHelper().executeScalar(strSql)).intValue();
         } else {
             return Integer.parseInt(getDbHelper().executeScalar(strSql).toString());
@@ -483,7 +483,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
-    public int getDBTYPE() throws SQLException {
+    public int getDbType() throws SQLException {
         detectDbType();
         return dbtype;
     }
@@ -729,7 +729,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         // hack the
         // " com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException:
         // Every derived table must have its own alias]"
-        if (this.getDBTYPE() == MYSQL && StringUtils.startsWithIgnoreCase(tableName.trim(), "select ")) {
+        if (this.getDbType() == MYSQL && StringUtils.startsWithIgnoreCase(tableName.trim(), "select ")) {
             tableName = "(" + tableName + ") table_alias_in_base_dao";
         }
         return tableName;
@@ -879,7 +879,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     <K> List<K> select(String select, String whereClause, String orderBy, Object[] params, int rowStart,
                        int rowEnd, Class<K> clz) throws SQLException {
 
-        String selectSql = select + " " + whereClause + " " + (this.getDBTYPE() == BaseDao.DERBY ? "" : orderBy);
+        String selectSql = select + " " + whereClause + " " + (this.getDbType() == BaseDao.DERBY ? "" : orderBy);
 
         List<Map<String, Object>> v = getDbHelper().executeQuery(this.getPagingSql(selectSql, rowStart, rowEnd),
                 params);
@@ -917,7 +917,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     protected @NotNull
     List<Map<String, Object>> select(String sql, String whereClause, String orderBy,
                                      Object[] params, int rowStart, int rowEnd) throws SQLException {
-        String selectSql = sql + " " + whereClause + " " + (this.getDBTYPE() == BaseDao.DERBY ? "" : orderBy);
+        String selectSql = sql + " " + whereClause + " " + (this.getDbType() == BaseDao.DERBY ? "" : orderBy);
         return getDbHelper().executeQuery(this.getPagingSql(selectSql, rowStart, rowEnd), params);
     }
 
@@ -936,7 +936,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     List<T> select(String whereClause, Object[] params, String orderbyClause, int beginNum, int endNum)
             throws SQLException {
         String query = getSelectAllFromTable() + whereClause;
-        if (this.getDBTYPE() != BaseDao.DERBY) {
+        if (this.getDbType() != BaseDao.DERBY) {
             query += orderbyClause;
         }
         query = getPagingSql(query, beginNum, endNum);
@@ -958,7 +958,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     List<T> select2step(String whereClause, Object[] params, String orderbyClause, int beginNum,
                         int endNum) throws SQLException {
         String query = "select " + getKeyName() + " from " + getTableName() + " " + whereClause;
-        if (this.getDBTYPE() != BaseDao.DERBY) {
+        if (this.getDbType() != BaseDao.DERBY) {
             query += orderbyClause;
         }
         query = getPagingSql(query, beginNum, endNum);
@@ -987,7 +987,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     List<T> selectWithJoin(String fieldList, String whereClause, Object[] params, String orderByClause,
                            int beginNum, int endNum) throws SQLException {
         String query = "select " + fieldList + " from " + getTableName() + " " + " " + whereClause;
-        if (this.getDBTYPE() != BaseDao.DERBY) {
+        if (this.getDbType() != BaseDao.DERBY) {
             query += orderByClause;
         }
         query = getPagingSql(query, beginNum, endNum);

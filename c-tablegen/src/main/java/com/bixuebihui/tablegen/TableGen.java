@@ -439,7 +439,6 @@ public class TableGen implements DiffHandler {
 	private String getCachedColumnDataFilePath() {
 
 		String baseDir = getConfigBaseDir(propertiesFilename);
-		//String src_dir = configProperties.getProperty("src_dir");
 		String src_dir = "target";
 
 		return  baseDir + File.separator + src_dir + File.separator + "gen_column_data.cache";
@@ -448,7 +447,7 @@ public class TableGen implements DiffHandler {
 	private String getCachedTableDataFilePath() {
 		String baseDir = System.getProperty("user.dir");
 
-		String src_dir = "target"; //configProperties.getProperty("src_dir");
+		String src_dir = "target";
 
 		return baseDir + File.separator + src_dir + File.separator + "gen_table_data.cache";
 	}
@@ -478,8 +477,8 @@ public class TableGen implements DiffHandler {
 		if (kuozhanbiao) {
 			DictionaryCache cache = new DictionaryCache();
 			DictionaryItem item = cache
-					.getItemById(TableGenConfig.METATABLE_DICT + DictionaryCache.KEY_SEPARATOR + tableName);
-			return item == null ? tableName : item.getMs_value();
+					.byId(TableGenConfig.METATABLE_DICT + DictionaryCache.KEY_SEPARATOR + tableName);
+			return item == null ? tableName : item.getValue();
 		} else {
 			return tableName;
 		}
@@ -491,12 +490,12 @@ public class TableGen implements DiffHandler {
 			DictionaryCache cache = new DictionaryCache();
 			DictionaryItem item = null;
 			try {
-				item = cache.getItemById(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
+				item = cache.byId(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
 						+ getTableIdByName(tableName) + DictionaryCache.KEY_SEPARATOR + columnName.toUpperCase());
 			} catch (Exception e) {
 				e.printStackTrace(console);
 			}
-			res = item == null ? columnName : item.getMs_value();
+			res = item == null ? columnName : item.getValue();
 		} else {
 			res = columnName;
 		}
@@ -516,12 +515,12 @@ public class TableGen implements DiffHandler {
 			DictionaryCache cache = new DictionaryCache();
 			DictionaryItem item = null;
 			try {
-				item = cache.getItemByValue(
+				item = cache.byValue(
 						TableGenConfig.TABLENAME_DICT + DictionaryCache.KEY_SEPARATOR + tableName.toUpperCase());
 			} catch (Exception e) {
 				e.printStackTrace(console);
 			}
-			return item == null ? 0 : Integer.parseInt(item.getMs_value());
+			return item == null ? 0 : Integer.parseInt(item.getValue());
 		} else {
 			return 0;
 		}
@@ -1198,9 +1197,6 @@ public class TableGen implements DiffHandler {
 			writeGetKeyName(getFirstKeyName(keyData), "getKeyName");
 			writeMapRow(tableName, colData);
 
-			// handle the variables
-
-
 			if (keys) {
 
 				writeGetSetId(tableName, keyData, colData);
@@ -1217,9 +1213,7 @@ public class TableGen implements DiffHandler {
 					if (keyData.size() > 1) {
 						writeDelete(tableName, keyData, "deleteByKey", false, colData);
 						writeDelete(tableName, keyData, "deleteByKey", true, colData);
-
 					}
-
 				} else {
 					writeDummyUpdate(tableName, "updateByKey");
 					writeDummyDelete(tableName, keyData, "deleteByKey", colData);
@@ -1245,7 +1239,7 @@ public class TableGen implements DiffHandler {
 			trace("foreignKeys :" + sw.getSplitTime());
 
 			if (indexes) {
-				List indexData = getTableIndexes(tableName); // updates the indexData
+				List<String> indexData = getTableIndexes(tableName); // updates the indexData
 				// variable
 				if (isNotEmpty(indexData)) {
 					writeSelect(tableName, indexData, "selectByIndex", colData);
@@ -1962,7 +1956,7 @@ public class TableGen implements DiffHandler {
 	void writeMapRow(String tableName, List<ColumnData> columnData) throws IOException {
 		String col;
 		String colType;
-		List<String> gets = new ArrayList<>(); // used to store the r1=r.getString("r1");
+		List<String> gets = new ArrayList<>();
 		String get;
 
 		for (ColumnData cd: columnData) {
@@ -2658,7 +2652,7 @@ public class TableGen implements DiffHandler {
 				SqlFileExecutor ex = new SqlFileExecutor();
 				String filename = "";
 
-				if (daoMetaTable.getDBTYPE() == BaseDao.POSTGRESQL) {
+				if (daoMetaTable.getDbType() == BaseDao.POSTGRESQL) {
 					filename = "postgresql";
 				} else {
 					filename = "mysql";

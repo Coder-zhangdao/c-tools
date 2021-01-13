@@ -1,5 +1,8 @@
 package com.bixuebihui.cache;
 
+/**
+ * @author xwx
+ */
 public class CacheConfig {
 
     /**

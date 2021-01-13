@@ -13,6 +13,9 @@ import com.bixuebihui.BeanFactory;
 import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.IDbHelper;
 
+/**
+ * @author xwx
+ */
 public abstract class BaseList<T, V> extends BaseDao<T, V> {
     public BaseList() {
         dbHelper = (IDbHelper) BeanFactory.createObjectById("cacheDbHelper");

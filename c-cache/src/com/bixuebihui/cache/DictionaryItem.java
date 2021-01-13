@@ -1,51 +1,41 @@
 package com.bixuebihui.cache;
 
-import com.bixuebihui.util.other.CMyString;
 
+/**
+ * @author xwx
+ */
 public class DictionaryItem {
 
-    private String ms_id;
-    private String ms_value;
-    private String ms_sort;
+    private String id;
+    private String value;
+    private String sort;
 
-    public String getMs_id() {
-        return ms_id;
+    public String getId() {
+        return id;
     }
 
-    public void setMs_id(String ms_id) {
-        this.ms_id = ms_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getMs_value() {
-        return ms_value;
+    public String getValue() {
+        return value;
     }
 
-    public void setMs_value(String ms_value) {
-        this.ms_value = ms_value;
+    public void setValue(String value) {
+        this.value = value;
     }
 
-    public String getMs_sort() {
-        return ms_sort;
+    public String getSort() {
+        return sort;
     }
 
-    public void setMs_sort(String ms_sort) {
-        this.ms_sort = ms_sort;
-    }
-
-    public String toXml() {
-        StringBuffer s = new StringBuffer();
-        String ln = System.getProperty("line.separator");
-        s.append("<DICTIONARYITEM ");
-        s.append("MS_ID=\"").append(this.getMs_id()).append("\" ");
-        s.append("MS_VALUE=\"").append(CMyString.filterForXML(this.getMs_value())).append("\" ");
-        s.append("MS_SORT=\"").append(this.getMs_sort()).append("\" ");
-        s.append(" />");
-        s.append(ln);
-        return s.toString();
+    public void setSort(String sort) {
+        this.sort = sort;
     }
 
     @Override
     public String toString() {
-        return "{" + ms_id + "," + ms_value + "," + ms_sort + "}";
+        return "{" + id + "," + value + "," + sort + "}";
     }
 }

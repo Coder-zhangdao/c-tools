@@ -33,7 +33,6 @@ public class PagePublisher implements Job {
                 mainpageUrl += (mainpageUrl.indexOf("?") >= 0 ? "&" : "?") + "syscode=" + syscode;
                 mainpagePath = Config.getProperty("path") + "/cache/shebeitree_cardlist.htm";
             }
-            //LastWriteDate = LogManager.writeChatMessage();
 
             Url2html uh = new Url2html();
             uh.addFilter(new MyFacesResourceFilter());
@@ -43,7 +42,6 @@ public class PagePublisher implements Job {
                 LastWriteDate = (new Date()).getTime();
                 mLog.debug("[CYC] Quartz task write " + mainpageUrl + ".... to " + mainpagePath + (new Date()));
             }
-            //throw new JobExecutionContext(exc.getMessage());
 
         } catch (IOException e) {
             mLog.warn(e);

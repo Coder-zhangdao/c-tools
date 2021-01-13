@@ -258,7 +258,7 @@
         <property name="colsTemplate">
             <map>
                 <entry key="SITE_ID">
-                    <value><![CDATA[<a href="#{SITE_ID}">,column "" is a test</a> ]]></value>
+                    <value><![CDATA[<a href="#{'#{SITE_ID}'}">,column "" is a test</a> ]]></value>
                 </entry>
             </map>
         </property>

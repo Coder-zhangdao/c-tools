@@ -11,6 +11,7 @@ import java.util.Map.Entry;
  *
  * @author xingwx
  * @version $Id: $Id
+ * TODO use SqlHelper is better
  */
 public class SqlFilter {
 
@@ -63,8 +64,8 @@ public class SqlFilter {
 		StringBuilder res = toCondition();
 
 		if(res.length()>0){
-			if(res.indexOf(AND)==5) {
-				res.delete(0, 4);
+			if(res.indexOf(AND)==AND.length()) {
+				res.delete(0, AND.length()-1);
 			}
 			res.insert(0, "where");
 		}

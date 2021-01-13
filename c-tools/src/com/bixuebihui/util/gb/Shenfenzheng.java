@@ -7,6 +7,9 @@ import java.util.*;
 
 public class Shenfenzheng {
 
+    public static final int SECOND_GEN_ID_LENGTH = 18;
+    public static final int FIRST_GEN_ID_LENGTH = 15;
+
     private static void initCity() {
         aCity = new HashMap<>(48);
 
@@ -2090,7 +2093,7 @@ public class Shenfenzheng {
             initCity();
         }
 
-        String regexp = "(\\d{17}|\\d{14})(\\d|x|X|y|Y)";
+        String regexp = "(\\d{"+(SECOND_GEN_ID_LENGTH -1)+"}|\\d{14})(\\d|x|X|y|Y)";
         if (!cardid.matches(regexp)) {
             // throw new CMyException("Error:输入身份证号码有误,请重新输入!");
             return false;
@@ -2100,11 +2103,11 @@ public class Shenfenzheng {
             // return "Error:非法身份证地区";
         }
         int iSum = 0;
-        if (cardid.length() == 18) {
+        if (cardid.length() == SECOND_GEN_ID_LENGTH) {
             cardid = cardid.replaceAll("(x|X)", "a");
-            for (int i = 17; i >= 0; i--) {
+            for (int i = SECOND_GEN_ID_LENGTH -1; i >= 0; i--) {
                 iSum += (Math.pow(2, i) % 11)
-                        * Integer.parseInt("" + cardid.charAt(17 - i), 11);
+                        * Integer.parseInt("" + cardid.charAt(SECOND_GEN_ID_LENGTH -1 - i), 11);
             }
             if (iSum % 11 != 1) {
                 return false;
@@ -2131,9 +2134,9 @@ public class Shenfenzheng {
 
         SimpleDateFormat sf = new SimpleDateFormat("yyMMdd");
         SimpleDateFormat cf = new SimpleDateFormat("yyyyMMdd");
-        if (cardid.length() == 15) {
+        if (cardid.length() == FIRST_GEN_ID_LENGTH) {
             return sf.parse(cardid.substring(6, 6 + 6));
-        } else if (cardid.length() == 18) {
+        } else if (cardid.length() == SECOND_GEN_ID_LENGTH) {
             return cf.parse(cardid.substring(6, 6 + 8));
         }
         return null;

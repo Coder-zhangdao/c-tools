@@ -29,7 +29,7 @@ public final class ConnectionPoolManager
     private boolean wantStop  =false;
     private static final int MAJOR_VERSION = 0;
     private static final int MINOR_VERSION = 92;
-    private HashMap<String, ConnectionPool> aliasHash;
+    private final HashMap<String, ConnectionPool> aliasHash;
     private long sleepInterval;
     private boolean trace;
     Thread thread;
@@ -40,7 +40,7 @@ public final class ConnectionPoolManager
     /**
      * <p>addAlias.</p>
      *
-     * @param _alias a {@link java.lang.String} object.
+     * @param alias a {@link java.lang.String} object.
      * @param driverName a {@link java.lang.String} object.
      * @param dburl a {@link java.lang.String} object.
      * @param username a {@link java.lang.String} object.
@@ -53,16 +53,16 @@ public final class ConnectionPoolManager
      * @throws java.lang.IllegalAccessException if any.
      * @throws java.sql.SQLException if any.
      */
-    public void addAlias(String _alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
+    public void addAlias(String alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
                          int checkoutMilliSeconds)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
-        addAlias(_alias, driverName, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, 0);
+        addAlias(alias, driverName, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, 0);
     }
 
     /**
      * <p>addAlias.</p>
      *
-     * @param _alias a {@link java.lang.String} object.
+     * @param alias a {@link java.lang.String} object.
      * @param driverName a {@link java.lang.String} object.
      * @param dburl a {@link java.lang.String} object.
      * @param username a {@link java.lang.String} object.
@@ -70,23 +70,23 @@ public final class ConnectionPoolManager
      * @param maxActive a int.
      * @param timeoutMiliSeconds a int.
      * @param checkoutMilliSeconds a int.
-     * @param _maxCheckout a int.
+     * @param maxCheckout a int.
      * @throws java.lang.ClassNotFoundException if any.
      * @throws java.lang.InstantiationException if any.
      * @throws java.lang.IllegalAccessException if any.
      * @throws java.sql.SQLException if any.
      */
-    public void addAlias(String _alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
-                         int checkoutMilliSeconds, int _maxCheckout)
+    public void addAlias(String alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
+                         int checkoutMilliSeconds, int maxCheckout)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
-        addAlias(_alias, driverName, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, _maxCheckout, true);
+        addAlias(alias, driverName, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, maxCheckout, true);
 
     }
 
     /**
      * <p>addAlias.</p>
      *
-     * @param _alias a {@link java.lang.String} object.
+     * @param alias a {@link java.lang.String} object.
      * @param driverName a {@link java.lang.String} object.
      * @param dburl a {@link java.lang.String} object.
      * @param username a {@link java.lang.String} object.
@@ -94,19 +94,19 @@ public final class ConnectionPoolManager
      * @param maxActive a int.
      * @param timeoutMiliSeconds a int.
      * @param checkoutMilliSeconds a int.
-     * @param _maxCheckout a int.
+     * @param maxCheckout a int.
      * @param cacheStatements a boolean.
      * @throws java.lang.ClassNotFoundException if any.
      * @throws java.lang.InstantiationException if any.
      * @throws java.lang.IllegalAccessException if any.
      * @throws java.sql.SQLException if any.
      */
-    public void addAlias(String _alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
-                         int checkoutMilliSeconds, int _maxCheckout, boolean cacheStatements)
+    public void addAlias(String alias, String driverName, String dburl, String username, String password, int maxActive, int timeoutMiliSeconds,
+                         int checkoutMilliSeconds, int maxCheckout, boolean cacheStatements)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
         DriverManager.registerDriver((Driver) Class.forName(driverName).getDeclaredConstructor().newInstance());
 
-        ConnectionPool connectionpool = new ConnectionPool(_alias, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, _maxCheckout);
+        ConnectionPool connectionpool = new ConnectionPool(alias, dburl, username, password, maxActive, timeoutMiliSeconds, checkoutMilliSeconds, maxCheckout);
         connectionpool.setTracing(true);
         connectionpool.setCacheStatements(cacheStatements);
         addAlias(connectionpool);
@@ -115,56 +115,30 @@ public final class ConnectionPoolManager
     /**
      * <p>addAlias.</p>
      *
-     * @param _alias a {@link java.lang.String} object.
+     * @param alias a {@link java.lang.String} object.
      * @param driverName a {@link java.lang.String} object.
-     * @param _url a {@link java.lang.String} object.
-     * @param _username a {@link java.lang.String} object.
-     * @param _password a {@link java.lang.String} object.
-     * @param _maxConn a int.
-     * @param _timeoutMililSeconds a int.
+     * @param url a {@link java.lang.String} object.
+     * @param username a {@link java.lang.String} object.
+     * @param password a {@link java.lang.String} object.
+     * @param maxConn a int.
+     * @param timeoutMililSeconds a int.
      * @param checkoutMilliSeconds a int.
-     * @param _maxCheckout a int.
-     * @param _prefetchSize a int.
+     * @param maxCheckout a int.
+     * @param prefetchSize a int.
+     * @param cacheStatements a boolean.
      * @throws java.lang.ClassNotFoundException if any.
      * @throws java.lang.InstantiationException if any.
      * @throws java.lang.IllegalAccessException if any.
      * @throws java.sql.SQLException if any.
      */
-    public void addAlias(String _alias, String driverName, String _url,
-                         String _username, String _password, int _maxConn, int _timeoutMililSeconds,
-                         int checkoutMilliSeconds, int _maxCheckout, int _prefetchSize)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-        addAlias(_alias, driverName, _url, _username, _password,
-                _maxConn, _timeoutMililSeconds, checkoutMilliSeconds, _maxCheckout, _prefetchSize, true);
-    }
-
-    /**
-     * <p>addAlias.</p>
-     *
-     * @param _alias a {@link java.lang.String} object.
-     * @param driverName a {@link java.lang.String} object.
-     * @param _url a {@link java.lang.String} object.
-     * @param _username a {@link java.lang.String} object.
-     * @param _password a {@link java.lang.String} object.
-     * @param _maxConn a int.
-     * @param _timeoutMililSeconds a int.
-     * @param checkoutMilliSeconds a int.
-     * @param _maxCheckout a int.
-     * @param _prefetchSize a int.
-     * @param _cacheStatements a boolean.
-     * @throws java.lang.ClassNotFoundException if any.
-     * @throws java.lang.InstantiationException if any.
-     * @throws java.lang.IllegalAccessException if any.
-     * @throws java.sql.SQLException if any.
-     */
-    public void addAlias(String _alias, String driverName, String _url,
-                         String _username, String _password, int _maxConn, int _timeoutMililSeconds,
-                         int checkoutMilliSeconds, int _maxCheckout, int _prefetchSize, boolean _cacheStatements)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-        DriverManager.registerDriver((Driver) Class.forName(driverName).newInstance());
-        ConnectionPool connectionpool = new ConnectionPool(_alias, _url, _username, _password, _maxConn, _timeoutMililSeconds, checkoutMilliSeconds, _maxCheckout);
-        connectionpool.setCacheStatements(_cacheStatements);
-        connectionpool.setPrefetchSize(_prefetchSize);
+    public void addAlias(String alias, String driverName, String url,
+                         String username, String password, int maxConn, int timeoutMililSeconds,
+                         int checkoutMilliSeconds, int maxCheckout, int prefetchSize, boolean cacheStatements)
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
+        DriverManager.registerDriver((Driver) Class.forName(driverName).getDeclaredConstructor().newInstance());
+        ConnectionPool connectionpool = new ConnectionPool(alias, url, username, password, maxConn, timeoutMililSeconds, checkoutMilliSeconds, maxCheckout);
+        connectionpool.setCacheStatements(cacheStatements);
+        connectionpool.setPrefetchSize(prefetchSize);
         addAlias(connectionpool);
     }
 

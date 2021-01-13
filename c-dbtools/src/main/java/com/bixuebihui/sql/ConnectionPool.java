@@ -24,7 +24,6 @@ import java.util.concurrent.Executor;
  * @author xingwx
  * @version $Id: $Id
  */
-@SuppressWarnings("AliControlFlowStatementWithoutBraces")
 public class ConnectionPool {
 
     private static final int MIN_TIMEOUT_MILLI_SECONDS = 100;
@@ -262,7 +261,6 @@ public class ConnectionPool {
 
     private synchronized Connection releaseConnection(PooledConnection pooledconnection) {
         if (trace) {
-            //pooledconnection.setTraceException(ExceptionUtils.getFullStackTrace(new Throwable()));
             pooledconnection.setTraceException(ExceptionUtils.getStackTrace(new Throwable()));
         }
         return pooledconnection;

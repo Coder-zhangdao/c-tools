@@ -150,6 +150,20 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 
 	/** {@inheritDoc} */
 	@Override
+	public ActiveRecord<T> greaterOrEqualThan(String field, Object value) {
+		filterStack.greaterOrEqualThan(field, value);
+		return this;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public ActiveRecord<T> smallerOrEqualThan(String field, Object value) {
+		filterStack.smallerOrEqualThan(field, value);
+		return this;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public SqlHelper getCondStack(){
 		return filterStack;
 	}
@@ -308,7 +322,7 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 	}
 
 	private String parseLimitSql() throws SQLException{
-		if(operator.getDBTYPE()==BaseDao.MYSQL){
+		if(operator.getDbType()==BaseDao.MYSQL){
 
 			if(limit==null) {
 				limit = SqlLimit.LIMIT_ONE;
@@ -316,7 +330,7 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 
 			return limit.toString();
 		}else{
-			log.warn("limit not implemented for this type of BaseDao.getDBTYPE()="+operator.getDBTYPE());
+			log.warn("limit not implemented for this type of BaseDao.getDBTYPE()="+operator.getDbType());
 			return "";
 		}
 	}

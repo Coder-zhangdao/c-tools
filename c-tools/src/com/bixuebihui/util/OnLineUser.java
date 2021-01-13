@@ -23,7 +23,7 @@ import java.util.Vector;
 public class OnLineUser
         implements HttpSessionBindingListener, HttpSessionAttributeListener, ServletContextListener {
 
-    Log __log = LogFactory.getLog(OnLineUser.class);
+    Log log = LogFactory.getLog(OnLineUser.class);
 
     public OnLineUser() {
     }
@@ -81,10 +81,10 @@ public class OnLineUser
         users.trimToSize();
         if (!existUser(name)) {
             users.add(name);
-            __log.debug("users object=" + users);
-            __log.info(name + "\t 登入到系统\t" + (new Date()) + " 在线用户数为：" + getCount());
+            log.debug("users object=" + users);
+            log.info(name + "\t 登入到系统\t" + (new Date()) + " 在线用户数为：" + getCount());
         } else {
-            __log.info(name + "已经存在");
+            log.info(name + "已经存在");
         }
     }
 
@@ -93,8 +93,8 @@ public class OnLineUser
         users.trimToSize();
         String userName = e.getName();
         deleteUser(userName);
-        __log.debug("users object=" + users);
-        __log.info("会话结束：" + userName + "\t 退出系统\t" + (new Date()) + " 在线用户数为：" + getCount());
+        log.debug("users object=" + users);
+        log.info("会话结束：" + userName + "\t 退出系统\t" + (new Date()) + " 在线用户数为：" + getCount());
     }
 
     @Override
@@ -110,8 +110,8 @@ public class OnLineUser
 
         if ("user_id".equals(arg0.getName())) {
             deleteUser(arg0.getValue().toString());
-            __log.info("attributeRemoved: " + arg0.getValue().toString() + "\t 退出系统\t" + (new Date()));
-            __log.info(" 在线用户数为：" + getCount() + ",用户id=" + arg0.getValue().toString() + "退出");
+            log.info("attributeRemoved: " + arg0.getValue().toString() + "\t 退出系统\t" + (new Date()));
+            log.info(" 在线用户数为：" + getCount() + ",用户id=" + arg0.getValue().toString() + "退出");
         }
 
     }
@@ -135,18 +135,18 @@ public class OnLineUser
         }
         event.getServletContext().log("Destory AppStartListener!");
 
-        __log.info("[CYC]系统关闭");
+        log.info("[CYC]系统关闭");
     }
 
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        __log.info("[CYC]系统启动...");
-        __log.info(event.getServletContext().getRealPath("/"));
+        log.info("[CYC]系统启动...");
+        log.info(event.getServletContext().getRealPath("/"));
         try {
-            __log.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
+            log.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
         } catch (Exception e) {
-            __log.error(e.getMessage());
+            log.error(e.getMessage());
         }
         event.getServletContext().log("AppStartListener Launch!");
 
