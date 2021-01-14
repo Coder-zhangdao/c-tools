@@ -1,6 +1,8 @@
 package com.bixuebihui.jmesa;
 
 import com.bixuebihui.BeanFactory;
+import com.bixuebihui.cache.DictionaryCache;
+import com.bixuebihui.cache.DictionaryItem;
 import com.bixuebihui.jdbc.IDbHelper;
 import org.hamcrest.collection.ArrayAsIterableMatcher;
 import org.hamcrest.collection.ArrayMatching;
@@ -13,7 +15,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.Locale;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -99,7 +101,7 @@ public class EasyTableTest {
 
 
     @Test
-    public void testEasyTableIDbHelperStringStringString() throws SQLException {
+    public void testEasyTableIDbHelperStringStringString() {
         String tableName = "t_config";
         String pkName = "c_key";
         String baseSql = " select c_key, c_name , c_value from t_config";
@@ -120,7 +122,7 @@ public class EasyTableTest {
     }
 
     @Test
-    public void testRender() throws Exception {
+    public void testRender() {
         String tableName = "t_config";
         String pkName = "c_key";
         String baseSql = " select c_key, c_name , c_value from t_config";
@@ -137,7 +139,7 @@ public class EasyTableTest {
     }
 
     @Test
-    public void testRenderPager() throws Exception {
+    public void testRenderPager() {
         String tableName = "t_config";
         String pkName = "c_key";
         String baseSql = " select c_key, c_name , c_value from t_config";
@@ -158,12 +160,39 @@ public class EasyTableTest {
     }
 
     @Test
-    public void testRenderAuto() throws Exception {
+    public void testRenderAuto() {
 
 
         String baseSql = " select c_key, c_name , c_value from t_config";
         EasyTable et = new EasyTable(dbHelper, null, baseSql);
 
+        HttpServletRequest request = new MockHttpServletRequest();
+
+        HttpServletResponse response = new MockHttpServletResponse();
+
+        String res = et.render(request, response);
+
+        System.out.println(res);
+    }
+
+    @Test
+    public void testDictCache() {
+        // https://docs.oracle.com/cd/E19798-01/821-1841/bnahu/index.html
+
+        List<DictionaryItem> dict = new ArrayList<>();
+        dict.add(new DictionaryItem("key","好", "1"));
+        dict.add(new DictionaryItem("key1","很好", "2"));
+
+        String myDict = "myDict";
+        DictionaryCache.putInCache(myDict, dict);
+
+
+        String baseSql = " select c_key, c_name , c_value from t_config";
+        EasyTable et = new EasyTable(dbHelper, null, baseSql);
+
+        Map<String, String> map = new HashMap<>();
+        map.put("c_key", "dict use: ${fn:byId('"+myDict+".'.concat(row.c_key)).value}");
+        et.setColsTemplate(map);
         HttpServletRequest request = new MockHttpServletRequest();
 
         HttpServletResponse response = new MockHttpServletResponse();

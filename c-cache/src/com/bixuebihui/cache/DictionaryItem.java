@@ -5,6 +5,13 @@ package com.bixuebihui.cache;
  * @author xwx
  */
 public class DictionaryItem {
+    public DictionaryItem(String id, String value, String sort) {
+        this.id = id;
+        this.value = value;
+        this.sort = sort;
+    }
+    public DictionaryItem(){
+    }
 
     private String id;
     private String value;

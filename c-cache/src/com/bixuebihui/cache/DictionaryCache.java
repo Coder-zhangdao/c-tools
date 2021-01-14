@@ -133,16 +133,16 @@ public class DictionaryCache {
         Object[] myValue;
 
         Dictionary dict = parseKey(key);
-        String storekey;
+        String storeKey;
         if (dict.condition != null) {
-            storekey = dict.tableName + CONDITION_SEPARATOR + dict.condition;
+            storeKey = dict.tableName + CONDITION_SEPARATOR + dict.condition;
         } else {
-            storekey = dict.tableName;
+            storeKey = dict.tableName;
         }
 
         try {
             // Get from the cache]
-            myValue = (Map[]) admin.getFromCache(storekey, (int) (CacheConfig
+            myValue = (Map[]) admin.getFromCache(storeKey, (int) (CacheConfig
                     .getUpdateIntervalMilliseconds() / 1000));
             if (dict.keyName == null) {
                 // LinkedHashMap
@@ -180,7 +180,7 @@ public class DictionaryCache {
                 DictionaryList list = new DictionaryList(def);
                 try {
                     List<DictionaryItem> li = list.selectAll();
-                    Map<String, DictionaryItem>[] mm = putInCache(storekey, li);
+                    Map<String, DictionaryItem>[] mm = putInCache(storeKey, li);
 
                     if (dict.keyName == null) {
                         return mm[isById ? 0 : 1];
@@ -209,11 +209,11 @@ public class DictionaryCache {
 
     /**
      * method for fill cache
-     * @param storekey
+     * @param storeKey
      * @param li
      * @return
      */
-    public static Map<String, DictionaryItem>[] putInCache(String storekey, List<DictionaryItem> li) {
+    public static Map<String, DictionaryItem>[] putInCache(String storeKey, List<DictionaryItem> li) {
         LinkedHashMap<String,DictionaryItem>[] mm = new LinkedHashMap[] {
             new LinkedHashMap<>(li.size()),
             new LinkedHashMap<>(li.size())
@@ -224,7 +224,7 @@ public class DictionaryCache {
             mm[1].put(dictionaryItem.getValue() + "", dictionaryItem);
         }
 
-        admin.putInCache(storekey, mm);
+        admin.putInCache(storeKey, mm);
         return mm;
     }
 
