@@ -475,8 +475,7 @@ public class TableGen implements DiffHandler {
 
 	protected String getTableComment(String tableName) {
 		if (kuozhanbiao) {
-			DictionaryCache cache = new DictionaryCache();
-			DictionaryItem item = cache
+			DictionaryItem item = DictionaryCache
 					.byId(TableGenConfig.METATABLE_DICT + DictionaryCache.KEY_SEPARATOR + tableName);
 			return item == null ? tableName : item.getValue();
 		} else {
@@ -487,10 +486,9 @@ public class TableGen implements DiffHandler {
 	private String getColumnDescription(String tableName, String columnName) {
 		String res;
 		if (kuozhanbiao) {
-			DictionaryCache cache = new DictionaryCache();
 			DictionaryItem item = null;
 			try {
-				item = cache.byId(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
+				item = DictionaryCache.byId(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
 						+ getTableIdByName(tableName) + DictionaryCache.KEY_SEPARATOR + columnName.toUpperCase());
 			} catch (Exception e) {
 				e.printStackTrace(console);
@@ -512,10 +510,9 @@ public class TableGen implements DiffHandler {
 
 	private int getTableIdByName(String tableName) {
 		if (kuozhanbiao) {
-			DictionaryCache cache = new DictionaryCache();
 			DictionaryItem item = null;
 			try {
-				item = cache.byValue(
+				item = DictionaryCache.byValue(
 						TableGenConfig.TABLENAME_DICT + DictionaryCache.KEY_SEPARATOR + tableName.toUpperCase());
 			} catch (Exception e) {
 				e.printStackTrace(console);
