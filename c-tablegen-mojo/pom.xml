@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.github.yujiaao</groupId>
         <artifactId>c-tools-parent</artifactId>
-        <version>1.0.1-M1</version>
+        <version>1.0.1-M2</version>
     </parent>
     <artifactId>tablegen-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
@@ -38,7 +38,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.4.2</version>
+                <version>2.22.2</version>
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>tablegen</artifactId>
-            <version>1.0.1-M1</version>
+            <version>1.0.1-M2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>

@@ -20,10 +20,10 @@ public interface DiffHandler {
      * 表不一致的处理
      * @param tableName
      */
-    public void processTableDiff(String tableName);
+    void processTableDiff(String tableName);
 
     /**
      * 比对结束的处理
      */
-    public void processEnd(HashMap<String,List<ColumnData>> tableData);
+    void processEnd(HashMap<String, List<ColumnData>> tableData);
 }

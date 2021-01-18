@@ -17,7 +17,7 @@ public class TableGenMojo extends AbstractMojo {
     /**
      * TableGen config file name.
      * @parameter
-     *   expression="${filename}"
+     *   propPath="propPath"
      *   default-value="tablegen.properties"
      */
     private String propPath;

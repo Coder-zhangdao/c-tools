@@ -80,13 +80,10 @@ public class TableGen implements DiffHandler {
 	String schema;
 	String prefix;
 	String versionColName = "version";
-	boolean keys;
-	boolean foreignKeys;
 	boolean indexes;
 	boolean overWriteAll = false;
 	boolean kuozhanbiao = false;
 	boolean use_annotation = false;
-	boolean generate_baselist = true;
 	boolean keep_case = false;
 	boolean use_autoincrement = false;
 	boolean generate_procedures = true;
@@ -174,37 +171,6 @@ public class TableGen implements DiffHandler {
 		System.exit(code);
 	}
 
-	/**
-	 * Fetch the entire contents of a text file, and return it in a String.
-	 *
-	 * @param aFile
-	 *            is a file which already exists and can be read.
-	 * @throws IOException
-	 */
-	static public String getContents(File aFile) throws IOException {
-		// ...checks on aFile are elided
-		StringBuilder contents = new StringBuilder();
-
-		// use buffering, reading one line at a time
-		// FileReader always assumes default encoding is OK!
-		BufferedReader input = new BufferedReader(new FileReader(aFile));
-		try {
-			String line; // not declared within while loop
-			/*
-			 * readLine is a bit quirky : it returns the content of a line MINUS
-			 * the newline. it returns null only for the END of the stream. it
-			 * returns an empty String if two newlines appear in a row.
-			 */
-			while ((line = input.readLine()) != null) {
-				contents.append(line);
-				contents.append(System.getProperty("line.separator"));
-			}
-		} finally {
-			input.close();
-		}
-
-		return contents.toString();
-	}
 
 	static Map<String ,String> initDefaultTypeValue(){
 		Map<String,String> map = new HashMap<>();
@@ -280,9 +246,7 @@ public class TableGen implements DiffHandler {
 			/**
 			 * 如果generator_all == yes，则生成所有表 否则，进行本地快照和数据库的比对
 			 */
-			if (generate_baselist) {
-				generateBaseList();
-			}
+			generateBaseList();
 			if ("yes".equals(configProperties.getProperty("generate_all"))) {
 
 
@@ -659,10 +623,6 @@ public class TableGen implements DiffHandler {
 	 * <TD>package name to use for gen classes.</TD>
 	 * </TR>
 	 * <TR>
-	 * <TD>keys</TD>
-	 * <TD>(optional) Generate key methods if keys available</TD>
-	 * </TR>
-	 * <TR>
 	 * <TD>foreign_keys</TD>
 	 * <TD>(optional) Generate retrieve methods for each foreign_key
 	 * available</TD>
@@ -736,8 +696,6 @@ public class TableGen implements DiffHandler {
 			tableOwner = props.getProperty("table_owner");
 			LOG.debug("table_owner:" + tableOwner);
 
-			keys = getBooleanCfg(props, "keys");
-			foreignKeys = getBooleanCfg(props, "foreign_keys");
 			indexes = getBooleanCfg(props, "indexes");
 			kuozhanbiao = getBooleanCfg(props, "kuozhanbiao");
 
@@ -766,7 +724,6 @@ public class TableGen implements DiffHandler {
 
 			overWriteAll = getBooleanCfg(props, "over_write_all");
 			use_annotation = getBooleanCfg(props, "use_annotation");
-			generate_baselist = getBooleanCfg(props, "generate_baselist");
 			keep_case = getBooleanCfg(props, "keep_case");
 			use_autoincrement = getBooleanCfg(props, "use_autoincrement");
 
@@ -1027,11 +984,13 @@ public class TableGen implements DiffHandler {
 						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
 				writeBaseHeader();
+				out(" @Autowired");
+				out(" DataSource ds;");
 				out(" public BaseList(){");
 				String lastName = packageName.substring(packageName.lastIndexOf('.') + 1);
-				out(" try {");
-				out("    dbHelper = (IDbHelper) BeanFactory.createObjectById(\"" + lastName + "DbHelper\");");
-				out("    }catch (Exception e ) { ");
+				out("// try {");
+				out("//    dbHelper = (IDbHelper) BeanFactory.createObjectById(\"" + lastName + "DbHelper\");");
+				out("//    }catch (Exception e ) { ");
 				out("    	MSDbHelper dbHelper0 = new MSDbHelper(); ");
 				out("    	dbHelper0.setMasterDatasource(ds); ");
 				out("    	dbHelper0.setDataSource(ds);");
@@ -1043,7 +1002,7 @@ public class TableGen implements DiffHandler {
 				out("    			dbHelper = dbHelper0;");
 				out("    		}");
 				out("    	}");
-				out(" }");
+				out("// }");
 
 				out("}");
 				currentOutput.close();
@@ -1194,44 +1153,42 @@ public class TableGen implements DiffHandler {
 			writeGetKeyName(getFirstKeyName(keyData), "getKeyName");
 			writeMapRow(tableName, colData);
 
-			if (keys) {
 
-				writeGetSetId(tableName, keyData, colData);
-				writeWraper(keyData, colData);
+			writeGetSetId(tableName, keyData, colData);
+			writeWraper(keyData, colData);
 
-				if (isNotEmpty(keyData)) {
+			if (isNotEmpty(keyData)) {
 
-					/* optimistic lock update ! */
-					if (containsVersion(colData)) {
-						boolean withVersion = true;
-						writeUpdate(tableName, keyData, "updateByKeyAndVersion", false, withVersion, colData);
-						writeUpdate(tableName, keyData, "updateByKeyAndVersion", true, withVersion, colData);
-					}
-					if (keyData.size() > 1) {
-						writeDelete(tableName, keyData, "deleteByKey", false, colData);
-						writeDelete(tableName, keyData, "deleteByKey", true, colData);
-					}
-				} else {
-					writeDummyUpdate(tableName, "updateByKey");
-					writeDummyDelete(tableName, keyData, "deleteByKey", colData);
+				/* optimistic lock update ! */
+				if (containsVersion(colData)) {
+					boolean withVersion = true;
+					writeUpdate(tableName, keyData, "updateByKeyAndVersion", false, withVersion, colData);
+					writeUpdate(tableName, keyData, "updateByKeyAndVersion", true, withVersion, colData);
 				}
+				if (keyData.size() > 1) {
+					writeDelete(tableName, keyData, "deleteByKey", false, colData);
+					writeDelete(tableName, keyData, "deleteByKey", true, colData);
+				}
+			} else {
+				writeDummyUpdate(tableName, "updateByKey");
+				writeDummyDelete(tableName, keyData, "deleteByKey", colData);
 			}
 
 			sw.split();
 			trace("after keys:" + sw.getSplitTime());
 
-			if (foreignKeys) {
-				List<FKDefinition> foreignKeyData = getTableImportedKeys(tableName);
-				for (FKDefinition fkEnum : foreignKeyData) {
-					writeImportedMethods(tableName, fkEnum, colData);
-				}
-
-				foreignKeyData = getTableExportedKeys(tableName);
-				for (FKDefinition fkEnum : foreignKeyData) {
-					writeExportedMethods( fkEnum, getColumnData(fkEnum.PKtable));
-				}
-
+			//foreign key
+			List<FKDefinition> foreignKeyData = getTableImportedKeys(tableName);
+			for (FKDefinition fkEnum : foreignKeyData) {
+				writeImportedMethods(tableName, fkEnum, colData);
 			}
+
+			foreignKeyData = getTableExportedKeys(tableName);
+			for (FKDefinition fkEnum : foreignKeyData) {
+				writeExportedMethods( fkEnum, getColumnData(fkEnum.PKtable));
+			}
+
+
 			sw.split();
 			trace("foreignKeys :" + sw.getSplitTime());
 
@@ -1624,7 +1581,7 @@ public class TableGen implements DiffHandler {
 			}
 			out("import " + packageName + ".pojo.*;");
 
-			if ("dal".equals(subPackage) && foreignKeys || "stub".equals(subPackage)) {
+			if ("dal".equals(subPackage) || "stub".equals(subPackage)) {
 				out("import com.bixuebihui.jdbc.RowMapperResultReader;");
 			}
 
@@ -1896,7 +1853,7 @@ public class TableGen implements DiffHandler {
 
 	private String getIds(List<String> keyData) {
 
-		StringBuilder paramString = new StringBuilder("");
+		StringBuilder paramString = new StringBuilder();
 
 		if (keyData != null) {
 			// work out the query string and the method parameters.
@@ -2038,19 +1995,19 @@ public class TableGen implements DiffHandler {
 		out("     " + this.getPojoClassName(tableName) + "  info = new " + this.getPojoClassName(tableName) + "();");
 
 		boolean isFirst = true;
-		for (int i = 0; i < columnData.size(); i++) {
-			if (!columnData.get(i).isNullable &&
-				"String".equals(columnData.get(i).getJavaType())) {
-					if (isFirst) {
-						out("     java.util.Random rnd = new java.util.Random();");
-						isFirst = false;
-					}
-					out("    info.set" + firstUp(columnData.get(i).name)
-							+ "(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));");
+		for (ColumnData columnDatum : columnData) {
+			if (!columnDatum.isNullable &&
+					"String".equals(columnDatum.getJavaType())) {
+				if (isFirst) {
+					out("     java.util.Random rnd = new java.util.Random();");
+					isFirst = false;
+				}
+				out("    info.set" + firstUp(columnDatum.name)
+						+ "(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));");
 			}
 		}
 
-		if (keys && isNotEmpty(keyData2)) {
+		if (isNotEmpty(keyData2)) {
 			out("    info.set" + firstUp(keyData2.get(0)) + "(getNextKey());");
 		}
 		out("    return this.insert(info);");
@@ -2258,7 +2215,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	public String createPreparedWhereClause(List<String> params, boolean withLike, List<ColumnData> columnData) throws GenException {
-		StringBuilder where = new StringBuilder("");
+		StringBuilder where = new StringBuilder();
 
 		// if we have keys passed in then we add a "where" to the count
 		// e.g. se
@@ -2439,8 +2396,7 @@ public class TableGen implements DiffHandler {
 		}
 		if(isMysql()){
 			//针对mysql的优化, 一次加载全部外键
-			if (!foreignKeyImCache.isEmpty()) {
-			} else {
+			if (foreignKeyImCache.isEmpty()) {
 				foreignKeyImCache.putAll(TableUtils.getAllMySQLImportKeys(getDbHelper(),tableOwner));
 			}
 			if(foreignKeyImCache.containsKey(tableName)) {
