@@ -984,8 +984,8 @@ public class TableGen implements DiffHandler {
 						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
 				writeBaseHeader();
-				out(" @Autowired");
-				out(" DataSource ds;");
+				out("      @Autowired");
+				out("      DataSource ds;");
 				out(" public BaseList(){");
 				String lastName = packageName.substring(packageName.lastIndexOf('.') + 1);
 				out("// try {");

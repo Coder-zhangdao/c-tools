@@ -33,24 +33,7 @@
             </testResource>
         </testResources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -147,16 +130,13 @@
             <artifactId>commons-logging</artifactId>
             <version>1.2</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-tools</artifactId>
             <version>1.0.1-M2</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.yujiaao</groupId>
-            <artifactId>c-dbtools</artifactId>
-            <version>1.0.1-M2</version>
-        </dependency>
+
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>jmesa</artifactId>
