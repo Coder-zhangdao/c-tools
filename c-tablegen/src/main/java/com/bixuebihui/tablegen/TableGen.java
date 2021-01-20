@@ -87,6 +87,7 @@ public class TableGen implements DiffHandler {
 	boolean keep_case = false;
 	boolean use_autoincrement = false;
 	boolean generate_procedures = true;
+
 	DatabaseMetaData metaData;
 	BufferedWriter currentOutput;
 	Map<String, T_metatable> tableData;
@@ -126,14 +127,13 @@ public class TableGen implements DiffHandler {
 	private String tableOwner;
 	private boolean traceEnable = false;
 	private Connection connection;
-	private List<String> tableNames;
+	private final Map<String, List<ForeignKeyDefinition>> foreignKeyImCache = new LRULinkedHashMap<>(
+			400);
 	private final Map<String, List<String>> keyCache = new LRULinkedHashMap<>(500);
-	private final Map<String, List<ColumnData>> colDataCache = new LRULinkedHashMap<>(500);
 	private final Map<String, List<String>> indexCache = new LRULinkedHashMap<>(200);
-	private final Map<String, List<FKDefinition>> foreignKeyImCache = new LRULinkedHashMap<>(
+	private final Map<String, List<ForeignKeyDefinition>> foreignKeyExCache = new LRULinkedHashMap<>(
 			400);
-	private final Map<String, List<FKDefinition>> foreignKeyExCache = new LRULinkedHashMap<>(
-			400);
+	private LinkedHashMap<String, TableInfo> tableInfos;
 	private DatabaseConfig dbconfig;
 	private PrintStream console = System.out;
 	private String propertiesFilename;
@@ -296,8 +296,9 @@ public class TableGen implements DiffHandler {
 		String fileName = this.resourceDir + File.separator + "config" + File.separator + "spring-dal.xml";
 		try {
 			Map<String, String> beans = new HashMap<>();
-			for (String tableName:getTableNames()) {
-				beans.put(NameUtils.firstLow(tableName, false) + MANAGER_SUFFIX, getBusFullClassName(tableName));
+			for (TableInfo table: getTableInfos().values()) {
+				beans.put(NameUtils.firstLow(table.getName(), false)
+						+ MANAGER_SUFFIX, getBusFullClassName(table.getName()));
 			}
 			File f = new File(fileName);
 			String xml = null;
@@ -326,12 +327,12 @@ public class TableGen implements DiffHandler {
 		try {
 			info("Generating Store Procedures : ");
 
-			String tableName = "Procedures";
-			String fileName = getBaseSrcDir() + File.separator + "stub" + File.separator + tableName + ".java";
+			TableInfo table = new TableInfo("Procedures");
+			String fileName = getBaseSrcDir() + File.separator + "stub" + File.separator + table.getName() + ".java";
 			currentOutput = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
-			writeHeader(tableName, "stub", "extends BaseList<Object, Object>");
+			writeHeader(table, "stub", "extends BaseList<Object, Object>");
 
 			List<ProcedureInfo> proc = ProcedureUtils.getProcedure(metaData, catalog, schema, tableOwner, null, null);
 
@@ -387,18 +388,6 @@ public class TableGen implements DiffHandler {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private synchronized List<ColumnData> getColumnDataFromLocalCache() {
-
-		String path = getCachedColumnDataFilePath();
-		try(ObjectInputStream in = new ObjectInputStream(new FileInputStream(path))){
-			return  (List<ColumnData>) in.readObject();
-		} catch (ClassNotFoundException | IOException e) {
-			LOG.warn(e);
-		}
-		return new ArrayList<>();
-
-	}
 
 	private String getCachedColumnDataFilePath() {
 
@@ -427,15 +416,6 @@ public class TableGen implements DiffHandler {
 
 	}
 
-	private synchronized void saveColumnDataToLocalCache(ArrayList<ColumnData> data) {
-		String path = getCachedColumnDataFilePath();
-		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path))){
-			out.writeObject(data);
-		} catch (IOException e) {
-		    LOG.warn(e);
-		}
-
-	}
 
 	protected String getTableComment(String tableName) {
 		if (kuozhanbiao) {
@@ -491,7 +471,8 @@ public class TableGen implements DiffHandler {
 
 		try {
 
-			for (String tableName: getTableNames()) {
+			for (TableInfo table: getTableInfos().values()) {
+				String tableName = table.getName();
 				info("Generating JSPs : " + tableName);
 
 				String fileName = jspDir + File.separator + "list" + File.separator + prefix + tableName.toLowerCase()
@@ -499,7 +480,7 @@ public class TableGen implements DiffHandler {
 				currentOutput = new BufferedWriter(
 						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
-				getColumnData(tableName);
+				getColumnData(table);
 				String baseDir = packageName + ".";
 				String serviceName = getPojoClassName(tableName) + "Manager";
 				String controlerName = getPojoClassName(tableName) + "WebUI";
@@ -546,7 +527,8 @@ public class TableGen implements DiffHandler {
 			out("<%@ page language=\"java\" import=\"java.util.*\" pageEncoding=\"UTF-8\"%>\n" + "<html>\n" + "<head>\n"
 					+ "</head>\n" + "<body><ul>\n");
 
-			for (String tableName:getTableNames()) {
+			for (TableInfo table: getTableInfos().values()) {
+				String tableName = table.getName();
 				String href = prefix + tableName.toLowerCase() + "_list.jsp";
 
 				out("\t<li><a href='" + href + "' target=\"mainForm\" >" + tableName.toLowerCase()
@@ -564,7 +546,8 @@ public class TableGen implements DiffHandler {
 
 	private void generateTest() throws SQLException {
 		try {
-			for (String tableName: getTableNames()) {
+			for (TableInfo  table: getTableInfos().values()) {
+				String tableName = table.getName();
 				info("Generating TESTs : " + tableName);
 				String baseDir = testDir + File.separator + packageName2Dir(packageName);
 				String fileName = baseDir + File.separator + BUSINESS + File.separator + getPojoClassName(tableName)
@@ -576,7 +559,7 @@ public class TableGen implements DiffHandler {
 							new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
 					//getColumnData(tableName);
-					writeHeader(tableName, BUSINESS, " extends TestCase");
+					writeHeader(table, BUSINESS, " extends TestCase");
 
 					writeSelectPageTest(tableName, "select");
 					writeCountWhereTest(tableName, "count");
@@ -902,17 +885,22 @@ public class TableGen implements DiffHandler {
 			connect();
 		}
 
-		List<String> col = getTableNames();
+		LinkedHashMap<String, TableInfo> col = getTableInfos();
 
 		if (CollectionUtils.isEmpty(col)) {
-			setTableNames(
-					TableUtils.getTableData(metaData, catalog, schema, tableOwner, tablesList, excludeTablesList));
+			List<String> tableNames =
+					TableUtils.getTableData(metaData, catalog, schema, tableOwner, tablesList, excludeTablesList);
+			LinkedHashMap<String, TableInfo> tables =new LinkedHashMap<>();
+			for(String name: tableNames){
+				tables.put(name, new TableInfo(name));
+			}
+			setTableInfos(tables);
 		} else {
 			info("tableNames already set, retrieve from db skipped.");
 		}
 
 		if (this.kuozhanbiao) {
-			tableData = getTableDataExt(getTableNames());
+			tableData = getTableDataExt(getTableInfos());
 		}
 
 		if (StringUtils.isNotEmpty(this.extra_setting)) {
@@ -1019,11 +1007,11 @@ public class TableGen implements DiffHandler {
 	/**
 	 * Generates the plane java model for each table.
 	 */
-	public void generatePojos() throws SQLException {
+	public void generatePojos() throws SQLException, IOException {
 
-		for ( String tableName: getTableNames()) {
-			info("Generating pojos : " + tableName);
-			generatePojo(tableName);
+		for (TableInfo table: getTableInfos().values()) {
+			info("Generating pojos : " + table.getName());
+			generatePojo(table);
 		}
 
 	}
@@ -1031,23 +1019,23 @@ public class TableGen implements DiffHandler {
 	/**
 	 * 生成单个pojo类
 	 *
-	 * @param tableName
+	 * @param table
 	 */
-	public void generatePojo(String tableName) {
+	public void generatePojo(TableInfo table) throws IOException {
+		String tableName = table.getName();
+		String baseDir = getBaseSrcDir();
 
+		String fileName = baseDir + File.separator + "pojo" + File.separator + getPojoClassName(tableName)
+				+ ".java";
 		try {
 
-			String baseDir = getBaseSrcDir();
-
-			String fileName = baseDir + File.separator + "pojo" + File.separator + getPojoClassName(tableName)
-					+ ".java";
 			currentOutput = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
+					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
-			List<ColumnData> colData = getColumnData(tableName);
+			List<ColumnData> colData = getColumnData(table).getFields();
 
 			String interfaces = this.getInterface(tableName);
-			writeHeader(tableName, "pojo", interfaces + this.getPojoExtendsClasses(tableName));
+			writeHeader(table, "pojo", interfaces + this.getPojoExtendsClasses(tableName));
 
 			// handle the variables
 			for (ColumnData e2 : colData) {
@@ -1067,6 +1055,7 @@ public class TableGen implements DiffHandler {
 				ColumnData col = new ColumnData("relation_code", 12, 0, false, false, 0, "",
 						"hack code for relation_code( to fit NodeInterface), not for use!");
 				out("// " + col.remarks);
+				out("// " + col.comment);
 				writeVariable(tableName, col);
 				writeSetGet(tableName, col);
 			}
@@ -1101,24 +1090,27 @@ public class TableGen implements DiffHandler {
 			out("     }");// toXml
 
 			out("}");
-			currentOutput.close();
 
 		} catch (IOException | SQLException ex) {
 			generateFlag = false;
 			ex.printStackTrace(console);
+		}finally {
+			currentOutput.close();
 		}
 	}
 
 	/**
 	 * 生成单个dal
 	 *
-	 * @param tableName database table name
+	 * @param table database table
 	 */
-	private void generateDAL(String tableName) {
+	private void generateDAL(TableInfo table) {
 
 		StopWatch sw = new StopWatch();
 		sw.start();
 		try {
+
+			String tableName = table.getName();
 			info("Generating DALs : " + tableName);
 			String baseDir = getBaseSrcDir();
 			String fileName = baseDir + File.separator + "dal" + File.separator + getPojoClassName(tableName)
@@ -1126,11 +1118,11 @@ public class TableGen implements DiffHandler {
 			currentOutput = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING), 10240);// new
 
-			List<ColumnData> colData = getColumnData(tableName);
+			List<ColumnData> colData = getColumnData(table).fields;
 
 			List<String> keyData = getTableKeys(tableName); // updates the keyData variable
 
-			writeHeader(tableName, "dal", " extends " + genericFiles[0] + getGeneticType(tableName));
+			writeHeader(table, "dal", " extends " + genericFiles[0] + getGeneticType(table));
 
 			// +
 			// " implements RowMapper<"+getPojoClassName(tableName)+">, IBaseListService");
@@ -1178,14 +1170,14 @@ public class TableGen implements DiffHandler {
 			trace("after keys:" + sw.getSplitTime());
 
 			//foreign key
-			List<FKDefinition> foreignKeyData = getTableImportedKeys(tableName);
-			for (FKDefinition fkEnum : foreignKeyData) {
+			List<ForeignKeyDefinition> foreignKeyData = getTableImportedKeys(tableName);
+			for (ForeignKeyDefinition fkEnum : foreignKeyData) {
 				writeImportedMethods(tableName, fkEnum, colData);
 			}
 
 			foreignKeyData = getTableExportedKeys(tableName);
-			for (FKDefinition fkEnum : foreignKeyData) {
-				writeExportedMethods( fkEnum, getColumnData(fkEnum.PKtable));
+			for (ForeignKeyDefinition fkEnum : foreignKeyData) {
+				writeExportedMethods( fkEnum, getColumnData(tableInfos.get(fkEnum.primaryKeyTableName)).fields);
 			}
 
 
@@ -1235,10 +1227,9 @@ public class TableGen implements DiffHandler {
 	 * Generates the Data Access Layer for each table.
 	 */
 	public void generateDALs() {
-		for (String tableName :  getTableNames()) {
-			generateDAL(tableName);
+		for (TableInfo table :  getTableInfos().values()) {
+			generateDAL(table);
 		}
-
 	}
 
 	private void writeSql(List<ColumnData> colData, List<String> params) throws IOException, GenException {
@@ -1387,7 +1378,8 @@ public class TableGen implements DiffHandler {
 		return tableName;
 	}
 
-	public void generateBusiness(String tableName) {
+	public void generateBusiness(TableInfo table) {
+		String tableName = table.getName();
 		info("Generating business : " + tableName);
 		String baseDir = getBaseSrcDir();
 		String fileName = baseDir + File.separator + BUSINESS + File.separator + getPojoClassName(tableName)
@@ -1400,8 +1392,8 @@ public class TableGen implements DiffHandler {
 				currentOutput = new BufferedWriter(
 						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
-				getColumnData(tableName);
-				writeHeader(tableName, BUSINESS, " extends " + getPojoClassName(tableName) + "List");
+				getColumnData(table);
+				writeHeader(table, BUSINESS, " extends " + getPojoClassName(tableName) + "List");
 				out("// Write your code here!");
 
 				out("}");
@@ -1421,8 +1413,8 @@ public class TableGen implements DiffHandler {
 	 * Generates the plane java model for each table.
 	 */
 	public void generateBusinesses() {
-		for (String tableName : getTableNames()) {
-			generateBusiness(tableName);
+		for (TableInfo table : getTableInfos().values()) {
+			generateBusiness(table);
 		}
 	}
 
@@ -1431,7 +1423,8 @@ public class TableGen implements DiffHandler {
 	 */
 	public void generateWebUI() throws SQLException {
 		try {
-			for (String tableName: getTableNames()) {
+			for (TableInfo table: getTableInfos().values()) {
+				String tableName = table.getName();
 				info("Generating web UI : " + tableName);
 				String baseDir = getBaseSrcDir();
 				String fileName = baseDir + File.separator + "web" + File.separator + getPojoClassName(tableName)
@@ -1442,9 +1435,9 @@ public class TableGen implements DiffHandler {
 					currentOutput = new BufferedWriter(
 							new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
-					List<ColumnData> colData = getColumnData(tableName);
+					List<ColumnData> colData = getColumnData(table).fields;
 					List<String> keyData = getTableKeys(tableName);
-					writeHeader(tableName, "web", " extends AbstractWebUI" + getGeneticType(tableName));
+					writeHeader(table, "web", " extends AbstractWebUI" + getGeneticType(table));
 					out("");
 					out("");
 					out("protected String getUniquePropertyName(){return \""
@@ -1520,9 +1513,10 @@ public class TableGen implements DiffHandler {
 
 	}
 
-	private String getGeneticType(String tableName) throws GenException, SQLException {
+	private String getGeneticType(TableInfo  table) throws GenException, SQLException {
+		String tableName =  table.getName();
 		List<String> keyData = getTableKeys(tableName);
-		List<ColumnData> columnData= getColumnData(tableName);
+		List<ColumnData> columnData= getColumnData(table).fields;
 		return "<" + getPojoClassName(tableName) + "," + getFirstKeyType(keyData, columnData) + ">";
 	}
 
@@ -1551,10 +1545,10 @@ public class TableGen implements DiffHandler {
 	/**
 	 * Generates the container/database access functions for each table.
 	 */
-	void writeHeader(String tableName, String subPackage, String extClass) throws IOException {
+	void writeHeader(TableInfo table, String subPackage, String extClass) throws IOException {
 		out("package " + packageName + "." + subPackage + ";");
 		out("/**");
-		out("  * " + tableName);
+		out("  * " + table.getName()+(table.getComment()!=null?(": "+table.getComment()):""));
 		writeHeaderComment();
 		out("  */");
 		out("");
@@ -1594,7 +1588,7 @@ public class TableGen implements DiffHandler {
 			}
 
 			if ("web".equals(subPackage)) {
-				out("import " + packageName + ".business." + this.getPojoClassName(tableName) + "Manager;");
+				out("import " + packageName + ".business." + this.getPojoClassName(table.getName()) + "Manager;");
 
 				out("import org.jmesa.worksheet.WorksheetColumn;");
 				out("import javax.servlet.http.HttpServletRequest;");
@@ -1620,11 +1614,11 @@ public class TableGen implements DiffHandler {
 		}
 
 		if ("dal".equals(subPackage)) {
-			out("public class " + getPojoClassName(tableName)
+			out("public class " + getPojoClassName(table.getName())
 					+ "List"
 					+ ((extClass.contains("TestCase")) ? "Test" : "") + " " + (extClass));
 		}else{
-			out("public class " + getPojoClassName(tableName)
+			out("public class " + getPojoClassName(table.getName())
 					+ (BUSINESS.equals(subPackage) ? "Manager" : ("web".equals(subPackage) ? "WebUI" : ""))
 					+ ((extClass.contains("TestCase")) ? "Test" : "") + " " + (extClass));
 		}
@@ -1638,9 +1632,9 @@ public class TableGen implements DiffHandler {
 	private void writeHeaderComment() throws IOException {
 		out("  * ");
 		out("  * WARNING! Automatically generated file!");
-		out("  * Do not edit the pojo and dal packages,use Auto" + "Code / tablegen!");
+		out("  * Do not edit the pojo and dal packages,use `maven tablegen:gen`!");
 		out("  * Code Generator by J.A.Carter");
-		out("  * Modified by Xing Wanxiang 2008-2019");
+		out("  * Modified by Xing Wanxiang 2008-2021");
 		out("  * (c) www@qsn.so");
 	}
 
@@ -2234,9 +2228,9 @@ public class TableGen implements DiffHandler {
 				// Hmmm should we allow more than this???
 				//
 				if ((withLike) && ("String".equals(keyType))) {
-					where.append(key + " like ?");
+					where.append(key).append(" like ?");
 				} else {
-					where.append(key + "=?");
+					where.append(key).append("=?");
 				}
 
 				if (e.hasNext()) {
@@ -2270,7 +2264,7 @@ public class TableGen implements DiffHandler {
 				// Hmmm should we allow more than this???
 				//
 				if ((withLike) && ("String".equals(keyType))) {
-					objs.append("\"%\"+" + key.toLowerCase() + "+\"%\"");
+					objs.append("\"%\"+").append(key.toLowerCase()).append("+\"%\"");
 				} else {
 					objs.append(key.toLowerCase());
 				}
@@ -2307,7 +2301,7 @@ public class TableGen implements DiffHandler {
 				    LOG.error("unsupported future when generate method "+methodName+" return type "+returnType, e1);
 				    throw e1;
 				}
-				paramString.append(keyType + " " + key.toLowerCase());
+				paramString.append(keyType).append(" ").append(key.toLowerCase());
 
 				if (e.hasNext()) {
 					paramString.append(",");
@@ -2325,17 +2319,12 @@ public class TableGen implements DiffHandler {
 	/**
 	 * Gets the column data for a specified table.
 	 */
-	public @NotNull List<ColumnData> getColumnData(String tableName) throws SQLException {
-
-		List<ColumnData> colData;
-		if (colDataCache.containsKey(tableName)) {
-			return colDataCache.get(tableName);
+	public @NotNull TableInfo getColumnData(TableInfo table) throws SQLException {
+		List<ColumnData> colData = table.getFields();
+		if(colData == null){
+			table = TableUtils.getColumnData(metaData, catalog, schema, table.getName());
 		}
-
-		colData = TableUtils.getColumnData(metaData, catalog, schema, tableName);
-
-		colDataCache.put(tableName, colData);
-		return colData;
+		return table;
 	}
 
 	/**
@@ -2359,7 +2348,7 @@ public class TableGen implements DiffHandler {
 	/**
 	 * Selects the Exported Keys defined for a particular table.
 	 */
-	protected @NotNull  List<FKDefinition> getTableExportedKeys(String tableName) throws SQLException {
+	protected @NotNull  List<ForeignKeyDefinition> getTableExportedKeys(String tableName) throws SQLException {
 		if (foreignKeyExCache.containsKey(tableName)) {
 			return foreignKeyExCache.get(tableName);
 		}
@@ -2377,7 +2366,7 @@ public class TableGen implements DiffHandler {
 			}
 			return Collections.emptyList();
 		}
-		List<FKDefinition> foreignKeyData = TableUtils.getTableExportedKeys(metaData, catalog, tableOwner, tableName);
+		List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableExportedKeys(metaData, catalog, tableOwner, tableName);
 		foreignKeyExCache.put(tableName, foreignKeyData);
 		return foreignKeyData;
 	}
@@ -2389,7 +2378,7 @@ public class TableGen implements DiffHandler {
 	/**
 	 * Selects the Imported Keys defined for a particular table.
 	 */
-	protected  @NotNull  List<FKDefinition> getTableImportedKeys(String tableName) throws SQLException {
+	protected  @NotNull  List<ForeignKeyDefinition> getTableImportedKeys(String tableName) throws SQLException {
 
 		if (foreignKeyImCache.containsKey(tableName)) {
 			return foreignKeyImCache.get(tableName);
@@ -2407,7 +2396,7 @@ public class TableGen implements DiffHandler {
 			}
 			return Collections.emptyList();
 		}
-		List<FKDefinition> foreignKeyData = TableUtils.getTableImportedKeys(metaData, catalog, tableOwner, tableName);
+		List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableImportedKeys(metaData, catalog, tableOwner, tableName);
 		foreignKeyImCache.put(tableName, foreignKeyData);
 		return foreignKeyData;
 	}
@@ -2416,7 +2405,7 @@ public class TableGen implements DiffHandler {
 	 *
 	 * write the methods associated to this Exported Foreign key entry.
 	 */
-	protected void writeExportedMethods(FKDefinition def, List<ColumnData> columnData) throws IOException, GenException {
+	protected void writeExportedMethods(ForeignKeyDefinition def, List<ColumnData> columnData) throws IOException, GenException {
 		out("/**");
 		out("  * Get all related  " + def.getFKTableName() + " which have same " + def.getFKColList());
 		out("  */");
@@ -2433,7 +2422,7 @@ public class TableGen implements DiffHandler {
 	 *
 	 * write the methods associated to this Foreign key entry.
 	 */
-	protected void writeImportedMethods(String tableName, FKDefinition def, List<ColumnData> columnData) throws IOException, GenException {
+	protected void writeImportedMethods(String tableName, ForeignKeyDefinition def, List<ColumnData> columnData) throws IOException, GenException {
 		out("/**");
 		out("  * Imported " + tableName + " PK:" + def.getPKTableName() + " FK:" + def.getFKTableName());
 		out("  */");
@@ -2545,12 +2534,12 @@ public class TableGen implements DiffHandler {
 		return status;
 	}
 
-	public List<String> getTableNames() {
-		return tableNames;
+	public LinkedHashMap<String, TableInfo> getTableInfos() {
+		return tableInfos;
 	}
 
-	public void setTableNames(List<String> tableNames) {
-		this.tableNames = tableNames;
+	public void setTableInfos(LinkedHashMap<String, TableInfo> tableInfos) {
+		this.tableInfos = tableInfos;
 	}
 
 	public Connection getConnection() {
@@ -2561,32 +2550,39 @@ public class TableGen implements DiffHandler {
 		this.connection = connection;
 	}
 
-	public Map<String, T_metatable> getTableDataExt(List<String> tableNames)
-			throws SQLException, InstantiationException, IllegalAccessException {
+	public Map<String, T_metatable> getTableDataExt(LinkedHashMap<String, TableInfo> tables)
+			throws SQLException {
 		HashMap<String, T_metatable> ht = new HashMap<>();
 
 		setupMetatable();
+		List<String> names = new ArrayList<>();
+		for(TableInfo table: tables.values()){
+			names.add(table.getName());
+		}
 
-		Collection<T_metatable> c = daoMetaTable.getTableDataExt(tableNames);
+		Collection<T_metatable> c = daoMetaTable.getTableDataExt(names);
 		for (T_metatable t : c) {
 			ht.put(t.getTname(), t);
 		}
 		return ht;
 	}
 
-	public boolean initTableData(List<String> tableNames) throws SQLException {
+	public boolean initTableData(LinkedHashMap<String, TableInfo> tableNames) throws SQLException {
 		if (tableNames != null) {
 			T_metatable[] infos = new T_metatable[tableNames.size()];
 			int i = 0;
-			for (String name : tableNames) {
-				infos[i] = new T_metatable();
-				infos[i].setTname(name);
-				infos[i].setIsnode(false);
-				infos[i].setIsstate(false);
-				infos[i].setIsversion(false);
-				infos[i].setIsmodifydate(false);
-				infos[i].setIsuuid(false);
-				infos[i].setTid(daoMetaTable.getNextKey());
+			for (TableInfo tableInfo : tableNames.values()) {
+				T_metatable t = new T_metatable();
+				t.setTname(tableInfo.getName());
+				t.setDescription(tableInfo.getComment());
+				t.setIsnode(false);
+				t.setIsstate(false);
+				t.setIsversion(false);
+				t.setIsmodifydate(false);
+				t.setIsuuid(false);
+				t.setTid(daoMetaTable.getNextKey());
+
+				infos[i] = t;
 				i++;
 			}
 			return daoMetaTable.insertBatch(infos, null);
@@ -2616,7 +2612,7 @@ public class TableGen implements DiffHandler {
 				LOG.info(loader.getResource(beanConfigFile).getFilename());
 				ex.execute(conn, loader.getResource(beanConfigFile).getInputStream());
 
-				res = initTableData(tableNames);
+				res = initTableData(tableInfos);
 			}
 			if (res) {
 				LOG.info("[CYC]数据库已成功安装");
@@ -2640,7 +2636,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	@Override
-	public void processTableDiff(String tableName) {
+	public void processTableDiff(String tableName) throws IOException {
 
 		if (excludeTablesList != null && excludeTablesList.containsKey(tableName)) {
 			return;
@@ -2650,9 +2646,11 @@ public class TableGen implements DiffHandler {
 			return;
 		}
 
-		generatePojo(tableName);
-		generateDAL(tableName);
-		generateBusiness(tableName);
+		TableInfo table = getTableInfos().get(tableName);
+
+		generatePojo(table);
+		generateDAL(table);
+		generateBusiness(table);
 	}
 
 	@Override

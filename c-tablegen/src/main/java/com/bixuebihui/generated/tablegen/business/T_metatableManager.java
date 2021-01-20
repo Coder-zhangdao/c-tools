@@ -26,13 +26,12 @@ import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 public class T_metatableManager extends T_metatableList {
 	@SuppressWarnings("unchecked")
 	public Collection<T_metatable> getTableDataExt(List<String> tableNames)
-			throws SQLException, InstantiationException, IllegalAccessException {
+			throws SQLException {
 		String select = "select * from " + this.getTableName();
 		String whereClause = " where tname in (" + v2str(tableNames) + ")";
 		String orderBy = " order by tid ";
-		Object[] params = null;
-		return (Collection<T_metatable>) this.select(select, whereClause,
-				orderBy, params, 0, 10000, T_metatable.class);
+		return this.select(select, whereClause,
+				orderBy, null, 0, 10000, T_metatable.class);
 	}
 
 	private String v2str(List<String> tableNames) {

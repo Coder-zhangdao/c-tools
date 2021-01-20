@@ -39,6 +39,16 @@ public class ColumnData implements Serializable {
     boolean isNullable;
     String defaultValue;
 
+    String comment;
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     /**
      * Standard constructor.
      * Requires name, XOPEN type, number of columns.
@@ -297,7 +307,7 @@ public class ColumnData implements Serializable {
             res = "Type : " + sqlTypes[type - 1] + digits + " Name : " + name;
         }
 
-        return res;
+        return res+(comment==null?"":": "+comment);
         //return super.toString()+"[type="+type+":"+ sqlTypes[type]+",columns="+columns+",name="+name+",isNullable="+isNullable+"]";
     }
 

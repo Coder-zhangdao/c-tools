@@ -2,6 +2,7 @@ package com.bixuebihui.tablegen.diffhandler;
 
 import com.bixuebihui.tablegen.ColumnData;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,18 +13,20 @@ import java.util.List;
  * Time: 下午3:27
  * To change this template use File | Settings | File Templates.
  * 数据库表的比对
+ * @author xwx
  */
 public interface DiffHandler {
 
 
     /**
      * 表不一致的处理
-     * @param tableName
+     * @param table
      */
-    void processTableDiff(String tableName);
+    void processTableDiff(String table) throws IOException;
 
     /**
      * 比对结束的处理
+     * @param tableData
      */
     void processEnd(HashMap<String, List<ColumnData>> tableData);
 }

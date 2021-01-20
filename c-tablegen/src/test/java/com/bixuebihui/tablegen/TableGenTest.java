@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -112,8 +113,8 @@ public class TableGenTest {
 					.getFile());
 			tg.connect();
 			tg.getTableData();
-			List<String> tables = tg.getTableNames();
-			for(String t:tables){
+			LinkedHashMap<String, TableInfo> tables = tg.getTableInfos();
+			for(TableInfo t:tables.values()){
 				System.out.println(t);
 			}
 
@@ -133,7 +134,7 @@ public class TableGenTest {
 					.getFile());
 			tg.connect();
 			tg.getTableData();
-			boolean res  = tg.initTableData(tg.getTableNames());
+			boolean res  = tg.initTableData(tg.getTableInfos());
 			Assert.assertTrue(res);
 		}catch(BatchUpdateException e){
 			e.getNextException().printStackTrace();

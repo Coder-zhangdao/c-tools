@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -80,7 +81,7 @@ public class DbDiff {
         return cachedTableData.get(tableName);
     }
 
-    public void compareTables() throws SQLException {
+    public void compareTables() throws SQLException, IOException {
 
 
         List<String> tab1;
@@ -108,7 +109,7 @@ public class DbDiff {
 
         for (String t : tab2) {
 
-            List<ColumnData> c = getColumns(db2, t);
+            List<ColumnData> c = getColumns(db2, t).fields;
 
             addTableData(t, c);
         }
@@ -118,7 +119,7 @@ public class DbDiff {
     /**
      * 比对表数据
      */
-    public void compareTableData(List<String> tab1, List<String> tab2) throws SQLException {
+    public void compareTableData(List<String> tab1, List<String> tab2) throws SQLException, IOException {
         dumpDiffTabs(tab1, tab2);
 
         Collection res4 = CollectionUtils.intersection(tab1, tab2);
@@ -127,18 +128,18 @@ public class DbDiff {
     }
 
     public void compareTablesColumns(Collection<String> tabs)
-            throws SQLException {
+            throws SQLException, IOException {
         for (String tableName : tabs) {
             compareColumns(tableName);
         }
     }
 
-    protected List<ColumnData> getColumns(Database db1, String tableName)
+    protected TableInfo getColumns(Database db1, String tableName)
             throws SQLException {
-        return TableUtils.getColumnData(db1.metaData, db1.catalog, db1.schema, tableName);
+        return  TableUtils.getColumnData(db1.metaData, db1.catalog, db1.schema, tableName);
     }
 
-    public void compareColumns(String tableName) throws SQLException {
+    public void compareColumns(String tableName) throws SQLException, IOException {
 
         List<ColumnData> cols1;
 
@@ -152,11 +153,11 @@ public class DbDiff {
             }
 
         } else {
-            cols1 = getColumns(db1, tableName);
+            cols1 = getColumns(db1, tableName).fields;
         }
 
 
-        List<ColumnData> cols2 = getColumns(db2, tableName);
+        List<ColumnData> cols2 = getColumns(db2, tableName).fields;
 
 
         if (dumpDiffCols(cols1, cols2)) {
@@ -179,7 +180,7 @@ public class DbDiff {
      * @param tab2 now table
      * @return show difference to console
      */
-    protected void dumpDiffTabs(List<String> tab1, List<String> tab2) {
+    protected void dumpDiffTabs(List<String> tab1, List<String> tab2) throws IOException {
         Collection<String> res1 = CollectionUtils.subtract(tab1, tab2);
         Collection<String> res2 = CollectionUtils.subtract(tab2, tab1);
 

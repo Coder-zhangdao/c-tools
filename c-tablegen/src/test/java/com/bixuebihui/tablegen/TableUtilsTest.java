@@ -50,8 +50,8 @@ public class TableUtilsTest {
 		String schema="test";
 		StopWatch sw = new StopWatch();
 		sw.start();
-		List<FKDefinition> v = TableUtils.getTableImportedKeys(metaData, null, schema, tableName);
-		for(FKDefinition s:v){
+		List<ForeignKeyDefinition> v = TableUtils.getTableImportedKeys(metaData, null, schema, tableName);
+		for(ForeignKeyDefinition s:v){
 			System.out.println(s);
 		}
 		sw.stop();
@@ -69,8 +69,8 @@ public class TableUtilsTest {
 		String catalog="test";
 		StopWatch sw = new StopWatch();
 		sw.start();
-		List<FKDefinition> v = TableUtils.getTableExportedKeys(metaData, catalog, schema, tableName);
-		for(FKDefinition s:v){
+		List<ForeignKeyDefinition> v = TableUtils.getTableExportedKeys(metaData, catalog, schema, tableName);
+		for(ForeignKeyDefinition s:v){
 			System.out.println(s);
 		}
 		sw.stop();
@@ -123,7 +123,7 @@ public class TableUtilsTest {
 		DatabaseMetaData metaData = dbHelper.getConnection().getMetaData();
 		String tableName="VRMS_ALLOWANCE";
 		String catalog="WESTPLAN";
-		List<ColumnData> v = TableUtils.getColumnData(metaData, catalog, null, tableName);
+		List<ColumnData> v = TableUtils.getColumnData(metaData, catalog, null, tableName).fields;
 		for(ColumnData c:v){
 			System.out.println(c);
 		}
@@ -135,7 +135,7 @@ public class TableUtilsTest {
 		//create table test1(id int auto_increment, num decimal(10,6) , primary key(id));
 
 		String tableName ="t_metatable";
-		List<ColumnData> v = TableUtils.getColumnData(meta, null, null, tableName);
+		List<ColumnData> v = TableUtils.getColumnData(meta, null, null, tableName).fields;
 		for(ColumnData s:v){
 			System.out.println(s+", java type = "+s.getJavaType());
 		}
@@ -144,13 +144,13 @@ public class TableUtilsTest {
     @org.junit.jupiter.api.Test
     void getTableImportedKeys() throws SQLException {
 		String tableName = "Businesses_details";
-		List<FKDefinition> res = TableUtils.getTableImportedKeys(dbHelper.getConnection().getMetaData(),
+		List<ForeignKeyDefinition> res = TableUtils.getTableImportedKeys(dbHelper.getConnection().getMetaData(),
 				"test", "test", tableName);
 		assertEquals(1, res.size());
 
-		Map<String, List<FKDefinition>> map = TableUtils.getAllMySQLImportKeys(dbHelper, "ssll");
+		Map<String, List<ForeignKeyDefinition>> map = TableUtils.getAllMySQLImportKeys(dbHelper, "ssll");
 
-		List<FKDefinition> newList = map.get(tableName);
+		List<ForeignKeyDefinition> newList = map.get(tableName);
 
 
 		////这里getTableImportedKeys sFKTable返回的表名是小写的(5.6.21-enterprise-commercial-advanced mac os),不知为什么?
@@ -161,16 +161,16 @@ public class TableUtilsTest {
 
     @org.junit.jupiter.api.Test
     void getTableExportedKeys() throws SQLException {
-		List<FKDefinition> res = TableUtils.getTableExportedKeys(dbHelper.getConnection().getMetaData(),
+		List<ForeignKeyDefinition> res = TableUtils.getTableExportedKeys(dbHelper.getConnection().getMetaData(),
 				"ssll", "ssll", "Businesses");
 		assertEquals(1, res.size());
     }
 
     @org.junit.jupiter.api.Test
     void getAllMySQLExportKeys() throws SQLException {
-		Map<String, List<FKDefinition>> res = TableUtils.getAllMySQLImportKeys(dbHelper, "ssll");
-		for(List<FKDefinition> list: res.values()){
-			for(FKDefinition fk: list){
+		Map<String, List<ForeignKeyDefinition>> res = TableUtils.getAllMySQLImportKeys(dbHelper, "ssll");
+		for(List<ForeignKeyDefinition> list: res.values()){
+			for(ForeignKeyDefinition fk: list){
 				System.out.println(fk.toString());
 			}
 		}
@@ -179,9 +179,9 @@ public class TableUtilsTest {
 
     @org.junit.jupiter.api.Test
     void getAllMySQLImportKeys() throws SQLException {
-		Map<String, List<FKDefinition>> res = TableUtils.getAllMySQLExportKeys(dbHelper, "ssll");
-		for(List<FKDefinition> list: res.values()){
-			for(FKDefinition fk: list){
+		Map<String, List<ForeignKeyDefinition>> res = TableUtils.getAllMySQLExportKeys(dbHelper, "ssll");
+		for(List<ForeignKeyDefinition> list: res.values()){
+			for(ForeignKeyDefinition fk: list){
 				System.out.println(fk.toString());
 			}
 		}

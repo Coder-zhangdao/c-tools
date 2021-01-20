@@ -9,13 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StopWatch;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 /**
  * @author xwx
@@ -98,7 +93,7 @@ public class TableUtils {
     /**
      * Selects the Imported Keys defined for a particular table.
      */
-    public static List<FKDefinition> getTableImportedKeys(
+    public static List<ForeignKeyDefinition> getTableImportedKeys(
             DatabaseMetaData metaData, String catalog, String schema,
             String tableName) throws SQLException {
         String sFKName;
@@ -109,10 +104,10 @@ public class TableUtils {
         short sequence;
         short oldSequence;
         boolean bMore;
-        FKDefinition f;
+        ForeignKeyDefinition f;
         start("getTableImportedKeys");
 
-        List<FKDefinition> foreignKeyData = new ArrayList<>();
+        List<ForeignKeyDefinition> foreignKeyData = new ArrayList<>();
 
 
         ResultSet r = metaData.getImportedKeys(catalog, schema, tableName);
@@ -127,7 +122,7 @@ public class TableUtils {
                 oldSequence = 0;
 
                 boolean existsCol = false;
-                for (FKDefinition dt : foreignKeyData) {
+                for (ForeignKeyDefinition dt : foreignKeyData) {
                     if (dt.getFKColumnName().equalsIgnoreCase(sFKName)) {
                         existsCol = true;
                         break;
@@ -137,7 +132,7 @@ public class TableUtils {
                     continue;
                 }
 
-                f = new FKDefinition(sPKTable, sFKTable, sFKName);
+                f = new ForeignKeyDefinition(sPKTable, sFKTable, sFKName);
                 while (bMore && (sequence > oldSequence)) {
                     sFKColumn = r.getString(8);
                     sPKColumn = r.getString(4);
@@ -161,7 +156,7 @@ public class TableUtils {
     /**
      * Selects the Exported Keys defined for a particular table.
      */
-    public static List<FKDefinition> getTableExportedKeys(
+    public static List<ForeignKeyDefinition> getTableExportedKeys(
             DatabaseMetaData metaData, String catalog, String schema,
             String tableName) throws SQLException {
         String sFKName;
@@ -172,12 +167,12 @@ public class TableUtils {
         short sequence;
         short oldSequence;
         boolean bMore;
-        FKDefinition f;
+        ForeignKeyDefinition f;
 
         start("getTableExportedKeys");
 
 
-        List<FKDefinition> foreignKeyData = new ArrayList<>();
+        List<ForeignKeyDefinition> foreignKeyData = new ArrayList<>();
 
         ResultSet r = metaData.getExportedKeys(catalog, schema, tableName);
         try {
@@ -189,7 +184,7 @@ public class TableUtils {
                 sPKTable = r.getString(3);
                 sequence = r.getShort(9);
                 oldSequence = 0;
-                f = new FKDefinition(sPKTable, sFKTable, sFKName);
+                f = new ForeignKeyDefinition(sPKTable, sFKTable, sFKName);
                 while (bMore && (sequence > oldSequence)) {
                     sFKColumn = r.getString(8);
                     sPKColumn = r.getString(4);
@@ -269,7 +264,7 @@ public class TableUtils {
      * @return
      * @throws SQLException
      */
-    public static Map<String, List<FKDefinition>> getAllMySQLExportKeys(IDbHelper dbHelper, String databaseName) throws SQLException {
+    public static Map<String, List<ForeignKeyDefinition>> getAllMySQLExportKeys(IDbHelper dbHelper, String databaseName) throws SQLException {
         String sql = "SELECT\n" +
                 "    A.REFERENCED_TABLE_NAME AS PKTABLE_NAME,  -- 3*\n" +
                 "    A.REFERENCED_COLUMN_NAME AS PKCOLUMN_NAME, -- 4*\n" +
@@ -286,9 +281,9 @@ public class TableUtils {
                 "    and B.CONSTRAINT_TYPE = 'FOREIGN KEY'        \n" +
                 " ORDER BY A.TABLE_SCHEMA , A.TABLE_NAME , A.ORDINAL_POSITION";
 
-        Map<String, List<FKDefinition>> map = new HashMap<>();
+        Map<String, List<ForeignKeyDefinition>> map = new HashMap<>();
 
-        List<FKDefinition> list = getFkDefinitions(dbHelper, databaseName, sql, map);
+        List<ForeignKeyDefinition> list = getFkDefinitions(dbHelper, databaseName, sql, map);
 
         dump(list);
 
@@ -348,7 +343,7 @@ public class TableUtils {
      * AND A.REFERENCED_TABLE_SCHEMA IS NOT NULL
      * ORDER BY A.REFERENCED_TABLE_SCHEMA , A.REFERENCED_TABLE_NAME , A.ORDINAL_POSITION
      */
-    public static Map<String, List<FKDefinition>> getAllMySQLImportKeys(IDbHelper dbHelper, String databaseName) throws SQLException {
+    public static Map<String, List<ForeignKeyDefinition>> getAllMySQLImportKeys(IDbHelper dbHelper, String databaseName) throws SQLException {
         String sql = "SELECT \t\n" +
                 "    A.REFERENCED_TABLE_NAME AS PKTABLE_NAME,   -- 3 *\n" +
                 "    A.REFERENCED_COLUMN_NAME AS PKCOLUMN_NAME, -- 4 *\t\n" +
@@ -366,16 +361,16 @@ public class TableUtils {
                 "    AND A.REFERENCED_TABLE_SCHEMA IS NOT NULL\n" +
                 "    ORDER BY A.REFERENCED_TABLE_SCHEMA , A.REFERENCED_TABLE_NAME , A.ORDINAL_POSITION";
 
-        Map<String, List<FKDefinition>> map = new HashMap<>();
+        Map<String, List<ForeignKeyDefinition>> map = new HashMap<>();
 
-        List<FKDefinition> list = getFkDefinitions(dbHelper, databaseName, sql, map);
+        List<ForeignKeyDefinition> list = getFkDefinitions(dbHelper, databaseName, sql, map);
 
         dump(list);
 
         return map;
     }
 
-    private static List<FKDefinition> getFkDefinitions(IDbHelper dbHelper, String databaseName, String sql, Map<String, List<FKDefinition>> map) throws SQLException {
+    private static List<ForeignKeyDefinition> getFkDefinitions(IDbHelper dbHelper, String databaseName, String sql, Map<String, List<ForeignKeyDefinition>> map) throws SQLException {
         return dbHelper.executeQuery(sql, new Object[]{databaseName}, new RowMapperResultReader<>((r, index) -> {
 
             String sFKName = r.getString("FK_NAME"); //12
@@ -383,15 +378,15 @@ public class TableUtils {
             String sPKTable = r.getString("PKTABLE_NAME"); //3
             short sequence = r.getShort("KEY_SEQ"); //9
 
-            List<FKDefinition> foreignKeyData = map.computeIfAbsent(sFKTable, k -> new ArrayList<>());
+            List<ForeignKeyDefinition> foreignKeyData = map.computeIfAbsent(sFKTable, k -> new ArrayList<>());
 
-            FKDefinition dt = getFkDefinition(sFKName, foreignKeyData);
+            ForeignKeyDefinition dt = getFkDefinition(sFKName, foreignKeyData);
             if (dt != null) {
                 return dt;
             }
 
 
-            FKDefinition f = new FKDefinition(sPKTable, sFKTable, sFKName);
+            ForeignKeyDefinition f = new ForeignKeyDefinition(sPKTable, sFKTable, sFKName);
             String sFKColumn = r.getString("FKCOLUMN_NAME"); //8
             String sPKColumn = r.getString("PKCOLUMN_NAME"); //4
             f.addField(sFKColumn, sPKColumn);
@@ -402,12 +397,12 @@ public class TableUtils {
         }));
     }
 
-    private static FKDefinition getFkDefinition(String sFKName, List<FKDefinition> foreignKeyData) {
+    private static ForeignKeyDefinition getFkDefinition(String sFKName, List<ForeignKeyDefinition> foreignKeyData) {
         LOG.debug("dump all foreign keys:");
         dump(foreignKeyData);
 
-        for (FKDefinition dt : foreignKeyData) {
-            if (dt.getFKname().equalsIgnoreCase(sFKName)) {
+        for (ForeignKeyDefinition dt : foreignKeyData) {
+            if (dt.getForeignKeyName().equalsIgnoreCase(sFKName)) {
                 LOG.debug("FKName:" + sFKName + " found!");
                 return dt;
             }
@@ -416,8 +411,8 @@ public class TableUtils {
         return null;
     }
 
-    private static void dump(List<FKDefinition> list) {
-        for (FKDefinition fk : list) {
+    private static void dump(List<ForeignKeyDefinition> list) {
+        for (ForeignKeyDefinition fk : list) {
             LOG.debug(fk);
         }
     }
@@ -558,7 +553,7 @@ public class TableUtils {
      * tableNamePattern - 表名称模式；它必须与存储在数据库中的表名称匹配
      * columnNamePattern - 列名称模式；它必须与存储在数据库中的列名称匹配
      */
-    public static List<ColumnData> getColumnData(DatabaseMetaData metaData,
+    public static TableInfo getColumnData(DatabaseMetaData metaData,
                                                  String catalog, String schema, String tableName) throws SQLException {
         start("getColumnData");
         List<ColumnData> colData = new ArrayList<>();
@@ -580,7 +575,6 @@ public class TableUtils {
 
         try {
             while (rs.next()) {
-
 
                 String colName = rs.getString(4);
 
@@ -638,9 +632,104 @@ public class TableUtils {
 
             DbUtils.close(rs);
         }
+        TableInfo tableInfo = new TableInfo(tableName);
+        tableInfo.setFields(colData);
 
-        return colData;
+        boolean isMySQL = metaData.getDriverName().toLowerCase(Locale.ROOT).contains("mysql");
 
+        if(isMySQL) {
+            fillComment(metaData.getConnection(), tableInfo);
+        }
+
+        return tableInfo;
+
+    }
+
+
+    /**
+     * this below two methods are valid only for MySQL
+     * @param conn
+     * @param tableInfo
+     * @return
+     */
+    private static void fillComment(Connection conn, TableInfo tableInfo ) {
+        ResultSet showTableResultSet = null;
+        Statement showTableStatement = null;
+        String tableName =tableInfo.getName();
+        try {
+            showTableStatement = conn.createStatement();
+            showTableResultSet = showTableStatement.executeQuery("show create table " + tableName);
+            showTableResultSet.next();
+            String createTableSql = showTableResultSet.getString(2);
+            fillFieldComment(tableName, tableInfo.getFields(), createTableSql);
+            String comment =  fillTableComment(createTableSql);
+            tableInfo.setComment(comment);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            try {
+                if (showTableResultSet != null) {
+                    showTableResultSet.close();
+                }
+                if (showTableStatement != null) {
+                    showTableStatement.close();
+                }
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+
+    private static  void fillFieldComment(String tableName, List<ColumnData> fields, String tableSql) {
+        String fieldSql = tableSql.substring(tableSql.indexOf("(") + 1, tableSql.lastIndexOf(")"));
+        String[] fieldDescs = org.apache.commons.lang3.StringUtils.split(fieldSql, "\n");
+        Map<String, ColumnData> commentMap = new HashMap<>();
+        for (ColumnData fieldInfo : fields) {
+            commentMap.put(fieldInfo.getName().toUpperCase(), fieldInfo);
+        }
+        for (String fieldDesc : fieldDescs) {
+            String trim = StringUtils.trim(fieldDesc);
+            String fieldName = StringUtils.split(trim, " ")[0].toUpperCase();
+            fieldName = replace(fieldName);
+            String upper = fieldDesc.toUpperCase();
+            if (upper.contains("AUTO_INCREMENT")) {
+                if (Arrays.asList(StringUtils.split(upper, " ")).contains("AUTO_INCREMENT")) {
+                    commentMap.get(fieldName).isAutoIncrement = true;
+                }
+            }
+            if (!fieldDesc.contains("COMMENT")) {
+                continue;
+            }
+            String[] splits = StringUtils.split(trim, "COMMENT");
+            String comment = splits[splits.length - 1];
+            comment = replace(comment);
+            if (commentMap.containsKey(fieldName)) {
+                commentMap.get(fieldName).setComment(comment);
+            } else {
+                LOG.info("table:"+tableName+",fileName:"+fieldDesc);
+            }
+        }
+    }
+
+
+    private static String fillTableComment(String tableSql) {
+        String classCommentTmp = tableSql.substring(tableSql.lastIndexOf("COMMENT=") + 8).trim();
+        classCommentTmp = replace(classCommentTmp);
+        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
+        return classCommentTmp;
+    }
+
+    private static String replace(String classCommentTmp) {
+        classCommentTmp = org.apache.commons.lang3.StringUtils.split(classCommentTmp, " ")[0];
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "'", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ";", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ",", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "`", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\n", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\t", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
+        return classCommentTmp;
     }
 
 

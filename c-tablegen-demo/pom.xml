@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-tools-parent</artifactId>
-            <version>1.0.1-RC7</version>
+            <version>1.0.1-M2</version>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>c-jmesa</artifactId>
-            <version>1.0.1-RC7</version>
+            <version>1.0.1-M2</version>
             <scope>compile</scope>
         </dependency>
 

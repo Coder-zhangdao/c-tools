@@ -1,5 +1,6 @@
 package com.bixuebihui.tablegen;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +18,8 @@ public class DbDiffTest {
 	}
 
 	@Test
-	public void testDumpDiffTabs() {
-		List<String> tab1 =new ArrayList<String>();
+	public void testDumpDiffTabs() throws IOException {
+		List<String> tab1 = new ArrayList<>();
 		tab1.add("tab1");
 		tab1.add("tab3");
 		List<String> tab2 =new ArrayList<>();
@@ -57,42 +58,42 @@ public class DbDiffTest {
 
 
 	@Test
-	public void testDbDiff() throws SQLException{
+	public void testDbDiff() throws SQLException, IOException {
 
-		DatabaseConfig srccfg = new DatabaseConfig();
+		DatabaseConfig config = new DatabaseConfig();
 		String className="com.mysql.jdbc.Driver";
-		srccfg.setClassName(className);
+		config.setClassName(className);
 
-		String dburl="jdbc:mysql://db.issll.com:3306/ssll";
+		String dburl="jdbc:mysql://localhost:3306/ssll";
 		String username="ssll";
 		String password="ssll123";
 
-		srccfg.setDburl(dburl);
-		srccfg.setUsername(username);
-		srccfg.setPassword(password);
-		srccfg.setAlias("srccfg");
+		config.setDburl(dburl);
+		config.setUsername(username);
+		config.setPassword(password);
+		config.setAlias("config");
 
-		System.out.println(srccfg);
-
-
-		DatabaseConfig dstcfg= new DatabaseConfig();
-		dstcfg.setClassName(className);
-		dstcfg.setAlias("dstcfg");
+		System.out.println(config);
 
 
-		dburl="jdbc:mysql://db.issll.com:3306/ssllalpha";
+		DatabaseConfig dstConfig= new DatabaseConfig();
+		dstConfig.setClassName(className);
+		dstConfig.setAlias("dstConfig");
+
+
+		dburl="jdbc:mysql://localhost:3306/ssllalpha";
 		username="ssllalpha";
 		password="ssllalpha123";
 
-		dstcfg.setDburl(dburl);
-		dstcfg.setUsername(username);
-		dstcfg.setPassword(password);
+		dstConfig.setDburl(dburl);
+		dstConfig.setUsername(username);
+		dstConfig.setPassword(password);
 
-		System.out.println(dstcfg);
+		System.out.println(dstConfig);
 
 		DbDiff dd = new DbDiff();
-		dd.db1 = new DbDiff.Database(dd.makeDataSource(srccfg).getConnection().getMetaData());
-		dd.db2 = new DbDiff.Database(dd.makeDataSource(dstcfg).getConnection().getMetaData());
+		dd.db1 = new DbDiff.Database(dd.makeDataSource(config).getConnection().getMetaData());
+		dd.db2 = new DbDiff.Database(dd.makeDataSource(dstConfig).getConnection().getMetaData());
 		dd.compareTables();
 
 
