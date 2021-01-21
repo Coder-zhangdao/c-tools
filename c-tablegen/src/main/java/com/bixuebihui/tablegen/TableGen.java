@@ -446,7 +446,7 @@ public class TableGen implements DiffHandler {
 			Map<String, T_metacolumn> cols = tableData.get(tableName).getColumns();
 			if (cols != null && cols.get(columnName) != null) {
 				T_metacolumn col = cols.get(columnName);
-				res += col == null ? "" : ": " + col.getDescription();
+				res += col == null ? "" : col.getDescription();
 			}
 		}
 		return res;
