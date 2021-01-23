@@ -1327,6 +1327,7 @@ public class TableGen implements DiffHandler {
 		out("}");
 		out("\n");
 
+		out("@Override");
 		out("public void setId(" + this.getPojoClassName(tableName) + " info, " + getFirstKeyType(keyData, columnData) + " id) {");
 		if (isNotEmpty(keyData)) {
 			out("    info.set" + firstUp(keyData.get(0)) + "(id);");
