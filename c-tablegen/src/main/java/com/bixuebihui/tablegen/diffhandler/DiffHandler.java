@@ -1,6 +1,6 @@
 package com.bixuebihui.tablegen.diffhandler;
 
-import com.bixuebihui.tablegen.ColumnData;
+import com.bixuebihui.tablegen.entry.ColumnData;
 
 import java.io.IOException;
 import java.util.HashMap;

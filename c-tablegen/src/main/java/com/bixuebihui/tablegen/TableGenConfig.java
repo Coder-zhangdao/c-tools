@@ -9,4 +9,7 @@ public class TableGenConfig {
 	public static final String METACOLUMN_DICT="t_metacolumn";
 
 	public static final String FILE_ENCODING="UTF-8";
+
+	public static final String PROPERTIES_FILENAME = "tablegen.properties";
+
 }

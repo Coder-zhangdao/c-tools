@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.bixuebihui.dbcon.DatabaseConfig;
 
+import com.bixuebihui.tablegen.entry.ColumnData;
 import org.junit.Assert;
 import org.junit.Test;
 

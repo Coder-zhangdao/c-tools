@@ -1,0 +1,39 @@
+package {{config.packageName}};
+
+{{> [header-comment.java]}}
+
+import com.bixuebihui.jdbc.BaseDao;
+import com.bixuebihui.jdbc.IDbHelper;
+import com.bixuebihui.jdbc.MSDbHelper;
+import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.sql.DataSource;
+
+/**
+* @author xwx
+*/
+@Service
+public abstract class BaseList<T, V> extends BaseDao<T, V> {
+    static MSDbHelper dbHelper0 = new MSDbHelper();
+    static IDbHelper dbHelper1;
+    static {
+        if (mLog.isDebugEnabled()) {
+            ProxyFactory obj = new ProxyFactory(dbHelper0);
+            obj.addAdvice(new DbHelperAroundAdvice());
+            dbHelper1 = (IDbHelper) obj.getProxy();
+        } else {
+            dbHelper1 = dbHelper0;
+        }
+
+    }
+
+    public void setDataSource(DataSource ds) {
+        dbHelper0.setMasterDatasource(ds);
+        dbHelper0.setDataSource(ds);
+        dbHelper = dbHelper1;
+    }
+    protected BaseList(){}
+}

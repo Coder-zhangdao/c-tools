@@ -1,7 +1,7 @@
 package com.bixuebihui.tablegen;
 
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
-import org.apache.commons.dbutils.DbUtils;
+import com.bixuebihui.tablegen.entry.TableInfo;import org.apache.commons.dbutils.DbUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -55,13 +55,13 @@ public class TableGenTest {
 	@Test
 	public void testGetPojoClassName() throws IOException {
 		TableGen tg = new TableGen();
-		tg.prefix="";
+		tg.config.prefix="";
 
 		String extra_setting2="src/main/resources/pojos.xml";
 		String name = "sm_template_suite";
 		Assert.assertEquals("Sm_template_suite", tg.getPojoClassName(name));
 		Map<String, T_metatable> res = tg.getExtraTableDataFromXml(extra_setting2, null);
-		tg.tableData = res;
+		tg.config.setTableDataExt(res);
 
 		Assert.assertEquals("TemplateSuite", tg.getPojoClassName(name));
 	}
@@ -113,7 +113,7 @@ public class TableGenTest {
 					.getFile());
 			tg.connect();
 			tg.getTableData();
-			LinkedHashMap<String, TableInfo> tables = tg.getTableInfos();
+			LinkedHashMap<String, TableInfo> tables = tg.setInfo.getTableInfos();
 			for(TableInfo t:tables.values()){
 				System.out.println(t);
 			}
@@ -134,7 +134,7 @@ public class TableGenTest {
 					.getFile());
 			tg.connect();
 			tg.getTableData();
-			boolean res  = tg.initTableData(tg.getTableInfos());
+			boolean res  = tg.initTableData(tg.setInfo.getTableInfos());
 			Assert.assertTrue(res);
 		}catch(BatchUpdateException e){
 			e.getNextException().printStackTrace();

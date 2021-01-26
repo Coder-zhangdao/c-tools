@@ -1,6 +1,9 @@
 package com.bixuebihui.dbcon;
 
 import com.bixuebihui.filter.IFilter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Properties;
 
 /**
  * 数据库(链接池)的基本参数
@@ -311,4 +314,16 @@ public class DatabaseConfig
     public void setRemoveAbandoned(boolean removeAbandoned) {
         this.removeAbandoned = removeAbandoned;
     }
+
+    public void readDbConfig(Properties props) {
+        setAlias(props.getProperty("alias"));
+        setClassName(props.getProperty("className"));
+        setDburl(props.getProperty("dburl"));
+        setUsername(props.getProperty("username"));
+        setPassword(props.getProperty("password"));
+        if (StringUtils.trimToNull(getAlias()) == null) {
+            setAlias("defaultdbcpalias");
+        }
+    }
+
 }

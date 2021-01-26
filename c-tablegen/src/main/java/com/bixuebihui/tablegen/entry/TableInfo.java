@@ -1,4 +1,6 @@
-package com.bixuebihui.tablegen;
+package com.bixuebihui.tablegen.entry;
+
+import com.bixuebihui.tablegen.entry.ColumnData;
 
 import java.util.List;
 

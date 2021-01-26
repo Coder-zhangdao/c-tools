@@ -38,6 +38,10 @@ import com.bixuebihui.tablegen.dbinfo.ProcedureInfo;
 import com.bixuebihui.tablegen.dbinfo.ProcedureParameterInfo;
 import com.bixuebihui.tablegen.dbinfo.ProcedureUtils;
 import com.bixuebihui.tablegen.diffhandler.DiffHandler;
+import com.bixuebihui.tablegen.entry.ColumnData;
+import com.bixuebihui.tablegen.entry.TableInfo;
+import com.bixuebihui.tablegen.entry.TableSetInfo;
+import com.bixuebihui.tablegen.generator.PojoGenerator;
 import com.bixuebihui.util.other.CMyFile;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.FileUtils;
@@ -56,7 +60,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static com.bixuebihui.tablegen.NameUtils.columnNameToFieldName;
+import static com.bixuebihui.tablegen.NameUtils.*;
+import static com.bixuebihui.tablegen.TableGenConfig.PROPERTIES_FILENAME;
 
 /**
  * 思路决定出路，创新才有发展，整合才能壮大
@@ -71,49 +76,13 @@ public class TableGen implements DiffHandler {
 	public static final String BUSINESS = "business";
 	private static final Log LOG = LogFactory.getLog(TableGen.class);
 	static String[] genericFiles = { "BaseList" };
-	String catalog;
-	String packageName;
-	String srcDir;
-	String testDir;
-	String resourceDir;
-	String jspDir;
-	String schema;
-	String prefix;
-	String versionColName = "version";
-	boolean indexes;
-	boolean overWriteAll = false;
-	boolean kuozhanbiao = false;
-	boolean use_annotation = false;
-	boolean keep_case = false;
-	boolean use_autoincrement = false;
-	boolean generate_procedures = true;
+
+	ProjectConfig config = new ProjectConfig();
 
 	DatabaseMetaData metaData;
 	BufferedWriter currentOutput;
-	Map<String, T_metatable> tableData;
-	/**
-	 * If the extended table is available, each table can implement the following interfaces
-	 */
-	String pojo_node_interface;
-	String pojo_version_interface;
-	String pojo_state_interface;
-	String pojo_uuid_interface;
-	String pojo_modifydate_interface;
-	List<String> pojo_node_interface_list;
-	List<String> pojo_version_interface_list;
-	List<String> pojo_state_interface_list;
-	List<String> pojo_uuid_interface_list;
-	List<String> pojo_modifydate_interface_list;
 
-	/**
-	 * names of tables to generate for. If null we do all.
- 	 */
-	Map<String, String> tablesList;
-	Map<String, String> excludeTablesList;
-	/**
-	 * additional settings, used for comments, data checking, interfaces, etc.
-	 */
-	String extra_setting;
+
 	IDbHelper dbHelper = null;
 	T_metatableManager daoMetaTable = null;
 	/**
@@ -124,20 +93,15 @@ public class TableGen implements DiffHandler {
 	 * Whether the generation is successful
 	 */
 	private boolean generateFlag = true;
-	private String tableOwner;
+
 	private boolean traceEnable = false;
 	private Connection connection;
-	private final Map<String, List<ForeignKeyDefinition>> foreignKeyImCache = new LRULinkedHashMap<>(
-			400);
-	private final Map<String, List<String>> keyCache = new LRULinkedHashMap<>(500);
-	private final Map<String, List<String>> indexCache = new LRULinkedHashMap<>(200);
-	private final Map<String, List<ForeignKeyDefinition>> foreignKeyExCache = new LRULinkedHashMap<>(
-			400);
-	private LinkedHashMap<String, TableInfo> tableInfos;
-	private DatabaseConfig dbconfig;
+
+	TableSetInfo setInfo = new TableSetInfo();
+
+
+	private DatabaseConfig dbconfig = new DatabaseConfig();
 	private PrintStream console = System.out;
-	private String propertiesFilename;
-	private Properties configProperties;
 
 	public TableGen(OutputStream outputStream) {
 		initConsole(outputStream);
@@ -152,10 +116,14 @@ public class TableGen implements DiffHandler {
 	 *
 	 * @throws SQLException
 	 */
-	public static void main(String[] argv) throws SQLException {
+	public static void   main(String[] argv) throws SQLException {
 		TableGen us = new TableGen();
 
 		if (argv.length >= 1) {
+			if("--help".equals(argv[0])){
+				usageAndExit(0);
+				return;
+			}
 			us.run(argv[0]);
 		} else {
 			us.run(null);
@@ -167,7 +135,7 @@ public class TableGen implements DiffHandler {
 	 * Displays the usage of the TableGen program and exits with the error code.
 	 */
 	public static void usageAndExit(int code) {
-		System.err.println("Usage: java TableGen properties_file_name");
+		System.err.println("Usage: java com.bixuebihui.tablegen.TableGen properties_file_name");
 		System.exit(code);
 	}
 
@@ -247,7 +215,7 @@ public class TableGen implements DiffHandler {
 			 * 如果generator_all == yes，则生成所有表 否则，进行本地快照和数据库的比对
 			 */
 			generateBaseList();
-			if ("yes".equals(configProperties.getProperty("generate_all"))) {
+			if (config.generateAll) {
 
 
 				generatePojos();
@@ -258,12 +226,12 @@ public class TableGen implements DiffHandler {
 				generateWebUI();
 
 				generateTest();
-				if(jspDir!=null) {
+				if(config.jspDir!=null) {
 					generateJsp();
 				}
 				generateSpringXml();
 
-				if (generate_procedures) {
+				if (config.generate_procedures) {
 					generateStoreProcedures();
 				}
 			} else {
@@ -293,10 +261,10 @@ public class TableGen implements DiffHandler {
 
 		info("Generating spring-dal.xml (if it exists before) : ");
 
-		String fileName = this.resourceDir + File.separator + "config" + File.separator + "spring-dal.xml";
+		String fileName = this.config.resourceDir + File.separator + "config" + File.separator + "spring-dal.xml";
 		try {
 			Map<String, String> beans = new HashMap<>();
-			for (TableInfo table: getTableInfos().values()) {
+			for (TableInfo table: setInfo.getTableInfos().values()) {
 				beans.put(NameUtils.firstLow(table.getName(), false)
 						+ MANAGER_SUFFIX, getBusFullClassName(table.getName()));
 			}
@@ -328,17 +296,17 @@ public class TableGen implements DiffHandler {
 			info("Generating Store Procedures : ");
 
 			TableInfo table = new TableInfo("Procedures");
-			String fileName = getBaseSrcDir() + File.separator + "stub" + File.separator + table.getName() + ".java";
+			String fileName = config.getBaseSrcDir() + File.separator + "stub" + File.separator + table.getName() + ".java";
 			currentOutput = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
 			writeHeader(table, "stub", "extends BaseList<Object, Object>");
 
-			List<ProcedureInfo> proc = ProcedureUtils.getProcedure(metaData, catalog, schema, tableOwner, null, null);
+			List<ProcedureInfo> proc = ProcedureUtils.getProcedure(metaData, config.catalog, config.schema, config.tableOwner, null, null);
 
 			for (ProcedureInfo info : proc) {
 				List<ProcedureParameterInfo> rs = ProcedureUtils.getProcedureColumns(metaData, info);
-				String str = ProcedureGen.process(info, rs, keep_case);
+				String str = ProcedureGen.process(info, rs);
 				out(str);
 			}
 
@@ -391,10 +359,9 @@ public class TableGen implements DiffHandler {
 
 	private String getCachedColumnDataFilePath() {
 
-		String baseDir = getConfigBaseDir(propertiesFilename);
 		String src_dir = "target";
 
-		return  baseDir + File.separator + src_dir + File.separator + "gen_column_data.cache";
+		return  config.getBaseDir()+ File.separator + src_dir + File.separator + "gen_column_data.cache";
 	}
 
 	private String getCachedTableDataFilePath() {
@@ -418,7 +385,7 @@ public class TableGen implements DiffHandler {
 
 
 	protected String getTableComment(String tableName) {
-		if (kuozhanbiao) {
+		if (config.kuozhanbiao) {
 			DictionaryItem item = DictionaryCache
 					.byId(TableGenConfig.METATABLE_DICT + DictionaryCache.KEY_SEPARATOR + tableName);
 			return item == null ? tableName : item.getValue();
@@ -429,7 +396,7 @@ public class TableGen implements DiffHandler {
 
 	private String getColumnDescription(String tableName, String columnName) {
 		String res;
-		if (kuozhanbiao) {
+		if (config.kuozhanbiao) {
 			DictionaryItem item = null;
 			try {
 				item = DictionaryCache.byId(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
@@ -442,18 +409,16 @@ public class TableGen implements DiffHandler {
 			res = columnName;
 		}
 
-		if (tableData != null && tableData.get(tableName) != null) {
-			Map<String, T_metacolumn> cols = tableData.get(tableName).getColumns();
-			if (cols != null && cols.get(columnName) != null) {
-				T_metacolumn col = cols.get(columnName);
-				res += col == null ? "" : col.getDescription();
-			}
+		Map<String, T_metacolumn> cols = setInfo.getColumnsExtInfo(tableName);
+		if (cols != null && cols.get(columnName) != null) {
+			T_metacolumn col = cols.get(columnName);
+			res += col == null ? "" : col.getDescription();
 		}
 		return res;
 	}
 
 	private int getTableIdByName(String tableName) {
-		if (kuozhanbiao) {
+		if (config.kuozhanbiao) {
 			DictionaryItem item = null;
 			try {
 				item = DictionaryCache.byValue(
@@ -471,17 +436,17 @@ public class TableGen implements DiffHandler {
 
 		try {
 
-			for (TableInfo table: getTableInfos().values()) {
+			for (TableInfo table: setInfo.getTableInfos().values()) {
 				String tableName = table.getName();
 				info("Generating JSPs : " + tableName);
 
-				String fileName = jspDir + File.separator + "list" + File.separator + prefix + tableName.toLowerCase()
+				String fileName = config.jspDir + File.separator + "list" + File.separator + config.prefix + tableName.toLowerCase()
 						+ "_list.jsp";
 				currentOutput = new BufferedWriter(
 						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
 				getColumnData(table);
-				String baseDir = packageName + ".";
+				String baseDir = config.packageName + ".";
 				String serviceName = getPojoClassName(tableName) + "Manager";
 				String controlerName = getPojoClassName(tableName) + "WebUI";
 
@@ -517,19 +482,19 @@ public class TableGen implements DiffHandler {
 
 			// generate index list of all jsp
 
-			info("Generating JSP index list : " + this.packageName + File.separator + "list" + File.separator
+			info("Generating JSP index list : " + config.packageName + File.separator + "list" + File.separator
 					+ "index.jsp");
 
-			String fileName = jspDir + File.separator + "list" + File.separator + "index.jsp";
+			String fileName = config.jspDir + File.separator + "list" + File.separator + "index.jsp";
 			currentOutput = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 			// BufferedWriter(new
 			out("<%@ page language=\"java\" import=\"java.util.*\" pageEncoding=\"UTF-8\"%>\n" + "<html>\n" + "<head>\n"
 					+ "</head>\n" + "<body><ul>\n");
 
-			for (TableInfo table: getTableInfos().values()) {
+			for (TableInfo table: setInfo.getTableInfos().values()) {
 				String tableName = table.getName();
-				String href = prefix + tableName.toLowerCase() + "_list.jsp";
+				String href = config.prefix + tableName.toLowerCase() + "_list.jsp";
 
 				out("\t<li><a href='" + href + "' target=\"mainForm\" >" + tableName.toLowerCase()
 						+ "</a>&nbsp;<a href='" + href + "?editable=true' target=\"mainForm\" >" + "编辑</a></li>\n");
@@ -546,10 +511,10 @@ public class TableGen implements DiffHandler {
 
 	private void generateTest() throws SQLException {
 		try {
-			for (TableInfo  table: getTableInfos().values()) {
+			for (TableInfo  table: setInfo.getTableInfos().values()) {
 				String tableName = table.getName();
 				info("Generating TESTs : " + tableName);
-				String baseDir = testDir + File.separator + packageName2Dir(packageName);
+				String baseDir = config.testDir + File.separator + config.packageName2Dir(config.packageName);
 				String fileName = baseDir + File.separator + BUSINESS + File.separator + getPojoClassName(tableName)
 						+ "ManagerTest.java";
 				File f = new File(fileName);
@@ -634,215 +599,19 @@ public class TableGen implements DiffHandler {
 	 * </TABLE>
 	 */
 	public synchronized void init(String filename) {
-		if (filename == null) {
-			propertiesFilename = "tablegen.properties";
-		} else {
-			propertiesFilename = filename;
-		}
-
-		String baseDir = getConfigBaseDir(propertiesFilename);
+		String propertiesFilename = filename!=null ? filename : PROPERTIES_FILENAME;
 
 		try ( FileInputStream fis = new FileInputStream(propertiesFilename) ){
 			Properties props = new Properties();
 
 			props.load(fis);
 
-			configProperties = props;
+			dbconfig.readDbConfig(props);
 
-			dbconfig = new DatabaseConfig();
-			dbconfig.setAlias(props.getProperty("alias"));
-			dbconfig.setClassName(props.getProperty("className"));
-			dbconfig.setDburl(props.getProperty("dburl"));
-			dbconfig.setUsername(props.getProperty("username"));
-			dbconfig.setPassword(props.getProperty("password"));
-			if (StringUtils.trimToNull(dbconfig.getAlias()) == null) {
-				dbconfig.setAlias("defaultdbcpalias");
-			}
-
-			srcDir = baseDir + props.getProperty("src_dir");
-			LOG.debug("src_dir:" + srcDir);
-			resourceDir = baseDir + props.getProperty("resource_dir");
-			LOG.debug("resource_dir:" + resourceDir);
-
-			if(StringUtils.isEmpty(resourceDir)) {
-				resourceDir = srcDir;
-			}
-
-			testDir = baseDir + props.getProperty("test_dir");
-			LOG.debug("test_dir:" + testDir);
-			jspDir = baseDir + props.getProperty("jsp_dir");
-			LOG.debug("jsp_dir:" + jspDir);
-			packageName = props.getProperty("package_name");
-			LOG.debug("package_name:" + packageName);
-			schema = props.getProperty("schema");
-			LOG.debug("schema:" + schema);
-			tableOwner = props.getProperty("table_owner");
-			LOG.debug("table_owner:" + tableOwner);
-
-			indexes = getBooleanCfg(props, "indexes");
-			kuozhanbiao = getBooleanCfg(props, "kuozhanbiao");
-
-			generate_procedures = getBooleanCfg(props, "generate_procedures");
-
-			prefix = props.getProperty("prefix");
-			if (prefix == null) {
-				prefix = "";
-			}
-
-			parseTableNames(props.getProperty("table_list"));
-			parseExcludeTableNames(props.getProperty("exclude_table_list"));
-
-			// 有扩展表时用以下interface的设置值
-			pojo_node_interface = props.getProperty("pojo_node_interface");
-			pojo_version_interface = props.getProperty("pojo_version_interface");
-			pojo_state_interface = props.getProperty("pojo_state_interface");
-			pojo_uuid_interface = props.getProperty("pojo_uuid_interface");
-			pojo_modifydate_interface = props.getProperty("pojo_modifydate_interface");
-
-			pojo_node_interface_list = makeList(props.getProperty("pojo_node_interface_list"));
-			pojo_version_interface_list = makeList(props.getProperty("pojo_version_interface_list"));
-			pojo_state_interface_list = makeList(props.getProperty("pojo_state_interface_list"));
-			pojo_uuid_interface_list = makeList(props.getProperty("pojo_uuid_interface_list"));
-			pojo_modifydate_interface_list = makeList(props.getProperty("pojo_modifydate_interface_list"));
-
-			overWriteAll = getBooleanCfg(props, "over_write_all");
-			use_annotation = getBooleanCfg(props, "use_annotation");
-			keep_case = getBooleanCfg(props, "keep_case");
-			use_autoincrement = getBooleanCfg(props, "use_autoincrement");
-
-			extra_setting = props.getProperty("extra_setting");
+			config.readFrom(props, getConfigBaseDir(propertiesFilename));
 
 		} catch (IOException e) {
 			e.printStackTrace(console);
-		}
-	}
-
-	private List<String> makeList(String property) {
-		List<String> res = new ArrayList<>();
-		if (StringUtils.isNotEmpty(property)) {
-			res.addAll(Arrays.asList(property.trim().split(",")));
-		}
-		return res;
-	}
-
-	private String getConfigBaseDir(String propertiesFilename) {
-		int i = propertiesFilename.lastIndexOf(File.separator) + 1;
-		return  propertiesFilename.substring(0, i);
-	}
-
-	private boolean getBooleanCfg(Properties props, String key) {
-		return "yes".equalsIgnoreCase(props.getProperty(key));
-	}
-
-	public String getInterface(String tableName) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(" implements Serializable");
-
-		T_metatable tab = getTableDetail(tableName);
-		if (tab != null) {
-			if (tab.getIsnode()) {
-				sb.append(", ").append(this.pojo_node_interface);
-			}
-			if (tab.getIsstate()) {
-				sb.append(", ").append(this.pojo_state_interface);
-			}
-			if (tab.getIsversion()) {
-				sb.append(", ").append(this.pojo_version_interface);
-			}
-			if (tab.getIsmodifydate()) {
-				sb.append(", ").append(this.pojo_modifydate_interface);
-			}
-			if (tab.getIsuuid()) {
-				sb.append(", ").append(this.pojo_uuid_interface);
-			}
-			if (StringUtils.isNotBlank(tab.getExtrainterfaces())) {
-				sb.append(", ").append(tab.getExtrainterfaces());
-			}
-		}
-		return sb.toString();
-	}
-
-	private T_metatable getTableDetail(String tableName) {
-		T_metatable res;
-		if (tableData != null) {
-			res = tableData.get(tableName);
-		} else {
-			res = new T_metatable();
-			boolean any = false;
-			if (this.pojo_node_interface_list.contains(tableName)) {
-				res.setIsnode(true);
-				any = true;
-			}
-			if (this.pojo_state_interface_list.contains(tableName)) {
-				res.setIsstate(true);
-				any = true;
-			}
-			if (this.pojo_version_interface_list.contains(tableName)) {
-				res.setIsversion(true);
-				any = true;
-			}
-			if (this.pojo_modifydate_interface_list.contains(tableName)) {
-				res.setIsmodifydate(true);
-				any = true;
-			}
-			if (this.pojo_uuid_interface_list.contains(tableName)) {
-				res.setIsuuid(true);
-				any = true;
-			}
-			if (!any) {
-				res = null;
-			}
-		}
-		return res;
-	}
-
-	private String getPojoExtendsClasses(String tableName) {
-		if (tableData != null) {
-			T_metatable tab = tableData.get(tableName);
-			if (tab != null) {
-				StringBuilder sb = new StringBuilder();
-				if (StringUtils.isNotBlank(tab.getExtrasuperclasses())) {
-					sb.append(", extends ").append(tab.getExtrasuperclasses());
-				}
-				return sb.toString();
-			}
-		}
-		return "";
-	}
-
-	/**
-	 * Parses a comma separated list of table names into the tablesList List.
-	 */
-	void parseTableNames(String names) {
-		if (names != null) {
-			if (tablesList == null) {
-				tablesList = new Hashtable<>();
-			}
-			StringTokenizer st = new StringTokenizer(names, ",");
-			String name;
-			while (st.hasMoreElements()) {
-				name = st.nextToken().trim();
-				tablesList.put(name, name);
-				info(name);
-			}
-		}
-	}
-
-	/**
-	 * Parses a comma separated list of table names into the tablesList List.
-	 */
-	void parseExcludeTableNames(String names) {
-		if (names != null) {
-			if (excludeTablesList == null) {
-				excludeTablesList = new Hashtable<>();
-			}
-			StringTokenizer st = new StringTokenizer(names, ",");
-			String name;
-			while (st.hasMoreElements()) {
-				name = st.nextToken().trim();
-				excludeTablesList.put(name, name);
-				info("exclude table: " + name);
-			}
 		}
 	}
 
@@ -863,9 +632,6 @@ public class TableGen implements DiffHandler {
 		info("Driver Version : " + metaData.getDriverMajorVersion() + "." + metaData.getDriverMinorVersion());
 	}
 
-	public Map<String, T_metatable> getTableDataExt() {
-		return tableData;
-	}
 
 	/**
 	 * Retrieves all the table data required.
@@ -885,27 +651,27 @@ public class TableGen implements DiffHandler {
 			connect();
 		}
 
-		LinkedHashMap<String, TableInfo> col = getTableInfos();
+		LinkedHashMap<String, TableInfo> col = setInfo.getTableInfos();
 
 		if (CollectionUtils.isEmpty(col)) {
 			List<String> tableNames =
-					TableUtils.getTableData(metaData, catalog, schema, tableOwner, tablesList, excludeTablesList);
+					TableUtils.getTableData(metaData, config.catalog, config.schema, config.tableOwner, config.tablesList, config.excludeTablesList);
 			LinkedHashMap<String, TableInfo> tables =new LinkedHashMap<>();
 			for(String name: tableNames){
 				tables.put(name, new TableInfo(name));
 			}
-			setTableInfos(tables);
+			setInfo.setTableInfos(tables);
 		} else {
 			info("tableNames already set, retrieve from db skipped.");
 		}
 
-		if (this.kuozhanbiao) {
-			tableData = getTableDataExt(getTableInfos());
+		if (config.kuozhanbiao) {
+			setInfo.setTableDataExt( getTableDataExt(setInfo.getTableInfos()));
 		}
 
-		if (StringUtils.isNotEmpty(this.extra_setting)) {
-			String baseDir = getConfigBaseDir(propertiesFilename);
-			tableData = getExtraTableDataFromXml(baseDir + this.extra_setting, tableData);
+		if (StringUtils.isNotEmpty(config.extra_setting)) {
+			setInfo.setTableDataExt( getExtraTableDataFromXml(
+					config.getBaseDir() + config.extra_setting, setInfo.getTableDataExt()));
 		}
 
 	}
@@ -931,43 +697,33 @@ public class TableGen implements DiffHandler {
 
 	public boolean makeDir() {
 		boolean res = true;
-		String baseDir = getBaseSrcDir();
+		String baseDir = config.getBaseSrcDir();
 		res = res && CMyFile.makeDir(baseDir, true);
-		res = res && CMyFile.makeDir(resourceDir + File.separator + "config", true);
+		res = res && CMyFile.makeDir(config.resourceDir + File.separator + "config", true);
 
 		res = CMyFile.makeDir(baseDir + File.separator + "pojo", true) && res;
 		res = CMyFile.makeDir(baseDir + File.separator + "dal", false) && res;
 		res = CMyFile.makeDir(baseDir + File.separator + BUSINESS, false) && res;
 		res = CMyFile.makeDir(baseDir + File.separator + "web", true) && res;
-		res = CMyFile.makeDir(testDir + File.separator + packageName2Dir(packageName) + File.separator + BUSINESS,
+		res = CMyFile.makeDir(config.testDir + File.separator + config.packageName2Dir(config.packageName) + File.separator + BUSINESS,
 				true) && res;
-		res = CMyFile.makeDir(jspDir + File.separator + "list", true) && res;
+		res = CMyFile.makeDir(config.jspDir + File.separator + "list", true) && res;
 
 		res = CMyFile.makeDir(baseDir + File.separator + "stub", false) && res;
 		return res;
 	}
 
-	private String getBaseSrcDir() {
-		return srcDir + File.separator + packageName2Dir(packageName);
-	}
 
-	private String packageName2Dir(String packageName) {
-		if (packageName == null) {
-			return null;
-		} else {
-			return packageName.replaceAll("\\.", "\\" + File.separator);
-		}
-	}
 
 	public void generateBaseList() throws SQLException {
 		try {
 			info("Generating BaseList : ");
-			String baseDir = getBaseSrcDir();
+			String baseDir = config.getBaseSrcDir();
 
 			String fileName = baseDir + File.separator + "BaseList.java";
 			File f = new File(fileName);
 
-			if (overWriteAll || !f.exists()) {
+			if (config.overWriteAll || !f.exists()) {
 				currentOutput = new BufferedWriter(
 						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
@@ -975,7 +731,7 @@ public class TableGen implements DiffHandler {
 				out("      @Autowired");
 				out("      DataSource ds;");
 				out(" public BaseList(){");
-				String lastName = packageName.substring(packageName.lastIndexOf('.') + 1);
+				String lastName = config.packageName.substring(config.packageName.lastIndexOf('.') + 1);
 				out("// try {");
 				out("//    dbHelper = (IDbHelper) BeanFactory.createObjectById(\"" + lastName + "DbHelper\");");
 				out("//    }catch (Exception e ) { ");
@@ -1009,7 +765,7 @@ public class TableGen implements DiffHandler {
 	 */
 	public void generatePojos() throws SQLException, IOException {
 
-		for (TableInfo table: getTableInfos().values()) {
+		for (TableInfo table: setInfo.getTableInfos().values()) {
 			info("Generating pojos : " + table.getName());
 			generatePojo(table);
 		}
@@ -1023,7 +779,7 @@ public class TableGen implements DiffHandler {
 	 */
 	public void generatePojo(TableInfo table) throws IOException {
 		String tableName = table.getName();
-		String baseDir = getBaseSrcDir();
+		String baseDir = config.getBaseSrcDir();
 
 		String fileName = baseDir + File.separator + "pojo" + File.separator + getPojoClassName(tableName)
 				+ ".java";
@@ -1034,8 +790,8 @@ public class TableGen implements DiffHandler {
 
 			List<ColumnData> colData = getColumnData(table).getFields();
 
-			String interfaces = this.getInterface(tableName);
-			writeHeader(table, "pojo", interfaces + this.getPojoExtendsClasses(tableName));
+			String interfaces = setInfo.getInterface(tableName, config);
+			writeHeader(table, "pojo", interfaces + PojoGenerator.getExtendsClasses(setInfo,tableName));
 
 			// handle the variables
 			for (ColumnData e2 : colData) {
@@ -1046,7 +802,7 @@ public class TableGen implements DiffHandler {
 			// handle the variable access functions (set/get)
 			for (ColumnData e2 : colData) {
 				writeSetGet(tableName, e2);
-				if ("relation_code".equalsIgnoreCase(e2.name)) {
+				if ("relation_code".equalsIgnoreCase(e2.getName())) {
 					findNode = true;
 				}
 			}
@@ -1054,8 +810,8 @@ public class TableGen implements DiffHandler {
 			if (interfaces.contains("NodeInterface") && !findNode) {
 				ColumnData col = new ColumnData("relation_code", 12, 0, false, false, 0, "",
 						"hack code for relation_code( to fit NodeInterface), not for use!");
-				out("// " + col.remarks);
-				out("// " + col.comment);
+				out("// " + col.getRemarks());
+				out("// " + col.getComment());
 				writeVariable(tableName, col);
 				writeSetGet(tableName, col);
 			}
@@ -1112,13 +868,13 @@ public class TableGen implements DiffHandler {
 
 			String tableName = table.getName();
 			info("Generating DALs : " + tableName);
-			String baseDir = getBaseSrcDir();
+			String baseDir = config.getBaseSrcDir();
 			String fileName = baseDir + File.separator + "dal" + File.separator + getPojoClassName(tableName)
 					+ "List.java";
 			currentOutput = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING), 10240);// new
 
-			List<ColumnData> colData = getColumnData(table).fields;
+			List<ColumnData> colData = getColumnData(table).getFields();
 
 			List<String> keyData = getTableKeys(tableName); // updates the keyData variable
 
@@ -1177,14 +933,14 @@ public class TableGen implements DiffHandler {
 
 			foreignKeyData = getTableExportedKeys(tableName);
 			for (ForeignKeyDefinition fkEnum : foreignKeyData) {
-				writeExportedMethods( fkEnum, getColumnData(tableInfos.get(fkEnum.primaryKeyTableName)).fields);
+				writeExportedMethods( fkEnum, getColumnData(setInfo.getTableInfos().get(fkEnum.primaryKeyTableName)).getFields());
 			}
 
 
 			sw.split();
 			trace("foreignKeys :" + sw.getSplitTime());
 
-			if (indexes) {
+			if (config.indexes) {
 				List<String> indexData = getTableIndexes(tableName); // updates the indexData
 				// variable
 				if (isNotEmpty(indexData)) {
@@ -1216,7 +972,7 @@ public class TableGen implements DiffHandler {
 
 	private boolean containsVersion(List<ColumnData> cols) {
 		for (ColumnData col : cols) {
-			if (col.getName().equalsIgnoreCase(versionColName)) {
+			if (col.getName().equalsIgnoreCase(config.versionColName)) {
 				return true;
 			}
 		}
@@ -1227,7 +983,7 @@ public class TableGen implements DiffHandler {
 	 * Generates the Data Access Layer for each table.
 	 */
 	public void generateDALs() {
-		for (TableInfo table :  getTableInfos().values()) {
+		for (TableInfo table :  setInfo.getTableInfos().values()) {
 			generateDAL(table);
 		}
 	}
@@ -1257,8 +1013,8 @@ public class TableGen implements DiffHandler {
 				fieldsAll.append(",");
 			}
 
-			if (!(use_autoincrement && cd.isAutoIncrement)) {
-				if (cd.getName().equalsIgnoreCase(versionColName)){
+			if (!(config.use_autoincrement && cd.isAutoIncrement())) {
+				if (cd.getName().equalsIgnoreCase(config.versionColName)){
 					update.append(cd.getName() + " = " + cd.getName() + "+1");
 				}else{
 					update.append(cd.getName() + "=?");
@@ -1300,7 +1056,7 @@ public class TableGen implements DiffHandler {
 	private void writeObjs(String tableName, List<String> params, List<ColumnData> columnData) throws IOException {
 
 		out("@Override\nprotected Object[] getInsertObjs(" + this.getPojoClassName(tableName) + " info){\n    return new Object[]{"
-				+ this.makeInsertObjects(use_autoincrement, columnData) + "};\n}\n");
+				+ this.makeInsertObjects(config.use_autoincrement, columnData) + "};\n}\n");
 		out("@Override\nprotected Object[] getUpdateObjs(" + this.getPojoClassName(tableName) + " info){\n    return new Object[]{"
 				+ this.makeUpdateObjects(params, columnData) + "};\n}\n");
 
@@ -1360,15 +1116,15 @@ public class TableGen implements DiffHandler {
 	String getPojoClassName(String tableName) {
 		String classname = tableName2ClassName(tableName);
 		if (tableName.equals(classname)) {
-			return prefix + firstUp(tableName);
+			return config.prefix + firstUp(tableName);
 		} else {
-			return prefix + classname;
+			return config.prefix + classname;
 		}
 	}
 
 	private String tableName2ClassName(String tableName) {
-		if (tableData != null && tableData.get(tableName) != null) {
-			String alias = tableData.get(tableName).getClassname();
+		if (setInfo.getTableDataExt()  != null && setInfo.getTableDataExt() .get(tableName) != null) {
+			String alias = setInfo.getTableDataExt() .get(tableName).getClassname();
 
 			LOG.debug("Pojo class alias is: " + alias);
 
@@ -1382,7 +1138,7 @@ public class TableGen implements DiffHandler {
 	public void generateBusiness(TableInfo table) {
 		String tableName = table.getName();
 		info("Generating business : " + tableName);
-		String baseDir = getBaseSrcDir();
+		String baseDir = config.getBaseSrcDir();
 		String fileName = baseDir + File.separator + BUSINESS + File.separator + getPojoClassName(tableName)
 				+ "Manager.java";
 		File f = new File(fileName);
@@ -1414,7 +1170,7 @@ public class TableGen implements DiffHandler {
 	 * Generates the plane java model for each table.
 	 */
 	public void generateBusinesses() {
-		for (TableInfo table : getTableInfos().values()) {
+		for (TableInfo table : setInfo.getTableInfos().values()) {
 			generateBusiness(table);
 		}
 	}
@@ -1424,19 +1180,19 @@ public class TableGen implements DiffHandler {
 	 */
 	public void generateWebUI() throws SQLException {
 		try {
-			for (TableInfo table: getTableInfos().values()) {
+			for (TableInfo table: setInfo.getTableInfos().values()) {
 				String tableName = table.getName();
 				info("Generating web UI : " + tableName);
-				String baseDir = getBaseSrcDir();
+				String baseDir = config.getBaseSrcDir();
 				String fileName = baseDir + File.separator + "web" + File.separator + getPojoClassName(tableName)
 						+ "WebUI.java";
 				File f = new File(fileName);
 				boolean fileExists = f.exists();
-				if (overWriteAll || !fileExists) {
+				if (config.overWriteAll || !fileExists) {
 					currentOutput = new BufferedWriter(
 							new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
-					List<ColumnData> colData = getColumnData(table).fields;
+					List<ColumnData> colData = getColumnData(table).getFields();
 					List<String> keyData = getTableKeys(tableName);
 					writeHeader(table, "web", " extends AbstractWebUI" + getGeneticType(table));
 					out("");
@@ -1517,12 +1273,12 @@ public class TableGen implements DiffHandler {
 	private String getGeneticType(TableInfo  table) throws GenException, SQLException {
 		String tableName =  table.getName();
 		List<String> keyData = getTableKeys(tableName);
-		List<ColumnData> columnData= getColumnData(table).fields;
+		List<ColumnData> columnData= getColumnData(table).getFields();
 		return "<" + getPojoClassName(tableName) + "," + getFirstKeyType(keyData, columnData) + ">";
 	}
 
 	void writeBaseHeader() throws IOException {
-		out("package " + packageName + ";");
+		out("package " + config.packageName + ";");
 		out("/**");
 		out("  * BaseList");
 		writeHeaderComment();
@@ -1547,7 +1303,7 @@ public class TableGen implements DiffHandler {
 	 * Generates the container/database access functions for each table.
 	 */
 	void writeHeader(TableInfo table, String subPackage, String extClass) throws IOException {
-		out("package " + packageName + "." + subPackage + ";");
+		out("package " + config.packageName + "." + subPackage + ";");
 		out("/**");
 		out("  * " + table.getName()+(table.getComment()!=null?(": "+table.getComment()):""));
 		writeHeaderComment();
@@ -1560,7 +1316,7 @@ public class TableGen implements DiffHandler {
 			out("import java.io.Serializable;");
 		}
 
-		if ("pojo".equals(subPackage) && this.use_annotation) {
+		if ("pojo".equals(subPackage) && config.use_annotation) {
 			out("import javax.validation.constraints.*;");
 			out("import org.apache.commons.text.StringEscapeUtils;");
 		}
@@ -1570,11 +1326,11 @@ public class TableGen implements DiffHandler {
 			out("import java.util.List;");
 
 			if (!"dal".equals(subPackage) && !"web".equals(subPackage)) {
-				out("import " + packageName + ".dal.*;");
+				out("import " + config.packageName + ".dal.*;");
 			} else {
-				out("import " + packageName + ".business.*;");
+				out("import " + config.packageName + ".business.*;");
 			}
-			out("import " + packageName + ".pojo.*;");
+			out("import " + config.packageName + ".pojo.*;");
 
 			if ("dal".equals(subPackage) || "stub".equals(subPackage)) {
 				out("import com.bixuebihui.jdbc.RowMapperResultReader;");
@@ -1589,7 +1345,7 @@ public class TableGen implements DiffHandler {
 			}
 
 			if ("web".equals(subPackage)) {
-				out("import " + packageName + ".business." + this.getPojoClassName(table.getName()) + "Manager;");
+				out("import " + config.packageName + ".business." + this.getPojoClassName(table.getName()) + "Manager;");
 
 				out("import org.jmesa.worksheet.WorksheetColumn;");
 				out("import javax.servlet.http.HttpServletRequest;");
@@ -1598,7 +1354,7 @@ public class TableGen implements DiffHandler {
 			}
 
 			for (String genericFile : genericFiles) {
-				out("import " + packageName + "." + genericFile + ";");
+				out("import " + config.packageName + "." + genericFile + ";");
 			}
 
 			if ("web".equals(subPackage)) {
@@ -1608,7 +1364,7 @@ public class TableGen implements DiffHandler {
 		}
 
 		extClass = extClass == null ? "" : extClass;
-		if (this.use_annotation && BUSINESS.equals(subPackage) && !extClass.contains("TestCase")) {
+		if (config.use_annotation && BUSINESS.equals(subPackage) && !extClass.contains("TestCase")) {
 			out("import org.springframework.stereotype.Repository;");
 			out("");
 			out("@Repository");
@@ -1627,7 +1383,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	private String getBusFullClassName(String tableName) {
-		return packageName + ".business." + this.getPojoClassName(tableName) + "Manager";
+		return config.packageName + ".business." + this.getPojoClassName(tableName) + "Manager";
 	}
 
 	private void writeHeaderComment() throws IOException {
@@ -1644,7 +1400,7 @@ public class TableGen implements DiffHandler {
 		String type = cd.getJavaType();
 		String code = typeDefaultValue.get(type);
 
-		if ("String".equals(type) && !cd.isNullable) {
+		if ("String".equals(type) && !cd.isNullable()) {
 				code="\"*\"";
 		}
 
@@ -1669,10 +1425,10 @@ public class TableGen implements DiffHandler {
 
 	String getColumnAnnotation(String tableName, ColumnData cd) {
 		StringBuilder sb = new StringBuilder();
-		if (this.use_annotation) {
+		if (config.use_annotation) {
 
-			if (tableData != null && tableData.get(tableName) != null) {
-				Map<String, T_metacolumn> cols = tableData.get(tableName).getColumns();
+			if (setInfo.getTableDataExt()  != null && setInfo.getTableDataExt().get(tableName) != null) {
+				Map<String, T_metacolumn> cols = setInfo.getTableDataExt().get(tableName).getColumns();
 				if (cols != null && cols.get(cd.getName()) != null) {
 					T_metacolumn col = cols.get(cd.getName());
 					sb.append(col.getAnnotation() == null ? "" : col.getAnnotation() + "\n");
@@ -1683,17 +1439,17 @@ public class TableGen implements DiffHandler {
 
 			if ("String".equals(cd.getJavaType())) {
 				//if columns is JSON type, there is no column size.
-				if (sb.indexOf("@Size") < 0 && cd.columns>0) {
-					sb.append("  @Size(max=").append(cd.columns).append(")\n");
+				if (sb.indexOf("@Size") < 0 && cd.getColumns()>0) {
+					sb.append("  @Size(max=").append(cd.getColumns()).append(")\n");
 				}
 			}
-			if (!cd.isNullable && cd.defaultValue == null) {
+			if (!cd.isNullable() && cd.getDefaultValue() == null) {
 				if (sb.indexOf("@NotNull") < 0) {
 					sb.append("  @NotNull\n");
 				}
-			} else if (cd.defaultValue != null) {
+			} else if (cd.getDefaultValue() != null) {
 				if (sb.indexOf("//@NotNull") < 0) {
-					sb.append("  //@NotNull, but has default value :").append(cd.defaultValue).append("\n");
+					sb.append("  //@NotNull, but has default value :").append(cd.getDefaultValue()).append("\n");
 				}
 
 			}
@@ -1991,13 +1747,13 @@ public class TableGen implements DiffHandler {
 
 		boolean isFirst = true;
 		for (ColumnData columnDatum : columnData) {
-			if (!columnDatum.isNullable &&
+			if (!columnDatum.isNullable() &&
 					"String".equals(columnDatum.getJavaType())) {
 				if (isFirst) {
 					out("     java.util.Random rnd = new java.util.Random();");
 					isFirst = false;
 				}
-				out("    info.set" + firstUp(columnDatum.name)
+				out("    info.set" + firstUp(columnDatum.getName())
 						+ "(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));");
 			}
 		}
@@ -2020,8 +1776,8 @@ public class TableGen implements DiffHandler {
 		Iterator<ColumnData> iterator = columnData.iterator();
 		while (iterator.hasNext()) {
 			ColumnData cd=iterator.next();
-			if (useAutoincrement && cd.isAutoIncrement
-					|| (useVersion && cd.getName().equalsIgnoreCase(versionColName))) {
+			if (useAutoincrement && cd.isAutoIncrement()
+					|| (useVersion && cd.getName().equalsIgnoreCase(config.versionColName))) {
 				continue;
 			}
 
@@ -2038,7 +1794,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	private String makeUpdateObjects(List<String> params, List<ColumnData> columnData) {
-		return "" + makeInsertObjects(use_autoincrement, true, columnData) + "," +
+		return "" + makeInsertObjects(config.use_autoincrement, true, columnData) + "," +
 				createKeyObjects(params);
 	}
 
@@ -2088,7 +1844,7 @@ public class TableGen implements DiffHandler {
 			boolean isWithVersion, List<ColumnData> columnData) throws IOException {
 		// work out the "where" part of the update first..
 		String paramObjs = this.createKeyObjects(params)
-				+ (isWithVersion ? ",info.get" + firstUp(versionColName) + "() " : "");
+				+ (isWithVersion ? ",info.get" + firstUp(config.versionColName) + "() " : "");
 
 		out("/**");
 		out("  * Updates the current object values into the database with version condition as an optimistic database lock.");
@@ -2101,7 +1857,7 @@ public class TableGen implements DiffHandler {
 		StringBuilder objs = new StringBuilder();
 		for (ColumnData cd:columnData) {
 			boolean added = true;
-			if (isWithVersion && cd.getName().equalsIgnoreCase(versionColName)) {
+			if (isWithVersion && cd.getName().equalsIgnoreCase(config.versionColName)) {
 				added = false;
 			} else {
 				objs.append(" info.get").append(firstUp(cd.getName())).append("()");
@@ -2323,7 +2079,7 @@ public class TableGen implements DiffHandler {
 	public @NotNull TableInfo getColumnData(TableInfo table) throws SQLException {
 		List<ColumnData> colData = table.getFields();
 		if(colData == null){
-			table = TableUtils.getColumnData(metaData, catalog, schema, table.getName());
+			table = TableUtils.getColumnData(metaData, config.catalog, config.schema, table.getName());
 		}
 		return table;
 	}
@@ -2336,13 +2092,13 @@ public class TableGen implements DiffHandler {
 	public @NotNull  List<String> getTableKeys(String tableName) throws SQLException {
 
 		List<String> keyData;
-		if (keyCache.containsKey(tableName)) {
-			return keyCache.get(tableName);
+		if (setInfo.getKeyCache().containsKey(tableName)) {
+			return setInfo.getKeyCache().get(tableName);
 		}
 
-		keyData = TableUtils.getTableKeys(metaData, catalog, schema, tableName);
+		keyData = TableUtils.getTableKeys(metaData, config.catalog, config.schema, tableName);
 
-		keyCache.put(tableName, keyData);
+		setInfo.getKeyCache().put(tableName, keyData);
 		return keyData;
 	}
 
@@ -2350,25 +2106,25 @@ public class TableGen implements DiffHandler {
 	 * Selects the Exported Keys defined for a particular table.
 	 */
 	protected @NotNull  List<ForeignKeyDefinition> getTableExportedKeys(String tableName) throws SQLException {
-		if (foreignKeyExCache.containsKey(tableName)) {
-			return foreignKeyExCache.get(tableName);
+		if (setInfo.getForeignKeyExCache().containsKey(tableName)) {
+			return setInfo.getForeignKeyExCache().get(tableName);
 		}
 
 		if(isMysql()){
 			//针对mysql的优化, 一次加载全部外键
-			if (foreignKeyExCache.isEmpty()) {
-				foreignKeyExCache.putAll(TableUtils.getAllMySQLExportKeys(getDbHelper(),tableOwner));
+			if (setInfo.getForeignKeyExCache().isEmpty()) {
+				setInfo.getForeignKeyExCache().putAll(TableUtils.getAllMySQLExportKeys(getDbHelper(),config.tableOwner));
 			}
-			if(foreignKeyExCache.containsKey(tableName)) {
-				LOG.info(tableName +" has  ExportKey in cache:"+ foreignKeyExCache.get(tableName));
-				return foreignKeyExCache.get(tableName);
+			if(setInfo.getForeignKeyExCache().containsKey(tableName)) {
+				LOG.info(tableName +" has  ExportKey in cache:"+ setInfo.getForeignKeyExCache().get(tableName));
+				return setInfo.getForeignKeyExCache().get(tableName);
 			}else{
 				LOG.debug(tableName +" does not have a ExportKey in cache");
 			}
 			return Collections.emptyList();
 		}
-		List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableExportedKeys(metaData, catalog, tableOwner, tableName);
-		foreignKeyExCache.put(tableName, foreignKeyData);
+		List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableExportedKeys(metaData, config.catalog, config.tableOwner, tableName);
+		setInfo.getForeignKeyExCache().put(tableName, foreignKeyData);
 		return foreignKeyData;
 	}
 
@@ -2381,24 +2137,24 @@ public class TableGen implements DiffHandler {
 	 */
 	protected  @NotNull  List<ForeignKeyDefinition> getTableImportedKeys(String tableName) throws SQLException {
 
-		if (foreignKeyImCache.containsKey(tableName)) {
-			return foreignKeyImCache.get(tableName);
+		if (setInfo.getForeignKeyImCache().containsKey(tableName)) {
+			return setInfo.getForeignKeyImCache().get(tableName);
 		}
 		if(isMysql()){
 			//针对mysql的优化, 一次加载全部外键
-			if (foreignKeyImCache.isEmpty()) {
-				foreignKeyImCache.putAll(TableUtils.getAllMySQLImportKeys(getDbHelper(),tableOwner));
+			if (setInfo.getForeignKeyImCache().isEmpty()) {
+				setInfo.getForeignKeyImCache().putAll(TableUtils.getAllMySQLImportKeys(getDbHelper(),config.tableOwner));
 			}
-			if(foreignKeyImCache.containsKey(tableName)) {
-				LOG.info(tableName +" has  ImportKey in cache:"+ foreignKeyImCache.get(tableName));
-				return foreignKeyImCache.get(tableName);
+			if(setInfo.getForeignKeyImCache().containsKey(tableName)) {
+				LOG.info(tableName +" has  ImportKey in cache:"+ setInfo.getForeignKeyImCache().get(tableName));
+				return setInfo.getForeignKeyImCache().get(tableName);
 			}else{
 				LOG.debug(tableName +"have not a ImportKey in cache");
 			}
 			return Collections.emptyList();
 		}
-		List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableImportedKeys(metaData, catalog, tableOwner, tableName);
-		foreignKeyImCache.put(tableName, foreignKeyData);
+		List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableImportedKeys(metaData, config.catalog, config.tableOwner, tableName);
+		setInfo.getForeignKeyImCache().put(tableName, foreignKeyData);
 		return foreignKeyData;
 	}
 
@@ -2448,12 +2204,12 @@ public class TableGen implements DiffHandler {
 		String index;
 		short indexType;
 		List<String> indexData;
-		if (indexCache.containsKey(tableName)) {
-			return indexCache.get(tableName);
+		if (setInfo.getIndexCache().containsKey(tableName)) {
+			return setInfo.getIndexCache().get(tableName);
 		}
 		indexData = new ArrayList<>();
 
-		try( ResultSet r = metaData.getIndexInfo(catalog, schema, tableName, false, false) ) {
+		try( ResultSet r = metaData.getIndexInfo(config.catalog, config.schema, tableName, false, false) ) {
 			while (r.next()) {
 				indexType = r.getShort(7);
 				index = r.getString(9);
@@ -2465,7 +2221,7 @@ public class TableGen implements DiffHandler {
 				}
 			}
 		}
-		indexCache.put(tableName, indexData);
+		setInfo.getIndexCache().put(tableName, indexData);
 		return indexData;
 	}
 
@@ -2510,12 +2266,12 @@ public class TableGen implements DiffHandler {
 			for (int i = 0; i < genericFiles.length; i++) {
 			    try(
 				BufferedReader br = new BufferedReader(new FileReader("dbgeneric" + File.separator + genericFiles[i] + ".java"));
-				BufferedWriter bw = new BufferedWriter(new FileWriter(srcDir + File.separator + genericFiles[i] + ".java"));
+				BufferedWriter bw = new BufferedWriter(new FileWriter(config.srcDir + File.separator + genericFiles[i] + ".java"));
 				){
 					// replaces the first line with the
 					// correct package name
 					//
-					bw.write("package " + packageName + ";\n");
+					bw.write("package " + config.packageName + ";\n");
 					String line = br.readLine();
 
 					while (line != null) {
@@ -2535,13 +2291,6 @@ public class TableGen implements DiffHandler {
 		return status;
 	}
 
-	public LinkedHashMap<String, TableInfo> getTableInfos() {
-		return tableInfos;
-	}
-
-	public void setTableInfos(LinkedHashMap<String, TableInfo> tableInfos) {
-		this.tableInfos = tableInfos;
-	}
 
 	public Connection getConnection() {
 		return connection;
@@ -2613,7 +2362,7 @@ public class TableGen implements DiffHandler {
 				LOG.info(loader.getResource(beanConfigFile).getFilename());
 				ex.execute(conn, loader.getResource(beanConfigFile).getInputStream());
 
-				res = initTableData(tableInfos);
+				res = initTableData(setInfo.getTableInfos());
 			}
 			if (res) {
 				LOG.info("[CYC]数据库已成功安装");
@@ -2639,15 +2388,15 @@ public class TableGen implements DiffHandler {
 	@Override
 	public void processTableDiff(String tableName) throws IOException {
 
-		if (excludeTablesList != null && excludeTablesList.containsKey(tableName)) {
+		if (config.excludeTablesList != null && config.excludeTablesList.containsKey(tableName)) {
 			return;
 		}
 
-		if (!CollectionUtils.isEmpty(tablesList) && !tablesList.containsKey(tableName)) {
+		if (!CollectionUtils.isEmpty(config.tablesList) && !config.tablesList.containsKey(tableName)) {
 			return;
 		}
 
-		TableInfo table = getTableInfos().get(tableName);
+		TableInfo table = setInfo.getTableInfos().get(tableName);
 
 		generatePojo(table);
 		generateDAL(table);
@@ -2656,15 +2405,10 @@ public class TableGen implements DiffHandler {
 
 	@Override
 	public void processEnd(HashMap<String, List<ColumnData>> tableData) {//NOSONAR
-
 		if (generateFlag) {
 			saveTableDataToLocalCache(tableData);
 		}
 
-	}
-
-	private String firstUp(String src) {
-		return NameUtils.firstUp(src, keep_case);
 	}
 
 }

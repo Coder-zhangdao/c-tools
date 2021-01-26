@@ -1,5 +1,6 @@
 package com.bixuebihui.tablegen;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,17 +41,20 @@ public class NameUtils {
 	}
 
     /**
-     * Upper cases the first character in a String. Includes a compatibility
-     * flag for earlier users. This will be removed at some stage.
-     * @param keepCase TODO
+     * Upper cases the first character in a String.
      */
-	public static String firstUp(String p, boolean keepCase) {
-        return keepCase ? (p.substring(0, 1).toUpperCase() + p.substring(1, p.length())) :
-                (p.substring(0, 1).toUpperCase() + p.substring(1, p.length()).toLowerCase());
+	public static String firstUp(String p) {
+        return p.substring(0, 1).toUpperCase() + p.substring(1, p.length());
     }
 
 	public static String firstLow(String p, boolean keepCase) {
 		return keepCase ? (p.substring(0, 1).toLowerCase() + p.substring(1, p.length())) :
 		 (p.substring(0, 1).toLowerCase() + p.substring(1, p.length()).toLowerCase());
     }
+
+	public static String getConfigBaseDir(String propertiesFilename) {
+		int i = propertiesFilename.lastIndexOf(File.separator) + 1;
+		return  propertiesFilename.substring(0, i);
+	}
+
 }

@@ -58,7 +58,7 @@ public class ProcedureUtilsTest {
 
 		for(ProcedureInfo info:res){
 			List<ProcedureParameterInfo> rs = ProcedureUtils.getProcedureColumns(metaData, info);
-			String str = ProcedureGen.process(info, rs, true);
+			String str = ProcedureGen.process(info, rs);
 			System.out.println(str);
 		}
 	}

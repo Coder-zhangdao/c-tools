@@ -3,7 +3,8 @@ package com.bixuebihui.tablegen;
 import com.bixuebihui.datasource.BitmechanicDataSource;
 import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.tablegen.diffhandler.DiffHandler;
-import org.apache.commons.collections.CollectionUtils;
+import com.bixuebihui.tablegen.entry.ColumnData;
+import com.bixuebihui.tablegen.entry.TableInfo;import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

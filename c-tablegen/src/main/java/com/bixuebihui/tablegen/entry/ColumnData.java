@@ -1,4 +1,4 @@
-package com.bixuebihui.tablegen;
+package com.bixuebihui.tablegen.entry;
 
 import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
 
@@ -27,27 +27,16 @@ public class ColumnData implements Serializable {
      * 注释
      */
     String remarks;
-
     //sysname in sql server is nvarchar(128) NOT NULL
     long cid;
     int type;
-
     //数字类型的位数或字符类型的最大长度
     long columns;
     long decimalDigits = 0;
     String name;
     boolean isNullable;
     String defaultValue;
-
     String comment;
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
 
     /**
      * Standard constructor.
@@ -223,12 +212,75 @@ public class ColumnData implements Serializable {
         }
     }
 
-
     public static ColumnData valueOf(T_metacolumn src) {
         ColumnData d = new ColumnData(src.getCname(), src.getType(), src.getColumns(), src.getIsnullable(), src.getIsauto_increment(), src.getDecimaldigits(),
                 null, src.getDescription());
         d.cid = src.getCid();
         return d;
+    }
+
+    public boolean isAutoIncrement() {
+        return isAutoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement) {
+        isAutoIncrement = autoIncrement;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
+    public long getCid() {
+        return cid;
+    }
+
+    public void setCid(long cid) {
+        this.cid = cid;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public long getColumns() {
+        return columns;
+    }
+
+    public void setColumns(long columns) {
+        this.columns = columns;
+    }
+
+    public long getDecimalDigits() {
+        return decimalDigits;
+    }
+
+    public void setDecimalDigits(long decimalDigits) {
+        this.decimalDigits = decimalDigits;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     @Override
@@ -285,6 +337,10 @@ public class ColumnData implements Serializable {
      */
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

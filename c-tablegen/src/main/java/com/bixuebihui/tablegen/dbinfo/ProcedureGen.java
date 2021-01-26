@@ -1,6 +1,6 @@
 package com.bixuebihui.tablegen.dbinfo;
 
-import com.bixuebihui.tablegen.ColumnData;
+import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.NameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,13 +23,13 @@ public class ProcedureGen {
      * @param params
      * @return
      */
-    public static String process(ProcedureInfo proc, List<ProcedureParameterInfo> params, boolean keepCase) {
+    public static String process(ProcedureInfo proc, List<ProcedureParameterInfo> params) {
         return "public <T> " + getReturnType(proc) + " "
                 + normalizeArgName(proc.getSimpleName()) + "("
                 + getArgs(params) + (params.size() > 0 ? "," : "") + " RowMapperResultReader<T> reader) throws SQLException {\n"
                 + getCallSql(proc.getSimpleName(), params.size())
                 + getStatement()
-                + getParameterSets(params, keepCase)
+                + getParameterSets(params)
                 + "    boolean isReturnResultSet = cstmt.execute();\n"
                 + "    if(isReturnResultSet && reader !=null){\n"
                 + "			rs = cstmt.getResultSet();\n"
@@ -43,7 +43,7 @@ public class ProcedureGen {
     }
 
 
-    private static String getParameterSets(List<ProcedureParameterInfo> params, boolean keepCase) {
+    private static String getParameterSets(List<ProcedureParameterInfo> params) {
         StringBuilder sb = new StringBuilder();
         int i = 1;
         for (ProcedureParameterInfo info : params) {
@@ -54,7 +54,7 @@ public class ProcedureGen {
             } else if ("byte[]".equals(type)) {
                 type = "Bytes";
             } else {
-                type = NameUtils.firstUp(type, keepCase);
+                type = NameUtils.firstUp(type);
             }
             sb.append("    cstmt.set" + type + "(" + i + "," + normalizeArgName(info.getSimpleName()) + ");\n");
             i++;
