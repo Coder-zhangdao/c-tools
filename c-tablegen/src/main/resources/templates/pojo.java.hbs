@@ -8,19 +8,14 @@ import javax.validation.constraints.*;
 import org.apache.commons.text.StringEscapeUtils;
 
 public class {{className tableInfo.name}}  {{interface tableInfo.name}} {
+{{#each tableInfo.fields as field}}
     /**
-     * Type : INT Name : id
-     * id
-     */
-    @NotNull
-    protected Long id;
-
-    /**
-     * Type : VARCHAR(100) Name : name
-     * name
-     */
-    @Size(max=100)
-    protected String name;
+    * Type :  {{columnDescription field tableName}}
+    * {{field.name}}
+    */
+    {{columnAnnotation field tableName}}
+    protected {{field.javaType}}  {{field.name}};
+{{/each}}
 
     /**
      * Sets the value for id id

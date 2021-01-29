@@ -395,42 +395,10 @@ public class TableGen implements DiffHandler {
 	}
 
 	private String getColumnDescription(String tableName, String columnName) {
-		String res;
-		if (config.kuozhanbiao) {
-			DictionaryItem item = null;
-			try {
-				item = DictionaryCache.byId(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
-						+ getTableIdByName(tableName) + DictionaryCache.KEY_SEPARATOR + columnName.toUpperCase());
-			} catch (Exception e) {
-				e.printStackTrace(console);
-			}
-			res = item == null ? columnName : item.getValue();
-		} else {
-			res = columnName;
-		}
-
 		Map<String, T_metacolumn> cols = setInfo.getColumnsExtInfo(tableName);
-		if (cols != null && cols.get(columnName) != null) {
-			T_metacolumn col = cols.get(columnName);
-			res += col == null ? "" : col.getDescription();
-		}
-		return res;
+		return TableUtils.getColumnDescription(config, cols, tableName, columnName);
 	}
 
-	private int getTableIdByName(String tableName) {
-		if (config.kuozhanbiao) {
-			DictionaryItem item = null;
-			try {
-				item = DictionaryCache.byValue(
-						TableGenConfig.TABLENAME_DICT + DictionaryCache.KEY_SEPARATOR + tableName.toUpperCase());
-			} catch (Exception e) {
-				e.printStackTrace(console);
-			}
-			return item == null ? 0 : Integer.parseInt(item.getValue());
-		} else {
-			return 0;
-		}
-	}
 
 	private void generateJsp() throws SQLException {
 
@@ -443,7 +411,7 @@ public class TableGen implements DiffHandler {
 				String fileName = config.jspDir + File.separator + "list" + File.separator + config.prefix + tableName.toLowerCase()
 						+ "_list.jsp";
 				currentOutput = new BufferedWriter(
-						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
+						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
 				getColumnData(table);
 				String baseDir = config.packageName + ".";
@@ -1424,38 +1392,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	String getColumnAnnotation(String tableName, ColumnData cd) {
-		StringBuilder sb = new StringBuilder();
-		if (config.use_annotation) {
-
-			if (setInfo.getTableDataExt()  != null && setInfo.getTableDataExt().get(tableName) != null) {
-				Map<String, T_metacolumn> cols = setInfo.getTableDataExt().get(tableName).getColumns();
-				if (cols != null && cols.get(cd.getName()) != null) {
-					T_metacolumn col = cols.get(cd.getName());
-					sb.append(col.getAnnotation() == null ? "" : col.getAnnotation() + "\n");
-				} else {
-					info("There NO settings for table columns:" + tableName);
-				}
-			}
-
-			if ("String".equals(cd.getJavaType())) {
-				//if columns is JSON type, there is no column size.
-				if (sb.indexOf("@Size") < 0 && cd.getColumns()>0) {
-					sb.append("  @Size(max=").append(cd.getColumns()).append(")\n");
-				}
-			}
-			if (!cd.isNullable() && cd.getDefaultValue() == null) {
-				if (sb.indexOf("@NotNull") < 0) {
-					sb.append("  @NotNull\n");
-				}
-			} else if (cd.getDefaultValue() != null) {
-				if (sb.indexOf("//@NotNull") < 0) {
-					sb.append("  //@NotNull, but has default value :").append(cd.getDefaultValue()).append("\n");
-				}
-
-			}
-		}
-
-		return StringUtils.stripEnd(sb.toString(), "\n");
+		return TableUtils.getColumnAnnotation(config, setInfo, tableName, cd);
 	}
 
 	/**

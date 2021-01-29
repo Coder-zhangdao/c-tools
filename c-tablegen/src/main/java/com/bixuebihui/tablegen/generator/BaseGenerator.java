@@ -14,6 +14,7 @@ import com.github.jknack.handlebars.io.TemplateLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -63,9 +64,11 @@ public abstract class BaseGenerator {
         }
     }
 
-    abstract public String getFileName(String tableName);
+    abstract String getTargetFileName(String tableName);
+    abstract String getTemplateFileName();
 
-    abstract public String getClassName(String tableName);
+    abstract String getClassName(String tableName);
+    protected void additionalSetting(Handlebars handlebars){}
 
     protected String getInterface(String tableName) {
         return setInfo.getInterface(tableName, config);
@@ -87,7 +90,7 @@ public abstract class BaseGenerator {
         handlebars.registerHelper("interface", (tableName, options) -> this.getInterface((String) tableName));
         handlebars.registerHelper("extends", (tableName, options) -> this.getExtendsClasses((String) tableName));
 
-        Template template = handlebars.compile("/pojo.java");
+        Template template = handlebars.compile(File.separator + getTemplateFileName());
 
         Map<String, Object> v = new HashMap<>(10);
         v.put("tableInfo", new TableInfo("test"));

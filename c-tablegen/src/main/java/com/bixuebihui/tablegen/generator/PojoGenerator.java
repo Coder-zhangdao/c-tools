@@ -1,7 +1,10 @@
 package com.bixuebihui.tablegen.generator;
 
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
+import com.bixuebihui.tablegen.TableUtils;
+import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
+import com.github.jknack.handlebars.Handlebars;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,11 +40,16 @@ public class PojoGenerator extends BaseGenerator{
     }
 
     @Override
-    public String getFileName(String tableName) {
+    public String getTargetFileName(String tableName) {
         String baseDir = config.getBaseDir();
 
         return baseDir + File.separator + "pojo" + File.separator + getClassName(tableName)
                 + ".java";
+    }
+
+    @Override
+    String getTemplateFileName() {
+        return "pojo.java";
     }
 
     @Override
@@ -52,6 +60,16 @@ public class PojoGenerator extends BaseGenerator{
         } else {
             return config.getPrefix() + classname;
         }
+    }
+
+    @Override
+    protected void additionalSetting(Handlebars handlebars) {
+        super.additionalSetting(handlebars);
+        // usage: {{columnAnnotation aColumnData tableName}}
+        handlebars.registerHelper("columnAnnotation", (col, options) -> TableUtils.getColumnAnnotation(config, setInfo, options.param(0),(ColumnData) col));
+
+        // usage: {{columnDescription aColumnData tableName}}
+        handlebars.registerHelper("columnDescription", (col, options) -> TableUtils.getColumnDescription(config, setInfo.getColumnsExtInfo(options.param(0)), options.param(0),((ColumnData) col).getName()));
     }
 
     @Override

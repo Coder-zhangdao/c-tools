@@ -1,10 +1,15 @@
 package com.bixuebihui.tablegen;
 
+import com.bixuebihui.cache.DictionaryCache;
+import com.bixuebihui.cache.DictionaryItem;
+import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
 import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jdbc.RowMapperResultReader;
 import com.bixuebihui.tablegen.entry.ColumnData;
-import com.bixuebihui.tablegen.entry.TableInfo;import org.apache.commons.dbutils.DbUtils;
+import com.bixuebihui.tablegen.entry.TableInfo;
+import com.bixuebihui.tablegen.entry.TableSetInfo;
+import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -646,6 +651,80 @@ public class TableUtils {
 
     }
 
+    public  static  String getColumnDescription(ProjectConfig config, Map<String, T_metacolumn> cols, String tableName, String columnName) {
+        String res;
+        if (config.kuozhanbiao) {
+            DictionaryItem item = null;
+            try {
+                item = DictionaryCache.byId(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
+                        + getTableIdByName(config, tableName) + DictionaryCache.KEY_SEPARATOR + columnName.toUpperCase());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            res = item == null ? columnName : item.getValue();
+        } else {
+            res = columnName;
+        }
+
+        if (cols != null && cols.get(columnName) != null) {
+            T_metacolumn col = cols.get(columnName);
+            res += col == null ? "" : col.getDescription();
+        }
+        return res;
+    }
+
+    private static int getTableIdByName(ProjectConfig config, String tableName) {
+        if (config.kuozhanbiao) {
+            DictionaryItem item = null;
+            try {
+                item = DictionaryCache.byValue(
+                        TableGenConfig.TABLENAME_DICT + DictionaryCache.KEY_SEPARATOR + tableName.toUpperCase());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return item == null ? 0 : Integer.parseInt(item.getValue());
+        } else {
+            return 0;
+        }
+    }
+
+
+
+    public static String getColumnAnnotation(ProjectConfig config, TableSetInfo setInfo, String tableName, ColumnData cd) {
+        StringBuilder sb = new StringBuilder();
+        if (config.use_annotation) {
+
+            if (setInfo.getTableDataExt()  != null && setInfo.getTableDataExt().get(tableName) != null) {
+                Map<String, T_metacolumn> cols = setInfo.getTableDataExt().get(tableName).getColumns();
+                if (cols != null && cols.get(cd.getName()) != null) {
+                    T_metacolumn col = cols.get(cd.getName());
+                    sb.append(col.getAnnotation() == null ? "" : col.getAnnotation() + "\n");
+                } else {
+                    LOG.info("There NO settings for table columns:" + tableName);
+                }
+            }
+
+            if ("String".equals(cd.getJavaType())) {
+                //if columns is JSON type, there is no column size.
+                if (sb.indexOf("@Size") < 0 && cd.getColumns()>0) {
+                    sb.append("  @Size(max=").append(cd.getColumns()).append(")\n");
+                }
+            }
+            if (!cd.isNullable() && cd.getDefaultValue() == null) {
+                if (sb.indexOf("@NotNull") < 0) {
+                    sb.append("  @NotNull\n");
+                }
+            } else if (cd.getDefaultValue() != null) {
+                if (sb.indexOf("//@NotNull") < 0) {
+                    sb.append("  //@NotNull, but has default value :").append(cd.getDefaultValue()).append("\n");
+                }
+
+            }
+        }
+
+        return org.apache.commons.lang3.StringUtils.stripEnd(sb.toString(), "\n");
+    }
+
 
     /**
      * this below two methods are valid only for MySQL
@@ -696,7 +775,7 @@ public class TableUtils {
             String upper = fieldDesc.toUpperCase();
             if (upper.contains("AUTO_INCREMENT")) {
                 if (Arrays.asList(StringUtils.split(upper, " ")).contains("AUTO_INCREMENT")) {
-                    commentMap.get(fieldName).isAutoIncrement = true;
+                    commentMap.get(fieldName).setAutoIncrement(true);
                 }
             }
             if (!fieldDesc.contains("COMMENT")) {
