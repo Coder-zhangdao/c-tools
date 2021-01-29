@@ -5,13 +5,12 @@
 	<parent>
 		<groupId>com.github.yujiaao</groupId>
 		<artifactId>c-tools-parent</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
+		<version>1.1.0-RC1</version>
 	</parent>
 
 	<artifactId>c-tools</artifactId>
 	<name>common tools</name>
 	<description>common tools for web development</description>
-
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -137,12 +136,6 @@
 		<spring4.version>4.3.29.RELEASE</spring4.version>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>commons-dbutils</groupId>
@@ -160,7 +153,7 @@
 		<dependency>
 			<groupId>com.github.yujiaao</groupId>
 			<artifactId>c-dbtools</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+			<version>${currentVersion}</version>
 		</dependency>
 
 		<dependency>

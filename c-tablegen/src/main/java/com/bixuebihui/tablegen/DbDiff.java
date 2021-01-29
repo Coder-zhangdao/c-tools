@@ -110,7 +110,7 @@ public class DbDiff {
 
         for (String t : tab2) {
 
-            List<ColumnData> c = getColumns(db2, t).fields;
+            List<ColumnData> c = getColumns(db2, t).getFields();
 
             addTableData(t, c);
         }
@@ -154,11 +154,11 @@ public class DbDiff {
             }
 
         } else {
-            cols1 = getColumns(db1, tableName).fields;
+            cols1 = getColumns(db1, tableName).getFields();
         }
 
 
-        List<ColumnData> cols2 = getColumns(db2, tableName).fields;
+        List<ColumnData> cols2 = getColumns(db2, tableName).getFields();
 
 
         if (dumpDiffCols(cols1, cols2)) {

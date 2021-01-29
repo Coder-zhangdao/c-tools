@@ -90,6 +90,8 @@ public abstract class BaseGenerator {
         handlebars.registerHelper("interface", (tableName, options) -> this.getInterface((String) tableName));
         handlebars.registerHelper("extends", (tableName, options) -> this.getExtendsClasses((String) tableName));
 
+        additionalSetting(handlebars);
+
         Template template = handlebars.compile(File.separator + getTemplateFileName());
 
         Map<String, Object> v = new HashMap<>(10);

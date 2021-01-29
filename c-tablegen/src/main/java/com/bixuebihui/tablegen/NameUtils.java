@@ -1,5 +1,7 @@
 package com.bixuebihui.tablegen;
 
+import org.apache.commons.text.CaseUtils;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -42,15 +44,28 @@ public class NameUtils {
 
     /**
      * Upper cases the first character in a String.
+	 * @Since 1.1 snake case to camel case
+     * @param p "camel_case"
+	 * @return  returns "camelCase"
      */
 	public static String firstUp(String p) {
-        return p.substring(0, 1).toUpperCase() + p.substring(1, p.length());
-    }
+        // return p.substring(0, 1).toUpperCase() + p.substring(1);
+        // Guava
+		// CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "camel_case"); // returns camelCase
+		// CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, "CAMEL_CASE"); // returns CamelCase
+		// CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, "camelCase"); // returns CAMEL_CASE
+		// CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, "CamelCase"); // returns camel-case
+
+
+		return CaseUtils.toCamelCase(p, true, '_');
+	}
 
 	public static String firstLow(String p, boolean keepCase) {
-		return keepCase ? (p.substring(0, 1).toLowerCase() + p.substring(1, p.length())) :
-		 (p.substring(0, 1).toLowerCase() + p.substring(1, p.length()).toLowerCase());
-    }
+		//return keepCase ? (p.substring(0, 1).toLowerCase() + p.substring(1)) :
+		// (p.substring(0, 1).toLowerCase() + p.substring(1).toLowerCase());
+		return CaseUtils.toCamelCase(p, false, '_');
+
+	}
 
 	public static String getConfigBaseDir(String propertiesFilename) {
 		int i = propertiesFilename.lastIndexOf(File.separator) + 1;
