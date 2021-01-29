@@ -24,7 +24,6 @@ package com.bixuebihui.tablegen;
  * Released under GPL. See LICENSE for full details.
  */
 
-import com.bixuebihui.algorithm.LRULinkedHashMap;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.cache.DictionaryItem;
 import com.bixuebihui.datasource.BitmechanicDataSource;
@@ -49,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.CaseUtils;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.CollectionUtils;
 
@@ -265,7 +265,7 @@ public class TableGen implements DiffHandler {
 		try {
 			Map<String, String> beans = new HashMap<>();
 			for (TableInfo table: setInfo.getTableInfos().values()) {
-				beans.put(NameUtils.firstLow(table.getName(), false)
+				beans.put(NameUtils.firstLow(table.getName())
 						+ MANAGER_SUFFIX, getBusFullClassName(table.getName()));
 			}
 			File f = new File(fileName);
@@ -495,7 +495,7 @@ public class TableGen implements DiffHandler {
 					writeHeader(table, BUSINESS, " extends TestCase");
 
 					writeSelectPageTest(tableName, "select");
-					writeCountWhereTest(tableName, "count");
+					writeCountWhereTest(tableName);
 
 					List<String> keyData = this.getTableKeys(tableName);
 					if (keyData != null && keyData.size() == 1) {
@@ -800,11 +800,11 @@ public class TableGen implements DiffHandler {
 			out("      s.append(\"<" + tableName + " \");");
 			for (ColumnData col : colData) {
 				if ("String".equals(col.getJavaType())) {
-					out("     s.append(\"" + col.getName()
+					out("     s.append(\"" + firstLow(col.getName())
 							+ "=\\\"\").append(StringEscapeUtils.escapeXml11(this.get"
 							+ firstUp(col.getName()) + "())).append(\"\\\" \");");
 				} else {
-					out("     s.append(\"" + col.getName() + "=\\\"\").append(this.get"
+					out("     s.append(\"" + firstLow(col.getName()) + "=\\\"\").append(this.get"
 							+ firstUp(col.getName()) + "()).append(\"\\\" \");");
 				}
 			}
@@ -866,7 +866,7 @@ public class TableGen implements DiffHandler {
 			writeObjs(tableName, keyData, colData);
 
 			writeGetTableName(tableName, "getTableName", false);
-			writeGetKeyName(getFirstKeyName(keyData), "getKeyName");
+			writeGetKeyName(getFirstKeyName(keyData));
 			writeMapRow(tableName, colData);
 
 
@@ -971,7 +971,7 @@ public class TableGen implements DiffHandler {
 		for (ColumnData cd: colData) {
 			i++;
 			boolean isNotLast = i < colData.size();
-			String field = columnNameToFieldName(cd.getName());
+			String field = columnNameToConstantName(cd.getName());
 
 			fields.append("        public static final String ").append(field)
 					.append(" = \"" + cd.getName() + "\";\n");
@@ -1364,7 +1364,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	void writeInit(ColumnData cd) throws IOException {
-		String name = cd.getName().toLowerCase();
+		String name = firstLow(cd.getName());
 		String type = cd.getJavaType();
 		String code = typeDefaultValue.get(type);
 
@@ -1387,7 +1387,7 @@ public class TableGen implements DiffHandler {
 		out("  * " + getColumnDescription(tableName, cd.getName()));
 		out("  */");
 		out(getColumnAnnotation(tableName, cd));
-		out("  protected " + cd.getJavaType() + " " + cd.getName().toLowerCase() + ";");
+		out("  protected " + cd.getJavaType() + " " + CaseUtils.toCamelCase(cd.getName(), false,'_' )+ ";");
 		out("");
 	}
 
@@ -1399,7 +1399,7 @@ public class TableGen implements DiffHandler {
 	 * Writes out the set and get functions for each variable.
 	 */
 	void writeSetGet(String tableName, ColumnData cd) throws IOException {
-		String name = cd.getName().toLowerCase();
+		String name = firstLow(cd.getName());
 		String newName = firstUp(cd.getName());
 
 		out("/**");
@@ -1606,7 +1606,7 @@ public class TableGen implements DiffHandler {
 			colType = cd.getJavaType();
 
 			// work out which data type we are getting for each variable
-			String ucol = "F." + columnNameToFieldName(col);
+			String ucol = "F." + columnNameToConstantName(col);
 
 			if (colType.compareTo("String") == 0) {
 				get = "(r.getString(" + ucol + "));";
@@ -1879,7 +1879,7 @@ public class TableGen implements DiffHandler {
 		}
 		else{
 			out("    return " + (isKey ?
-					"F." + columnNameToFieldName(tableOrKeyName)
+					"F." + columnNameToConstantName(tableOrKeyName)
 					: "\"" + tableOrKeyName + "\""
 			) + ";");
 		}
@@ -1887,17 +1887,17 @@ public class TableGen implements DiffHandler {
 		out("");
 	}
 
-	void writeGetKeyName(String keyName, String methodName) throws IOException {
-		writeGetTableName(keyName, methodName, true);
+	void writeGetKeyName(String keyName) throws IOException {
+		writeGetTableName(keyName, "getKeyName", true);
 	}
 
-	void writeCountWhereTest(String tableName, String methodName) throws IOException {
+	void writeCountWhereTest(String tableName) throws IOException {
 
-		out("public void test" + firstUp(methodName) + "() throws SQLException");
+		out("public void test" + firstUp("count") + "() throws SQLException");
 		out("{");
 		String className = this.getPojoClassName(tableName) + "Manager";
 		out("  " + className + " man = new " + className + "();");
-		out("    assertTrue(man." + methodName + "(\"\")>=0);");
+		out("    assertTrue(man." + "count" + "(\"\")>=0);");
 		out("}");
 		out("");
 	}

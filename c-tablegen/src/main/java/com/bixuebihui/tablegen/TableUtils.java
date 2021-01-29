@@ -47,7 +47,7 @@ public class TableUtils {
                 LOG.warn(info);
             }
         } else {
-            LOG.debug(stopWatch.getLastTaskName() + " use:" + stopWatch.getLastTaskTimeMillis());
+            LOG.debug(stopWatch.getLastTaskName() + " use: " + stopWatch.getLastTaskTimeMillis()+"ms");
         }
 
     }

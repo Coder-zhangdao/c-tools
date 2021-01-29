@@ -1,5 +1,6 @@
 package com.bixuebihui.tablegen;
 
+import com.google.common.base.CaseFormat;
 import org.apache.commons.text.CaseUtils;
 
 import java.io.File;
@@ -39,7 +40,14 @@ public class NameUtils {
 		if (JAVA_KEYWORD.contains(columnName) || (PROJECT_FIELD_KEYWORD.contains(columnName))) {
 			columnName = KEYWORD_APPEND_CHAR + columnName;
 		}
-		return columnName;
+		return CaseUtils.toCamelCase(columnName,false,'_');
+	}
+
+	public static String columnNameToConstantName(String columnName){
+		if (JAVA_KEYWORD.contains(columnName) || (PROJECT_FIELD_KEYWORD.contains(columnName))) {
+			columnName = KEYWORD_APPEND_CHAR + columnName;
+		}
+		return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_UNDERSCORE, columnName);
 	}
 
     /**
@@ -49,7 +57,6 @@ public class NameUtils {
 	 * @return  returns "camelCase"
      */
 	public static String firstUp(String p) {
-        // return p.substring(0, 1).toUpperCase() + p.substring(1);
         // Guava
 		// CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "camel_case"); // returns camelCase
 		// CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, "CAMEL_CASE"); // returns CamelCase
@@ -60,9 +67,7 @@ public class NameUtils {
 		return CaseUtils.toCamelCase(p, true, '_');
 	}
 
-	public static String firstLow(String p, boolean keepCase) {
-		//return keepCase ? (p.substring(0, 1).toLowerCase() + p.substring(1)) :
-		// (p.substring(0, 1).toLowerCase() + p.substring(1).toLowerCase());
+	public static String firstLow(String p) {
 		return CaseUtils.toCamelCase(p, false, '_');
 
 	}

@@ -255,12 +255,12 @@ public class ParameterUtils {
         }
         int m = 0;
         if (li != null) {
-            Iterator<FileItem> iter = li.iterator();
-            while (iter.hasNext()) {
-                FileItem fi = iter.next();
+            for (FileItem fi : li) {
                 if (fi.isFormField()) {
                     List<String> vec = new ArrayList<>();
-                    String fieldName = fi.getFieldName(); // 这里取得字段名称
+
+                    // 这里取得字段名称
+                    String fieldName = fi.getFieldName();
                     // 如果已经存在此字段信息（多选列表或多个同名的隐藏域等）
                     if (fieldsMap.get(fieldName) != null) {
                         vec = fieldsMap.get(fieldName);
@@ -285,7 +285,7 @@ public class ParameterUtils {
                         UploadFile up = new UploadFile();
                         up.saveFileItem(fileNames, m++, storePath, fi);
                     } catch (Exception e) {
-                       logger.error(e);
+                        logger.error(e);
                     }
                 }
             }

@@ -111,7 +111,10 @@ public class EasyTable extends BasicWebUI {
 
     /**
      * use LimitActionFactoryJsonImpl
-     * json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
+     * json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123,
+     * "filter": { "property1":value1, "property2":value2, },
+     * "sort":{ "property1":"asc", "property2":"desc", },
+     * "exportType":"json", }
      */
     public String json(String jsonQuery) throws SQLException {
         SimpleHttpServletRequest request = new SimpleHttpServletRequest();
