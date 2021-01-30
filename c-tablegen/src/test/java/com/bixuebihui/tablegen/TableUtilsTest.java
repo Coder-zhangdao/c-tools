@@ -124,7 +124,7 @@ public class TableUtilsTest {
 		DatabaseMetaData metaData = dbHelper.getConnection().getMetaData();
 		String tableName="VRMS_ALLOWANCE";
 		String catalog="WESTPLAN";
-		List<ColumnData> v = TableUtils.getColumnData(metaData, catalog, null, tableName).fields;
+		List<ColumnData> v = TableUtils.getColumnData(metaData, catalog, null, tableName).getFields();
 		for(ColumnData c:v){
 			System.out.println(c);
 		}
@@ -136,7 +136,7 @@ public class TableUtilsTest {
 		//create table test1(id int auto_increment, num decimal(10,6) , primary key(id));
 
 		String tableName ="t_metatable";
-		List<ColumnData> v = TableUtils.getColumnData(meta, null, null, tableName).fields;
+		List<ColumnData> v = TableUtils.getColumnData(meta, null, null, tableName).getFields();
 		for(ColumnData s:v){
 			System.out.println(s+", java type = "+s.getJavaType());
 		}
@@ -149,7 +149,7 @@ public class TableUtilsTest {
 				"test", "test", tableName);
 		assertEquals(1, res.size());
 
-		Map<String, List<ForeignKeyDefinition>> map = TableUtils.getAllMySQLImportKeys(dbHelper, "ssll");
+		Map<String, List<ForeignKeyDefinition>> map = TableUtils.getAllMySQLImportKeys(dbHelper, "test");
 
 		List<ForeignKeyDefinition> newList = map.get(tableName);
 
@@ -163,13 +163,13 @@ public class TableUtilsTest {
     @org.junit.jupiter.api.Test
     void getTableExportedKeys() throws SQLException {
 		List<ForeignKeyDefinition> res = TableUtils.getTableExportedKeys(dbHelper.getConnection().getMetaData(),
-				"ssll", "ssll", "Businesses");
+				"test", "test", "Businesses");
 		assertEquals(1, res.size());
     }
 
     @org.junit.jupiter.api.Test
     void getAllMySQLExportKeys() throws SQLException {
-		Map<String, List<ForeignKeyDefinition>> res = TableUtils.getAllMySQLImportKeys(dbHelper, "ssll");
+		Map<String, List<ForeignKeyDefinition>> res = TableUtils.getAllMySQLImportKeys(dbHelper, "test");
 		for(List<ForeignKeyDefinition> list: res.values()){
 			for(ForeignKeyDefinition fk: list){
 				System.out.println(fk.toString());
@@ -180,7 +180,7 @@ public class TableUtilsTest {
 
     @org.junit.jupiter.api.Test
     void getAllMySQLImportKeys() throws SQLException {
-		Map<String, List<ForeignKeyDefinition>> res = TableUtils.getAllMySQLExportKeys(dbHelper, "ssll");
+		Map<String, List<ForeignKeyDefinition>> res = TableUtils.getAllMySQLExportKeys(dbHelper, "test");
 		for(List<ForeignKeyDefinition> list: res.values()){
 			for(ForeignKeyDefinition fk: list){
 				System.out.println(fk.toString());

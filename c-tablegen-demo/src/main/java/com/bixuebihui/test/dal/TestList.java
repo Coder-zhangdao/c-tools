@@ -1,7 +1,7 @@
 package com.bixuebihui.test.dal;
 /*
   * test
-  *
+  * 
   * Notice! Automatically generated file!
   * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
   * Code Generator originally by J.A.Carter
@@ -28,6 +28,12 @@ protected TestList()
 protected String getDeleteSql(){
     return "delete from " + getTableName() + " where id=?";
 }
+
+    public static final class F{
+        public static final String ID = "id";
+        public static final String NAME = "name";
+        public static final String[] getAllFields() { return new String[] {ID,NAME};}
+    }
 
 @Override
 protected String getInsertSql(){
@@ -85,10 +91,12 @@ public Long getId(Test info) {
     return  info.getId();
 }
 
+
 @Override
 public void setId(Test info, Long id) {
     info.setId(id);
 }
+
 
 /**
   * Inserts the dummy record of Test object values into the database.
@@ -100,11 +108,5 @@ public boolean insertDummy() throws SQLException
     info.setId(getNextKey());
     return this.insert(info);
 }
-
-    public static final class F{
-        public static final String ID = "id";
-        public static final String NAME = "name";
-        public static final String[] getAllFields() { return new String[] {ID,NAME};}
-    }
 
 }

@@ -61,7 +61,7 @@ public class TableGenTest {
 		String name = "sm_template_suite";
 		Assert.assertEquals("Sm_template_suite", tg.getPojoClassName(name));
 		Map<String, T_metatable> res = tg.getExtraTableDataFromXml(extra_setting2, null);
-		tg.config.setTableDataExt(res);
+		tg.setInfo.setTableDataExt(res);
 
 		Assert.assertEquals("TemplateSuite", tg.getPojoClassName(name));
 	}

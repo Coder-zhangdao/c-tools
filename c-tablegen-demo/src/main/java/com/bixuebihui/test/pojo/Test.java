@@ -29,11 +29,27 @@ public class Test  implements Serializable
   @Size(max=100)
   protected String name;
 
+/**
+  * Sets the value for id id
+  */
+public void setId(Long id)
+{
+  this.id=id;
+}
+
  public Test()
      {
       id=0L;
       name="";
      }
+
+/**
+  * Sets the value for name name
+  */
+public void setName(String name)
+{
+  this.name=name;
+}
 
 /**
   * Gets the value for id
@@ -44,29 +60,12 @@ public Long getId()
 }
 
 /**
-  * Sets the value for id id
-  */
-public void setId(Long id)
-{
-  this.id=id;
-}
-
-/**
   * Gets the value for name
   */
 public String getName()
 {
   return name;
 }
-
-/**
-  * Sets the value for name name
-  */
-public void setName(String name)
-{
-  this.name=name;
-}
-
  public String toXml()
      {
       StringBuilder s= new StringBuilder();
