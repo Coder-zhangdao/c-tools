@@ -14,20 +14,13 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <springboot.verion>2.3.8.RELEASE</springboot.verion>
+
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.github.yujiaao</groupId>
-            <artifactId>c-tools-parent</artifactId>
-            <version>${currentVersion}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${springboot.verion}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -36,10 +29,8 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.yujiaao</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>c-jmesa</artifactId>
-            <version>${currentVersion}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -51,23 +42,23 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.github.yujiaao</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>tablegen-maven-plugin</artifactId>
-                <version>1.1.0-RC1</version>
-                <executions>
-                    <execution>
-                        <id>first-execution</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>gen</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <propPath>${project.basedir}/tablegen.properties</propPath>
-                </configuration>
             </plugin>
         </plugins>
+
     </build>
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>c-tools-bom</artifactId>
+                <version>${currentVersion}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>

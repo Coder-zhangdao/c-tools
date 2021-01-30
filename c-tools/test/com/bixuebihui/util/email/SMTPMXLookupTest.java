@@ -5,30 +5,29 @@ import org.junit.jupiter.api.Disabled;
 
 import static com.bixuebihui.util.email.SMTPMXLookup.isAddressValid;
 
+@Disabled("It is too slow")
 public class SMTPMXLookupTest {
 
     @Test
-    @Disabled("It is too slow")
     public void testIsAddressValid() {
-        String testData[] = {
-                /*
-    "real@rgagnon.com",
-    "you@acquisto.net",
-    "fail.me@nowhere.spam", // Invalid domain name
-    "arkham@bigmeanogre.net", // Invalid address
-    "nosuchaddress@yahoo.com" // Failure of this method
-    */
-                "131212312312312@msn.com",
-                "xwx@live.cn",
-                "www@qsn.so",
-                "xwx@g.cn",
+        String[] testData = {
+           /*
+            "real@rgagnon.com",
+            "you@acquisto.net",
+            "fail.me@nowhere.spam", // Invalid domain name
+            "arkham@bigmeanogre.net", // Invalid address
+            "nosuchaddress@yahoo.com" // Failure of this method
+            */
+            "131212312312312@msn.com",
+            "xwx@live.cn",
+            "www@qsn.so",
+            "xwx@g.cn",
         };
 
-        for (int ctr = 0; ctr < testData.length; ctr++) {
-            System.out.println(testData[ctr] + " is valid? " +
-                    isAddressValid(testData[ctr]));
+        for (String testDatum : testData) {
+            System.out.println(testDatum + " is valid? " +
+                    isAddressValid(testDatum));
         }
-        return;
     }
 
 }

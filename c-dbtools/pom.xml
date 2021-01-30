@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.github.yujiaao</groupId>
-        <version>1.1.0-RC1</version>
         <artifactId>c-tools-parent</artifactId>
+        <version>1.1.0-RC1</version>
     </parent>
 
     <artifactId>c-dbtools</artifactId>
@@ -15,8 +15,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring3.version>3.2.18.RELEASE</spring3.version>
-        <spring4.version>4.3.29.RELEASE</spring4.version>
     </properties>
 
     <build>
@@ -121,10 +119,15 @@
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <linkXRef>false</linkXRef>
-                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
 
             <plugin>
@@ -210,14 +213,12 @@
             <version>1.4</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.ibm.db2.jcc/db2jcc -->
         <dependency>
             <groupId>com.ibm.db2.jcc</groupId>
             <artifactId>db2jcc</artifactId>
             <version>db2jcc4</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
@@ -261,7 +262,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring4.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -278,8 +278,6 @@
             <version>5.0.3.Final</version>
             <scope>test</scope>
         </dependency>
-
-
 
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -330,6 +328,34 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+        </dependency>
+
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.github.yujiaao</groupId>
+                <artifactId>c-tools-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>

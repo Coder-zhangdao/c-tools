@@ -3,10 +3,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.yujiaao</groupId>
     <artifactId>tablegen</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0-RC1</version>
     <parent>
         <groupId>com.github.yujiaao</groupId>
         <artifactId>c-tools-parent</artifactId>
@@ -14,6 +12,7 @@
     </parent>
     <properties>
         <handlebars-version>4.2.0</handlebars-version>
+        <springboot.version>2.3.8.RELEASE</springboot.version>
     </properties>
     <build>
         <finalName>tablegen</finalName>
@@ -130,19 +129,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.yujiaao</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>c-tools</artifactId>
-            <version>1.1.0-RC1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.yujiaao</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>c-dbtools</artifactId>
-            <version>1.1.0-RC1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.yujiaao</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>c-cache</artifactId>
-            <version>1.1.0-RC1</version>
         </dependency>
         <dependency>
             <groupId>postgresql</groupId>
@@ -158,9 +154,8 @@
             <version>1.1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.yujiaao</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>c-jmesa</artifactId>
-            <version>1.1.0-RC1</version>
         </dependency>
 
 
@@ -251,5 +246,25 @@
             </properties>
         </profile>
     </profiles>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>c-tools-bom</artifactId>
+                <version>${currentVersion}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>

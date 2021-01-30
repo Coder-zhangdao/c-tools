@@ -5,7 +5,7 @@ import com.bixuebihui.jdbc.SqlFilter;
 import com.bixuebihui.jdbc.SqlSort;
 import com.bixuebihui.jdbc.entity.CountObject;
 import com.bixuebihui.jdbc.entity.CountValue;
-import com.mysql.jdbc.NotImplemented;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -291,19 +291,19 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	/** {@inheritDoc} */
 	@Override
 	public T mapRow(ResultSet rs, int index) throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean updateByKey(T info) throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean insertDummy() throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 	/** {@inheritDoc} */
@@ -339,21 +339,21 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	/** {@inheritDoc} */
 	@Override
 	public boolean insert(T entity) throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 
 	/** {@inheritDoc} */
 	@Override
 	public List<Object> getVector(String field) throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 
 	/** {@inheritDoc} */
 	@Override
 	public List<Long> getLongVector(String field) throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 
@@ -434,7 +434,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	@Override
 	public CountValue countValue(String field, Record.GroupFun fun)
 			throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 
@@ -447,7 +447,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	/** {@inheritDoc} */
 	@Override
 	public boolean exists() throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 
@@ -469,13 +469,13 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	/** {@inheritDoc} */
 	@Override
 	public int update(String[] fields, Object[] values) throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int update(String fields, Object values) throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 
@@ -483,7 +483,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	@Override
 	public <K> CountObject<K> countObject(String field, Record.GroupFun fun, Class<K> objectType)
 			throws SQLException {
-		throw new NotImplemented();
+		throw new NotImplementedException();
 	}
 
 

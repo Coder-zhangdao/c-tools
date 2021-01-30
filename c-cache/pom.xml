@@ -78,9 +78,8 @@
     <dependencies>
 
         <dependency>
-            <groupId>com.github.yujiaao</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>c-tools</artifactId>
-            <version>1.1.0-RC1</version>
         </dependency>
 
         <dependency>
@@ -128,5 +127,17 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>c-tools-bom</artifactId>
+                <version>${currentVersion}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
