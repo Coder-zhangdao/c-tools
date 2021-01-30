@@ -1,1 +1,1 @@
- mvn -o package -Dmaven.test.skip=true install:install
+ mvn -o clean package -Dmaven.test.skip=true install:install -Ppro

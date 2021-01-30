@@ -840,11 +840,12 @@ public class TableGen implements DiffHandler {
 			String fileName = baseDir + File.separator + "dal" + File.separator + getPojoClassName(tableName)
 					+ "List.java";
 			currentOutput = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING), 10240);// new
+					new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING), 10240);
 
 			List<ColumnData> colData = getColumnData(table).getFields();
 
-			List<String> keyData = getTableKeys(tableName); // updates the keyData variable
+			// updates the keyData variable
+			List<String> keyData = getTableKeys(tableName);
 
 			writeHeader(table, "dal", " extends " + genericFiles[0] + getGeneticType(table));
 
@@ -1046,6 +1047,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	private void writeGetSetId(String tableName, List<String> keyData, List<ColumnData> columnData) throws IOException, GenException {
+		out("@Override");
 		out("public " + getFirstKeyType(keyData, columnData) + " getId(" + this.getPojoClassName(tableName) + " info) {");
 		out("    return " + this.getOneId(keyData) + ";");
 		out("}");
@@ -1247,7 +1249,7 @@ public class TableGen implements DiffHandler {
 
 	void writeBaseHeader() throws IOException {
 		out("package " + config.packageName + ";");
-		out("/**");
+		out("/*");
 		out("  * BaseList");
 		writeHeaderComment();
 		out("*/");
@@ -1272,7 +1274,7 @@ public class TableGen implements DiffHandler {
 	 */
 	void writeHeader(TableInfo table, String subPackage, String extClass) throws IOException {
 		out("package " + config.packageName + "." + subPackage + ";");
-		out("/**");
+		out("/*");
 		out("  * " + table.getName()+(table.getComment()!=null?(": "+table.getComment()):""));
 		writeHeaderComment();
 		out("  */");
@@ -1356,11 +1358,11 @@ public class TableGen implements DiffHandler {
 
 	private void writeHeaderComment() throws IOException {
 		out("  * ");
-		out("  * WARNING! Automatically generated file!");
+		out("  * Notice! Automatically generated file!");
 		out("  * Do not edit the pojo and dal packages,use `maven tablegen:gen`!");
-		out("  * Code Generator by J.A.Carter");
+		out("  * Code Generator originally by J.A.Carter");
 		out("  * Modified by Xing Wanxiang 2008-2021");
-		out("  * (c) www@qsn.so");
+		out("  * email: www@qsn.so");
 	}
 
 	void writeInit(ColumnData cd) throws IOException {
