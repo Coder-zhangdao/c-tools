@@ -86,7 +86,20 @@
             <groupId>opensymphony</groupId>
             <artifactId>oscache</artifactId>
             <version>2.4.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.jms</groupId>
+                    <artifactId>jms</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <!-- Failure to find javax.jms:jms:jar:1.1 in https://maven-central.storage-download.googleapis.com/maven2/ -->
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
