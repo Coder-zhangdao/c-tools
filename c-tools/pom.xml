@@ -68,6 +68,9 @@
                 <version>2.22.2</version>
                 <configuration>
                     <skipTests>false</skipTests>
+                    <excludes>
+                        <exclude>com.bixuebihui.util.email.SMTPMXLookupTest</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 
@@ -132,8 +135,8 @@
                 </executions>
             </plugin>
 
-
         </plugins>
+
     </build>
 
     <dependencies>
@@ -278,14 +281,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <!-- Import dependency management from Spring Boot -->
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${springboot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>c-tools-bom</artifactId>
                 <version>${currentVersion}</version>
@@ -293,6 +288,5 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-
     </dependencyManagement>
 </project>
