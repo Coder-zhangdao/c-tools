@@ -5,6 +5,7 @@ import com.bixuebihui.datasource.DataSourceTest;
 import com.bixuebihui.dbcon.DatabaseConfig;
 import org.easymock.EasyMockSupport;
 import org.junit.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,22 +15,19 @@ import static org.junit.Assert.*;
 
 public class MSDbHelperTest extends EasyMockSupport {
 
-	@Test
-	public void testGetConnection() throws SQLException {
-
-	}
 
 	@Test
 	public void testGetConnectionBoolean() throws SQLException {
 		MSDbHelper db = new MSDbHelper();
 
 		BitmechanicDataSource ds = new BitmechanicDataSource();
-		DatabaseConfig ro = DataSourceTest.getConfigMysqlReadOnly();
+		DatabaseConfig ro ;
+			ro = DataSourceTest.getConfigReadOnly();
 		ds.setDatabaseConfig(ro);
 		db.setDataSource(ds);
 
 		BitmechanicDataSource master = new BitmechanicDataSource();
-		DatabaseConfig ma = DataSourceTest.getConfigMysqlMaster();
+		DatabaseConfig ma = DataSourceTest.getConfigMaster();
 		master.setDatabaseConfig(ma);
 
 		db.setMasterDatasource(master);
@@ -42,19 +40,26 @@ public class MSDbHelperTest extends EasyMockSupport {
 	}
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testForceUseMasterDb() throws SQLException{
+		if(!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()){
+			return;
+		}
+
 		MSDbHelper db = new MSDbHelper();
 
 		BitmechanicDataSource ds = new BitmechanicDataSource();
-		DatabaseConfig ro = DataSourceTest.getConfigMysqlReadOnly();
+		DatabaseConfig ro;
+		ro = DataSourceTest.getConfigReadOnly();
 		ds.setDatabaseConfig(ro);
 		db.setDataSource(ds);
 
 		BitmechanicDataSource master = new BitmechanicDataSource();
-		DatabaseConfig ma = DataSourceTest.getConfigMysqlMaster();
+		DatabaseConfig ma = DataSourceTest.getConfigMaster();
 		master.setDatabaseConfig(ma);
 
 		db.setMasterDatasource(master);
+
 
 
 		AbstractBaseDao dao = new AbstractBaseDao(db){
@@ -87,6 +92,10 @@ public class MSDbHelperTest extends EasyMockSupport {
 		dao.endForceMasterDB();
 
 		Connection connRO = dao.dbHelper.getConnection(true);
+
+		if(!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()){
+			return;
+		}
 		assertTrue(connRO.isReadOnly());
 	}
 

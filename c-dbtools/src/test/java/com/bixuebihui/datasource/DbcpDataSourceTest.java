@@ -2,17 +2,19 @@ package com.bixuebihui.datasource;
 
 import java.sql.SQLException;
 
+import com.bixuebihui.dbcon.DatabaseConfig;
 import junit.framework.TestCase;
 
 public class DbcpDataSourceTest extends TestCase {
 
 	public void testGetConnection() throws SQLException {
 		DbcpDataSource ds = new DbcpDataSource();
+		DatabaseConfig cfg = DataSourceTest.getConfigMaster();
 
-		ds.setDriverClassName("com.mysql.jdbc.Driver");
-		ds.setUrl("jdbc:mysql://localhost/test?autoReconnect=true&zeroDateTimeBehavior=convertToNull&noAccessToProcedureBodies=true&useUnicode=true&characterEncoding=utf8&mysqlEncoding=utf8&useSSL=false");
-		ds.setUsername("test");
-		ds.setPassword("test123");
+		ds.setDriverClassName(cfg.getClassName());
+		ds.setUrl(cfg.getDburl());
+		ds.setUsername(cfg.getUsername());
+		ds.setPassword(cfg.getPassword());
 		DataSourceTest.dataSourceTest(ds);
 
 	}
@@ -20,7 +22,7 @@ public class DbcpDataSourceTest extends TestCase {
 	public void testSetDatabaseConfig() throws SQLException {
 		DbcpDataSource ds = new DbcpDataSource();
 
-		ds.setDatabaseConfig(DataSourceTest.getConfigMysqlMaster());
+		ds.setDatabaseConfig(DataSourceTest.getConfigMaster());
 
 		DataSourceTest.dataSourceTest(ds);
 	}

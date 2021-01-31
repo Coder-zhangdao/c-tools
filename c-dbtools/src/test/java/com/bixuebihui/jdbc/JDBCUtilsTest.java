@@ -1,14 +1,14 @@
 package com.bixuebihui.jdbc;
 
 import java.sql.*;
+import java.util.Locale;
 
-import org.apache.commons.dbutils.DbUtils;
-
-import com.bixuebihui.datasource.BitmechanicDataSource;
 import com.bixuebihui.datasource.DataSourceTest;
 import com.bixuebihui.datasource.DbcpDataSource;
 
+import com.bixuebihui.dbcon.DatabaseConfig;
 import org.junit.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -16,25 +16,38 @@ import static org.junit.Assert.assertTrue;
 public class JDBCUtilsTest {
 
     @Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
     public void testTableOrViewExists() throws SQLException {
 		String tableName = "t_log";
 
 		DbcpDataSource ds = new DbcpDataSource();
-		ds.setDatabaseConfig(DataSourceTest.getConfigMysqlMaster());
+		DatabaseConfig cfg = DataSourceTest.getConfigMaster();
+		ds.setDatabaseConfig(cfg);
 		IDbHelper db = new DbHelper();
 		db.setDataSource(ds);
 
-		assertTrue(JDBCUtils.tableOrViewExists(null, null, tableName, db
+		String schema=null;
+		String catalog=null;
+		if(cfg.getClassName().contains("h2")){
+			tableName= tableName.toUpperCase(Locale.ROOT);
+		}
+
+
+		assertTrue(JDBCUtils.tableOrViewExists(catalog, schema, tableName, db
 				.getConnection()));
 	}
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testColumnOfTableExists() throws SQLException {
+		if(!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()) {
+			return;
+		}
 		String tableName = "t_log";
 		String columnName = "lid";
 
 		DbcpDataSource ds = new DbcpDataSource();
-		ds.setDatabaseConfig(DataSourceTest.getConfigMysqlMaster());
+		ds.setDatabaseConfig(DataSourceTest.getConfigMaster());
 		IDbHelper db = new DbHelper();
 		db.setDataSource(ds);
 

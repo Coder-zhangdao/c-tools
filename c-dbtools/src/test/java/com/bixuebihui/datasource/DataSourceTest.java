@@ -1,40 +1,40 @@
 package com.bixuebihui.datasource;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.jdbc.AbstractBaseDao;
 import com.bixuebihui.jdbc.DbHelper;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.sequence.SequenceUtils;
-
 import junit.framework.TestCase;
+import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
+import java.sql.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 public class DataSourceTest extends TestCase {
 
 	private static final Log log = LogFactory.getLog(DataSourceTest.class);
+	protected static DatabaseConfig cfg = new DatabaseConfig();
+	static {
+		cfg.setAlias("test1");
+		cfg.setClassName("com.mysql.jdbc.Driver");
+		cfg.setUsername("test");
+		cfg.setPassword("test123");
+		cfg.setDburl(
+				"jdbc:mysql://localhost:3306/test?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&mysqlEncoding=utf8&useSSL=false");
 
-	// this is a superclass for test DataSource!
-	public void testDummy() {
-		assertEquals(true, true);
+	}
+
+	public static DatabaseConfig getConfig() {
+		return getConfigMaster();
 	}
 
 	public static String getDummySql(Connection cn) throws SQLException {
@@ -218,10 +218,23 @@ public class DataSourceTest extends TestCase {
 		log.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
 	}
 
+	public static DatabaseConfig getConfigDerby() {
+	    String dbName = "/tmp/data/test";
+		File file = new File(dbName);
+		try {
+			FileUtils.deleteDirectory(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		DatabaseConfig cfg = new DatabaseConfig();
+		cfg.setAlias("derby");
+		cfg.setClassName("org.apache.derby.jdbc.EmbeddedDriver");
+		cfg.setUsername("");
+		cfg.setPassword("");
+		cfg.setDburl("jdbc:derby:"+dbName+";create=true");
 
+		return cfg;
 
-	public static DatabaseConfig getConfig() {
-		return getConfigMysqlMaster();
 	}
 
 	public static DatabaseConfig getConfigWest() {
@@ -246,29 +259,10 @@ public class DataSourceTest extends TestCase {
 
 	}
 
-	public static DatabaseConfig getConfigDerby() {
-	    String dbName = "/tmp/data/jijian";
-		File file = new File(dbName);
-		try {
-			FileUtils.deleteDirectory(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		DatabaseConfig cfg = new DatabaseConfig();
-		cfg.setAlias("derby");
-		cfg.setClassName("org.apache.derby.jdbc.EmbeddedDriver");
-		cfg.setUsername("");
-		cfg.setPassword("");
-		cfg.setDburl("jdbc:derby:"+dbName+";create=true");
-
-		return cfg;
-
-	}
-
 	public static DatabaseConfig getConfigH2() {
 
 		DatabaseConfig cfg = new DatabaseConfig();
-		cfg.setAlias("h2");
+		cfg.setAlias("test1");
 		cfg.setClassName("org.h2.Driver");
 		cfg.setUsername("sa");
 		cfg.setPassword("sa");
@@ -278,32 +272,60 @@ public class DataSourceTest extends TestCase {
 
 	}
 
-	public static DatabaseConfig getConfigMysqlMaster() {
+	public static boolean isMysqlAvailable() {
 
+		if(!cfg.getClassName().contains("mysql")){
+			return false;
+		}
+
+		try {
+			Class.forName(cfg.getClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new RuntimeException("MySQL is not available!");
+		}
+
+		try(Connection con = DriverManager.getConnection(
+				cfg.getDburl(), cfg.getUsername(), cfg.getPassword());
+			Statement statement =  con.createStatement();
+			ResultSet resultSet = statement.executeQuery("select 1+1");
+		) {
+			resultSet.next();
+			return resultSet.getInt(1) == 2;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public static synchronized DatabaseConfig getConfigMaster() {
+		if (!isMysqlAvailable()) {
+			cfg = getConfigH2();
+			try {
+				new H2DataSource().init();
+			} catch (SQLException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		return cfg;
+	}
+
+	public static DatabaseConfig getConfigReadOnly() {
+
+		DatabaseConfig c = getConfigMaster();
 		DatabaseConfig cfg = new DatabaseConfig();
-		cfg.setAlias("test1");
-		cfg.setClassName("com.mysql.jdbc.Driver");
-		cfg.setUsername("test");
-		cfg.setPassword("test123");
-		cfg.setDburl(
-				"jdbc:mysql://localhost:3306/test?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&mysqlEncoding=utf8&useSSL=false");
+		cfg.setAlias("testRO");
+		cfg.setClassName(c.getClassName());
+		cfg.setUsername(c.getUsername());
+		cfg.setPassword(c.getPassword());
+		cfg.setDburl(c.getDburl());
 
 		return cfg;
 
 	}
 
-	public static DatabaseConfig getConfigMysqlReadOnly() {
-
-		DatabaseConfig cfg = new DatabaseConfig();
-		cfg.setAlias("testRO");
-		cfg.setClassName("com.mysql.jdbc.Driver");
-		cfg.setUsername("test");
-		cfg.setPassword("test123");
-		cfg.setDburl(
-				"jdbc:mysql://localhost:3306/test?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&mysqlEncoding=utf8&useSSL=false");
-
-		return cfg;
-
+	// this is a superclass for test DataSource!
+	public void testDummy() {
+		assertTrue(true);
 	}
 
 }

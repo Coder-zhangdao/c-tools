@@ -2,20 +2,25 @@ package com.bixuebihui.datasource;
 
 import java.sql.SQLException;
 
+import com.bixuebihui.dbcon.DatabaseConfig;
 import org.junit.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import static org.junit.Assert.assertEquals;
 
 public class DruidDataSourceAdapterTest {
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testGetConnection() throws SQLException {
 		DruidDataSourceAdapter ds = new DruidDataSourceAdapter();
 
-		ds.setDriverClassName("com.mysql.jdbc.Driver");
-		ds.setUrl("jdbc:mysql://localhost/test?autoReconnect=true&zeroDateTimeBehavior=convertToNull&noAccessToProcedureBodies=true&useUnicode=true&characterEncoding=utf8&mysqlEncoding=utf8&useSSL=false");
-		ds.setUsername("test");
-		ds.setPassword("test123");
+		DatabaseConfig cfg = DataSourceTest.getConfigMaster();
+
+		ds.setDriverClassName(cfg.getClassName());
+		ds.setUrl(cfg.getDburl());
+		ds.setUsername(cfg.getUsername());
+		ds.setPassword(cfg.getPassword());
 		DataSourceTest.dataSourceTest(ds);
 		ds.close();
 
@@ -39,10 +44,11 @@ public class DruidDataSourceAdapterTest {
 	}
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testSetDatabaseConfig() throws SQLException {
 		DruidDataSourceAdapter ds = new DruidDataSourceAdapter();
 
-		ds.setDatabaseConfig(DataSourceTest.getConfigMysqlMaster());
+		ds.setDatabaseConfig(DataSourceTest.getConfigMaster());
 
 		DataSourceTest.dataSourceTest(ds);
 		ds.close();
@@ -51,10 +57,11 @@ public class DruidDataSourceAdapterTest {
 
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testDbHelper() throws SQLException {
 		DruidDataSourceAdapter ds = new DruidDataSourceAdapter();
 
-		ds.setDatabaseConfig(DataSourceTest.getConfigMysqlMaster());
+		ds.setDatabaseConfig(DataSourceTest.getConfigMaster());
 
 		DataSourceTest.testDbHelper(ds);
 		ds.close();

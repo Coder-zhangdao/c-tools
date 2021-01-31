@@ -13,6 +13,9 @@ import org.apache.commons.logging.LogFactory;
 import com.bixuebihui.sql.ConnectionPool;
 
 import junit.framework.TestCase;
+import org.junit.jupiter.api.condition.DisabledIf;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ConnectionManagerTest extends TestCase {
 	private static final Log log = LogFactory.getLog(ConnectionManagerTest.class);
@@ -23,7 +26,7 @@ public class ConnectionManagerTest extends TestCase {
 
 	public void testGetConnection() throws Exception {
 		Collection<ConnectionPool> e = ConnectionManager.getInstance().getPools();
-		if (e != null && !e.isEmpty()) {
+		if (!e.isEmpty()) {
 			ConnectionPool o =  e.iterator().next();
 			log.info(o.toString());
 		} else {
@@ -40,7 +43,12 @@ public class ConnectionManagerTest extends TestCase {
 
 	volatile boolean finish=false;
 
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testFreeConnection() throws SQLException, InterruptedException {
+		if(!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()){
+			log.warn("MySQL is not available!");
+			return;
+		}
 		log.info(ConnectionManager.getInstance());
 
 		final String alias = "test1";
@@ -103,7 +111,8 @@ public class ConnectionManagerTest extends TestCase {
 	}
 
 	public void testState() throws Exception {
-		ConnectionManager.getInstance().getPools();
+		Collection<ConnectionPool> pools = ConnectionManager.getInstance().getPools();
+		assertThat("", pools.size()>0);
 		log.info(ConnectionManager.state());
 	}
 

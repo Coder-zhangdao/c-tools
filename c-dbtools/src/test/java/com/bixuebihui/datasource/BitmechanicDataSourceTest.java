@@ -7,11 +7,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.bixuebihui.ConnectionManager;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 public class BitmechanicDataSourceTest extends TestCase {
 
 	private static final Log log = LogFactory.getLog(BitmechanicDataSourceTest.class);
 
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testGetConnection() throws SQLException {
 		BitmechanicDataSource ds = new BitmechanicDataSource();
 
@@ -20,6 +22,7 @@ public class BitmechanicDataSourceTest extends TestCase {
 		DataSourceTest.dataSourceTest(ds);
 	}
 
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testSetDatabaseConfig() throws SQLException {
 		BitmechanicDataSource ds = new BitmechanicDataSource();
 

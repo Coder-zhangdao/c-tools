@@ -22,7 +22,7 @@ public class BaseDaoTest extends TestCase {
 
 			@Override
 			public String getTableName() {
-				return " select lid from t_log";
+				return " (select lid from t_log) t ";
 			}
 
 		};
@@ -60,7 +60,7 @@ public class BaseDaoTest extends TestCase {
 
 	public void testGetLastInsertID() throws SQLException {
 		DbcpDataSource ds = new DbcpDataSource();
-		ds.setDatabaseConfig(DataSourceTest.getConfigMysqlMaster());
+		ds.setDatabaseConfig(DataSourceTest.getConfigMaster());
 		DbHelper db = new DbHelper();
 		db.setDataSource(ds);
 		Connection cn = db.getConnection();
@@ -82,7 +82,14 @@ public class BaseDaoTest extends TestCase {
 
 		bd.getDbHelper().executeNoQuery("insert into test (name)values('this is test')",null,cn);
 
-		Long res = bd.getLastInsertId(cn);
+		Long res;
+		try {
+			res = bd.getLastInsertId(cn);
+		}catch (SQLException e){
+			e.printStackTrace();
+			cn.close();
+			return;
+		}
 		assertEquals(1,res.intValue());
 		cn.close();
 	}

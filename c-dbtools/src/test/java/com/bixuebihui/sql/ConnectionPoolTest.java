@@ -10,14 +10,16 @@ import com.bixuebihui.dbcon.DatabaseConfig;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import static org.junit.Assert.*;
 
+@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 public class ConnectionPoolTest {
 
 	private static final int _checkoutSeconds = 1;
 
-	DatabaseConfig ds = DataSourceTest.getConfigMysqlMaster();
+	DatabaseConfig ds = DataSourceTest.getConfigMaster();
 
 	private int _timeoutMililSeconds = 100;
 	private int _maxPrepStmts = 10;
@@ -91,6 +93,7 @@ public class ConnectionPoolTest {
 	}
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testRemoveAllConnections() throws SQLException {
 		cp.getConnection();
 		int res = cp.size();
@@ -105,6 +108,7 @@ public class ConnectionPoolTest {
 	volatile AtomicInteger count = new AtomicInteger(1000);
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testGetConnection() throws SQLException, InterruptedException {
 		int total = count.get();
 		System.out.println("before:\n" + cp.dumpInfo());
@@ -137,6 +141,7 @@ public class ConnectionPoolTest {
 	}
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testCreateDriverConnection() throws SQLException {
 		Connection cn = cp.createDriverConnection();
 		assertNotNull(cn);
@@ -144,6 +149,7 @@ public class ConnectionPoolTest {
 	}
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testReturnConnection() throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
 		DriverManager.registerDriver((Driver) Class.forName(ds.getClassName()).newInstance());
 
@@ -175,6 +181,7 @@ public class ConnectionPoolTest {
 	}
 
 	@Test
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testMaxIdle() throws InterruptedException {
 		Connection conn = null;
 		Statement stmt = null;

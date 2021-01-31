@@ -1,6 +1,5 @@
 package com.bixuebihui.datasource;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
@@ -17,14 +16,8 @@ public class H2DataSource {
 	public final JdbcConnectionPool cpRO = JdbcConnectionPool.
 		    create("jdbc:h2:mem:test1", "sa", "sa");
 
-	public H2DataSource init() throws SQLException{
-		//jdbc:h2:mem:test
-		URL configUrl = Loader.getResource("h2test.sql");
-
-		RunScript.execute("jdbc:h2:mem:test", "sa", "sa",
-				configUrl.getPath(),
-				StandardCharsets.UTF_8,true);
-		return this;
+	public static void main(String[] args) throws SQLException, ClassNotFoundException {
+		new H2DataSource().init().close();
 	}
 
 	public void close(){
@@ -32,7 +25,14 @@ public class H2DataSource {
 		cpRO.dispose();
 	}
 
-	public static void main(String[] args) throws SQLException{
-		new H2DataSource().init().close();
+	public H2DataSource init() throws SQLException, ClassNotFoundException {
+		//jdbc:h2:mem:test
+		URL configUrl = Loader.getResource("h2test.sql");
+		Class.forName("org.h2.Driver");
+
+		RunScript.execute("jdbc:h2:mem:test", "sa", "sa",
+				configUrl.getPath(),
+				StandardCharsets.UTF_8,true);
+		return this;
 	}
 }

@@ -33,7 +33,7 @@ public class DbHelperTest extends TestCase {
 
     protected void setUp() {
         BitmechanicDataSource ds = new BitmechanicDataSource();
-        ds.setDatabaseConfig(DataSourceTest.getConfigMysqlMaster());
+        ds.setDatabaseConfig(DataSourceTest.getConfigMaster());
 
         h.setDataSource(ds);
     }

@@ -82,7 +82,7 @@ public class ConnectionPoolManagerTest {
     @Test
     public void getMajorVersion() throws Exception {
         ConnectionPoolManager pm = new ConnectionPoolManager();
-        assertThat(pm.getMajorVersion(), Is.isA(Integer.class));
+        org.hamcrest.MatcherAssert.assertThat(pm.getMajorVersion(), Is.isA(Integer.class));
 
 
 
@@ -91,7 +91,7 @@ public class ConnectionPoolManagerTest {
     @Test
     public void getMinorVersion() throws Exception {
         ConnectionPoolManager pm = new ConnectionPoolManager();
-        assertThat(pm.getMinorVersion(), Is.isA(Integer.class));
+        org.hamcrest.MatcherAssert.assertThat(pm.getMinorVersion(), Is.isA(Integer.class));
     }
 
     @Test
@@ -107,8 +107,8 @@ public class ConnectionPoolManagerTest {
                 100,1000,2000);
         pm.getPool("h2").getConnection();
         String str = pm.dumpInfo();
-        System.out.println(str);
-        assertThat(str, StringContains.containsString("h2"));
+//        System.out.println(str);
+        org.hamcrest.MatcherAssert.assertThat(str, StringContains.containsString("h2"));
 
     }
 
