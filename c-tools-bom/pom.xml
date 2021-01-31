@@ -12,12 +12,6 @@
     <artifactId>c-tools-bom</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <junitVersion>5.7.0</junitVersion>
-        <springboot.version>2.3.8.RELEASE</springboot.version>
-    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
