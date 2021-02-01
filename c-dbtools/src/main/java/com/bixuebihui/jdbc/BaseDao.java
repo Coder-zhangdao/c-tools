@@ -61,6 +61,9 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     public static final int POSTGRESQL = 5;
     /** Constant <code>ACCESS=6</code> */
     public static final int ACCESS = 6;
+    /** Constant <code>H2=8</code> */
+    public static final int H2 = 8;
+
 
     static {
         ConvertUtils.register(new DateConverter(null), Date.class);
@@ -216,6 +219,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             res = SQLSERVER_2005_AND_UP;
         } else if (name.contains("POSTGRESQL")) {
             res = POSTGRESQL;
+        } else if (name.contains("H2")) {
+            res = H2;            
         } else if (name.contains("ACCESS")) {
             res = ACCESS;
         }
@@ -242,7 +247,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         } else if (dbtype == SQLSERVER_2005_AND_UP) {
             return getPagingSqlSqlServer2005(selectSql, startNum, endNum);
 
-        } else if (dbtype == MYSQL) {
+        } else if (dbtype == MYSQL || dbtype == H2) {
             return getPagingSqlMySql(selectSql, startNum, endNum);
         } else if (dbtype == POSTGRESQL) {
             return getPagingSqlPostgresql(selectSql, startNum, endNum);

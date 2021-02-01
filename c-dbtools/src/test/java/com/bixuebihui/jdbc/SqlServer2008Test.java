@@ -3,6 +3,7 @@ package com.bixuebihui.jdbc;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -19,8 +20,8 @@ public class SqlServer2008Test extends TestCase{
 	public void commentout_testDbDriver() throws SQLException {
 		Connection conn = null;
 		try {
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
-					.newInstance();
+			DriverManager.registerDriver((Driver)Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver").getDeclaredConstructor().newInstance());
+			
 			System.out.println("数据库驱动程序注册成功！");
 			String url = "jdbc:sqlserver://192.168.1.13:1433;DatabaseName=ibdmt";
 			String user = "sa";

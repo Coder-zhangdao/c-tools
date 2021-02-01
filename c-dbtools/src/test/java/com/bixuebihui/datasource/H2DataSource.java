@@ -2,10 +2,16 @@ package com.bixuebihui.datasource;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.sql.Driver;
+import java.sql.DriverManager;
 
 import org.apache.log4j.helpers.Loader;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.tools.RunScript;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+
 
 
 public class H2DataSource {
@@ -25,14 +31,19 @@ public class H2DataSource {
 		cpRO.dispose();
 	}
 
-	public H2DataSource init() throws SQLException, ClassNotFoundException {
+	public H2DataSource init() throws SQLException {
 		//jdbc:h2:mem:test
-		URL configUrl = Loader.getResource("h2test.sql");
-		Class.forName("org.h2.Driver");
+		try{
+			InputStream in = getClass().getResourceAsStream("/h2test.sql");			
+			DriverManager.registerDriver((Driver) Class.forName("org.h2.Driver").getDeclaredConstructor().newInstance());
+			
+			InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
 
-		RunScript.execute("jdbc:h2:mem:test", "sa", "sa",
-				configUrl.getPath(),
-				StandardCharsets.UTF_8,true);
+			RunScript.execute(cp.getConnection(),reader);
+		}catch(ClassNotFoundException| NoSuchMethodException
+		| InstantiationException|IllegalAccessException | InvocationTargetException e){
+			e.printStackTrace();
+		}
 		return this;
 	}
 }

@@ -67,7 +67,7 @@ public class ConnectionPoolManagerTest {
 
     @Test
     public void run() throws Exception {
-        DriverManager.registerDriver((Driver) Class.forName(driverName).newInstance());
+        DriverManager.registerDriver((Driver) Class.forName(driverName).getDeclaredConstructor().newInstance());
         ConnectionPoolManager pm = new ConnectionPoolManager();
         pm.setTracing(true);
         pm.addAlias("h2", driverName,url,username,password,

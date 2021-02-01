@@ -322,7 +322,7 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 	}
 
 	private String parseLimitSql() throws SQLException{
-		if(operator.getDbType()==BaseDao.MYSQL){
+		if(operator.getDbType()==BaseDao.MYSQL || operator.getDbType() == BaseDao.H2){
 
 			if(limit==null) {
 				limit = SqlLimit.LIMIT_ONE;

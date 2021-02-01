@@ -302,7 +302,7 @@ public class DataSourceTest extends TestCase {
 			cfg = getConfigH2();
 			try {
 				new H2DataSource().init();
-			} catch (SQLException | ClassNotFoundException e) {
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
