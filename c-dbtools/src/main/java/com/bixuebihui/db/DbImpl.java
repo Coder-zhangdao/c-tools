@@ -324,6 +324,11 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 		return null;
 	}
 
+	@Override
+	protected void setIdLong(T info, long id) {
+
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public String getTableName() {

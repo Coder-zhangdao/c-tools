@@ -958,7 +958,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	private void writeSql(List<ColumnData> colData, List<String> params) throws IOException, GenException {
-		StringBuilder columnss = new StringBuilder("( ");
+		StringBuilder columns = new StringBuilder("( ");
 		StringBuilder values = new StringBuilder("");
 
 		String where = createPreparedWhereClause(params, false, colData);
@@ -990,18 +990,18 @@ public class TableGen implements DiffHandler {
 				}
 
 				values.append("?");
-				columnss.append(cd.getName());
+				columns.append(cd.getName());
 
 				if (isNotLast) {
 					update.append(",");
 					values.append(",");
-					columnss.append(",");
+					columns.append(",");
 				}
 			}
 		}
 
 		values.append(" )\";");
-		columnss.append(" )");
+		columns.append(" )");
 		update.append("\"\n    " + where + ";");
 		fieldsAll.append("};}\n");
 
@@ -1015,7 +1015,7 @@ public class TableGen implements DiffHandler {
 		fields.append("    }\n");
 		out(fields.toString());
 
-		out("@Override\nprotected String getInsertSql(){\n    return \"insert into \" + getTableName() + \" " + columnss
+		out("@Override\nprotected String getInsertSql(){\n    return \"insert into \" + getTableName() + \" " + columns
 				+ " values ( " + values + "\n}\n");
 
 		out("@Override\nprotected String getUpdateSql(){\n    return \"update \" + getTableName() + \" set " + update + "\n}\n");
@@ -1047,16 +1047,28 @@ public class TableGen implements DiffHandler {
 	}
 
 	private void writeGetSetId(String tableName, List<String> keyData, List<ColumnData> columnData) throws IOException, GenException {
+	    String type = getFirstKeyType(keyData, columnData);
 		out("@Override");
-		out("public " + getFirstKeyType(keyData, columnData) + " getId(" + this.getPojoClassName(tableName) + " info) {");
+		out("public " + type + " getId(" + this.getPojoClassName(tableName) + " info) {");
 		out("    return " + this.getOneId(keyData) + ";");
 		out("}");
 		out("\n");
 
 		out("@Override");
-		out("public void setId(" + this.getPojoClassName(tableName) + " info, " + getFirstKeyType(keyData, columnData) + " id) {");
+		out("public void setId(" + this.getPojoClassName(tableName) + " info, " + type + " id) {");
 		if (isNotEmpty(keyData)) {
 			out("    info.set" + firstUp(keyData.get(0)) + "(id);");
+		} else {
+			out("   //no key to set, don't this method!");
+		}
+		out("}");
+		out("\n");
+
+
+		out("@Override");
+		out("public void setIdLong(" + this.getPojoClassName(tableName) + " info, long id) {");
+		if (isNotEmpty(keyData)) {
+			out("    info.set" + firstUp(keyData.get(0)) + "(("+type+")id);");
 		} else {
 			out("   //no key to set, don't this method!");
 		}

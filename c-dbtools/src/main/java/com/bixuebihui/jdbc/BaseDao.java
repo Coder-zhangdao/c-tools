@@ -220,7 +220,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         } else if (name.contains("POSTGRESQL")) {
             res = POSTGRESQL;
         } else if (name.contains("H2")) {
-            res = H2;            
+            res = H2;
         } else if (name.contains("ACCESS")) {
             res = ACCESS;
         }
@@ -1781,4 +1781,36 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             mLog.warn(e);
         }
     }
+
+
+    public boolean save(T info) throws SQLException {
+        if(getId(info) !=null && Integer.parseInt(getId(info).toString() )!= 0){
+            return updateByKey(info);
+        }else{
+            return insertAutoIncrement(info);
+        }
+    }
+
+    protected abstract void setIdLong(T info, long id);
+
+    private boolean insertAutoIncrement(T info) throws SQLException {
+        beforeChange(info);
+        setIdLong(info,getDbHelper().executeNoQuery(getInsertSqlAutoIncrement(),
+                getInsertObjs(info) ));
+        return true;
+    }
+
+    protected String getInsertSqlAutoIncrement(){
+        String res =  this.getInsertSql();
+        try {
+            res   += (getDbType()==MYSQL)? " ;select last_insert_id()" :"";
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return res;
+    }
+
+
+
+
 }
