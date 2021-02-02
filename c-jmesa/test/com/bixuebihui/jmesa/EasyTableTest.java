@@ -207,12 +207,10 @@ public class EasyTableTest {
     @Test
     public void testParser() throws StandardException {
         EasyTable.MiniSqlParser mp = EasyTable.MiniSqlParser.parse("select count(*) from article");
-        assertTrue(mp!=null);
-        assertEquals("", mp.uniquePropertyName);
+        assertEquals(null, mp.uniquePropertyName);
 
         mp = EasyTable.MiniSqlParser.parse("select count(*) CNT from article");
-        assertTrue(mp!=null);
-        assertEquals("CNT", mp.uniquePropertyName);
+        assertEquals("cnt", mp.uniquePropertyName);
 
     }
 
