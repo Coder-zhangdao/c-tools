@@ -696,25 +696,38 @@ public class TableGen implements DiffHandler {
 						new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
 				writeBaseHeader();
-				out("      @Autowired");
-				out("      DataSource ds;");
-				out(" public BaseList(){");
-				String lastName = config.packageName.substring(config.packageName.lastIndexOf('.') + 1);
-				out("// try {");
-				out("//    dbHelper = (IDbHelper) BeanFactory.createObjectById(\"" + lastName + "DbHelper\");");
-				out("//    }catch (Exception e ) { ");
-				out("    	MSDbHelper dbHelper0 = new MSDbHelper(); ");
-				out("    	dbHelper0.setMasterDatasource(ds); ");
-				out("    	dbHelper0.setDataSource(ds);");
-				out("    	if (mLog.isDebugEnabled()) {");
-				out("    			ProxyFactory obj = new ProxyFactory(dbHelper0);");
-				out("    			obj.addAdvice(new DbHelperAroundAdvice());");
-				out("    			dbHelper = (IDbHelper) obj.getProxy();");
-				out("    		} else {");
-				out("    			dbHelper = dbHelper0;");
-				out("    		}");
-				out("    	}");
-				out("// }");
+//				out("      @Autowired");
+//				out("      DataSource ds;");
+//				out(" public BaseList(){");
+//				String lastName = config.packageName.substring(config.packageName.lastIndexOf('.') + 1);
+//				out("// try {");
+//				out("//    dbHelper = (IDbHelper) BeanFactory.createObjectById(\"" + lastName + "DbHelper\");");
+//				out("//    }catch (Exception e ) { ");
+//				out("    	MSDbHelper dbHelper0 = new MSDbHelper(); ");
+//				out("    	dbHelper0.setMasterDatasource(ds); ");
+//				out("    	dbHelper0.setDataSource(ds);");
+//				out("    	if (mLog.isDebugEnabled()) {");
+//				out("    			ProxyFactory obj = new ProxyFactory(dbHelper0);");
+//				out("    			obj.addAdvice(new DbHelperAroundAdvice());");
+//				out("    			dbHelper = (IDbHelper) obj.getProxy();");
+//				out("    		} else {");
+//				out("    			dbHelper = dbHelper0;");
+//				out("    		}");
+//				out("    	}");
+//				out("// }");
+				out("\n" +
+						"    public BaseList(DataSource ds) {\n" +
+						"        MSDbHelper dbHelper0 = new MSDbHelper();\n" +
+						"        dbHelper0.setMasterDatasource(ds);\n" +
+						"        dbHelper0.setDataSource(ds);\n" +
+						"        if (mLog.isDebugEnabled()) {\n" +
+						"            ProxyFactory obj = new ProxyFactory(dbHelper0);\n" +
+						"            obj.addAdvice(new DbHelperAroundAdvice());\n" +
+						"            dbHelper = (IDbHelper) obj.getProxy();\n" +
+						"        } else {\n" +
+						"            dbHelper = dbHelper0;\n" +
+						"        }\n" +
+						"    }");
 
 				out("}");
 				currentOutput.close();
@@ -1133,7 +1146,14 @@ public class TableGen implements DiffHandler {
 
 				getColumnData(table);
 				writeHeader(table, BUSINESS, " extends " + getPojoClassName(tableName) + "List");
-				out("// Write your code here!");
+				out("    /**\n" +
+								"     * Don't direct use the constructor of TestList, use TestManager instead.\n" +
+								"     *\n" +
+								"     * @param ds datasource for injecting\n" +
+								"     */\n" +
+								"    protected TestManager(DataSource ds) {\n" +
+								"        super(ds);\n" +
+								"    }");
 
 				out("}");
 				currentOutput.close();
@@ -1271,7 +1291,7 @@ public class TableGen implements DiffHandler {
 		out("  import com.bixuebihui.jdbc.MSDbHelper;");
 		out("  import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;");
 		out("  import org.springframework.aop.framework.ProxyFactory;");
-		out("  import org.springframework.beans.factory.annotation.Autowired;");
+//		out("  import org.springframework.beans.factory.annotation.Autowired;");
 
 		out("  import javax.sql.DataSource;");
 		out("  import java.sql.SQLException;");
@@ -1782,8 +1802,9 @@ public class TableGen implements DiffHandler {
 		out("/**");
 		out("  * Don't direct use the " + className + ", use " + classPojo + "Manager instead.");
 		out("  */");
-		out("protected " + className + "()");
+		out("protected " + className + "(DataSource ds)");
 		out("{");
+		out("    super(ds);");
 		out("}");
 		out("");
 	}

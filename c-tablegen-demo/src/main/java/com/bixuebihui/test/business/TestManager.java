@@ -17,6 +17,8 @@ import com.bixuebihui.test.BaseList;
 
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
+
 /**
  * @author xwx
  */
@@ -24,4 +26,12 @@ import org.springframework.stereotype.Repository;
 public class TestManager  extends TestList
 {
 
+    /**
+     * Don't direct use the TestList, use TestManager instead.
+     *
+     * @param ds
+     */
+    protected TestManager(DataSource ds) {
+        super(ds);
+    }
 }

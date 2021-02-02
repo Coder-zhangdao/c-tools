@@ -1,7 +1,7 @@
 package com.bixuebihui.test.dal;
 /*
   * test
-  * 
+  *
   * Notice! Automatically generated file!
   * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
   * Code Generator originally by J.A.Carter
@@ -16,13 +16,19 @@ import com.bixuebihui.test.pojo.*;
 import com.bixuebihui.jdbc.RowMapperResultReader;
 import com.bixuebihui.test.BaseList;
 
+import javax.sql.DataSource;
+
+/**
+ * @author xwx
+ */
 public class TestList  extends BaseList<Test,Long>
 {
 /**
   * Don't direct use the TestList, use TestManager instead.
   */
-protected TestList()
+protected TestList(DataSource ds)
 {
+    super(ds);
 }
 
 protected String getDeleteSql(){

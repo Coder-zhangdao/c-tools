@@ -1807,7 +1807,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
     protected void setIdLong(T info, long id){};
 
-    private boolean insertAutoIncrement(T info) throws SQLException {
+    protected boolean insertAutoIncrement(T info) throws SQLException {
         beforeChange(info);
         setIdLong(info,getDbHelper().executeNoQuery(getInsertSqlAutoIncrement(),
                 getInsertObjs(info) ));
