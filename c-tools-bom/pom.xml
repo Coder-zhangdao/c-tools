@@ -44,6 +44,7 @@
                 <artifactId>c-tablegen-mojo</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
@@ -51,6 +52,7 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+
 
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -66,6 +68,8 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+
 
         </dependencies>
     </dependencyManagement>
@@ -108,9 +112,6 @@
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
-
-
-
 
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>

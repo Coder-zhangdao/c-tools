@@ -15,7 +15,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty9.version>9.4.30.v20200611</jetty9.version>
-        <junitVersion>5.7.0</junitVersion>
     </properties>
 
     <build>

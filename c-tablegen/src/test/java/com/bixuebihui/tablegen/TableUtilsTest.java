@@ -3,11 +3,13 @@ package com.bixuebihui.tablegen;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
 import com.bixuebihui.tablegen.entry.ColumnData;
+import com.bixuebihui.tablegen.entry.TableInfo;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.StopWatch;
@@ -22,7 +24,7 @@ public class TableUtilsTest {
 
 	@BeforeAll
 	public static void setUp() {
-		dbHelper=(IDbHelper) BeanFactory.createObjectById("dbHelper");
+//		dbHelper=(IDbHelper) BeanFactory.createObjectById("dbHelper");
 	}
 
 	@Test
@@ -81,7 +83,35 @@ public class TableUtilsTest {
 	//我不想把短暂的人生投入到无限的忽悠事业中去
 	//
 	@Test
-	public void testGetTableData() {
+	public void testGetTableData() throws SQLException {
+		TableGen t = new TableGen();
+		t.init("tablegen.properties");
+
+		t.connect();
+
+		DatabaseMetaData metaData = t.getConnection().getMetaData();
+
+		String schema="autonews_autocode";
+		String catalog=null;
+		StopWatch sw = new StopWatch();
+		sw.start();
+		List<String> v = TableUtils.getTableData(metaData, catalog, schema, null, t.config.tablesList, t.config.excludeTablesList);
+		for(String s:v){
+			System.out.println(s);
+			TableInfo cols = TableUtils.getColumnData(metaData, catalog, schema, s);
+			for(ColumnData col: cols.getFields()){
+				System.out.println(col);
+			}
+		}
+
+		sw.stop();
+		System.out.println("use time: "+sw.getTotalTimeMillis()+"ms");
+	}
+
+	@Test
+	public void testRun() throws SQLException {
+
+		TableGen.main(new String[]{"tablegen.properties"});
 
 	}
 

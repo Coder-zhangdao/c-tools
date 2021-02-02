@@ -437,6 +437,23 @@ public class TableUtils {
      * TYPE_NAME String => 类型名称（可为 null）
      * SELF_REFERENCING_COL_NAME String => 有类型表的指定 "identifier" 列的名称（可为 null）
      * REF_GENERATION String => 指定在 SELF_REFERENCING_COL_NAME 中创建值的方式。这些值为 "SYSTEM"、"USER" 和 "DERIVED"。（可能为 null）
+     *
+     * 数据库中schema和catalog
+     * ----------------------
+     *  A：按照SQL标准的解释，在SQL环境下Catalog和Schema都属于抽象概念，从概念上说，一个数据库系统包含多个Catalog，每个Catalog又包含多个Schema，而每个Schema又包含多个数据库对象（表、视图、序列等），反过来讲一个数据库对象必然属于一个Schema，而该Schema又必然属于一个Catalog。
+     *  B：作用：得到数据库对象的全限定名称，解决命名冲突问题
+     *  C：用法：各种数据库系统对Catalog和Schema的支持和实现方式千差万别，针对具体问题需要参考具体的产品说明书，比较简单而常用的实现方式是使用数据库名作为Catalog名，使用用户名作为Schema名
+     *
+     *  数据库	Catalog	 Schema
+     * -------|--------|--------
+     *  Oracle	不支持	用户名(User Id)
+     *  MySQL	不支持	数据库名
+     *
+     *  D：表删除后会放到数据库的回收站：数据库库删除一张表之后,会产生一个BIN开头的垃圾信息,使用下面sql语句可以查询出来
+     *  select object_name
+     *  from user_objects
+     *  where object_type = upper('table');
+     *  清除回收的表：purge recyclebin;
      */
     public static List<String> getTableData(DatabaseMetaData metaData,
                                             String catalog, String schema, String tableOwner,
@@ -569,7 +586,6 @@ public class TableUtils {
         int dbtype = BaseDao.detectDbType(metaData.getDriverName());
 
         ColumnData cd;
-        String colStringType;
         int colType;
         int colCols;
         int decimalDigits = 0;
@@ -745,7 +761,8 @@ public class TableUtils {
             String comment =  fillTableComment(createTableSql);
             tableInfo.setComment(comment);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            LOG.warn("fail to execute: show create table"+tableName);
+            LOG.warn(e.getMessage(), e);
         } finally {
             try {
                 if (showTableResultSet != null) {

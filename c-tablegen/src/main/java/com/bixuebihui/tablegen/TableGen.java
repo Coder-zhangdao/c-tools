@@ -2046,8 +2046,10 @@ public class TableGen implements DiffHandler {
 	 */
 	public @NotNull TableInfo getColumnData(TableInfo table) throws SQLException {
 		List<ColumnData> colData = table.getFields();
+		TableInfo newInfo;
 		if(colData == null){
-			table = TableUtils.getColumnData(metaData, config.catalog, config.schema, table.getName());
+			newInfo = TableUtils.getColumnData(metaData, config.catalog, config.schema, table.getName());
+			table.setFields(newInfo.getFields());
 		}
 		return table;
 	}
