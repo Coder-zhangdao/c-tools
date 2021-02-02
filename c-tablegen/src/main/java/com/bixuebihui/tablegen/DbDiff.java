@@ -148,7 +148,6 @@ public class DbDiff {
 
         if (db1 == null) {
 
-
             cols1 = getCachedColumns(tableName);
 
             if (cols1 == null) {
@@ -207,7 +206,7 @@ public class DbDiff {
         }
         Collection res3 = CollectionUtils.disjunction(tab1, tab2);
         if (!res3.isEmpty()) {
-            LOG.debug("|db1-db2|=");
+            LOG.debug("|previous-current|=");
             outputSortedList(res3);
         }
 
