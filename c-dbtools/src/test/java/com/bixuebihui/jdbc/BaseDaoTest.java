@@ -363,6 +363,11 @@ public class BaseDaoTest extends TestCase {
 				return null;
 			}
 
+			@Override
+			protected void setIdLong(DbObj info, long id) {
+				setId(info, id);
+			}
+
 		}
 
 		BD mybd = new BD(db);

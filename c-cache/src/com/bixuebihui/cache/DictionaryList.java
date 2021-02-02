@@ -151,6 +151,11 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
         return SequenceUtils.getInstance().getNextKeyValue(this.getTableName() + "_ms_id", dbHelper) + "";
     }
 
+    @Override
+    protected void setIdLong(DictionaryItem info, long id) {
+        setId(info, id+"");
+    }
+
 
     /**
      * Counts the number of entries for this table in the database.

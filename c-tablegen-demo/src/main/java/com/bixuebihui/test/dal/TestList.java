@@ -37,23 +37,23 @@ protected String getDeleteSql(){
 
 @Override
 protected String getInsertSql(){
-    return "insert into " + getTableName() + " ( id,name ) values ( ?,? )";
+    return "insert into " + getTableName() + " ( name ) values ( ? )";
 }
 
 @Override
 protected String getUpdateSql(){
-    return "update " + getTableName() + " set id=?,name=?"
+    return "update " + getTableName() + " set name=?"
     +" where id=?";
 }
 
 @Override
 protected Object[] getInsertObjs(Test info){
-    return new Object[]{info.getId(),info.getName()};
+    return new Object[]{info.getName()};
 }
 
 @Override
 protected Object[] getUpdateObjs(Test info){
-    return new Object[]{info.getId(),info.getName(),info.getId()};
+    return new Object[]{info.getName(),info.getId()};
 }
 
 /**
@@ -95,6 +95,12 @@ public Long getId(Test info) {
 @Override
 public void setId(Test info, Long id) {
     info.setId(id);
+}
+
+
+@Override
+public void setIdLong(Test info, long id) {
+    info.setId((Long)id);
 }
 
 

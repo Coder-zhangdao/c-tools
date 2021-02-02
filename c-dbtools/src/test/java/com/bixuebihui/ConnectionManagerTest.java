@@ -99,7 +99,7 @@ public class ConnectionManagerTest extends TestCase {
 		}.start();
 
 		while(!finish)
-			Thread.sleep(100);
+			Thread.sleep(10);
 
 		//https://github.com/awaitility/awaitility/wiki/Getting_started
 		//Awaitility.await().atMost(20, Duration.SECONDS).until(didTheThing()); // Compliant

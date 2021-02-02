@@ -1,7 +1,7 @@
 package com.bixuebihui.test.pojo;
 /*
   * test
-  *
+  * 
   * Notice! Automatically generated file!
   * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
   * Code Generator originally by J.A.Carter
@@ -37,11 +37,13 @@ public void setId(Long id)
   this.id=id;
 }
 
- public Test()
-     {
-      id=0L;
-      name="";
-     }
+/**
+  * Gets the value for id
+  */
+public Long getId()
+{
+  return id;
+}
 
 /**
   * Sets the value for name name
@@ -52,20 +54,18 @@ public void setName(String name)
 }
 
 /**
-  * Gets the value for id
-  */
-public Long getId()
-{
-  return id;
-}
-
-/**
   * Gets the value for name
   */
 public String getName()
 {
   return name;
 }
+
+ public Test()
+     {
+      id=0L;
+      name="";
+     }
  public String toXml()
      {
       StringBuilder s= new StringBuilder();

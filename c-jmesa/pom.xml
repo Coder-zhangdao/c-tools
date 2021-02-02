@@ -259,7 +259,7 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>c-tools-bom</artifactId>
-                <version>${currentVersion}</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

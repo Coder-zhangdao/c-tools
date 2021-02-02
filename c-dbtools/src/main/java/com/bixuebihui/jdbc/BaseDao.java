@@ -1349,6 +1349,20 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
     }
 
+    private String getLastInsertIdSql() throws  SQLException {
+        detectDbType();
+        if (dbtype == DERBY) {
+           return  "select last_insert_id()";
+        } else if (dbtype == SQLSERVER || dbtype == SQLSERVER_2005_AND_UP || dbtype == ACCESS) {
+           return "select scope_identity()";
+        } else if (dbtype == MYSQL) {
+           return "select last_insert_id()";
+        } else {
+            throw new SQLException("getLastInsertId is not support for current dbtype=" + dbtype);
+        }
+
+    }
+
     /**
      * <p>select.</p>
      *
@@ -1791,7 +1805,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         }
     }
 
-    protected abstract void setIdLong(T info, long id);
+    protected void setIdLong(T info, long id){};
 
     private boolean insertAutoIncrement(T info) throws SQLException {
         beforeChange(info);
@@ -1800,13 +1814,9 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return true;
     }
 
-    protected String getInsertSqlAutoIncrement(){
+    protected String getInsertSqlAutoIncrement() throws SQLException {
         String res =  this.getInsertSql();
-        try {
-            res   += (getDbType()==MYSQL)? " ;select last_insert_id()" :"";
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+            res   += " ;"+getLastInsertIdSql() ;
         return res;
     }
 

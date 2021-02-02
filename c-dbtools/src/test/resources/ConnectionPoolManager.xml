@@ -6,28 +6,28 @@
 
   <!-- Set up an alias for each db you need to access.
        Note use of xml rules for character escaping. -->
-<!--   <Alias-->
-<!--  	name="test1"-->
-<!--  	driver="com.mysql.jdbc.Driver"-->
-<!--  	url="jdbc:mysql://localhost/test?autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true&amp;useUnicode=true&amp;characterEncoding=utf8&amp;mysqlEncoding=utf8&amp;connectTimeout=2000&amp;socketTimeout=2000&amp;useSSL=false"-->
-<!--  	username="test"-->
-<!--  	password="test123"-->
-<!--  	maxConn="6"-->
-<!--  	idleTimeout="2"-->
-<!--  	checkoutTimeout="2"-->
-<!--  	maxCheckout="50"-->
-<!--  />-->
-	<Alias
-			name="test1"
-			driver="org.h2.Driver"
-			url="jdbc:h2:mem:test"
-			username="sa"
-			password="sa"
-			maxConn="6"
-			idleTimeout="2"
-			checkoutTimeout="2"
-			maxCheckout="50"
-	/>
+   <Alias
+  	name="test1"
+  	driver="com.mysql.jdbc.Driver"
+  	url="jdbc:mysql://localhost/test?autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true&amp;useUnicode=true&amp;characterEncoding=utf8&amp;mysqlEncoding=utf8&amp;connectTimeout=2000&amp;socketTimeout=2000&amp;useSSL=false"
+  	username="test"
+  	password="test123"
+  	maxConn="6"
+  	idleTimeout="2"
+  	checkoutTimeout="2"
+  	maxCheckout="50"
+  />
+<!--	<Alias-->
+<!--			name="test1"-->
+<!--			driver="org.h2.Driver"-->
+<!--			url="jdbc:h2:mem:test"-->
+<!--			username="sa"-->
+<!--			password="sa"-->
+<!--			maxConn="6"-->
+<!--			idleTimeout="2"-->
+<!--			checkoutTimeout="2"-->
+<!--			maxCheckout="50"-->
+<!--	/>-->
 
   </poolResources>
 

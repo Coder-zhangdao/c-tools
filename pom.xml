@@ -28,7 +28,6 @@
         <web-access-limit>1.1.9</web-access-limit>
         <justauth-spring.version>1.1.0</justauth-spring.version>
         <junitVersion>5.7.0</junitVersion>
-        <currentVersion>1.1.0-RC1</currentVersion>
         <springboot.version>2.3.8.RELEASE</springboot.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

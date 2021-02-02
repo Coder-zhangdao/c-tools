@@ -27,3 +27,5 @@ file_upload_store
 target
 *.db
 *.iml
+.DS_Store
+.java-version

@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.Date;
 import java.util.List;
@@ -279,10 +280,10 @@ public class DataSourceTest extends TestCase {
 		}
 
 		try {
-			Class.forName(cfg.getClassName());
-		} catch (ClassNotFoundException e) {
+			DriverManager.registerDriver((java.sql.Driver)(Class.forName(cfg.getClassName()).getDeclaredConstructor().newInstance()));
+		} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | InvocationTargetException | SQLException | IllegalAccessException e) {
 			e.printStackTrace();
-			throw new RuntimeException("MySQL is not available!");
+			throw new RuntimeException("MySQL Driver is not available!");
 		}
 
 		try(Connection con = DriverManager.getConnection(
@@ -297,14 +298,14 @@ public class DataSourceTest extends TestCase {
 		}
 	}
 
-	public static synchronized DatabaseConfig getConfigMaster() {
+	public static DatabaseConfig getConfigMaster() {
 		if (!isMysqlAvailable()) {
-			cfg = getConfigH2();
 			try {
 				new H2DataSource().init();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+			return getConfigH2();
 		}
 		return cfg;
 	}
