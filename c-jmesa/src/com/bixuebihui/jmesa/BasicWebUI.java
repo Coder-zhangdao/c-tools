@@ -23,7 +23,7 @@ import java.util.Map;
 public class BasicWebUI extends AbstractWebUI<Object, Long> {
 
     /**
-     * @see json query, use LimitFactoryJsonImpl
+     * @see org.jmesa.limit.LimitActionFactoryJsonImpl json query, use LimitActionFactoryJsonImpl
      */
     public static String JSON_QUERY = "JSON_QUERY";
     protected int maxRows = 0;

@@ -34,11 +34,13 @@ public class DbDiff {
     private final List<DiffHandler> diffHandlerList = new ArrayList<>();
 
 
-    public DbDiff(Map<String, List<ColumnData>> cachedTableData, Connection dsdstcfg) throws SQLException {
+    public DbDiff(Map<String, List<ColumnData>> cachedTableData, Connection dsdstcfg, String catalog, String schema) throws SQLException {
 
         this.cachedTableData = cachedTableData;
 
         this.db2 = new Database(dsdstcfg.getMetaData());
+        this.db2.catalog = catalog;
+        this.db2.schema = schema;
     }
 
 
@@ -60,9 +62,9 @@ public class DbDiff {
         return ds;
     }
 
-    List<String> getTableData(Database db1) throws SQLException {
-        return TableUtils.getTableData(db1.metaData, db1.catalog, db1.schema,
-                db1.tableOwner, db1.includeTablesList, db1.excludeTablesList);
+    List<String> getTableData(Database database) throws SQLException {
+        return TableUtils.getTableData(database.metaData, database.catalog, database.schema,
+                database.tableOwner, database.includeTablesList, database.excludeTablesList);
     }
 
     private List<String> getCachedTables() {
@@ -123,8 +125,8 @@ public class DbDiff {
     public void compareTableData(List<String> tab1, List<String> tab2) throws SQLException, IOException {
         dumpDiffTabs(tab1, tab2);
 
-        Collection res4 = CollectionUtils.intersection(tab1, tab2);
-        compareTablesColumns(res4);
+        Collection intersection = CollectionUtils.intersection(tab1, tab2);
+        compareTablesColumns(intersection);
 
     }
 
@@ -135,9 +137,9 @@ public class DbDiff {
         }
     }
 
-    protected TableInfo getColumns(Database db1, String tableName)
+    protected TableInfo getColumns(Database database, String tableName)
             throws SQLException {
-        return  TableUtils.getColumnData(db1.metaData, db1.catalog, db1.schema, tableName);
+        return  TableUtils.getColumnData(database.metaData, database.catalog, database.schema, tableName);
     }
 
     public void compareColumns(String tableName) throws SQLException, IOException {
@@ -186,11 +188,11 @@ public class DbDiff {
         Collection<String> res2 = CollectionUtils.subtract(tab2, tab1);
 
         if (!res1.isEmpty()) {
-            LOG.debug("db1 - db2 =");
+            LOG.debug("previous - current =");
             outputSortedList(res1);
         }
         if (!res2.isEmpty()) {
-            LOG.debug("db2 - db1 =");
+            LOG.debug("current - previous =");
             outputSortedList(res2);
 
             for (String tableName : res2) {

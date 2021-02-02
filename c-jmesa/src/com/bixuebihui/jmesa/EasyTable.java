@@ -81,9 +81,9 @@ public class EasyTable extends BasicWebUI {
 
         try {
             return MiniSqlParser.parse(baseSql);
-        } catch (StandardException e) {
-            log.error("sql can't be parsed:" + baseSql);
-            log.error(e);
+        } catch (StandardException |RuntimeException e) {
+            log.warn("sql can't be parsed:" + baseSql);
+            log.warn(e.getMessage());
         }
         return null;
     }

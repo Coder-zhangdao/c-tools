@@ -238,7 +238,7 @@ public class TableGen implements DiffHandler {
 
 				Connection conn = getDbHelper().getConnection();
 				try {
-					DbDiff dd = new DbDiff(getTableDataFromLocalCache(), conn);
+					DbDiff dd = new DbDiff(getTableDataFromLocalCache(), conn, config.catalog, config.schema);
 					dd.addDiffHandler(this);
 					dd.compareTables();
 				} finally {

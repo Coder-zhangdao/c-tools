@@ -4,6 +4,7 @@ import com.bixuebihui.BeanFactory;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.cache.DictionaryItem;
 import com.bixuebihui.jdbc.IDbHelper;
+import com.foundationdb.sql.StandardException;
 import org.hamcrest.collection.ArrayAsIterableMatcher;
 import org.hamcrest.collection.ArrayMatching;
 import org.hamcrest.core.StringContains;
@@ -200,6 +201,19 @@ public class EasyTableTest {
         String res = et.render(request, response);
 
         System.out.println(res);
+    }
+
+
+    @Test
+    public void testParser() throws StandardException {
+        EasyTable.MiniSqlParser mp = EasyTable.MiniSqlParser.parse("select count(*) from article");
+        assertTrue(mp!=null);
+        assertEquals("", mp.uniquePropertyName);
+
+        mp = EasyTable.MiniSqlParser.parse("select count(*) CNT from article");
+        assertTrue(mp!=null);
+        assertEquals("CNT", mp.uniquePropertyName);
+
     }
 
 }

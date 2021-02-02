@@ -581,6 +581,7 @@ public class TableUtils {
         start("getColumnData");
         List<ColumnData> colData = new ArrayList<>();
 
+
         ResultSet rs = metaData.getColumns(catalog, schema, tableName, "%");
 
         int dbtype = BaseDao.detectDbType(metaData.getDriverName());
@@ -761,7 +762,7 @@ public class TableUtils {
             String comment =  fillTableComment(createTableSql);
             tableInfo.setComment(comment);
         } catch (Exception e) {
-            LOG.warn("fail to execute: show create table"+tableName);
+            LOG.warn("fail to execute: show create table "+tableName);
             LOG.warn(e.getMessage(), e);
         } finally {
             try {
