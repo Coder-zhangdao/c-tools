@@ -37,8 +37,8 @@ public class TestManagerTest {
         public DataSource getDataSource() {
             BitmechanicDataSource res = new BitmechanicDataSource();
             DatabaseConfig cfg = new DatabaseConfig();
-            cfg.setClassName("com.mysql.cf.jdbc.Driver");
-            cfg.setDburl("jdbc:mysql://127.0.0.1:3306/test");
+            cfg.setClassName("com.mysql.jdbc.Driver");
+            cfg.setDburl("jdbc:mysql://localhost:3306/test?allowMultiQueries=true");
             cfg.setUsername("test");
             cfg.setPassword("test123");
             res.setDatabaseConfig(cfg);

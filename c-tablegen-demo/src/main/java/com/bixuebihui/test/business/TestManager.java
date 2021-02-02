@@ -31,7 +31,7 @@ public class TestManager  extends TestList
      *
      * @param ds
      */
-    protected TestManager(DataSource ds) {
+    public TestManager(DataSource ds) {
         super(ds);
     }
 }
