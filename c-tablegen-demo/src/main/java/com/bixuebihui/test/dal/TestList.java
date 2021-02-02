@@ -14,13 +14,9 @@ import java.util.List;
 import com.bixuebihui.test.business.*;
 import com.bixuebihui.test.pojo.*;
 import com.bixuebihui.jdbc.RowMapperResultReader;
+import javax.sql.DataSource;
 import com.bixuebihui.test.BaseList;
 
-import javax.sql.DataSource;
-
-/**
- * @author xwx
- */
 public class TestList  extends BaseList<Test,Long>
 {
 /**
@@ -35,11 +31,10 @@ protected String getDeleteSql(){
     return "delete from " + getTableName() + " where id=?";
 }
 
-    public static final class F{
-        public static final String ID = "id";
-        public static final String NAME = "name";
-        public static final String[] getAllFields() { return new String[] {ID,NAME};}
-    }
+@Override
+public void setIdLong(Test info, long id) {
+    info.setId(id);
+}
 
 @Override
 protected String getInsertSql(){
@@ -103,11 +98,11 @@ public void setId(Test info, Long id) {
     info.setId(id);
 }
 
-
-@Override
-public void setIdLong(Test info, long id) {
-    info.setId((Long)id);
-}
+    public static final class F{
+        public static final String ID = "id";
+        public static final String NAME = "name";
+        public static String[] getAllFields() { return new String[] {ID,NAME};}
+    }
 
 
 /**

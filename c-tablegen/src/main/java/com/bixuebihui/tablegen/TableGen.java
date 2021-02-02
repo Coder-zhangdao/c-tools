@@ -114,7 +114,7 @@ public class TableGen implements DiffHandler {
 	/**
 	 * Application start.
 	 *
-	 * @throws SQLException
+	 * @throws SQLException db error
 	 */
 	public static void   main(String[] argv) throws SQLException {
 		TableGen us = new TableGen();
@@ -972,13 +972,13 @@ public class TableGen implements DiffHandler {
 
 	private void writeSql(List<ColumnData> colData, List<String> params) throws IOException, GenException {
 		StringBuilder columns = new StringBuilder("( ");
-		StringBuilder values = new StringBuilder("");
+		StringBuilder values = new StringBuilder();
 
 		String where = createPreparedWhereClause(params, false, colData);
 
-		StringBuilder update = new StringBuilder("");
+		StringBuilder update = new StringBuilder();
 		StringBuilder fields = new StringBuilder("    public static final class F{\n");
-		StringBuilder fieldsAll = new StringBuilder("        public static final String[] getAllFields() { return new String[] {");
+		StringBuilder fieldsAll = new StringBuilder("        public static String[] getAllFields() { return new String[] {");
 
 		int i=0;
 
@@ -987,8 +987,7 @@ public class TableGen implements DiffHandler {
 			boolean isNotLast = i < colData.size();
 			String field = columnNameToConstantName(cd.getName());
 
-			fields.append("        public static final String ").append(field)
-					.append(" = \"" + cd.getName() + "\";\n");
+			fields.append("        public static final String ").append(field).append(" = \"").append(cd.getName()).append("\";\n");
 			fieldsAll.append(field);
 
 			if(isNotLast) {
@@ -997,9 +996,9 @@ public class TableGen implements DiffHandler {
 
 			if (!(config.use_autoincrement && cd.isAutoIncrement())) {
 				if (cd.getName().equalsIgnoreCase(config.versionColName)){
-					update.append(cd.getName() + " = " + cd.getName() + "+1");
+					update.append(cd.getName()).append(" = ").append(cd.getName()).append("+1");
 				}else{
-					update.append(cd.getName() + "=?");
+					update.append(cd.getName()).append("=?");
 				}
 
 				values.append("?");
@@ -1015,14 +1014,10 @@ public class TableGen implements DiffHandler {
 
 		values.append(" )\";");
 		columns.append(" )");
-		update.append("\"\n    " + where + ";");
+		update.append("\"\n    ").append(where).append(";");
 		fieldsAll.append("};}\n");
 
-		StringBuilder query = new StringBuilder("delete from \" + getTableName() + \" where ");
-
-		query.append(StringUtils.join(params,"=? and ")).append("=?");
-
-		out("protected String getDeleteSql(){\n    return \"" + query + "\";\n}\n");
+		out("protected String getDeleteSql(){\n    return \"" + "delete from \" + getTableName() + \" where " + StringUtils.join(params, "=? and ") + "=?" + "\";\n}\n");
 
 		fields.append(fieldsAll);
 		fields.append("    }\n");
@@ -1336,6 +1331,7 @@ public class TableGen implements DiffHandler {
 
 			if ("dal".equals(subPackage) || "stub".equals(subPackage)) {
 				out("import com.bixuebihui.jdbc.RowMapperResultReader;");
+				out("import javax.sql.DataSource;");
 			}
 
 			if ("stub".equals(subPackage)) {
@@ -1742,7 +1738,7 @@ public class TableGen implements DiffHandler {
 		return makeInsertObjects(useAutoincrement, false, columnData);
 	}
 	private String makeInsertObjects(boolean useAutoincrement, boolean skipVersionColumn, List<ColumnData> columnData) {
-		StringBuilder objs = new StringBuilder("");
+		StringBuilder objs = new StringBuilder();
 		boolean useVersion  = skipVersionColumn && containsVersion(columnData);
 		Iterator<ColumnData> iterator = columnData.iterator();
 		while (iterator.hasNext()) {
@@ -1849,8 +1845,8 @@ public class TableGen implements DiffHandler {
 
 	/**
 	 * since bixuebihui-dbtools 0.7.1, only generate getNextKey for Timestamp and String/UUID
-	 * @param keyData
-	 * @throws IOException
+	 * @param keyData db key info
+	 * @throws IOException io error
 	 */
 	void writeWraper(List<String> keyData, List<ColumnData> columnData) throws IOException, GenException {
 
@@ -1861,7 +1857,7 @@ public class TableGen implements DiffHandler {
 			if (keyData != null && keyData.size() == 1) {
 				if ("Timestamp".equals(type)) {
 					out("\treturn new Timestamp(new java.util.Date().getTime());");
-				} else if ("String".equals(type)) {
+				} else {
 					out("\treturn java.util.UUID.randomUUID().toString();");
 				}
 
@@ -1974,7 +1970,7 @@ public class TableGen implements DiffHandler {
 	}
 
 	public String createPreparedObjects(List<String> params, boolean withLike, List<ColumnData> columnData) throws GenException {
-		StringBuilder objs = new StringBuilder("");
+		StringBuilder objs = new StringBuilder();
 
 		// if we have keys passed in then we add a "where" to the count
 		// e.g. se
@@ -2059,7 +2055,7 @@ public class TableGen implements DiffHandler {
 	/**
 	 * Selects the primary keys for a particular table.
 	 *
-	 * @throws SQLException
+	 * @throws SQLException db error
 	 */
 	public @NotNull  List<String> getTableKeys(String tableName) throws SQLException {
 
@@ -2235,11 +2231,11 @@ public class TableGen implements DiffHandler {
 
 		try {
 
-			for (int i = 0; i < genericFiles.length; i++) {
-			    try(
-				BufferedReader br = new BufferedReader(new FileReader("dbgeneric" + File.separator + genericFiles[i] + ".java"));
-				BufferedWriter bw = new BufferedWriter(new FileWriter(config.srcDir + File.separator + genericFiles[i] + ".java"));
-				){
+			for (String genericFile : genericFiles) {
+				try (
+						BufferedReader br = new BufferedReader(new FileReader("dbgeneric" + File.separator + genericFile + ".java"));
+						BufferedWriter bw = new BufferedWriter(new FileWriter(config.srcDir + File.separator + genericFile + ".java"))
+				) {
 					// replaces the first line with the
 					// correct package name
 					//
@@ -2321,7 +2317,7 @@ public class TableGen implements DiffHandler {
 			conn = dbHelper.getConnection();
 			if (!JDBCUtils.tableOrViewExists(null, null, daoMetaTable.getTableName(), conn)) {
 				SqlFileExecutor ex = new SqlFileExecutor();
-				String filename = "";
+				String filename;
 
 				if (daoMetaTable.getDbType() == BaseDao.POSTGRESQL) {
 					filename = "postgresql";
