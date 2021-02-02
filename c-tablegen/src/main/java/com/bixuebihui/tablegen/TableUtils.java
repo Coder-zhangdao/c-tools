@@ -454,6 +454,13 @@ public class TableUtils {
      *  from user_objects
      *  where object_type = upper('table');
      *  清除回收的表：purge recyclebin;
+     *
+     *  !!!
+     *   mysql-connector-java 5.1.47 版与8.0.22版的区别
+     *   当用户有多个库的权限时， metaData.getTables 不管schema是否指定库，
+     *   8.0.22版返回所有用户可见的表，
+     *   5.1.47版只返回 schema 指定的库里的表
+     *  !!!
      */
     public static List<String> getTableData(DatabaseMetaData metaData,
                                             String catalog, String schema, String tableOwner,
@@ -462,7 +469,8 @@ public class TableUtils {
         String[] tableTypes = {"TABLE", "VIEW"};
         List<String> tableNames;
 
-        ResultSet tables = metaData.getTables(catalog, schema, "%", tableTypes);
+        // ResultSet tables = metaData.getTables(catalog, schema, "%", tableTypes);
+        ResultSet tables = metaData.getTables(catalog, schema, null, tableTypes);
         start("getTableData");
         try {
             tableNames = new ArrayList<>();
