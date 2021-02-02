@@ -32,19 +32,26 @@ public class EasyTable extends BasicWebUI {
         this(dbhelper, tableCaption, baseSql, null, null);
     }
 
-
     /**
-     * use com.foundationdb.sql.parser.SQLParser to detect columns and key
-     * 通过数据库返回的元数据确定列名
-     *
-     * @param dbhelper     use as data source
-     * @param tableCaption 表名描述
-     * @param baseSql      核心sql语句
-     * @param tableId      表名
-     * @param pkName       主键名
-     * @throws SQLException
+     * @deprecated use constructor with  colNames
      */
+    @Deprecated
     public EasyTable(IDbHelper dbhelper, String tableCaption, String baseSql, @Nullable String pkName, @Nullable String tableId) {
+        this(dbhelper, tableCaption, baseSql, pkName,tableId, null);
+    }
+
+        /**
+         * use com.foundationdb.sql.parser.SQLParser to detect columns and key
+         * 通过数据库返回的元数据确定列名
+         *
+         * @param dbhelper     use as data source
+         * @param tableCaption 表名描述
+         * @param baseSql      核心sql语句
+         * @param tableId      表名
+         * @param pkName       主键名
+         * @throws SQLException
+         */
+    public EasyTable(IDbHelper dbhelper, String tableCaption, String baseSql, @Nullable String pkName, @Nullable String tableId, String colNames) {
         this.id = tableId;
         super.setTableCaption(tableCaption);
 
@@ -54,7 +61,10 @@ public class EasyTable extends BasicWebUI {
             this.setUniquePropertyName(pkName);
         }
 
-        msp = initMeta(baseSql);
+        setColsList(colNames);
+        if(colNames==null) {
+            msp = initMeta(baseSql);
+        }
         if (pkName != null && msp != null) {
             this.setUniquePropertyName(msp.uniquePropertyName);
         }
@@ -78,7 +88,6 @@ public class EasyTable extends BasicWebUI {
 
 
     protected MiniSqlParser initMeta(String baseSql) {
-
         try {
             return MiniSqlParser.parse(baseSql);
         } catch (StandardException |RuntimeException e) {
@@ -90,7 +99,17 @@ public class EasyTable extends BasicWebUI {
 
     @Override
     protected String[] getColNames() {
-        return msp.colNames;
+        if(msp!=null) {
+            return msp.colNames;
+        }else{
+            String cols =  getColsList();
+            if(cols!=null) {
+                return cols.split(",");
+            }else {
+                log.error("you must set colNames or colsList");
+            }
+            return new String[0];
+        }
     }
 
     @Override
