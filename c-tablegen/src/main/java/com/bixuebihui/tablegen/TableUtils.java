@@ -714,7 +714,6 @@ public class TableUtils {
     }
 
 
-
     public static String getColumnAnnotation(ProjectConfig config, TableSetInfo setInfo, String tableName, ColumnData cd) {
         StringBuilder sb = new StringBuilder();
         if (config.use_annotation) {
@@ -735,7 +734,7 @@ public class TableUtils {
                     sb.append("  @Size(max=").append(cd.getColumns()).append(")\n");
                 }
             }
-            if (!cd.isNullable() && cd.getDefaultValue() == null) {
+            if (isNeedNotNullAnnotation(config, cd)) {
                 if (sb.indexOf("@NotNull") < 0) {
                     sb.append("  @NotNull\n");
                 }
@@ -748,6 +747,10 @@ public class TableUtils {
         }
 
         return org.apache.commons.lang3.StringUtils.stripEnd(sb.toString(), "\n");
+    }
+
+    private static boolean isNeedNotNullAnnotation(ProjectConfig config, ColumnData cd) {
+        return !cd.isNullable() && cd.getDefaultValue() == null && (!config.use_autoincrement || !cd.isAutoIncrement());
     }
 
 
