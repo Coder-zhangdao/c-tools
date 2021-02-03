@@ -132,8 +132,11 @@ public class EasyTable extends BasicWebUI {
      */
     public String json(Map<String, Object> paramsMap) throws SQLException {
         SimpleHttpServletRequest request = new SimpleHttpServletRequest();
-        request.setParameter(this.id + "_e_", "json");
-        request.setAttribute(JSON_QUERY, paramsMap);
+        if(paramsMap==null || paramsMap.isEmpty()) {
+            request.setParameter(this.id + "_e_", "json");
+        }else {
+            request.setAttribute(JSON_QUERY, paramsMap);
+        }
         return getJsonData(request);
     }
 
@@ -146,8 +149,11 @@ public class EasyTable extends BasicWebUI {
      */
     public String json(String jsonQuery) throws SQLException {
         SimpleHttpServletRequest request = new SimpleHttpServletRequest();
-        request.setParameter(this.id + "_e_", "json");
-        request.setAttribute(JSON_QUERY, jsonQuery);
+        if(StringUtils.isBlank(jsonQuery)) {
+            request.setParameter(this.id + "_e_", "json");
+        }else {
+            request.setAttribute(JSON_QUERY, jsonQuery);
+        }
         return getJsonData(request);
     }
 
