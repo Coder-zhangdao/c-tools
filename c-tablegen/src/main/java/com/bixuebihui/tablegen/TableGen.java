@@ -1130,7 +1130,7 @@ public class TableGen implements DiffHandler {
 		info("Generating business : " + tableName);
 		String baseDir = config.getBaseSrcDir();
 		String fileName = baseDir + File.separator + BUSINESS + File.separator + getPojoClassName(tableName)
-				+ "Manager.java";
+				+MANAGER_SUFFIX + ".java";
 		File f = new File(fileName);
 		boolean fileExists = f.exists();
 		if (!fileExists) {
@@ -1142,11 +1142,9 @@ public class TableGen implements DiffHandler {
 				getColumnData(table);
 				writeHeader(table, BUSINESS, " extends " + getPojoClassName(tableName) + "List");
 				out("    /**\n" +
-								"     * Don't direct use the constructor of TestList, use TestManager instead.\n" +
-								"     *\n" +
 								"     * @param ds datasource for injecting\n" +
 								"     */\n" +
-								"    protected TestManager(DataSource ds) {\n" +
+								"    public "+getPojoClassName(tableName)+MANAGER_SUFFIX+"(DataSource ds) {\n" +
 								"        super(ds);\n" +
 								"    }");
 
@@ -1321,6 +1319,7 @@ public class TableGen implements DiffHandler {
 		if (!"pojo".equals(subPackage)) {
 
 			out("import java.util.List;");
+			out("import javax.sql.DataSource;");
 
 			if (!"dal".equals(subPackage) && !"web".equals(subPackage)) {
 				out("import " + config.packageName + ".dal.*;");
@@ -1331,7 +1330,6 @@ public class TableGen implements DiffHandler {
 
 			if ("dal".equals(subPackage) || "stub".equals(subPackage)) {
 				out("import com.bixuebihui.jdbc.RowMapperResultReader;");
-				out("import javax.sql.DataSource;");
 			}
 
 			if ("stub".equals(subPackage)) {
