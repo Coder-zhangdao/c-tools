@@ -214,4 +214,11 @@ public class EasyTableTest {
 
     }
 
+    @Test void testSetColNames(){
+        EasyTable et = new EasyTable(dbHelper, "站内系统私信",
+                "select * from t_config where c_key =0","a","表名",  "a,b,c" );
+       assertEquals( "a,b,c", et.getColsList());
+
+    }
+
 }

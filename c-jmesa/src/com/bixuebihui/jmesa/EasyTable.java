@@ -106,7 +106,6 @@ public class EasyTable extends BasicWebUI {
             if(cols!=null) {
                 return cols.split(",");
             }else {
-
                 log.error("you must set colNames or colsList");
             }
             return new String[0];
@@ -115,13 +114,16 @@ public class EasyTable extends BasicWebUI {
 
     public String[] getColLabelsFromDb(String sql) throws SQLException {
         try(Connection cn = service.getDbHelper().getConnection()) {
-            return MiniSqlParser.getByDb(cn, sql).colLabels;
+            return MiniSqlParser.getByDb(cn, sql).colNames;
         }
     }
 
     @Override
     public String getColsList() {
-        return StringUtils.join(msp.colNames, ",");
+        if(msp!=null){
+            return StringUtils.join(msp.colNames, ",");
+        }
+        return super.getColsList();
     }
 
     /**
