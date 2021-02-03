@@ -177,7 +177,7 @@ public class EasyTable extends BasicWebUI {
         this.onePage = onePage;
     }
 
-    static class MiniSqlParser {
+    public static class MiniSqlParser {
         public String[] colNames;
         public String[] colLabels;
         public String tableName;
