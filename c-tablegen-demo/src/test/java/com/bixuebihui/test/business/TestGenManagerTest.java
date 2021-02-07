@@ -18,18 +18,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class TestManagerTest {
+public class TestGenManagerTest {
+
+    @Autowired
+    TestGenManager man;
 
     @Test
     public void testManInsert() throws SQLException {
-        com.bixuebihui.test.pojo.Test info = new com.bixuebihui.test.pojo.Test();
+        com.bixuebihui.test.pojo.TestGen info = new com.bixuebihui.test.pojo.TestGen();
         info.setName("abc");
         man.save(info);
         assertTrue(info.getId()>=1);
     }
-
-    @Autowired
-    TestManager man;
 
     @TestConfiguration
     public static class Ds {
