@@ -24,7 +24,9 @@ public class TableUtilsTest {
 
 	@BeforeAll
 	public static void setUp() {
-//		dbHelper=(IDbHelper) BeanFactory.createObjectById("dbHelper");
+		TableGen t = new TableGen();
+		t.init("tablegen.properties");
+		dbHelper = t.getDbHelper(t.dbconfig);
 	}
 
 	@Test
@@ -63,8 +65,6 @@ public class TableUtilsTest {
 
 	@Test
 	public void testGetTableExportedKeys() throws SQLException {
-		//need root to run
-		//dbHelper.executeNoQuery("SET GLOBAL innodb_stats_on_metadata = 0;\r\n" );
 		DatabaseMetaData metaData = dbHelper.getConnection().getMetaData();
 
 		String tableName="Forum";
@@ -87,9 +87,7 @@ public class TableUtilsTest {
 		TableGen t = new TableGen();
 		t.init("tablegen.properties");
 
-		t.connect();
-
-		DatabaseMetaData metaData = t.getConnection().getMetaData();
+		DatabaseMetaData metaData = t.connect(dbHelper.getConnection());
 
 		String schema="autonews_autocode";
 		String catalog=null;
