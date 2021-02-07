@@ -1,7 +1,7 @@
 package com.bixuebihui.test.dal;
 /*
-  * test
-  *
+  * test_gen: 测试表
+  * 
   * Notice! Automatically generated file!
   * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
   * Code Generator originally by J.A.Carter
@@ -11,18 +11,18 @@ package com.bixuebihui.test.dal;
 
 import java.sql.*;
 import java.util.List;
+import javax.sql.DataSource;
 import com.bixuebihui.test.business.*;
 import com.bixuebihui.test.pojo.*;
 import com.bixuebihui.jdbc.RowMapperResultReader;
-import javax.sql.DataSource;
 import com.bixuebihui.test.BaseList;
 
-public class TestList  extends BaseList<Test,Long>
+public class TestGenList  extends BaseList<TestGen,Long>
 {
 /**
-  * Don't direct use the TestList, use TestManager instead.
+  * Don't direct use the TestGenList, use TestGenManager instead.
   */
-protected TestList(DataSource ds)
+protected TestGenList(DataSource ds)
 {
     super(ds);
 }
@@ -31,10 +31,11 @@ protected String getDeleteSql(){
     return "delete from " + getTableName() + " where id=?";
 }
 
-@Override
-public void setIdLong(Test info, long id) {
-    info.setId(id);
-}
+    public static final class F{
+        public static final String ID = "id";
+        public static final String NAME = "name";
+        public static String[] getAllFields() { return new String[] {ID,NAME};}
+    }
 
 @Override
 protected String getInsertSql(){
@@ -48,12 +49,12 @@ protected String getUpdateSql(){
 }
 
 @Override
-protected Object[] getInsertObjs(Test info){
+protected Object[] getInsertObjs(TestGen info){
     return new Object[]{info.getName()};
 }
 
 @Override
-protected Object[] getUpdateObjs(Test info){
+protected Object[] getUpdateObjs(TestGen info){
     return new Object[]{info.getName(),info.getId()};
 }
 
@@ -63,7 +64,7 @@ protected Object[] getUpdateObjs(Test info){
 @Override
 public String getTableName()
 {
-    return "test";
+    return "test_gen";
 }
 
 /**
@@ -79,39 +80,39 @@ public String getKeyName()
   * Updates the object from a selected ResultSet.
   */
 @Override
-public Test mapRow (ResultSet r, int index) throws SQLException
+public TestGen mapRow (ResultSet r, int index) throws SQLException
 {
-      Test res = new Test();
+      TestGen res = new TestGen();
       res.setId(r.getLong(F.ID));
       res.setName(r.getString(F.NAME));
       return res;
 }
 
 @Override
-public Long getId(Test info) {
+public Long getId(TestGen info) {
     return  info.getId();
 }
 
 
 @Override
-public void setId(Test info, Long id) {
+public void setId(TestGen info, Long id) {
     info.setId(id);
 }
 
-    public static final class F{
-        public static final String ID = "id";
-        public static final String NAME = "name";
-        public static String[] getAllFields() { return new String[] {ID,NAME};}
-    }
+
+@Override
+public void setIdLong(TestGen info, long id) {
+    info.setId((Long)id);
+}
 
 
 /**
-  * Inserts the dummy record of Test object values into the database.
+  * Inserts the dummy record of TestGen object values into the database.
   */
 @Override
 public boolean insertDummy() throws SQLException
 {
-     Test  info = new Test();
+     TestGen  info = new TestGen();
     info.setId(getNextKey());
     return this.insert(info);
 }

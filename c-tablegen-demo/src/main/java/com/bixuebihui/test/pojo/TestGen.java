@@ -1,7 +1,7 @@
 package com.bixuebihui.test.pojo;
 /*
-  * test
-  * 
+  * test_gen: 测试表
+  *
   * Notice! Automatically generated file!
   * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
   * Code Generator originally by J.A.Carter
@@ -13,20 +13,24 @@ import java.sql.*;
 import java.io.Serializable;
 import javax.validation.constraints.*;
 import org.apache.commons.text.StringEscapeUtils;
-public class Test  implements Serializable
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+@ApiModel(value = "测试表")
+public class TestGen  implements Serializable
 {
 /**
-  * Type : INT Name : id
+  * Type : INT Name : id: 这里是id!
   * id
   */
-  @NotNull
+  @ApiModelProperty(value = "这里是id!")
   protected Long id;
 
 /**
-  * Type : VARCHAR(100) Name : name
+  * Type : VARCHAR(100) Name : name: 这里是名称！
   * name
   */
   @Size(max=100)
+  @ApiModelProperty(value = "这里是名称！")
   protected String name;
 
 /**
@@ -61,7 +65,7 @@ public String getName()
   return name;
 }
 
- public Test()
+ public TestGen()
      {
       id=0L;
       name="";
@@ -70,7 +74,7 @@ public String getName()
      {
       StringBuilder s= new StringBuilder();
       String ln = System.getProperty("line.separator");
-      s.append("<test ");
+      s.append("<test_gen ");
      s.append("id=\"").append(this.getId()).append("\" ");
      s.append("name=\"").append(StringEscapeUtils.escapeXml11(this.getName())).append("\" ");
      s.append(" />");

@@ -1,5 +1,6 @@
 package com.bixuebihui.sql;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,11 +22,11 @@ public class ConnectionPoolTest {
 
 	DatabaseConfig ds = DataSourceTest.getConfigMaster();
 
-	private int _timeoutMililSeconds = 100;
+	private int _timeoutMilliSeconds = 100;
 	private int _maxPrepStmts = 10;
 
 	ConnectionPool cp = new ConnectionPool(ds.getAlias(), ds.getDburl(), ds.getUsername(), ds.getPassword(),
-			ds.getMaxActive(), _timeoutMililSeconds, _checkoutSeconds * 1000, ds.getMaxCheckOutCount(), _maxPrepStmts);
+			ds.getMaxActive(), _timeoutMilliSeconds, _checkoutSeconds * 1000, ds.getMaxCheckOutCount(), _maxPrepStmts);
 
 	@Before
 	public void setUp() {
@@ -37,6 +38,7 @@ public class ConnectionPoolTest {
 		cp.setCacheStatements(true);
 	}
 
+	@Test
 	public void testGetCacheStatements() {
 		cp.setCacheStatements(true);
 		assertTrue(cp.isCacheStatements());
@@ -109,7 +111,7 @@ public class ConnectionPoolTest {
 
 	@Test
 	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
-	public void testGetConnection() throws SQLException, InterruptedException {
+	public void testGetConnection() throws InterruptedException {
 		int total = count.get();
 		System.out.println("before:\n" + cp.dumpInfo());
 		System.out.println("Try to get connection ");
@@ -118,7 +120,7 @@ public class ConnectionPoolTest {
 			new Thread("GetConThread-" + i) {
 				@Override
 				public void run() {
-					Connection cn = null;
+					Connection cn;
 					try {
 						cn = cp.getConnection();
 						assert (cn!=null);
@@ -150,8 +152,8 @@ public class ConnectionPoolTest {
 
 	@Test
 	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
-	public void testReturnConnection() throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-		DriverManager.registerDriver((Driver) Class.forName(ds.getClassName()).newInstance());
+	public void testReturnConnection() throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+		DriverManager.registerDriver((Driver) Class.forName(ds.getClassName()).getDeclaredConstructor().newInstance());
 
 		PooledConnection pooledconnection = (PooledConnection) cp.getConnection();
 		int res = cp.size();
@@ -204,7 +206,7 @@ public class ConnectionPoolTest {
 	}
 
 	@Test
-	public void testTimeOut() throws SQLException, InterruptedException {
+	public void testTimeOut() throws InterruptedException {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;

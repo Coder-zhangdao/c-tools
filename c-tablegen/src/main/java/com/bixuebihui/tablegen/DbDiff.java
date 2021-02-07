@@ -177,10 +177,10 @@ public class DbDiff {
 
     /**
      * 比较两个集合
+     * show difference to console
      *
      * @param tab1 previews table
      * @param tab2 now table
-     * @return show difference to console
      */
     protected void dumpDiffTabs(List<String> tab1, List<String> tab2) throws IOException {
         Collection<String> res1 = CollectionUtils.subtract(tab1, tab2);

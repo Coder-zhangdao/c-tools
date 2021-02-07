@@ -1,12 +1,15 @@
 package com.bixuebihui.tablegen;
 
+import com.bixuebihui.generated.tablegen.business.T_metatableManager;
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
+import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.tablegen.entry.TableInfo;import org.apache.commons.dbutils.DbUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.BatchUpdateException;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -47,7 +50,7 @@ public class TableGenTest {
 		List<String> tableNames2= new ArrayList<>();
 		tableNames2.add("sm_template_suite");
 		Map<String, T_metatable> tableData2 = null;
-		Map<String, T_metatable> res = tg.getExtraTableDataFromXml(extra_setting2, tableData2);
+		Map<String, T_metatable> res = tg.setInfo.getExtraTableDataFromXml(extra_setting2, tableData2);
 		Assert.assertEquals(1, res.size());
 		Assert.assertEquals(1, res.get("sm_template_suite").getColumns().size());
 	}
@@ -60,7 +63,7 @@ public class TableGenTest {
 		String extra_setting2="src/main/resources/pojos.xml";
 		String name = "sm_template_suite";
 		Assert.assertEquals("Sm_template_suite", tg.getPojoClassName(name));
-		Map<String, T_metatable> res = tg.getExtraTableDataFromXml(extra_setting2, null);
+		Map<String, T_metatable> res = tg.setInfo.getExtraTableDataFromXml(extra_setting2, null);
 		tg.setInfo.setTableDataExt(res);
 
 		Assert.assertEquals("TemplateSuite", tg.getPojoClassName(name));
@@ -108,19 +111,16 @@ public class TableGenTest {
 		// this.getClass().getResource("tablegen.properties").getFile()
 		System.out.println(this.getClass().getResource("/tablegen.properties")
 				.getFile());
-		try {
-			tg.init(this.getClass().getResource("/tablegen.properties")
-					.getFile());
-			tg.connect();
-			tg.getTableData();
-			LinkedHashMap<String, TableInfo> tables = tg.setInfo.getTableInfos();
-			for(TableInfo t:tables.values()){
-				System.out.println(t);
-			}
-
-		} finally {
-			DbUtils.close(tg.getConnection());
+		tg.init(this.getClass().getResource("/tablegen.properties")
+				.getFile());
+		IDbHelper helper = TableGen.getDbHelper(tg.dbconfig);
+		DatabaseMetaData meta = tg.connect(helper.getConnection());
+		tg.setInfo.getTableData(tg.config, helper, meta);
+		LinkedHashMap<String, TableInfo> tables = tg.setInfo.getTableInfos();
+		for(TableInfo t:tables.values()){
+			System.out.println(t);
 		}
+
 	}
 
 	@Test
@@ -132,18 +132,19 @@ public class TableGenTest {
 		try {
 			tg.init(this.getClass().getResource("/tablegen.properties")
 					.getFile());
-			tg.connect();
-			tg.getTableData();
-			boolean res  = tg.initTableData(tg.setInfo.getTableInfos());
+			IDbHelper helper = TableGen.getDbHelper(tg.dbconfig);
+			DatabaseMetaData meta = tg.connect(helper.getConnection());
+
+			tg.setInfo.getTableData(tg.config, helper, meta);
+			T_metatableManager manager = new T_metatableManager();
+			manager.setDbHelper(helper);
+			boolean res  = tg.setInfo.initTableData(tg.setInfo.getTableInfos(), manager);
 			Assert.assertTrue(res);
 		}catch(BatchUpdateException e){
 			e.getNextException().printStackTrace();
 			e.printStackTrace();
 		}
 
-		finally {
-			DbUtils.close(tg.getConnection());
-		}
 	}
 
 	@Test

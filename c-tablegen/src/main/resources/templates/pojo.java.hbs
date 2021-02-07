@@ -7,53 +7,50 @@ import java.io.Serializable;
 import javax.validation.constraints.*;
 import org.apache.commons.text.StringEscapeUtils;
 
-public class {{className tableInfo.name}}  {{interface tableInfo.name}} {
-{{#each tableInfo.fields as field}}
+{{#if config.use_swagger}}
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(description ="{{tableInfo.comment}}")
+{{/if}}
+public class {{className tableInfo.name}} {{interface tableInfo.name}} {
+{{#each fields as | field index | }}
+    {{log field level="error" }}
     /**
-    * Type :  {{columnDescription field tableName}}
-    * {{field.name}}
+    * {{columnDescription this tableName}}
     */
-    {{columnAnnotation field tableName}}
-    protected {{field.javaType}}  {{field.name}};
+    {{columnAnnotation this tableName}}
+    protected {{javaType}}  {{firstLow name}};
 {{/each}}
 
-    /**
-     * Sets the value for id id
-     */
-    public void setId(Long id)
+{{#each fields}}
+    public void set{{firstUp name}}({{javaType}} {{firstLow name}})
     {
-        this.id=id;
+      this.{{firstLow name}} = {{firstLow name}};
     }
+    public {{javaType}} get{{firstUp name}}()
+    {
+      return this.{{firstLow name}};
+    }
+{{/each}}
 
-    /**
-     * Gets the value for id
-     */
-    public Long getId()
-    {
-        return id;
-    }
+// handle the constructor
+public {{className tableInfo.name}}()
+{
+{{#each fields}}
+    {{#eq "String" type }}
+        {{#not field.nullable}}
+            {{firstLow name}}="*";
+        {{/not}}
+    {{else}}
+        {{#let code}}{{typeDefaultValue javaType}}{{/let}}
+        {{#neq code null}}
+            {{firstLow name}}={{typeDefaultValue javaType}};
+        {{/neq}}
+    {{/eq}}
+{{/each}}
+}
 
-    /**
-     * Sets the value for name name
-     */
-    public void setName(String name)
-    {
-        this.name=name;
-    }
-
-    /**
-     * Gets the value for name
-     */
-    public String getName()
-    {
-        return name;
-    }
-
-    public Test()
-    {
-        id=0L;
-        name="";
-    }
     public String toXml()
     {
         StringBuilder s= new StringBuilder();

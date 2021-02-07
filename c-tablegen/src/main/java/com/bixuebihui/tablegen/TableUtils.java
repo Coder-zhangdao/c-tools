@@ -666,19 +666,14 @@ public class TableUtils {
         TableInfo tableInfo = new TableInfo(tableName);
         tableInfo.setFields(colData);
 
-        boolean isMySQL = metaData.getDriverName().toLowerCase(Locale.ROOT).contains("mysql");
-
-        if(isMySQL) {
-            fillComment(metaData.getConnection(), tableInfo);
-        }
-
         return tableInfo;
 
     }
 
-    public  static  String getColumnDescription(ProjectConfig config, Map<String, T_metacolumn> cols, String tableName, String columnName) {
+    public  static  String getColumnDescription(ProjectConfig config, Map<String, T_metacolumn> cols, String tableName, ColumnData col) {
         String res;
-        if (config.kuozhanbiao) {
+        String columnName = col.getName();
+        if (config.useCustomMetaTable) {
             DictionaryItem item = null;
             try {
                 item = DictionaryCache.byId(TableGenConfig.METACOLUMN_DICT + DictionaryCache.CONDITION_SEPARATOR
@@ -692,14 +687,21 @@ public class TableUtils {
         }
 
         if (cols != null && cols.get(columnName) != null) {
-            T_metacolumn col = cols.get(columnName);
-            res += col == null ? "" : col.getDescription();
+            T_metacolumn colMeta = cols.get(columnName);
+            res += colMeta == null ? "" : colMeta.getDescription();
+        }
+
+        if (col.getDefaultValue() != null) {
+            if (!res.contains("NotNull")) {
+                res += " * NotNull, but has default value :"+  col.getDefaultValue()+ "\n";
+            }
+
         }
         return res;
     }
 
     private static int getTableIdByName(ProjectConfig config, String tableName) {
-        if (config.kuozhanbiao) {
+        if (config.useCustomMetaTable) {
             DictionaryItem item = null;
             try {
                 item = DictionaryCache.byValue(
@@ -738,11 +740,10 @@ public class TableUtils {
                 if (sb.indexOf("@NotNull") < 0) {
                     sb.append("  @NotNull\n");
                 }
-            } else if (cd.getDefaultValue() != null) {
-                if (sb.indexOf("//@NotNull") < 0) {
-                    sb.append("  //@NotNull, but has default value :").append(cd.getDefaultValue()).append("\n");
-                }
+            }
 
+            if(config.use_swagger && StringUtils.isNotBlank(cd.getComment())){
+                sb.append("  @ApiModelProperty(value = \"").append(cd.getComment()).append("\")");
             }
         }
 
@@ -753,93 +754,6 @@ public class TableUtils {
         return !cd.isNullable() && cd.getDefaultValue() == null && (!config.use_autoincrement || !cd.isAutoIncrement());
     }
 
-
-    /**
-     * this below two methods are valid only for MySQL
-     * @param conn
-     * @param tableInfo
-     * @return
-     */
-    private static void fillComment(Connection conn, TableInfo tableInfo ) {
-        ResultSet showTableResultSet = null;
-        Statement showTableStatement = null;
-        String tableName =tableInfo.getName();
-        try {
-            showTableStatement = conn.createStatement();
-            showTableResultSet = showTableStatement.executeQuery("show create table " + tableName);
-            showTableResultSet.next();
-            String createTableSql = showTableResultSet.getString(2);
-            fillFieldComment(tableName, tableInfo.getFields(), createTableSql);
-            String comment =  fillTableComment(createTableSql);
-            tableInfo.setComment(comment);
-        } catch (Exception e) {
-            LOG.warn("fail to execute: show create table "+tableName);
-            LOG.warn(e.getMessage(), e);
-        } finally {
-            try {
-                if (showTableResultSet != null) {
-                    showTableResultSet.close();
-                }
-                if (showTableStatement != null) {
-                    showTableStatement.close();
-                }
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-    }
-
-
-    private static  void fillFieldComment(String tableName, List<ColumnData> fields, String tableSql) {
-        String fieldSql = tableSql.substring(tableSql.indexOf("(") + 1, tableSql.lastIndexOf(")"));
-        String[] fieldDescs = org.apache.commons.lang3.StringUtils.split(fieldSql, "\n");
-        Map<String, ColumnData> commentMap = new HashMap<>();
-        for (ColumnData fieldInfo : fields) {
-            commentMap.put(fieldInfo.getName().toUpperCase(), fieldInfo);
-        }
-        for (String fieldDesc : fieldDescs) {
-            String trim = StringUtils.trim(fieldDesc);
-            String fieldName = StringUtils.split(trim, " ")[0].toUpperCase();
-            fieldName = replace(fieldName);
-            String upper = fieldDesc.toUpperCase();
-            if (upper.contains("AUTO_INCREMENT")) {
-                if (Arrays.asList(StringUtils.split(upper, " ")).contains("AUTO_INCREMENT")) {
-                    commentMap.get(fieldName).setAutoIncrement(true);
-                }
-            }
-            if (!fieldDesc.contains("COMMENT")) {
-                continue;
-            }
-            String[] splits = StringUtils.split(trim, "COMMENT");
-            String comment = splits[splits.length - 1];
-            comment = replace(comment);
-            if (commentMap.containsKey(fieldName)) {
-                commentMap.get(fieldName).setComment(comment);
-            } else {
-                LOG.info("table:"+tableName+",fileName:"+fieldDesc);
-            }
-        }
-    }
-
-
-    private static String fillTableComment(String tableSql) {
-        String classCommentTmp = tableSql.substring(tableSql.lastIndexOf("COMMENT=") + 8).trim();
-        classCommentTmp = replace(classCommentTmp);
-        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
-        return classCommentTmp;
-    }
-
-    private static String replace(String classCommentTmp) {
-        classCommentTmp = org.apache.commons.lang3.StringUtils.split(classCommentTmp, " ")[0];
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "'", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ";", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ",", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "`", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\n", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\t", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
-        return classCommentTmp;
-    }
 
 
 }

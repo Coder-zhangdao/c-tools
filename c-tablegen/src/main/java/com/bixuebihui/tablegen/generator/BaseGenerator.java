@@ -4,11 +4,15 @@ package com.bixuebihui.tablegen.generator;
 import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.tablegen.NameUtils;
 import com.bixuebihui.tablegen.ProjectConfig;
+import com.bixuebihui.tablegen.TableGen;
+import com.bixuebihui.tablegen.TableUtils;
 import com.bixuebihui.tablegen.entry.TableInfo;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import org.apache.commons.logging.Log;
@@ -28,22 +32,27 @@ import static com.bixuebihui.tablegen.TableGenConfig.PROPERTIES_FILENAME;
  * @author xwx
  */
 public abstract class BaseGenerator {
-    private static final String TEMPLATE_ROOT = "/templates";
+    protected static final String TEMPLATE_ROOT = "/templates";
     private static final Log LOG = LogFactory.getLog(BaseGenerator.class);
 
-    final ProjectConfig config;
-    final DatabaseConfig dbConfig;
-    final TableSetInfo setInfo;
+    ProjectConfig config;
+    DatabaseConfig dbConfig;
+    TableSetInfo setInfo;
 
     public BaseGenerator(){
         config = new ProjectConfig();
         dbConfig = new DatabaseConfig();
         setInfo = new TableSetInfo();
-        init(null);
-        readDb();
     }
 
-    private void readDb() {
+    public void init(ProjectConfig config, DatabaseConfig dbConfig, TableSetInfo setInfo){
+        this.config = config;
+        this.dbConfig = dbConfig;
+        this.setInfo = setInfo;
+    }
+
+    public synchronized void  readDb(DatabaseConfig dbConfig) {
+
 
     }
 
@@ -58,6 +67,8 @@ public abstract class BaseGenerator {
             dbConfig.readDbConfig(props);
 
             config.readFrom(props, getConfigBaseDir(propertiesFilename));
+
+            readDb(dbConfig);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,25 +90,42 @@ public abstract class BaseGenerator {
     }
 
 
-    public String generate() throws IOException {
+    public String generate(String tableName) throws IOException {
+        Handlebars handlebars = getHandlebars();
+
+        Template template = handlebars.compile(File.separator + getTemplateFileName());
+
+        Map<String, Object> v = new HashMap<>(10);
+        v.put("tableInfo", setInfo.getTableInfos().get(tableName));
+        v.put("fields", setInfo.getTableCols(tableName));
+        v.put("setInfo", setInfo);
+        v.put("config", config);
+        return template.apply(Context.newContext(v));
+    }
+
+    private Handlebars getHandlebars() {
         TemplateLoader loader = new ClassPathTemplateLoader();
         loader.setPrefix(TEMPLATE_ROOT);
         loader.setSuffix(".hbs");
 
         Handlebars handlebars = new Handlebars(loader);
-        handlebars.registerHelper("u1", (name, options) -> NameUtils.firstUp((String) name));
+        handlebars.registerHelper("firstUp", (name, options) -> NameUtils.firstUp((String) name));
+        handlebars.registerHelper("firstLow", (name, options) -> NameUtils.firstLow((String) name));
         handlebars.registerHelper("className", (tableName, options) -> this.getClassName((String) tableName));
         handlebars.registerHelper("interface", (tableName, options) -> this.getInterface((String) tableName));
         handlebars.registerHelper("extends", (tableName, options) -> this.getExtendsClasses((String) tableName));
+        handlebars.registerHelper("typeDefaultValue", (tableName, options) -> TableGen.defaultTypeValue().get(tableName));
+        handlebars.registerHelpers(ConditionalHelpers.class);
+
+        //copied from AssignHelper
+        handlebars.registerHelper("let", (String variableName, Options options) -> {
+            CharSequence finalValue = options.apply(options.fn);
+            options.context.data(variableName, finalValue.toString().trim());
+            return null;
+        });
 
         additionalSetting(handlebars);
-
-        Template template = handlebars.compile(File.separator + getTemplateFileName());
-
-        Map<String, Object> v = new HashMap<>(10);
-        v.put("tableInfo", new TableInfo("test"));
-        v.put("config", new ProjectConfig());
-        return template.apply(Context.newContext(v));
+        return handlebars;
     }
 
 

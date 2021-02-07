@@ -27,8 +27,9 @@ public class ProjectConfig {
     String versionColName = "version";
     boolean indexes;
     boolean overWriteAll = false;
-    boolean kuozhanbiao = false;
+    boolean useCustomMetaTable = false;
     boolean use_annotation = false;
+    boolean use_swagger = true;
     boolean use_autoincrement = false;
     boolean generate_procedures = true;
     boolean generateAll=false;
@@ -54,6 +55,14 @@ public class ProjectConfig {
      */
     Map<String, String> tablesList;
     Map<String, String> excludeTablesList;
+
+    public boolean isUse_swagger() {
+        return use_swagger;
+    }
+
+    public void setUse_swagger(boolean use_swagger) {
+        this.use_swagger = use_swagger;
+    }
 
     public String getBaseDir() {
         return baseDir;
@@ -160,12 +169,12 @@ public class ProjectConfig {
         this.overWriteAll = overWriteAll;
     }
 
-    public boolean isKuozhanbiao() {
-        return kuozhanbiao;
+    public boolean isUseCustomMetaTable() {
+        return useCustomMetaTable;
     }
 
-    public void setKuozhanbiao(boolean kuozhanbiao) {
-        this.kuozhanbiao = kuozhanbiao;
+    public void setUseCustomMetaTable(boolean useCustomMetaTable) {
+        this.useCustomMetaTable = useCustomMetaTable;
     }
 
     public boolean isUse_annotation() {
@@ -327,7 +336,7 @@ public class ProjectConfig {
         LOG.debug("table_owner:" + tableOwner);
 
         indexes = getBooleanCfg(props, "indexes");
-        kuozhanbiao = getBooleanCfg(props, "kuozhanbiao");
+        useCustomMetaTable = getBooleanCfg(props, "kuozhanbiao");
 
         generate_procedures = getBooleanCfg(props, "generate_procedures");
 
