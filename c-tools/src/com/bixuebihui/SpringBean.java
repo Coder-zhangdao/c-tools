@@ -39,7 +39,7 @@ public class SpringBean {
 
     public void destroy() {
         if (beanFactory != null) {
-            beanFactory.destroy();
+            beanFactory.close();
             beanFactory = null;
         }
     }
@@ -79,7 +79,7 @@ public class SpringBean {
             }
 
             beanFactory = new GenericApplicationContext();
-            XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader((BeanDefinitionRegistry) beanFactory);
+            XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 
             reader.loadBeanDefinitions(resource);
 
@@ -89,7 +89,7 @@ public class SpringBean {
             }
 
             if (configUrl != null) {
-                PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+                org.springframework.context.support.PropertySourcesPlaceholderConfigurer cfg = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
                 LOG.debug("Use resource for bean properties: [" + configUrl + "].");
                 cfg.setLocation(new UrlResource(configUrl));
                 cfg.postProcessBeanFactory(beanFactory.getBeanFactory());

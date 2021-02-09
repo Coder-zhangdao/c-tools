@@ -129,9 +129,9 @@ public class HtmlDocument {
         for (Iterator itr = content.iterator(); itr.hasNext(); textContent.append("\n")) {
             Object obj = itr.next();
             if (obj instanceof HtmlComment) {
-                textContent.append(((HtmlComment) obj).toString());
+                textContent.append(obj.toString());
             } else if (obj instanceof HtmlElement) {
-                textContent.append(((HtmlElement) obj).toString());
+                textContent.append(obj.toString());
             }
         }
 
