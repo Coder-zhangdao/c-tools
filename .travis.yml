@@ -4,7 +4,8 @@ jdk:
 - openjdk8
 #script:
 #- mvn test
-script: "mvn cobertura:cobertura"
+#script: "mvn cobertura:cobertura"
+script: "mvn jacoco:check site"
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 cache:
