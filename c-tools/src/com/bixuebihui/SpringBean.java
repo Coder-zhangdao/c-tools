@@ -62,6 +62,10 @@ public class SpringBean {
                 url = this.getClass().getResource("/" + beanConfigFile);
                 LOG.info(this.getClass().getResource("/").toString());
             }
+
+
+            beanFactory = new GenericApplicationContext();
+
             // If we have a non-null url, then delegate the rest of the
             // configuration to the OptionConverter.selectAndConfigure
             // method.
@@ -69,6 +73,8 @@ public class SpringBean {
                 LOG.debug("Using URL [" + url + "] for automatic spring configuration.");
                 try {
                     resource = new UrlResource(url);
+                    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+                    reader.loadBeanDefinitions(resource);
                 } catch (NoClassDefFoundError e) {
                     LOG.warn("Error during default initialization", e);
                 }
@@ -76,10 +82,6 @@ public class SpringBean {
                 LOG.debug("Could not find resource: [" + beanConfigFile + "].");
             }
 
-            beanFactory = new GenericApplicationContext();
-            XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-
-            reader.loadBeanDefinitions(resource);
 
             URL configUrl = Loader.getResource(CONFIG_PROPERTIES);
             if (configUrl == null) {
@@ -93,8 +95,6 @@ public class SpringBean {
                 cfg.postProcessBeanFactory(beanFactory.getBeanFactory());
             } else {
                 LOG.debug("Could not find resource: [" + CONFIG_PROPERTIES + "]");
-
-
             }
             beanFactory.refresh();
         }else {
