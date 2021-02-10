@@ -3,7 +3,7 @@ package com.bixuebihui.tablegen;
 import com.bixuebihui.generated.tablegen.business.T_metatableManager;
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 import com.bixuebihui.jdbc.IDbHelper;
-import com.bixuebihui.tablegen.entry.TableInfo;import org.apache.commons.dbutils.DbUtils;
+import com.bixuebihui.tablegen.entry.TableInfo;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.sql.BatchUpdateException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TableGenTest {
@@ -47,10 +45,7 @@ public class TableGenTest {
 
 		String extra_setting2="src/main/resources/pojos.xml";
 
-		List<String> tableNames2= new ArrayList<>();
-		tableNames2.add("sm_template_suite");
-		Map<String, T_metatable> tableData2 = null;
-		Map<String, T_metatable> res = tg.setInfo.getExtraTableDataFromXml(extra_setting2, tableData2);
+		Map<String, T_metatable> res = tg.setInfo.getExtraTableDataFromXml(extra_setting2, null);
 		Assert.assertEquals(1, res.size());
 		Assert.assertEquals(1, res.get("sm_template_suite").getColumns().size());
 	}

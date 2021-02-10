@@ -71,7 +71,7 @@ public class Zuzhijigoudaima {
         } else if (ModResult == 0) {
             ReChar = '0';
         } else {
-            ReChar = ((11 - ModResult) + "").charAt(0);//(char) S;// [1];
+            ReChar = ((11 - ModResult) + "").charAt(0);
         }
         return ReChar;
     }

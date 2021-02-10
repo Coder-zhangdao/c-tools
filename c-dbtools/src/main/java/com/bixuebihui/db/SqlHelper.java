@@ -133,15 +133,6 @@ public class SqlHelper {
 		}
 	}
 
-	/**
-	 * 防止sql注入
-	 *
-	 * @param sql 原始语句
-	 * @return 过滤特殊字符,单引号注释等
-	 */
-	public static String transactSQLInjection(String sql) {
-		return SqlFilter.transactSQLInjection(sql);
-	}
 
 	/**
 	 * 增加

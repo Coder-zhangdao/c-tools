@@ -1,6 +1,7 @@
 package com.bixuebihui.db;
 
 import com.bixuebihui.jdbc.BaseDao;
+import com.bixuebihui.jdbc.SqlFilter;
 import junit.framework.TestCase;
 
 import java.sql.Date;
@@ -38,11 +39,6 @@ public class SqlHelperTest extends TestCase {
 		assertNotNull(res);
 	}
 
-	public void testTransactSQLInjection() {
-		@SuppressWarnings("deprecation")
-		String res = SqlHelper.transactSQLInjection("';--");
-		assertEquals("", res);
-	}
 
 	public void testEqualMapOfStringObjectBoolean() throws SQLException {
 		SqlHelper sp = new SqlHelper();

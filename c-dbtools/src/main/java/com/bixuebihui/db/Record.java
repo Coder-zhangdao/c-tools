@@ -14,26 +14,13 @@ import java.util.List;
  */
 public interface Record<T> {
 	/**
-	 * group by function
+	 * <p>getVector.</p> 获得单个字段
+	 *
+	 * @param field a {@link java.lang.String} object.
+	 * @return a {@link java.util.List} object.
+	 * @throws java.sql.SQLException if any.
 	 */
-	enum GroupFun{
-		AVG,//(column)	返回某列的平均值
-		//BINARY_CHECKSUM
-		//CHECKSUM
-		//CHECKSUM_AGG
-		COUNT,//(column)	返回某列的行数（不包括NULL值）
-		//COUNT(*)	返回被选行数
-		//COUNT(DISTINCT column)	返回相异结果的数目
-		FIRST,//(column)	返回在指定的域中第一个记录的值（SQLServer2000 不支持）
-		LAST,//(column)	返回在指定的域中最后一个记录的值（SQLServer2000 不支持）
-		MAX,//(column)	返回某列的最高值
-		MIN,//(column)	返回某列的最低值
-		STDDEV_SAMP,//STDDEV_SAMP for MySql, MS SQL Server STDEV,//(column)
-		STD,//(column)	STD for MySql , MS SQL Server STDEVP
-		SUM,//(column)	返回某列的总和
-		VAR,//(column)
-		VARP,//(column)
-	}
+	List<Object> getVector(String field) throws SQLException;
 
 	//查询多条
 
@@ -76,61 +63,52 @@ public interface Record<T> {
 	 */
 	Object get(String field) throws SQLException;
 
-	//获得单个字段
-
 	/**
-	 * <p>getVector.</p>
-	 *
-	 * @param field a {@link java.lang.String} object.
-	 * @return a {@link java.util.List} object.
-	 * @throws java.sql.SQLException if any.
-	 */
-	List<Object> getVector(String field) throws SQLException;
-
-	//获得数量
-
-	/**
-	 * <p>count.</p>
+	 * <p>count.</p> 获得数量
 	 *
 	 * @return a int.
 	 * @throws java.sql.SQLException if any.
 	 */
 	int count() throws SQLException;
 
-	//获得数量
-
 	/**
-	 * <p>countValue.</p>
+	 * <p>countValue.</p> 获得数量
 	 *
 	 * @param field a {@link java.lang.String} object.
-	 * @param fun a {@link Record.GroupFun} object.
+	 * @param fun a {@link GroupFunction} object.
 	 * @return a {@link CountValue} object.
 	 * @throws java.sql.SQLException if any.
 	 */
-	CountValue countValue(String field, GroupFun fun) throws SQLException;
+	CountValue countValue(String field, GroupFunction fun) throws SQLException;
 
 	/**
 	 * <p>countObject.</p>
 	 *
 	 * @param field a {@link java.lang.String} object.
-	 * @param fun a {@link Record.GroupFun} object.
+	 * @param fun a {@link GroupFunction} object.
 	 * @param objectType a {@link java.lang.Class} object.
 	 * @param <K> a K object.
 	 * @return a {@link CountObject} object.
 	 * @throws java.sql.SQLException if any.
 	 */
-	<K> CountObject<K> countObject(String field, GroupFun fun, Class<K> objectType) throws SQLException;
-
-	//获得数量
+	<K> CountObject<K> countObject(String field, GroupFunction fun, Class<K> objectType) throws SQLException;
 
 	/**
-	 * <p>countSum.</p>
+	 * <p>countSum.</p> 获得数量
 	 *
 	 * @param field a {@link java.lang.String} object.
 	 * @return a {@link CountValue} object.
 	 * @throws java.sql.SQLException if any.
 	 */
 	CountValue countSum(String field) throws SQLException;
+
+	/**
+	 * <p>getSql.</p> 获得生产的sql
+	 *
+	 * @return a {@link SqlPocket} object.
+	 * @throws java.sql.SQLException if any.
+	 */
+	SqlPocket getSql() throws SQLException;
 
 
 	/**
@@ -141,15 +119,14 @@ public interface Record<T> {
 	 */
 	boolean exists() throws SQLException;
 
-	//获得生产的sql
-
 	/**
-	 * <p>getSql.</p>
+	 * <p>getStringVector.</p> 获得单个字段
 	 *
-	 * @return a {@link SqlPocket} object.
+	 * @param field a {@link java.lang.String} object.
+	 * @return a {@link java.util.List} object.
 	 * @throws java.sql.SQLException if any.
 	 */
-	SqlPocket getSql() throws SQLException;
+	List<String> getStringVector(String field) throws SQLException;
 
 	/**
 	 * 获取字段field的长整型列表
@@ -160,16 +137,67 @@ public interface Record<T> {
 	 */
 	List<Long> getLongVector(String field) throws SQLException;
 
-	//获得单个字段
+
 
 	/**
-	 * <p>getStringVector.</p>
-	 *
-	 * @param field a {@link java.lang.String} object.
-	 * @return a {@link java.util.List} object.
-	 * @throws java.sql.SQLException if any.
+	 * group by function
 	 */
-	List<String> getStringVector(String field) throws SQLException;
+	enum GroupFunction {
+		/**
+		 *  avg(column)	返回某列的平均值
+		 */
+		AVG,
+		//BINARY_CHECKSUM
+		//CHECKSUM
+		//CHECKSUM_AGG
+		/**
+		 *  count(column)	返回某列的行数（不包括NULL值）
+		 */
+		COUNT,
+		//COUNT(*)	返回被选行数
+		//COUNT(DISTINCT column)	返回相异结果的数目
+		/**
+		 * first(column)	返回在指定的域中第一个记录的值（SQLServer2000 不支持）
+		 */
+		FIRST,
+		/**
+		 * last(column)	返回在指定的域中最后一个记录的值（SQLServer2000 不支持）
+		 */
+		LAST,
+
+		/**
+		 *  max(column)	返回某列的最高值
+		 */
+		MAX,
+		/**
+		 *  min(column)	返回某列的最低值
+		 */
+		MIN,
+		/**
+		 *  STDDEV_SAMP for MySql, MS SQL Server STDEV(column)
+		 */
+		STDDEV_SAMP,
+		/**
+		 * std(column)	STD for MySql , MS SQL Server STDEVP
+		 */
+		STD,
+		/**
+		 * sum(column)	返回某列的总和
+		 */
+		SUM,
+		/**
+		 * var(column) MySQL 不支持, 使用 variance
+		 */
+		VAR,
+		/**
+		 *  VARIANCE(expr);  standard variance 标准方差
+		 */
+		VARIANCE,
+		/**
+		 *  varp(column) MySQL 不支持,see var_pop or var_samp
+		 */
+		VARP
+	}
 
 	/**
 	 * field = field +1

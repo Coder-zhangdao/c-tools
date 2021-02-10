@@ -4,7 +4,7 @@ import com.bixuebihui.db.*;
 import com.bixuebihui.sql.SQLUtil;
 import com.bixuebihui.jdbc.entity.CountObject;
 import com.bixuebihui.jdbc.entity.CountValue;
-import com.bixuebihui.db.Record.GroupFun;
+import com.bixuebihui.db.Record.GroupFunction;
 import com.bixuebihui.shardingjdbc.core.api.HintManager;
 import org.apache.commons.beanutils.*;
 import org.apache.commons.beanutils.converters.*;
@@ -88,7 +88,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         }
     }
 
-    private static final Set<Class> BUILT_IN_SET = new HashSet<>();
+    private static final Set<Class<?>> BUILT_IN_SET = new HashSet<>();
 
     /**
      * <p>Getter for the field <code>dbHelper</code>.</p>
@@ -1152,24 +1152,49 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     }
 
     /**
-     * {@inheritDoc}
+     * <p>filterForSQL.</p>
      *
-     * Select from the database for table "agent_form" by unique ids
+     * @param sql a {@link java.lang.String} object.
+     * @return a {@link java.lang.String} object.
      */
-    @Override
-    public @NotNull
-    Map<String, T> selectByIds(String uniquePropertyName, List<String> uniquePropertyValues)
-            throws SQLException {
-
-        String ids = StringUtils.join(uniquePropertyValues, ",");
-
-        java.util.Collection<T> infos = selectAllWhere(
-                WHERE + uniquePropertyName + " in(" + filterForSQL(ids) + ")");
-        Map<String, T> map = new HashMap<>(16);
-        for (T info : infos) {
-            map.put("" + getId(info), info);
+    public static String filterForSql(String sql) {
+        if (sql == null || sql.length()==0) {
+            return "";
         }
-        return map;
+        int nLen = sql.length();
+
+        char[] srcBuff = sql.toCharArray();
+        StringBuilder retBuff = new StringBuilder((int) (nLen * 1.5D));
+        for (int i = 0; i < nLen; ++i) {
+            char cTemp = srcBuff[i];
+            switch (cTemp) {
+                case '\'':
+                    retBuff.append("''");
+                    break;
+                case ';':
+                    boolean bSkip = false;
+                    for (int j = i + 1; (j < nLen) && (!(bSkip)); ++j) {
+                        char cTemp2 = srcBuff[j];
+                        if (cTemp2 == ' ') {
+                            continue;
+                        }
+                        if (cTemp2 == '&') {
+                            retBuff.append(';');
+                        }
+                        bSkip = true;
+                    }
+
+                    if (!(bSkip)) {
+                        retBuff.append(';');
+                    }
+                    break;
+                default:
+                    retBuff.append(cTemp);
+            }
+
+        }
+
+        return retBuff.toString();
     }
 
     /**
@@ -1197,32 +1222,25 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return false;
     }
 
-    private boolean repairAndTry(T info, int tryCount) throws SQLException {
-        if (tryCount++ > 3) {
-            return false;
+    /**
+     * {@inheritDoc}
+     *
+     * Select from the database for table "agent_form" by unique ids
+     */
+    @Override
+    public @NotNull
+    Map<String, T> selectByIds(String uniquePropertyName, List<String> uniquePropertyValues)
+            throws SQLException {
+
+        String ids = StringUtils.join(uniquePropertyValues, ",");
+
+        java.util.Collection<T> infos = selectAllWhere(
+                WHERE + uniquePropertyName + " in(" + filterForSql(ids) + ")");
+        Map<String, T> map = new HashMap<>(16);
+        for (T info : infos) {
+            map.put("" + getId(info), info);
         }
-
-        try {
-            setId(info, getNextKey());
-            return this.insert(info);
-        }catch (SQLIntegrityConstraintViolationException ex){
-            // Duplicate entry '10061' for key 'PRIMARY'
-            String message = ex.getMessage();
-
-            if (message.contains("Duplicate") && message.contains("PRIMARY")) {
-
-                String key = getSequenceKeyName();
-                long max = (long) this.ar().countValue(this.getKeyName(), GroupFun.MAX).getValue();
-                try {
-                    SequenceUtils.getInstance().moveKeyValueToCurrent(key, max,
-                            this.getDbHelper());
-                    return repairAndTry(info, tryCount);
-                } catch (Exception e) {
-                    throw new SQLException(ex);
-                }
-            }
-        }
-        return false;
+        return map;
     }
 
     /**
@@ -1396,50 +1414,32 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return res;
     }
 
-    /**
-     * <p>filterForSQL.</p>
-     *
-     * @param sql a {@link java.lang.String} object.
-     * @return a {@link java.lang.String} object.
-     */
-    public static String filterForSQL(String sql) {
-        if (sql == null || sql.length()==0) {
-            return "";
+    private boolean repairAndTry(T info, int tryCount) throws SQLException {
+        if (tryCount++ > 3) {
+            return false;
         }
-        int nLen = sql.length();
 
-        char[] srcBuff = sql.toCharArray();
-        StringBuilder retBuff = new StringBuilder((int) (nLen * 1.5D));
-        for (int i = 0; i < nLen; ++i) {
-            char cTemp = srcBuff[i];
-            switch (cTemp) {
-                case '\'':
-                    retBuff.append("''");
-                    break;
-                case ';':
-                    boolean bSkip = false;
-                    for (int j = i + 1; (j < nLen) && (!(bSkip)); ++j) {
-                        char cTemp2 = srcBuff[j];
-                        if (cTemp2 == ' ') {
-                            continue;
-                        }
-                        if (cTemp2 == '&') {
-                            retBuff.append(';');
-                        }
-                        bSkip = true;
-                    }
+        try {
+            setId(info, getNextKey());
+            return this.insert(info);
+        }catch (SQLIntegrityConstraintViolationException ex){
+            // Duplicate entry '10061' for key 'PRIMARY'
+            String message = ex.getMessage();
 
-                    if (!(bSkip)) {
-                        retBuff.append(';');
-                    }
-                    break;
-                default:
-                    retBuff.append(cTemp);
+            if (message.contains("Duplicate") && message.contains("PRIMARY")) {
+
+                String key = getSequenceKeyName();
+                long max = (long) this.ar().countValue(this.getKeyName(), GroupFunction.MAX).getValue();
+                try {
+                    SequenceUtils.getInstance().moveKeyValueToCurrent(key, max,
+                            this.getDbHelper());
+                    return repairAndTry(info, tryCount);
+                } catch (Exception e) {
+                    throw new SQLException(ex);
+                }
             }
-
         }
-
-        return retBuff.toString();
+        return false;
     }
 
     /**

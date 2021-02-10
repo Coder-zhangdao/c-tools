@@ -7,7 +7,7 @@ import com.bixuebihui.jdbc.DbHelper;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jdbc.entity.CountObject;
 import com.bixuebihui.jdbc.entity.CountValue;
-import com.bixuebihui.db.Record.GroupFun;
+import com.bixuebihui.db.Record.GroupFunction;
 import junit.framework.TestCase;
 
 import java.sql.Connection;
@@ -158,7 +158,7 @@ public class ActiveRecordImplTest extends TestCase {
 	public void testCountObject() throws SQLException {
 
 		 String field="createtime";
-		GroupFun fun = GroupFun.MAX;
+		GroupFunction fun = GroupFunction.MAX;
 
 		CountObject<Timestamp> res = bd.ar().countObject(field, fun , Timestamp.class);
 
@@ -166,7 +166,7 @@ public class ActiveRecordImplTest extends TestCase {
 
 		assertEquals(2, res.getCount());
 
-		fun = GroupFun.MIN;
+		fun = GroupFunction.MIN;
 		res = bd.ar().countObject(field, fun , Timestamp.class);
 
 

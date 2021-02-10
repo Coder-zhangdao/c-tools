@@ -1,12 +1,15 @@
 package com.bixuebihui.jdbc;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SqlFilterTest extends TestCase {
+public class SqlFilterTest {
 
+	@Test
 	public void testToString() {
 		SqlFilter filter = new SqlFilter();
 		assertEquals("", filter.toString());
@@ -16,6 +19,7 @@ public class SqlFilterTest extends TestCase {
 		assertEquals("where name like 'abc%'", filter.toString());
 	}
 
+	@Test
 	public void testAddFilter() {
 		SqlFilter filter = new SqlFilter();
 		assertEquals("", filter.toString());
@@ -26,6 +30,7 @@ public class SqlFilterTest extends TestCase {
 		assertEquals("where name like 'abc%' and cnt = 100", filter.toString());
 	}
 
+	@Test
 	public void testOr(){
 		SqlFilter filter = new SqlFilter();
 		filter.addFilter("name", "abc");
@@ -36,11 +41,13 @@ public class SqlFilterTest extends TestCase {
 		cond.or(cond1);
 		SqlFilter res = filter.or(cond);
 
-		System.out.println(res.toString());
+		assertEquals("where( name like 'abc%') or (( name like 'def%') or ( name like 'dff%'))",
+				res.toString());
 
 	}
 
 
+	@Test
 	public void testAddFilters(){
 		SqlFilter sf = new 	SqlFilter();
 		Map<String, Object> condition = new HashMap<String, Object>();
@@ -55,8 +62,16 @@ public class SqlFilterTest extends TestCase {
 	}
 
 
+
+	@Test
 	public void testInjection(){
-		System.out.println(SqlFilter.transactSQLInjection("flksdfjlk ' and 1=1 --"));
-		System.out.println(SqlFilter.transactSQLInjection("flksdfjlk sfs"));
+		assertEquals("", SqlFilter.transactSQLInjection("flksdfjlk ' and 1=1 --"));
+		assertEquals("flksdfjlk sfs",SqlFilter.transactSQLInjection("flksdfjlk sfs"));
 	}
+
+    @Test
+    void transactSQLInjection() {
+		String res = SqlFilter.transactSQLInjection("';--");
+		assertEquals("", res);
+    }
 }

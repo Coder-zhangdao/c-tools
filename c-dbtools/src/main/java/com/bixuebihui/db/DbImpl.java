@@ -437,7 +437,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	/** {@inheritDoc} */
 	@Override
-	public CountValue countValue(String field, Record.GroupFun fun)
+	public CountValue countValue(String field, GroupFunction fun)
 			throws SQLException {
 		throw new NotImplementedException();
 	}
@@ -446,7 +446,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	/** {@inheritDoc} */
 	@Override
 	public CountValue countSum(String field) throws SQLException {
-		return countValue(field, GroupFun.SUM);
+		return countValue(field, GroupFunction.SUM);
 	}
 
 	/** {@inheritDoc} */
@@ -486,7 +486,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	/** {@inheritDoc} */
 	@Override
-	public <K> CountObject<K> countObject(String field, Record.GroupFun fun, Class<K> objectType)
+	public <K> CountObject<K> countObject(String field, GroupFunction fun, Class<K> objectType)
 			throws SQLException {
 		throw new NotImplementedException();
 	}
