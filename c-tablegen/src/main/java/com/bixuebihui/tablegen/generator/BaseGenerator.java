@@ -2,6 +2,7 @@ package com.bixuebihui.tablegen.generator;
 
 
 import com.bixuebihui.dbcon.DatabaseConfig;
+import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.tablegen.NameUtils;
 import com.bixuebihui.tablegen.ProjectConfig;
 import com.bixuebihui.tablegen.TableGen;
@@ -21,6 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -51,9 +54,12 @@ public abstract class BaseGenerator {
         this.setInfo = setInfo;
     }
 
-    public synchronized void  readDb(DatabaseConfig dbConfig) {
+    public synchronized void  readDb(DatabaseConfig dbConfig) throws SQLException, InstantiationException, IOException, IllegalAccessException {
 
+        IDbHelper helper = TableGen.getDbHelper(dbConfig);
 
+        DatabaseMetaData metaData = helper.getConnection().getMetaData();
+        setInfo.getTableData(config, helper, metaData);
     }
 
     public synchronized void init(String filename) {
@@ -70,7 +76,7 @@ public abstract class BaseGenerator {
 
             readDb(dbConfig);
 
-        } catch (IOException e) {
+        } catch (IOException | SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
     }
