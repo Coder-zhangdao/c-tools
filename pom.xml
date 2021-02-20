@@ -33,7 +33,6 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mysql.version>5.1.47</mysql.version>
-        <argLine>-XX:MaxPermSize=512m</argLine>
     </properties>
     <dependencyManagement>
 
@@ -58,7 +57,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-                    <argLine>-server -ea -XX:MaxPermSize=256m -Xmx4g -XX:-UseSplitVerifier ${argLine}</argLine>
+                    <argLine>-server -ea -Xmx4g </argLine>
                     <skip>false</skip>
                     <testFailureIgnore>false</testFailureIgnore>
                     <includes></includes>

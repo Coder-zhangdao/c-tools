@@ -12,17 +12,19 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description ="{{tableInfo.comment}}")
-{{/if}}
+{{/if~}}
 public class {{className tableInfo.name}} {{interface tableInfo.name}} {
+{{! field declaration }}
 {{#each fields as | field index | }}
-    {{log field level="error" }}
+    {{log field level="info" }}
     /**
     * {{columnDescription this tableName}}
     */
-    {{columnAnnotation this tableName}}
+    {{{columnAnnotation this tableName}}}
     protected {{javaType}}  {{firstLow name}};
 {{/each}}
 
+{{! setters & getters }}
 {{#each fields}}
     public void set{{firstUp name}}({{javaType}} {{firstLow name}})
     {
@@ -34,30 +36,34 @@ public class {{className tableInfo.name}} {{interface tableInfo.name}} {
     }
 {{/each}}
 
-// handle the constructor
-public {{className tableInfo.name}}()
-{
-{{#each fields}}
-    {{#eq "String" type }}
-        {{#not field.nullable}}
-            {{firstLow name}}="*";
-        {{/not}}
-    {{else}}
-        {{#let code}}{{typeDefaultValue javaType}}{{/let}}
-        {{#neq code null}}
-            {{firstLow name}}={{typeDefaultValue javaType}};
-        {{/neq}}
-    {{/eq}}
-{{/each}}
-}
+    {{! handle the constructor }}
+    public {{className tableInfo.name}}()
+    {
+    {{#each fields~}}
+        {{#eq "String" type ~}}
+            {{#not field.nullable~}}
+                {{firstLow name}}="*";
+            {{/not~}}
+        {{else}} {{#let 'code'}}{{{typeDefaultValue javaType}}}{{/let}}
+            {{#neq code null~}}
+                {{firstLow name}}={{{code}}};
+            {{/neq~}}
+        {{/eq~}}
+    {{/each}}
+    }
 
     public String toXml()
     {
         StringBuilder s= new StringBuilder();
         String ln = System.getProperty("line.separator");
-        s.append("<test ");
-        s.append("id=\"").append(this.getId()).append("\" ");
-        s.append("name=\"").append(StringEscapeUtils.escapeXml11(this.getName())).append("\" ");
+        s.append("<{{tableInfo.name}} ");
+{{#each fields as | field index | }}
+        {{#eq "String" javaType~}}
+        s.append(" {{firstLow name}}=\"").append(StringEscapeUtils.escapeXml11(this.get{{firstUp  name }}())).append("\"");
+        {{else~}}
+        s.append(" {{firstLow name}}=\"").append(this.get{{firstUp name}}()).append("\"");
+        {{/eq~}}
+{{/each~}}
         s.append(" />");
         s.append(ln);
         return s.toString();

@@ -482,6 +482,9 @@ public class TableSetInfo {
 
 
     private static String fillTableComment(String tableSql) {
+        if(!tableSql.contains("COMMENT=")){
+            return "";
+        }
         String classCommentTmp = tableSql.substring(tableSql.lastIndexOf("COMMENT=") + 8).trim();
         classCommentTmp = replace(classCommentTmp);
         classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
@@ -500,5 +503,17 @@ public class TableSetInfo {
         return classCommentTmp;
     }
 
+    /**
+     * Selects the primary keys for a particular table.
+     *
+     * @throws SQLException db error
+     */
+    public @NotNull List<String> getTableKeys(String tableName) throws SQLException {
+
+        if (getKeyCache().containsKey(tableName)) {
+            return getKeyCache().get(tableName);
+        }
+        return Collections.emptyList();
+    }
 
 }

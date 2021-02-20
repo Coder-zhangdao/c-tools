@@ -66,9 +66,8 @@ public class OverseaUserDto {
 
     @Override
     public String getTargetFileName(String tableName) {
-        String baseDir = config.getBaseDir();
 
-        return baseDir + File.separator + "pojo" + File.separator + getClassName(tableName)
+        return  config.getBaseSrcDir()+File.separator + "pojo" + File.separator + getClassName(tableName)
                 + ".java";
     }
 
@@ -79,12 +78,7 @@ public class OverseaUserDto {
 
     @Override
     public String getClassName(String tableName) {
-        String classname = setInfo.tableName2ClassName(tableName);
-        if (tableName.equals(classname)) {
-            return config.getPrefix() + firstUp(tableName);
-        } else {
-            return config.getPrefix() + classname;
-        }
+      return getPojoClassName(tableName);
     }
 
     @Override

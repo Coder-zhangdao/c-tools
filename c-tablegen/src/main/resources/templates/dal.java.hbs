@@ -1,0 +1,158 @@
+package {{config.packageName}}.{{tableInfo.name}}.dal;
+
+{{> [header-comment.java]}}
+
+import java.sql.*;
+import java.util.List;
+import javax.sql.DataSource;
+import com.bixuebihui.test.business.*;
+import com.bixuebihui.test.pojo.*;
+import com.bixuebihui.jdbc.RowMapperResultReader;
+import com.bixuebihui.test.BaseList;
+
+
+public class {{className tableInfo.name}}List  extends BaseList<{{className tableInfo.name}}, {{firstKeyType tableInfo.name}}>
+{
+
+       {{! writeDALConstructor(tableName); }}
+
+/**
+  * Don't direct use the {{className tableInfo.name}}List, use {{className tableInfo.name}}Manager instead.
+  */
+protected {{className tableInfo.name}}List(DataSource ds)
+{
+    super(ds);
+}
+
+       {{! writeSql(colData, keyData); }}
+StringBuilder columns = new StringBuilder("( ");
+StringBuilder values = new StringBuilder();
+
+String where = createPreparedWhereClause(params, false, colData);
+
+    public static final class F{
+        public static String[] getAllFields() { return new String[] {
+
+int i = 0;
+
+for (ColumnData cd : colData) {
+i++;
+boolean isNotLast = i < colData.size();
+String field = columnNameToConstantName(cd.getName());
+
+fields.append("        public static final String ").append(field).append(" = \"").append(cd.getName()).append("\";\n");
+fieldsAll.append(field);
+
+if (isNotLast) {
+fieldsAll.append(",");
+}
+
+if (!(config.use_autoincrement && cd.isAutoIncrement())) {
+if (cd.getName().equalsIgnoreCase(config.versionColName)) {
+update.append(cd.getName()).append(" = ").append(cd.getName()).append("+1");
+} else {
+update.append(cd.getName()).append("=?");
+}
+
+values.append("?");
+columns.append(cd.getName());
+
+if (isNotLast) {
+update.append(",");
+values.append(",");
+columns.append(",");
+}
+}
+}
+
+values.append(" )\";");
+columns.append(" )");
+update.append("\"\n    ").append(where).append(";");
+fieldsAll.append("};}\n");
+
+out("protected String getDeleteSql(){\n    return \"" + "delete from \" + getTableName() + \" where " + StringUtils.join(params, "=? and ") + "=?" + "\";\n}\n");
+
+fields.append(fieldsAll);
+fields.append("    }\n");
+out(fields.toString());
+
+out("@Override\nprotected String getInsertSql(){\n    return \"insert into \" + getTableName() + \" " + columns
++ " values ( " + values + "\n}\n");
+
+out("@Override\nprotected String getUpdateSql(){\n    return \"update \" + getTableName() + \" set " + update + "\n}\n");
+
+
+        writeObjs(tableName, keyData, colData);
+
+        writeGetTableName(tableName, "getTableName", false);
+        writeGetKeyName(getFirstKeyName(keyData));
+        writeMapRow(tableName, colData);
+
+
+        writeGetSetId(tableName, keyData, colData);
+        writeWraper(keyData, colData);
+
+        if (isNotEmpty(keyData)) {
+
+        /* optimistic lock update ! */
+        if (containsVersion(colData)) {
+        boolean withVersion = true;
+        writeUpdate(tableName, keyData, "updateByKeyAndVersion", false, withVersion, colData);
+        writeUpdate(tableName, keyData, "updateByKeyAndVersion", true, withVersion, colData);
+        }
+        if (keyData.size() > 1) {
+        writeDelete(tableName, keyData, "deleteByKey", false, colData);
+        writeDelete(tableName, keyData, "deleteByKey", true, colData);
+        }
+        } else {
+        writeDummyUpdate(tableName, "updateByKey");
+        writeDummyDelete(tableName, keyData, "deleteByKey", colData);
+        }
+
+        sw.split();
+        trace("after keys:" + sw.getSplitTime());
+
+        //foreign key
+        List<ForeignKeyDefinition> foreignKeyData = getTableImportedKeys(tableName);
+            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
+            writeImportedMethods(tableName, fkEnum, colData);
+            }
+
+            foreignKeyData = getTableExportedKeys(tableName);
+            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
+            writeExportedMethods(fkEnum, getColumnData(setInfo.getTableInfos().get(fkEnum.primaryKeyTableName)).getFields());
+            }
+
+
+            sw.split();
+            trace("foreignKeys :" + sw.getSplitTime());
+
+            if (config.indexes) {
+            List<String> indexData = getTableIndexes(tableName); // updates the indexData
+                // variable
+                if (isNotEmpty(indexData)) {
+                writeSelect(tableName, indexData, "selectByIndex", colData);
+                writeSelectAll(tableName, indexData, false, "selectAllLikeIndex", true, colData);
+
+                writeUpdate(tableName, indexData, "updateByIndex", false, false, colData);
+                writeUpdate(tableName, indexData, "updateByIndex", true, false, colData);
+
+                writeDelete(tableName, indexData, "deleteByIndex", false, colData);
+                writeDelete(tableName, indexData, "deleteByIndex", true, colData);
+                writeCount(indexData, false, "countByIndex", colData);
+                writeCount(indexData, true, "countLikeIndex", colData);
+
+                }
+                }
+
+                writeInsertDummy(tableName, keyData, "insertDummy", colData);
+                out("}");
+
+                currentOutput.close();
+
+                } catch (SQLException | IOException | GenException e) {
+                e.printStackTrace(console);
+                }
+                sw.split();
+                trace("after close:" + sw.getSplitTime());
+                }

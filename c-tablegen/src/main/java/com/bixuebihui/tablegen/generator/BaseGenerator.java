@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.bixuebihui.tablegen.NameUtils.firstUp;
 import static com.bixuebihui.tablegen.NameUtils.getConfigBaseDir;
 import static com.bixuebihui.tablegen.TableGenConfig.PROPERTIES_FILENAME;
 
@@ -84,6 +85,15 @@ public abstract class BaseGenerator {
     abstract String getTargetFileName(String tableName);
     abstract String getTemplateFileName();
 
+    public String getPojoClassName(String tableName) {
+        String classname = setInfo.tableName2ClassName(tableName);
+        if (tableName.equals(classname)) {
+            return config.getPrefix() + firstUp(tableName);
+        } else {
+            return config.getPrefix() + classname;
+        }
+    }
+
     abstract String getClassName(String tableName);
     protected void additionalSetting(Handlebars handlebars){}
 
@@ -101,15 +111,20 @@ public abstract class BaseGenerator {
 
         Template template = handlebars.compile(File.separator + getTemplateFileName());
 
+        Map<String, Object> v = getContextMap(tableName);
+        return template.apply(Context.newContext(v));
+    }
+
+    protected Map<String, Object> getContextMap(String tableName) {
         Map<String, Object> v = new HashMap<>(10);
         v.put("tableInfo", setInfo.getTableInfos().get(tableName));
         v.put("fields", setInfo.getTableCols(tableName));
         v.put("setInfo", setInfo);
         v.put("config", config);
-        return template.apply(Context.newContext(v));
+        return v;
     }
 
-    private Handlebars getHandlebars() {
+    protected Handlebars getHandlebars() {
         TemplateLoader loader = new ClassPathTemplateLoader();
         loader.setPrefix(TEMPLATE_ROOT);
         loader.setSuffix(".hbs");

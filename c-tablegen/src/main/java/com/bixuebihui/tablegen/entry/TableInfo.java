@@ -1,6 +1,7 @@
 package com.bixuebihui.tablegen.entry;
 
 import com.bixuebihui.tablegen.entry.ColumnData;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -34,6 +35,9 @@ public class TableInfo {
     }
 
     public String getComment() {
+        if(StringUtils.isBlank(comment)){
+            return name;
+        }
         return comment;
     }
 

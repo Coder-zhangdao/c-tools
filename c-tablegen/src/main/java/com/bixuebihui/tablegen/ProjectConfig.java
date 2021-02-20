@@ -314,6 +314,7 @@ public class ProjectConfig {
     }
 
     public void readFrom(Properties props, String baseDir) {
+        this.baseDir = baseDir;
 
         srcDir = baseDir + props.getProperty("src_dir");
         LOG.debug("src_dir:" + srcDir);

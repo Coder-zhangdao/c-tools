@@ -58,6 +58,7 @@ import java.util.*;
 
 import static com.bixuebihui.tablegen.NameUtils.*;
 import static com.bixuebihui.tablegen.TableGenConfig.PROPERTIES_FILENAME;
+import static com.bixuebihui.tablegen.generator.DalGenerator.*;
 
 /**
  * 思路决定出路，创新才有发展，整合才能壮大
@@ -394,7 +395,6 @@ public class TableGen implements DiffHandler {
                 currentOutput = new BufferedWriter(
                         new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
-                getColumnData(table);
                 String baseDir = config.packageName + ".";
                 String serviceName = getPojoClassName(tableName) + "Manager";
                 String controlerName = getPojoClassName(tableName) + "WebUI";
@@ -458,39 +458,48 @@ public class TableGen implements DiffHandler {
         }
     }
 
-    private void generateTest() throws SQLException {
-        try {
-            for (TableInfo table : setInfo.getTableInfos().values()) {
-                String tableName = table.getName();
-                info("Generating TESTs : " + tableName);
-                String baseDir = config.testDir + File.separator + config.packageName2Dir(config.packageName);
-                String fileName = baseDir + File.separator + BUSINESS + File.separator + getPojoClassName(tableName)
-                        + "ManagerTest.java";
-                File f = new File(fileName);
-                boolean fileExists = f.exists();
-                if (!fileExists) {
-                    currentOutput = new BufferedWriter(
-                            new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
+    /**
+     * only keys used as parameters in where clause, so here params mean key columns.
+     * @param params keys of table
+     * @param withLike like for true or equal for false
+     * @param columnData columns of table
+     * @return string starts with 'where' or empty string
+     * @throws GenException
+     */
+    public static String createPreparedWhereClause(List<String> params, boolean withLike, List<ColumnData> columnData) throws GenException {
+        StringBuilder where = new StringBuilder();
 
-                    //getColumnData(tableName);
-                    writeHeader(table, BUSINESS, " extends TestCase");
+        // if we have keys passed in then we add a "where" to the count
+        // e.g. se
+        //
+        if (params != null) {
+            // work out the "where" part of the update first..
+            //
+            where.append("+\" where ");
+            String key;
+            String keyType;
+            for (Iterator<String> e = params.iterator(); e.hasNext(); ) {
+                key = e.next();
+                keyType = getColType(key, columnData);
 
-                    writeSelectPageTest(tableName, "select");
-                    writeCountWhereTest(tableName);
+                // only allow likes on String types...
+                // Hmmm should we allow more than this???
+                //
+                if ((withLike) && ("String".equals(keyType))) {
+                    where.append(key).append(" like ?");
+                } else {
+                    where.append(key).append("=?");
+                }
 
-                    List<String> keyData = this.getTableKeys(tableName);
-                    if (keyData != null && keyData.size() == 1) {
-                        writeInsertDummyTest(tableName, "insertDummy");
-                    }
-
-                    out("}");
-                    currentOutput.close();
+                if (e.hasNext()) {
+                    where.append(" and ");
                 }
             }
 
-        } catch (IOException e) {
-            e.printStackTrace(console);
+            where.append("\"");
         }
+
+        return where.toString();
     }
 
     private void writeInsertDummyTest(String tableName, String methodName) throws IOException {
@@ -653,6 +662,41 @@ public class TableGen implements DiffHandler {
 
     }
 
+    private void generateTest() throws SQLException {
+        try {
+            for (TableInfo table : setInfo.getTableInfos().values()) {
+                String tableName = table.getName();
+                info("Generating TESTs : " + tableName);
+                String baseDir = config.testDir + File.separator + config.packageName2Dir(config.packageName);
+                String fileName = baseDir + File.separator + BUSINESS + File.separator + getPojoClassName(tableName)
+                        + "ManagerTest.java";
+                File f = new File(fileName);
+                boolean fileExists = f.exists();
+                if (!fileExists) {
+                    currentOutput = new BufferedWriter(
+                            new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
+
+                    //getColumnData(tableName);
+                    writeHeader(table, BUSINESS, " extends TestCase");
+
+                    writeSelectPageTest(tableName, "select");
+                    writeCountWhereTest(tableName);
+
+                    List<String> keyData = setInfo.getTableKeys(tableName);
+                    if (keyData != null && keyData.size() == 1) {
+                        writeInsertDummyTest(tableName, "insertDummy");
+                    }
+
+                    out("}");
+                    currentOutput.close();
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace(console);
+        }
+    }
+
     /**
      * 生成单个pojo类
      *
@@ -669,7 +713,7 @@ public class TableGen implements DiffHandler {
             currentOutput = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
-            List<ColumnData> colData = getColumnData(table).getFields();
+            List<ColumnData> colData = table.getFields();
 
             String interfaces = setInfo.getInterface(tableName, config);
             writeHeader(table, "pojo", interfaces + PojoGenerator.getExtendsClasses(setInfo, tableName));
@@ -728,128 +772,12 @@ public class TableGen implements DiffHandler {
 
             out("}");
 
-        } catch (IOException | SQLException ex) {
+        } catch (IOException ex) {
             generateFlag = false;
             ex.printStackTrace(console);
         } finally {
             currentOutput.close();
         }
-    }
-
-    /**
-     * 生成单个dal
-     *
-     * @param table database table
-     */
-    private void generateDAL(TableInfo table) {
-
-        StopWatch sw = new StopWatch();
-        sw.start();
-        try {
-
-            String tableName = table.getName();
-            info("Generating DALs : " + tableName);
-            String baseDir = config.getBaseSrcDir();
-            String fileName = baseDir + File.separator + "dal" + File.separator + getPojoClassName(tableName)
-                    + "List.java";
-            currentOutput = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING), 10240);
-
-            List<ColumnData> colData = getColumnData(table).getFields();
-
-            // updates the keyData variable
-            List<String> keyData = getTableKeys(tableName);
-
-            writeHeader(table, "dal", " extends " + genericFiles[0] + getGeneticType(table));
-
-            // +
-            // " implements RowMapper<"+getPojoClassName(tableName)+">, IBaseListService");
-
-            // do the retrieve,insert and update functions
-            // We have pair of updates and retrieve, depending
-            // upon whether keys and/or indexes are present on
-            // the database table.
-            //
-            // If no keys/indexes are present, then you'll just have to
-            // write your own retrieve and update functions.
-            //
-            writeDALConstructor(tableName);
-
-            writeSql(colData, keyData);
-
-            writeObjs(tableName, keyData, colData);
-
-            writeGetTableName(tableName, "getTableName", false);
-            writeGetKeyName(getFirstKeyName(keyData));
-            writeMapRow(tableName, colData);
-
-
-            writeGetSetId(tableName, keyData, colData);
-            writeWraper(keyData, colData);
-
-            if (isNotEmpty(keyData)) {
-
-                /* optimistic lock update ! */
-                if (containsVersion(colData)) {
-                    boolean withVersion = true;
-                    writeUpdate(tableName, keyData, "updateByKeyAndVersion", false, withVersion, colData);
-                    writeUpdate(tableName, keyData, "updateByKeyAndVersion", true, withVersion, colData);
-                }
-                if (keyData.size() > 1) {
-                    writeDelete(tableName, keyData, "deleteByKey", false, colData);
-                    writeDelete(tableName, keyData, "deleteByKey", true, colData);
-                }
-            } else {
-                writeDummyUpdate(tableName, "updateByKey");
-                writeDummyDelete(tableName, keyData, "deleteByKey", colData);
-            }
-
-            sw.split();
-            trace("after keys:" + sw.getSplitTime());
-
-            //foreign key
-            List<ForeignKeyDefinition> foreignKeyData = getTableImportedKeys(tableName);
-            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
-                writeImportedMethods(tableName, fkEnum, colData);
-            }
-
-            foreignKeyData = getTableExportedKeys(tableName);
-            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
-                writeExportedMethods(fkEnum, getColumnData(setInfo.getTableInfos().get(fkEnum.primaryKeyTableName)).getFields());
-            }
-
-
-            sw.split();
-            trace("foreignKeys :" + sw.getSplitTime());
-
-            if (config.indexes) {
-                List<String> indexData = getTableIndexes(tableName); // updates the indexData
-                // variable
-                if (isNotEmpty(indexData)) {
-                    writeSelect(tableName, indexData, "selectByIndex", colData);
-                    writeSelectAll(tableName, indexData, false, "selectAllLikeIndex", true, colData);
-
-                    writeUpdate(tableName, indexData, "updateByIndex", false, false, colData);
-                    writeUpdate(tableName, indexData, "updateByIndex", true, false, colData);
-
-                    writeDelete(tableName, indexData, "deleteByIndex", false, colData);
-                    writeDelete(tableName, indexData, "deleteByIndex", true, colData);
-                    writeCount(indexData, false, "countByIndex", colData);
-                    writeCount(indexData, true, "countLikeIndex", colData);
-
-                }
-            }
-
-            writeInsertDummy(tableName, keyData, "insertDummy", colData);
-            out("}");
-
-            currentOutput.close();
-
-        } catch (SQLException | IOException | GenException e) {
-            e.printStackTrace(console);
-        }
-        sw.split();
-        trace("after close:" + sw.getSplitTime());
     }
 
     private boolean containsVersion(List<ColumnData> cols) {
@@ -939,20 +867,7 @@ public class TableGen implements DiffHandler {
 
     }
 
-    private boolean isNotEmpty(Collection<?> col) {
-        return !CollectionUtils.isEmpty(col);
-    }
 
-    private String getFirstKeyType(List<String> keyData2, List<ColumnData> columnData) throws GenException {
-        return (isNotEmpty(keyData2)) ? getColType(keyData2.get(0), columnData) : "Object";
-    }
-
-    private String getFirstKeyName(List<String> keyData2) {
-        if (isNotEmpty(keyData2)) {
-            return keyData2.get(0);
-        }
-        return null;
-    }
 
     private void writeGetSetId(String tableName, List<String> keyData, List<ColumnData> columnData) throws IOException, GenException {
         String type = getFirstKeyType(keyData, columnData);
@@ -994,13 +909,120 @@ public class TableGen implements DiffHandler {
 
     }
 
-    private void writeDummyDelete(String tableName, List<String> keyData2, String methodName, List<ColumnData> columnData) throws IOException, GenException {
-        out("");
-        out("public boolean " + methodName + "(" + this.getFirstKeyType(keyData2, columnData) + " key) throws SQLException {");
-        out("    throw new SQLException(\"This operation is not supported, because talbe " + tableName
-                + " not have a unique key!\");");
-        out("}");
+    /**
+     * 生成单个dal
+     *
+     * @param table database table
+     */
+    private void generateDAL(TableInfo table) {
 
+        StopWatch sw = new StopWatch();
+        sw.start();
+        try {
+
+            String tableName = table.getName();
+            info("Generating DALs : " + tableName);
+            String baseDir = config.getBaseSrcDir();
+            String fileName = baseDir + File.separator + "dal" + File.separator + getPojoClassName(tableName)
+                    + "List.java";
+            currentOutput = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING), 10240);
+
+            List<ColumnData> colData = table.getFields();
+
+            // updates the keyData variable
+            List<String> keyData = setInfo.getTableKeys(tableName);
+
+            writeHeader(table, "dal", " extends " + genericFiles[0] + getGeneticType(table));
+
+            // +
+            // " implements RowMapper<"+getPojoClassName(tableName)+">, IBaseListService");
+
+            // do the retrieve,insert and update functions
+            // We have pair of updates and retrieve, depending
+            // upon whether keys and/or indexes are present on
+            // the database table.
+            //
+            // If no keys/indexes are present, then you'll just have to
+            // write your own retrieve and update functions.
+            //
+            writeDALConstructor(tableName);
+
+            writeSql(colData, keyData);
+
+            writeObjs(tableName, keyData, colData);
+
+            writeGetTableName(tableName, "getTableName", false);
+            writeGetKeyName(getFirstKeyName(keyData));
+            writeMapRow(tableName, colData);
+
+
+            writeGetSetId(tableName, keyData, colData);
+            writeGetNextKey(keyData, colData);
+
+            if (isNotEmpty(keyData)) {
+
+                /* optimistic lock update ! */
+                if (containsVersion(colData)) {
+                    boolean withVersion = true;
+                    writeUpdate(tableName, keyData, "updateByKeyAndVersion", false, withVersion, colData);
+                    writeUpdate(tableName, keyData, "updateByKeyAndVersion", true, withVersion, colData);
+                }
+                if (keyData.size() > 1) {
+                    writeDelete(tableName, keyData, "deleteByKey", false, colData);
+                    writeDelete(tableName, keyData, "deleteByKey", true, colData);
+                }
+            } else {
+                writeDummyUpdate(tableName, "updateByKey");
+                writeDummyDelete(tableName, keyData, "deleteByKey", colData);
+            }
+
+            sw.split();
+            trace("after keys:" + sw.getSplitTime());
+
+            //foreign key
+            List<ForeignKeyDefinition> foreignKeyData = getTableImportedKeys(tableName);
+            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
+                writeImportedMethods(tableName, fkEnum, colData);
+            }
+
+            foreignKeyData = getTableExportedKeys(tableName);
+            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
+                writeExportedMethods(fkEnum, setInfo.getTableInfos().get(fkEnum.primaryKeyTableName).getFields());
+            }
+
+
+            sw.split();
+            trace("foreignKeys :" + sw.getSplitTime());
+
+            if (config.indexes) {
+                List<String> indexData = getTableIndexes(tableName); // updates the indexData
+                // variable
+                if (isNotEmpty(indexData)) {
+                    writeSelect(tableName, indexData, "selectByIndex", colData);
+                    writeSelectAll(tableName, indexData, false, "selectAllLikeIndex", true, colData);
+
+                    writeUpdate(tableName, indexData, "updateByIndex", false, false, colData);
+                    writeUpdate(tableName, indexData, "updateByIndex", true, false, colData);
+
+                    writeDelete(tableName, indexData, "deleteByIndex", false, colData);
+                    writeDelete(tableName, indexData, "deleteByIndex", true, colData);
+                    writeCount(indexData, false, "countByIndex", colData);
+                    writeCount(indexData, true, "countLikeIndex", colData);
+
+                }
+            }
+
+            writeInsertDummy(tableName, keyData, "insertDummy", colData);
+            out("}");
+
+            currentOutput.close();
+
+        } catch (SQLException | IOException | GenException e) {
+            e.printStackTrace(console);
+        }
+        sw.split();
+        trace("after close:" + sw.getSplitTime());
     }
 
     String getPojoClassName(String tableName) {
@@ -1025,6 +1047,24 @@ public class TableGen implements DiffHandler {
         return tableName;
     }
 
+    private void writeDummyDelete(String tableName, List<String> keyData2, String methodName, List<ColumnData> columnData) throws IOException, GenException {
+        out("");
+        out("public boolean " + methodName + "(" + getFirstKeyType(keyData2, columnData) + " key) throws SQLException {");
+        out("    throw new SQLException(\"This operation is not supported, because talbe " + tableName
+                + " not have a unique key!\");");
+        out("}");
+
+    }
+
+    /**
+     * Generates the plane java model for each table.
+     */
+    public void generateBusinesses() {
+        for (TableInfo table : setInfo.getTableInfos().values()) {
+            generateBusiness(table);
+        }
+    }
+
     public void generateBusiness(TableInfo table) {
         String tableName = table.getName();
         info("Generating business : " + tableName);
@@ -1039,7 +1079,6 @@ public class TableGen implements DiffHandler {
                 currentOutput = new BufferedWriter(
                         new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
-                getColumnData(table);
                 writeHeader(table, BUSINESS, " extends " + getPojoClassName(tableName) + "List");
                 out("    /**\n" +
                         "     * @param ds datasource for injecting\n" +
@@ -1050,7 +1089,7 @@ public class TableGen implements DiffHandler {
 
                 out("}");
                 currentOutput.close();
-            } catch (SQLException | IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace(console);
                 LOG.warn(e);
             }
@@ -1061,13 +1100,16 @@ public class TableGen implements DiffHandler {
 
     }
 
-    /**
-     * Generates the plane java model for each table.
-     */
-    public void generateBusinesses() {
-        for (TableInfo table : setInfo.getTableInfos().values()) {
-            generateBusiness(table);
-        }
+    private String formFieldsString(List<ColumnData> columnData) {
+        return
+                columnData.stream()
+                        .map(ColumnData::getName)
+                        .map(it -> "\"" + it + "\"")
+                        .reduce((a, b) -> a + "," + b)
+                        .get()
+                        .toLowerCase()
+                ;
+
     }
 
     /**
@@ -1087,8 +1129,8 @@ public class TableGen implements DiffHandler {
                     currentOutput = new BufferedWriter(
                             new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
 
-                    List<ColumnData> colData = getColumnData(table).getFields();
-                    List<String> keyData = getTableKeys(tableName);
+                    List<ColumnData> colData = table.getFields();
+                    List<String> keyData = setInfo.getTableKeys(tableName);
                     writeHeader(table, "web", " extends AbstractWebUI" + getGeneticType(table));
                     out("");
                     out("");
@@ -1151,25 +1193,6 @@ public class TableGen implements DiffHandler {
         } catch (GenException e) {
             e.printStackTrace();
         }
-    }
-
-    private String formFieldsString(List<ColumnData> columnData) {
-        return
-                columnData.stream()
-                        .map(ColumnData::getName)
-                        .map(it -> "\"" + it + "\"")
-                        .reduce((a, b) -> a + "," + b)
-                        .get()
-                        .toLowerCase()
-                ;
-
-    }
-
-    private String getGeneticType(TableInfo table) throws GenException, SQLException {
-        String tableName = table.getName();
-        List<String> keyData = getTableKeys(tableName);
-        List<ColumnData> columnData = getColumnData(table).getFields();
-        return "<" + getPojoClassName(tableName) + "," + getFirstKeyType(keyData, columnData) + ">";
     }
 
     void writeBaseHeader() throws IOException {
@@ -1432,15 +1455,11 @@ public class TableGen implements DiffHandler {
         out("");
     }
 
-
-    private String getOneId(List<String> keyData2) {
-        if (isNotEmpty(keyData2)) {
-            String key = this.getFirstKeyName(keyData2);
-            if (key != null) {
-                return " info.get" + firstUp(key) + "()";
-            }
-        }
-        return "0L";
+    private String getGeneticType(TableInfo table) throws GenException, SQLException {
+        String tableName = table.getName();
+        List<String> keyData = setInfo.getTableKeys(tableName);
+        List<ColumnData> columnData = table.getFields();
+        return "<" + getPojoClassName(tableName) + "," + getFirstKeyType(keyData, columnData) + ">";
     }
 
 
@@ -1701,34 +1720,14 @@ public class TableGen implements DiffHandler {
 
     }
 
-    /**
-     * since c-dbtools 0.7.1, only generate getNextKey for Timestamp and String/UUID
-     * @param keyData db key info
-     * @throws IOException io error
-     */
-    void writeWraper(List<String> keyData, List<ColumnData> columnData) throws IOException, GenException {
-
-        String type = this.getFirstKeyType(keyData, columnData);
-
-        if ("Timestamp".equals(type) || "String".equals(type)) {
-            out("public " + type + " getNextKey(){\n");
-            if (keyData != null && keyData.size() == 1) {
-                if ("Timestamp".equals(type)) {
-                    out("\treturn new Timestamp(new java.util.Date().getTime());");
-                } else {
-                    out("\treturn java.util.UUID.randomUUID().toString();");
-                }
-
-            } else if (keyData != null && keyData.size() > 1) {
-                out("\tthrow new IllegalStateException(\"联合主键时，无法生成自增长主键\");");
-            } else {//没有主键
-                out("\treturn new java.util.Date().getTime();");
+    private String getOneId(List<String> keyData2) {
+        if (isNotEmpty(keyData2)) {
+            String key = getFirstKeyName(keyData2);
+            if (key != null) {
+                return " info.get" + firstUp(key) + "()";
             }
-            out("}\n");
-            out("\n");
         }
-
-
+        return "0L";
     }
 
     /**
@@ -1789,40 +1788,34 @@ public class TableGen implements DiffHandler {
         out("");
     }
 
-    public String createPreparedWhereClause(List<String> params, boolean withLike, List<ColumnData> columnData) throws GenException {
-        StringBuilder where = new StringBuilder();
+    /**
+     * since c-dbtools 0.7.1, only generate getNextKey for Timestamp and String/UUID
+     * @param keyData db key info
+     * @throws IOException io error
+     */
+    void writeGetNextKey(List<String> keyData, List<ColumnData> columnData) throws IOException, GenException {
 
-        // if we have keys passed in then we add a "where" to the count
-        // e.g. se
-        //
-        if (params != null) {
-            // work out the "where" part of the update first..
-            //
-            where.append("+\" where ");
-            String key;
-            String keyType;
-            for (Iterator<String> e = params.iterator(); e.hasNext(); ) {
-                key = e.next();
-                keyType = getColType(key, columnData);
+        String type = getFirstKeyType(keyData, columnData);
 
-                // only allow likes on String types...
-                // Hmmm should we allow more than this???
-                //
-                if ((withLike) && ("String".equals(keyType))) {
-                    where.append(key).append(" like ?");
+        if ("Timestamp".equals(type) || "String".equals(type)) {
+            out("public " + type + " getNextKey(){\n");
+            if (keyData != null && keyData.size() == 1) {
+                if ("Timestamp".equals(type)) {
+                    out("\treturn new Timestamp(new java.util.Date().getTime());");
                 } else {
-                    where.append(key).append("=?");
+                    out("\treturn java.util.UUID.randomUUID().toString();");
                 }
 
-                if (e.hasNext()) {
-                    where.append(" and ");
-                }
+            } else if (keyData != null && keyData.size() > 1) {
+                out("\tthrow new IllegalStateException(\"联合主键时，无法生成自增长主键\");");
+            } else {//没有主键
+                out("\treturn new java.util.Date().getTime();");
             }
-
-            where.append("\"");
+            out("}\n");
+            out("\n");
         }
 
-        return where.toString();
+
     }
 
     public String createPreparedObjects(List<String> params, boolean withLike, List<ColumnData> columnData) throws GenException {
@@ -1897,29 +1890,7 @@ public class TableGen implements DiffHandler {
         return paramString.toString();
     }
 
-    /**
-     * Gets the column data for a specified table.
-     */
-    public @NotNull TableInfo getColumnData(TableInfo table) throws SQLException {
-        List<ColumnData> colData = table.getFields();
-        if (colData == null) {
-            throw new IllegalStateException("Column data not init!");
-        }
-        return table;
-    }
 
-    /**
-     * Selects the primary keys for a particular table.
-     *
-     * @throws SQLException db error
-     */
-    public @NotNull List<String> getTableKeys(String tableName) throws SQLException {
-
-        if (setInfo.getKeyCache().containsKey(tableName)) {
-            return setInfo.getKeyCache().get(tableName);
-        }
-        return Collections.emptyList();
-    }
 
     /**
      * Selects the Exported Keys defined for a particular table.
@@ -1987,27 +1958,6 @@ public class TableGen implements DiffHandler {
             return setInfo.getIndexCache().get(tableName);
         }
         return Collections.emptyList();
-    }
-
-    /**
-     * Selects the type of a particular column name. Cannot use Hashtables to
-     * store columns as it screws up the ordering, so we have to do a crap
-     * search. (and yes I know it could be better - it's good enuf).
-     */
-    public String getColType(String key, List<ColumnData> columnData) throws GenException {
-        String type = "unknown";
-        for (ColumnData tmp : columnData) {
-            if (tmp.getName().equalsIgnoreCase(key)) {
-                type = tmp.getJavaType();
-                break;
-            }
-        }
-        if ("unknown".equals(type)) {
-            LOG.error("unknown type of key:" + key);
-            throw new GenException("error unknown type of key:" + key);
-        }
-
-        return type;
     }
 
     /**
