@@ -13,6 +13,10 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.context.FieldValueResolver;
+import com.github.jknack.handlebars.context.JavaBeanValueResolver;
+import com.github.jknack.handlebars.context.MapValueResolver;
+import com.github.jknack.handlebars.context.MethodValueResolver;
 import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
@@ -113,7 +117,13 @@ public abstract class BaseGenerator {
         Template template = handlebars.compile(File.separator + getTemplateFileName());
 
         Map<String, Object> v = getContextMap(tableName);
-        return template.apply(Context.newContext(v));
+        //return template.apply(Context.newBuilder(v).resolver(MethodValueResolver.INSTANCE).build());
+        return template.apply(Context.newBuilder(v).resolver(
+                MethodValueResolver.INSTANCE,
+                JavaBeanValueResolver.INSTANCE,
+                FieldValueResolver.INSTANCE,
+                MapValueResolver.INSTANCE
+                ).build());
     }
 
     protected Map<String, Object> getContextMap(String tableName) {

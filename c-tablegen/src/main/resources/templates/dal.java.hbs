@@ -10,7 +10,6 @@ import com.bixuebihui.test.pojo.*;
 import com.bixuebihui.jdbc.RowMapperResultReader;
 import com.bixuebihui.test.BaseList;
 
-
 public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}>
 {
     {{! writeDALConstructor(tableName); }}
@@ -24,31 +23,29 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
     {{! writeSql(colData, keyData); }}
     public static final class F{
-        {{#each fields}}public static final String {{constantName name}} = "{{name}}";{{/each}}
-        public static String[] getAllFields() { return new String[] {
-            {{#each fields}}{{constantName name}}{{#unless @last}}, {{/unless}}{{/each}}
-            };
+        {{#each fields ~}}
+        public static final String {{constantName this.name}} = "{{this.name}}";
+        {{/each}}
+        public static String[] getAllFields() {
+            return new String[] { {{#each fields}}{{constantName this.name}}{{#unless @last}}, {{/unless}}{{/each}} };
         }
     }
 
     @Override
     protected String getDeleteSql(){
-        return "delete from {{tableName}} where {{#each keys}} {{this}}=? {{#unless @last}} and {{/unless}}{{/each}} =? ";
+        return "delete from {{tableName}} where {{#each keys}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}} ";
     }
 
    @Override
    protected String getInsertSql(){
-       return "insert into {{tableName}} ( {{#each fields }}
-            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement))}}
-            {{~ name ~}}
+       return "insert into {{tableName}} ( {{#each fields ~}}
+            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}}
+            {{ name ~}}
             {{#unless @last}},{{/unless ~}}
-            {{/if}}
-            {{/each ~}} )
-            values ( {{#each fields }}
-            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement))}}
-                {{~ ? ~}}
-                {{#unless @last}},{{/unless ~}}
-            {{/if}}
+            {{/if ~}}
+            {{/each ~}} ) values ( {{#each fields ~}}
+            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}} ? {{#unless @last}},{{/unless ~}}
+            {{/if ~}}
             {{/each ~}}
             )";
    }
@@ -57,11 +54,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     @Override
     protected String getUpdateSql(){
         return "update {{tableName}} set {{#each fields ~}}
-            {{#eq config.versionColName name}}
-                {{name}}= {{name}} +1
-            {{else}}
-                {{name}}=?
-            {{/eq}}
+            {{#eq config.versionColName name ~}} {{name}}= {{name}} +1 {{else}} {{name}}=? {{/eq ~}}
             {{~#unless @last}},{{/unless~}}
             {{~/each}} {{whereNotLike}}";
     }
@@ -84,7 +77,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     @Override
     public String getTableName()
     {
-       return  "{{tableName}}";
+       return  "{{tableInfo.name}}";
     }
 
     {{!    writeGetKeyName(getFirstKeyName(keyData)); }}
@@ -97,8 +90,8 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         return  F.{{constantName firstKeyName}};
     }
 
-    {{!    writeMapRow(tableName, colData); }}
-    {{mapRow}}
+{{!    writeMapRow(tableName, colData); }}
+{{{mapRow}}}
 
 {{! writeGetSetId(tableName, keyData, colData);}}
     @Override
@@ -124,28 +117,23 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         //no key to set, don't this method!
     {{/if}}
     }
-
 {{! writeGetNextKey(keyData, colData); }}
-
-    public {{firstKeyType}} getNextKey(){
-    {{#not hasKey}}
-        return new java.util.Date().getTime();
-    {{else}}
+    {{#if hasKey}}
       {{#eq firstKeyType "Timestamp"}}
+          public {{firstKeyType}} getNextKey(){
         return new Timestamp(new java.util.Date().getTime());
+          }
       {{/eq}}
       {{#eq firstKeyType "String"}}
-        return java.util.UUID.randomUUID().toString();
+          public {{firstKeyType}} getNextKey(){
+          return java.util.UUID.randomUUID().toString();
+          }
       {{/eq}}
       {{#gt keys.size 1}}
-        throw new IllegalStateException("no autokey for union keys");
+          public {{firstKeyType}} getNextKey(){
+          throw new IllegalStateException("no autokey for union keys");
+          }
       {{/gt}}
-    {{/not}}
-    }
-
-{{#if hasKey}}
-
-    /* optimistic lock update ! */
 
     {{#if hasVersionCol}}
     {{! writeUpdate(tableName, keyData, "updateByKeyAndVersion", false, withVersion, colData); }}
@@ -182,29 +170,36 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
     {{! writeDelete(tableName, keyData, "deleteByKey", false, colData);}}
     /**
-     * Deletes from the database for table {{tableName}} with connection
+     * Deletes from the database for table {{tableInfo.name}} with connection
      */
-    public boolean deleteByKey( {{#each keys}} {{colType tableName name}} {{name}}, {{/each}}  Connection cn ) throws SQLException
+    public boolean deleteByKey( {{#each keys}} {{colType tableInfo.name this}} {{this}}, {{/each}}  Connection cn ) throws SQLException
     {
-        return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{name}} {{#unless @last}}, {{/unless}} {{/each}} }, cn);
+        return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} }, cn);
     }
 
     /**
     * Deletes from the database for table {{tableName}}
     */
-    public boolean deleteByKey( {{#each keys}} {{colType tableName name}} {{name}} {{#unless @last}}, {{/unless}}{{/each}}) throws SQLException
+    public boolean deleteByKey( {{#each keys}} {{colType tableInfo.name this}} {{this}} {{#unless @last}}, {{/unless}}{{/each}}) throws SQLException
     {
-        return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{name}} {{#unless @last}}, {{/unless}} {{/each}} });
+        return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} });
     }
 
 {{else}}
+    {{! writeDummyUpdate(tableName, "updateByKey"); }}
+    public boolean updateByKey({{pojoClassName}} info) throws SQLException {
+        throw new SQLException("This operation is not supported, because table {{tableName}} not have a unique key!");
+    }
 
-    writeDummyUpdate(tableName, "updateByKey");
-    writeDummyDelete(tableName, keyData, "deleteByKey", colData);
+    {{! writeDummyDelete(tableName, keyData, "deleteByKey", colData); }}
+    public boolean deleteByKey({{firstKeyType}}  key) throws SQLException {
+        throw new SQLException("This operation is not supported, because table {{ tableName }} not have a unique key!");
+    }
 
 {{/if}}
 
-//foreign key
+{{! foreign key }}
+{{!
         List<ForeignKeyDefinition> foreignKeyData = getTableImportedKeys(tableName);
             for (ForeignKeyDefinition fkEnum : foreignKeyData) {
             writeImportedMethods(tableName, fkEnum, colData);
@@ -235,7 +230,5 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
                 }
 
                 writeInsertDummy(tableName, keyData, "insertDummy", colData);
-                out("}");
-
-
-                }
+}}
+}

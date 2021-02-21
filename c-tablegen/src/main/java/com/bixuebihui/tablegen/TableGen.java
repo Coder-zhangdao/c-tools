@@ -896,7 +896,7 @@ public class TableGen implements DiffHandler {
     private void writeDummyUpdate(String tableName, String methodName) throws IOException {
         out("");
         out("public boolean " + methodName + "(" + this.getPojoClassName(tableName) + " info) throws SQLException {");
-        out("    throw new SQLException(\"This operation is not supported, because talbe " + tableName
+        out("    throw new SQLException(\"This operation is not supported, because table " + tableName
                 + " not have a unique key!\");");
         out("}");
 
@@ -1041,7 +1041,7 @@ public class TableGen implements DiffHandler {
     private void writeDummyDelete(String tableName, List<String> keyData2, String methodName, List<ColumnData> columnData) throws IOException, GenException {
         out("");
         out("public boolean " + methodName + "(" + getFirstKeyType(keyData2, columnData) + " key) throws SQLException {");
-        out("    throw new SQLException(\"This operation is not supported, because talbe " + tableName
+        out("    throw new SQLException(\"This operation is not supported, because table " + tableName
                 + " not have a unique key!\");");
         out("}");
 

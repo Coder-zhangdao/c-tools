@@ -75,6 +75,9 @@ public class TableSetInfo {
     }
 
     public List<ColumnData> getTableCols(String tableName){
+        if(tableName==null){
+            return Collections.emptyList();
+        }
        return this.getTableInfos().get(tableName).getFields();
     }
 
@@ -507,7 +510,6 @@ public class TableSetInfo {
      * Selects the primary keys for a particular table.
      */
     public @NotNull List<String> getTableKeys(String tableName){
-
         if (getKeyCache().containsKey(tableName)) {
             return getKeyCache().get(tableName);
         }

@@ -44,6 +44,7 @@ public class NameUtils {
 	}
 
 	public static String columnNameToConstantName(String columnName){
+		if(columnName==null) return "";
 		if (JAVA_KEYWORD.contains(columnName) || (PROJECT_FIELD_KEYWORD.contains(columnName))) {
 			columnName = KEYWORD_APPEND_CHAR + columnName;
 		}

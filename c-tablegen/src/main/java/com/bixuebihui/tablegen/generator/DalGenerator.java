@@ -189,10 +189,10 @@ public class DalGenerator extends BaseGenerator {
                 .append(INDENT).append("@Override\n")
                 .append(INDENT).append("public " + pojoClassName + " mapRow (ResultSet r, int index) throws SQLException\n")
                 .append(INDENT).append("{\n")
-                .append(INDENT + pojoClassName + " res = new " + pojoClassName + "();\n");
+                .append(INDENT).append(INDENT).append( pojoClassName + " res = new " + pojoClassName + "();\n");
 
         for (String e : gets) {
-            sb.append(INDENT).append(INDENT).append("res.set" + e);
+            sb.append(INDENT).append(INDENT).append("res.set" + e).append("\n");
         }
 
         sb.append(INDENT).append(INDENT).append("return res;\n");
@@ -233,7 +233,7 @@ public class DalGenerator extends BaseGenerator {
     protected void additionalSetting(Handlebars handlebars) {
         super.additionalSetting(handlebars);
         // usage: {{type tableName colName}}
-        handlebars.registerHelper("type", (tableName, options) -> getColType(options.param(0), this.setInfo.getTableCols((String)tableName)));
+        handlebars.registerHelper("colType", (tableName, options) -> getColType(options.param(0), this.setInfo.getTableCols((String)tableName)));
         // usage: {{where tableName}}
         handlebars.registerHelper("where", (tableName, options) ->
         {
