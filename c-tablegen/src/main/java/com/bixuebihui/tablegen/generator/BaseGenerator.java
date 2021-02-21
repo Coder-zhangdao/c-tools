@@ -16,6 +16,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -119,6 +120,11 @@ public abstract class BaseGenerator {
         Map<String, Object> v = new HashMap<>(10);
         v.put("tableInfo", setInfo.getTableInfos().get(tableName));
         v.put("fields", setInfo.getTableCols(tableName));
+        v.put("keys", setInfo.getTableKeys(tableName));
+        v.put("pojoClassName", this.getPojoClassName(tableName));
+        v.put("className", this.getClassName(tableName));
+        v.put("interface",  this.getInterface(tableName));
+        v.put("extends", this.getExtendsClasses(tableName));
         v.put("setInfo", setInfo);
         v.put("config", config);
         return v;
@@ -131,11 +137,10 @@ public abstract class BaseGenerator {
 
         Handlebars handlebars = new Handlebars(loader);
         handlebars.registerHelper("firstUp", (name, options) -> NameUtils.firstUp((String) name));
+        handlebars.registerHelper("constantName", (name, options) -> NameUtils.columnNameToConstantName((String) name));
         handlebars.registerHelper("firstLow", (name, options) -> NameUtils.firstLow((String) name));
-        handlebars.registerHelper("className", (tableName, options) -> this.getClassName((String) tableName));
-        handlebars.registerHelper("interface", (tableName, options) -> this.getInterface((String) tableName));
-        handlebars.registerHelper("extends", (tableName, options) -> this.getExtendsClasses((String) tableName));
-        handlebars.registerHelper("typeDefaultValue", (tableName, options) -> TableGen.defaultTypeValue().get(tableName));
+        handlebars.registerHelper("join", (items, options) -> StringUtils.join((Object[]) items, options.param(0)));
+        handlebars.registerHelper("typeDefaultValue", (typeName, options) -> TableGen.defaultTypeValue().get(typeName));
         handlebars.registerHelpers(ConditionalHelpers.class);
 
         //copied from AssignHelper

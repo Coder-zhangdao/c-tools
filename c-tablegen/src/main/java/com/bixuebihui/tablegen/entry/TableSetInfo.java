@@ -428,8 +428,8 @@ public class TableSetInfo {
             showTableResultSet = showTableStatement.executeQuery("show create table " + tableName);
             showTableResultSet.next();
             String createTableSql = showTableResultSet.getString(2);
-            fillFieldComment(tableName, tableInfo.getFields(), createTableSql);
-            String comment =  fillTableComment(createTableSql);
+            findFieldComment(tableName, tableInfo.getFields(), createTableSql);
+            String comment =  findTableComment(createTableSql);
             tableInfo.setComment(comment);
         } catch (Exception e) {
             LOG.warn("fail to execute: show create table "+tableName);
@@ -449,7 +449,7 @@ public class TableSetInfo {
     }
 
 
-    private static  void fillFieldComment(String tableName, List<ColumnData> fields, String tableSql) {
+    private static  void findFieldComment(String tableName, List<ColumnData> fields, String tableSql) {
         String fieldSql = tableSql.substring(tableSql.indexOf("(") + 1, tableSql.lastIndexOf(")"));
         String[] fieldDescs = org.apache.commons.lang3.StringUtils.split(fieldSql, "\n");
         Map<String, ColumnData> commentMap = new HashMap<>();
@@ -481,7 +481,7 @@ public class TableSetInfo {
     }
 
 
-    private static String fillTableComment(String tableSql) {
+    private static String findTableComment(String tableSql) {
         if(!tableSql.contains("COMMENT=")){
             return "";
         }
@@ -505,10 +505,8 @@ public class TableSetInfo {
 
     /**
      * Selects the primary keys for a particular table.
-     *
-     * @throws SQLException db error
      */
-    public @NotNull List<String> getTableKeys(String tableName) throws SQLException {
+    public @NotNull List<String> getTableKeys(String tableName){
 
         if (getKeyCache().containsKey(tableName)) {
             return getKeyCache().get(tableName);

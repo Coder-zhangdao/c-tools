@@ -38,6 +38,7 @@ import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableInfo;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
+import com.bixuebihui.tablegen.generator.DalGenerator;
 import com.bixuebihui.tablegen.generator.PojoGenerator;
 import com.bixuebihui.util.other.CMyFile;
 import org.apache.commons.dbutils.DbUtils;
@@ -466,7 +467,7 @@ public class TableGen implements DiffHandler {
      * @return string starts with 'where' or empty string
      * @throws GenException
      */
-    public static String createPreparedWhereClause(List<String> params, boolean withLike, List<ColumnData> columnData) throws GenException {
+    public static String createPreparedWhereClause(List<String> params, boolean withLike, List<ColumnData> columnData) {
         StringBuilder where = new StringBuilder();
 
         // if we have keys passed in then we add a "where" to the count
@@ -780,14 +781,6 @@ public class TableGen implements DiffHandler {
         }
     }
 
-    private boolean containsVersion(List<ColumnData> cols) {
-        for (ColumnData col : cols) {
-            if (col.getName().equalsIgnoreCase(config.versionColName)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Generates the Data Access Layer for each table.
@@ -861,9 +854,9 @@ public class TableGen implements DiffHandler {
     private void writeObjs(String tableName, List<String> params, List<ColumnData> columnData) throws IOException {
 
         out("@Override\nprotected Object[] getInsertObjs(" + this.getPojoClassName(tableName) + " info){\n    return new Object[]{"
-                + this.makeInsertObjects(config.use_autoincrement, columnData) + "};\n}\n");
+                + makeInsertObjects(config.use_autoincrement,  columnData, config.versionColName) + "};\n}\n");
         out("@Override\nprotected Object[] getUpdateObjs(" + this.getPojoClassName(tableName) + " info){\n    return new Object[]{"
-                + this.makeUpdateObjects(params, columnData) + "};\n}\n");
+                + makeUpdateObjects(params, columnData, config.use_autoincrement, config.versionColName) + "};\n}\n");
 
     }
 
@@ -954,8 +947,8 @@ public class TableGen implements DiffHandler {
 
             writeGetTableName(tableName, "getTableName", false);
             writeGetKeyName(getFirstKeyName(keyData));
-            writeMapRow(tableName, colData);
 
+            out(mapRow(tableName, colData, getPojoClassName(tableName)));
 
             writeGetSetId(tableName, keyData, colData);
             writeGetNextKey(keyData, colData);
@@ -963,15 +956,13 @@ public class TableGen implements DiffHandler {
             if (isNotEmpty(keyData)) {
 
                 /* optimistic lock update ! */
-                if (containsVersion(colData)) {
+                if (containsVersion(colData, config.versionColName)) {
                     boolean withVersion = true;
                     writeUpdate(tableName, keyData, "updateByKeyAndVersion", false, withVersion, colData);
                     writeUpdate(tableName, keyData, "updateByKeyAndVersion", true, withVersion, colData);
                 }
-                if (keyData.size() > 1) {
-                    writeDelete(tableName, keyData, "deleteByKey", false, colData);
-                    writeDelete(tableName, keyData, "deleteByKey", true, colData);
-                }
+                writeDelete(tableName, keyData, "deleteByKey", false, colData);
+                writeDelete(tableName, keyData, "deleteByKey", true, colData);
             } else {
                 writeDummyUpdate(tableName, "updateByKey");
                 writeDummyDelete(tableName, keyData, "deleteByKey", colData);
@@ -1497,79 +1488,7 @@ public class TableGen implements DiffHandler {
         out("");
     }
 
-    /**
-     * Writes out the mapRow method. The mapRow method interprets the returned
-     * result set from a Select and update the object with those values.
-     */
-    void writeMapRow(String tableName, List<ColumnData> columnData) throws IOException {
-        String col;
-        String colType;
-        List<String> gets = new ArrayList<>();
-        String get;
 
-        for (ColumnData cd : columnData) {
-            col = cd.getName();
-            colType = cd.getJavaType();
-
-            // work out which data type we are getting for each variable
-            String ucol = "F." + columnNameToConstantName(col);
-
-            if (colType.compareTo("String") == 0) {
-                get = "(r.getString(" + ucol + "));";
-            } else if (colType.compareTo("byte") == 0 || colType.compareTo("Byte") == 0) {
-                get = "(r.getByte(" + ucol + "));";
-            } else if (colType.compareTo("long") == 0 || colType.compareTo("Long") == 0) {
-                get = "(r.getLong(" + ucol + "));";
-            } else if (colType.compareTo("int") == 0 || colType.compareTo("Integer") == 0) {
-                get = "(r.getInt(" + ucol + "));";
-            } else if (colType.compareTo("short") == 0 || colType.compareTo("Short") == 0) {
-                get = "(r.getShort(" + ucol + "));";
-            } else if (colType.compareTo("float") == 0 || colType.compareTo("Float") == 0) {
-                get = "(r.getFloat(" + ucol + "));";
-            } else if (colType.compareTo("double") == 0 || colType.compareTo("Double") == 0) {
-                get = "(r.getDouble(" + ucol + "));";
-            } else if (colType.compareTo("Date") == 0) {
-                get = "(r.getDate(" + ucol + "));";
-            } else if (colType.compareTo("Timestamp") == 0) {
-                get = "(r.getTimestamp(" + ucol + "));";
-            } else if (colType.compareTo("Time") == 0) {
-                get = "(r.getTime(" + ucol + "));";
-            } else if (colType.compareTo("char") == 0 || colType.compareTo("Char") == 0) {
-                get = "(r.getString(" + ucol + ").charAt(0);";
-            } else if (colType.compareTo("byte[]") == 0) {
-                get = "(r.getBytes(" + ucol + "));";
-            } else if (colType.compareTo("Boolean") == 0) {
-                get = "(r.getBoolean(" + ucol + "));";
-            } else if (colType.compareTo("Byte[]") == 0) {
-                get = "(org.apache.commons.lang.ArrayUtils.toObject(r.getBytes(" + ucol + ")));";
-            } else if (colType.compareTo("com.bixuebihui.jdbc.ClobString") == 0) {
-                get = "(new com.bixuebihui.jdbc.ClobString(com.bixuebihui.jdbc.JDBCUtils.oracleClob2Str((Clob)r.getObject("
-                        + ucol + "))));";
-            } else {
-                get = "(r.getObject(" + ucol + "));";
-                LOG.error("Warning! Unknown type : " + colType + " in write mapRow");
-            }
-
-            get = firstUp(cd.getName()) + get;
-            gets.add(get);
-        }
-
-        out("/**");
-        out("  * Updates the object from a selected ResultSet.");
-        out("  */");
-        out("@Override");
-        out("public " + getPojoClassName(tableName) + " mapRow (ResultSet r, int index) throws SQLException");
-        out("{");
-        out(INDENT + getPojoClassName(tableName) + " res = new " + getPojoClassName(tableName) + "();");
-
-        for (String e : gets) {
-            out("      res.set" + e);
-        }
-
-        out("      return res;");
-        out("}");
-        out("");
-    }
 
     /**
      * Writes out the dummy insert (blank record) function.
@@ -1610,58 +1529,7 @@ public class TableGen implements DiffHandler {
         out("");
     }
 
-    private String makeInsertObjects(boolean useAutoincrement, List<ColumnData> columnData) {
-        return makeInsertObjects(useAutoincrement, false, columnData);
-    }
 
-    private String makeInsertObjects(boolean useAutoincrement, boolean skipVersionColumn, List<ColumnData> columnData) {
-        StringBuilder objs = new StringBuilder();
-        boolean useVersion = skipVersionColumn && containsVersion(columnData);
-        Iterator<ColumnData> iterator = columnData.iterator();
-        while (iterator.hasNext()) {
-            ColumnData cd = iterator.next();
-            if (useAutoincrement && cd.isAutoIncrement()
-                    || (useVersion && cd.getName().equalsIgnoreCase(config.versionColName))) {
-                continue;
-            }
-
-            objs.append("info.get").append(firstUp(cd.getName())).append("()");
-
-            if (iterator.hasNext()) {
-                objs.append(",");
-            }
-        }
-        if (objs.lastIndexOf(",") == objs.length() - 1) {
-            objs.deleteCharAt(objs.length() - 1);
-        }
-        return objs.toString();
-    }
-
-    private String makeUpdateObjects(List<String> params, List<ColumnData> columnData) {
-        return "" + makeInsertObjects(config.use_autoincrement, true, columnData) + "," +
-                createKeyObjects(params);
-    }
-
-    public String createKeyObjects(List<String> params) {
-        StringBuilder objs = new StringBuilder();
-        if (params != null) {
-            String key;
-            for (Iterator<String> e = params.iterator(); e.hasNext(); ) {
-                key = e.next();
-
-                objs.append("info.get").append(firstUp(key)).append("()");
-
-                if (e.hasNext()) {
-                    objs.append(" , ");
-                }
-            }
-
-        } else {
-            objs = null;
-        }
-
-        return objs == null ? null : objs.toString();
-    }
 
     /**
      * Writes out the count function. If "key" is not null then a search based
@@ -1688,7 +1556,7 @@ public class TableGen implements DiffHandler {
     void writeUpdate(String tableName, List<String> params, String methodName, boolean isWithConn,
                      boolean isWithVersion, List<ColumnData> columnData) throws IOException {
         // work out the "where" part of the update first..
-        String paramObjs = this.createKeyObjects(params)
+        String paramObjs = createKeyObjects(params)
                 + (isWithVersion ? ",info.get" + firstUp(config.versionColName) + "() " : "");
 
         out("/**");
@@ -1818,7 +1686,7 @@ public class TableGen implements DiffHandler {
 
     }
 
-    public String createPreparedObjects(List<String> params, boolean withLike, List<ColumnData> columnData) throws GenException {
+    public String createPreparedObjects(List<String> params, boolean withLike, List<ColumnData> columnData) {
         StringBuilder objs = new StringBuilder();
 
         // if we have keys passed in then we add a "where" to the count
@@ -1869,11 +1737,9 @@ public class TableGen implements DiffHandler {
             //
             for (Iterator<String> e = params.iterator(); e.hasNext(); ) {
                 key = e.next();
-                try {
-                    keyType = getColType(key, columnData);
-                } catch (GenException e1) {
-                    LOG.error("unsupported future when generate method " + methodName + " return type " + returnType, e1);
-                    throw e1;
+                keyType = getColType(key, columnData);
+                if (UNKNOWN_TYPE.equals(keyType)) {
+                    LOG.error("unsupported future when generate method " + methodName + " return type " + returnType);
                 }
                 paramString.append(keyType).append(" ").append(key.toLowerCase());
 
