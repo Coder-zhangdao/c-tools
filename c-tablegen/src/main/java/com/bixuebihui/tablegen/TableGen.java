@@ -948,7 +948,7 @@ public class TableGen implements DiffHandler {
             writeGetTableName(tableName, "getTableName", false);
             writeGetKeyName(getFirstKeyName(keyData));
 
-            out(mapRow(tableName, colData, getPojoClassName(tableName)));
+            out(mapRow(colData, getPojoClassName(tableName)));
 
             writeGetSetId(tableName, keyData, colData);
             writeGetNextKey(keyData, colData);
@@ -972,12 +972,12 @@ public class TableGen implements DiffHandler {
             trace("after keys:" + sw.getSplitTime());
 
             //foreign key
-            List<ForeignKeyDefinition> foreignKeyData = getTableImportedKeys(tableName);
+            List<ForeignKeyDefinition> foreignKeyData = setInfo.getTableImportedKeys(tableName);
             for (ForeignKeyDefinition fkEnum : foreignKeyData) {
                 writeImportedMethods(tableName, fkEnum, colData);
             }
 
-            foreignKeyData = getTableExportedKeys(tableName);
+            foreignKeyData = setInfo.getTableExportedKeys(tableName);
             for (ForeignKeyDefinition fkEnum : foreignKeyData) {
                 writeExportedMethods(fkEnum, setInfo.getTableInfos().get(fkEnum.primaryKeyTableName).getFields());
             }
@@ -987,7 +987,7 @@ public class TableGen implements DiffHandler {
             trace("foreignKeys :" + sw.getSplitTime());
 
             if (config.indexes) {
-                List<String> indexData = getTableIndexes(tableName); // updates the indexData
+                List<String> indexData = setInfo.getTableIndexes(tableName); // updates the indexData
                 // variable
                 if (isNotEmpty(indexData)) {
                     writeSelect(tableName, indexData, "selectByIndex", colData);
@@ -1380,7 +1380,7 @@ public class TableGen implements DiffHandler {
      * match the search pattern.
      */
     void writeSelectAll(String tableName, List<String> params, boolean customWhere, String methodName, boolean bLike, List<ColumnData> columnData)
-            throws IOException, GenException {
+            throws IOException{
         String query = "select * from \" + getTableName() + \" \"";
         String where = createPreparedWhereClause(params, bLike, columnData);
         String objs = createPreparedObjects(params, bLike, columnData);
@@ -1727,7 +1727,7 @@ public class TableGen implements DiffHandler {
     /**
      * Creates a the parameter block for a method.
      */
-    public String createMethodLine(String methodName, List<String> params, String returnType, List<ColumnData> columnData) throws GenException {
+    public String createMethodLine(String methodName, List<String> params, String returnType, List<ColumnData> columnData) {
         StringBuilder paramString = new StringBuilder("public " + returnType + " " + methodName + "(");
         String key;
         String keyType;
@@ -1756,29 +1756,6 @@ public class TableGen implements DiffHandler {
         return paramString.toString();
     }
 
-
-
-    /**
-     * Selects the Exported Keys defined for a particular table.
-     */
-    protected @NotNull List<ForeignKeyDefinition> getTableExportedKeys(String tableName) throws SQLException {
-        if (setInfo.getForeignKeyExCache().containsKey(tableName)) {
-            return setInfo.getForeignKeyExCache().get(tableName);
-        }
-        return Collections.emptyList();
-    }
-
-
-    /**
-     * Selects the Imported Keys defined for a particular table.
-     */
-    protected @NotNull List<ForeignKeyDefinition> getTableImportedKeys(String tableName) throws SQLException {
-
-        if (setInfo.getForeignKeyImCache().containsKey(tableName)) {
-            return setInfo.getForeignKeyImCache().get(tableName);
-        }
-        return Collections.emptyList();
-    }
 
     /**
      *
@@ -1816,15 +1793,6 @@ public class TableGen implements DiffHandler {
                 false, columnData);
     }
 
-    /**
-     * Selects the indexes for a particular table.
-     */
-    public List<String> getTableIndexes(String tableName) throws SQLException {
-        if (setInfo.getIndexCache().containsKey(tableName)) {
-            return setInfo.getIndexCache().get(tableName);
-        }
-        return Collections.emptyList();
-    }
 
     /**
      * Wrapper for text output. So we can change where the output goes easily!
@@ -1832,7 +1800,6 @@ public class TableGen implements DiffHandler {
     public void out(String text) throws IOException {
         currentOutput.write(text + "\n");
     }
-
 
     @Override
     public void processTableDiff(String tableName) throws IOException {

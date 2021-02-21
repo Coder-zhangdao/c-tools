@@ -1,4 +1,4 @@
-package {{config.packageName}}.{{tableInfo.name}}.dal;
+package {{config.packageName}}.{{tableName}}.dal;
 
 {{> [header-comment.java]}}
 
@@ -39,13 +39,9 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
    @Override
    protected String getInsertSql(){
        return "insert into {{tableName}} ( {{#each fields ~}}
-            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}}
-            {{ name ~}}
-            {{#unless @last}},{{/unless ~}}
-            {{/if ~}}
+            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}} {{ name }} {{#unless @last}},{{/unless ~}} {{/if ~}}
             {{/each ~}} ) values ( {{#each fields ~}}
-            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}} ? {{#unless @last}},{{/unless ~}}
-            {{/if ~}}
+            {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) }} ? {{#unless @last}},{{/unless}} {{/if ~}}
             {{/each ~}}
             )";
    }
@@ -77,7 +73,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     @Override
     public String getTableName()
     {
-       return  "{{tableInfo.name}}";
+       return  "{{tableName}}";
     }
 
     {{!    writeGetKeyName(getFirstKeyName(keyData)); }}
@@ -170,9 +166,9 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
     {{! writeDelete(tableName, keyData, "deleteByKey", false, colData);}}
     /**
-     * Deletes from the database for table {{tableInfo.name}} with connection
+     * Deletes from the database for table {{tableName}} with connection
      */
-    public boolean deleteByKey( {{#each keys}} {{colType tableInfo.name this}} {{this}}, {{/each}}  Connection cn ) throws SQLException
+    public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}}, {{/each}}  Connection cn ) throws SQLException
     {
         return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} }, cn);
     }
@@ -180,7 +176,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     /**
     * Deletes from the database for table {{tableName}}
     */
-    public boolean deleteByKey( {{#each keys}} {{colType tableInfo.name this}} {{this}} {{#unless @last}}, {{/unless}}{{/each}}) throws SQLException
+    public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}} {{#unless @last}}, {{/unless}}{{/each}}) throws SQLException
     {
         return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} });
     }
@@ -198,19 +194,47 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
 {{/if}}
 
+{{#each foreignKeyData}}
+    /**
+     * Imported {{tableName}}  PK: {{this.pKTableName}}  FK:{{this.fKTableName}}
+     */"
+    public {{getPojoClassName this.pkTableName}} get{{getPojoClassName this.pkTableName}}By{{this.fKColumnName}}(
+    {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    {
+        {{getPojoClassName this.pkTableName}}Manager x = new {{getPojoClassName this.pkTableName}}Manager();
+        return x.selectByKey({{this.fKColList}});
+    }
+
+    /**
+    * Select from the database for table {{tableName}} "
+    */
+    public List<{{pojoClassName}}> selectBy{{this.fKTableName}}__{{this.fKColumnName}}(  {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    {
+        String query = "select * from {{tableName}}";
+        String where = " where {{#each this.fKFields}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}}";
+
+        String query = query + where ;
+        return dbHelper.executeQuery(query,
+            new Object[]{ {{#each this.fKFields }} {{name}} {{#unless @last}},{{/unless}} {{/each}} },
+            new RowMapperResultReader<{{pojoClassName}}>(this));
+    }
+
+{{/each}}
+
+{{#each exportedKeys}}
+    /**
+    * Get all related  {{this.fKTableName}} which have same {{this.fKColList}}
+    */
+    public List<{{getPojoClassName this.fkTableName}}> getRelated{{this.fkTableName}}__{{this.fKColumnName}}(
+    {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    {
+        {{getPojoClassName this.fKTableName}}Manager x = new {{getPojoClassName this.fKTableName}}Manager();
+        return x.selectBy{{this.fKTableName}}__{{this.fKColumnName}}({{#each this.pKColList}} {{name}} {{#unless @last}},{{/unless}} {{/each}});
+    }
+{{/each}}
+
 {{! foreign key }}
 {{!
-        List<ForeignKeyDefinition> foreignKeyData = getTableImportedKeys(tableName);
-            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
-            writeImportedMethods(tableName, fkEnum, colData);
-            }
-
-            foreignKeyData = getTableExportedKeys(tableName);
-            for (ForeignKeyDefinition fkEnum : foreignKeyData) {
-            writeExportedMethods(fkEnum, getColumnData(setInfo.getTableInfos().get(fkEnum.primaryKeyTableName)).getFields());
-            }
-
-
             if (config.indexes) {
             List<String> indexData = getTableIndexes(tableName); // updates the indexData
                 // variable

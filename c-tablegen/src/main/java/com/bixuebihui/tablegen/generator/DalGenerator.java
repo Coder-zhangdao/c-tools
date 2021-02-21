@@ -24,9 +24,6 @@ public class DalGenerator extends BaseGenerator {
 
     private static final Log LOG = LogFactory.getLog(DalGenerator.class);
 
-    public static boolean isNotEmpty(Collection<?> col) {
-        return !CollectionUtils.isEmpty(col);
-    }
 
     /**
      * Selects the type of a particular column name. Cannot use Hashtables to
@@ -129,7 +126,7 @@ public class DalGenerator extends BaseGenerator {
      * Writes out the mapRow method. The mapRow method interprets the returned
      * result set from a Select and update the object with those values.
      */
-    public static String mapRow(String tableName, List<ColumnData> columnData, String pojoClassName) {
+    public static String mapRow(List<ColumnData> columnData, String pojoClassName) {
         String col;
         String colType;
         List<String> gets = new ArrayList<>();
@@ -204,7 +201,6 @@ public class DalGenerator extends BaseGenerator {
     protected Map<String, Object> getContextMap(String tableName) {
         Map<String, Object> v = super.getContextMap(tableName);
 
-        v.put("hasKey", isNotEmpty(this.setInfo.getTableKeys(tableName)));
         v.put("hasVersionCol", containsVersion(this.setInfo.getTableCols(tableName), config.getVersionColName()));
         v.put("firstKeyType", this.getFirstKeyType(tableName));
         v.put("firstKeyName", this.getFirstKeyName(tableName));
@@ -213,7 +209,7 @@ public class DalGenerator extends BaseGenerator {
         v.put("insertObjects", makeInsertObjects(config.isUse_autoincrement(), setInfo.getTableCols(tableName), config.getVersionColName()));
         v.put("updateObjects", makeUpdateObjects(setInfo.getTableKeys(tableName), setInfo.getTableCols(tableName), config.isUse_autoincrement(), config.getVersionColName()));
         v.put("keyObjects", createKeyObjects(setInfo.getTableKeys(tableName)));
-        v.put("mapRow", mapRow(tableName, setInfo.getTableCols(tableName), this.getPojoClassName(tableName)));
+        v.put("mapRow", mapRow(setInfo.getTableCols(tableName), this.getPojoClassName(tableName)));
         return v;
     }
 

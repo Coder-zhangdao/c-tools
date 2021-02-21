@@ -1,4 +1,4 @@
-package {{config.packageName}}.{{tableInfo.name}}.pojo;
+package {{config.packageName}}.{{tableName}}.pojo;
 
 {{> [header-comment.java]}}
 
@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description ="{{tableInfo.comment}}")
 {{/if~}}
-public class {{className tableInfo.name}} {{interface tableInfo.name}} {
+public class {{className}} {{interface}} {
 {{! field declaration }}
 {{#each fields as | field index | }}
     {{log field level="info" }}
@@ -37,7 +37,7 @@ public class {{className tableInfo.name}} {{interface tableInfo.name}} {
 {{/each}}
 
     {{! handle the constructor }}
-    public {{className tableInfo.name}}()
+    public {{className}}()
     {
     {{#each fields~}}
         {{#eq "String" type ~}}
@@ -56,7 +56,7 @@ public class {{className tableInfo.name}} {{interface tableInfo.name}} {
     {
         StringBuilder s= new StringBuilder();
         String ln = System.getProperty("line.separator");
-        s.append("<{{tableInfo.name}} ");
+        s.append("<{{tableName}} ");
 {{#each fields as | field index | }}
         {{#eq "String" javaType~}}
         s.append(" {{firstLow name}}=\"").append(StringEscapeUtils.escapeXml11(this.get{{firstUp  name }}())).append("\"");

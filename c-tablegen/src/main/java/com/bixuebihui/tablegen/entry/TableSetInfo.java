@@ -516,4 +516,36 @@ public class TableSetInfo {
         return Collections.emptyList();
     }
 
+    /**
+     * Selects the Imported Keys defined for a particular table.
+     */
+    public @NotNull List<ForeignKeyDefinition> getTableImportedKeys(String tableName){
+
+        if (getForeignKeyImCache().containsKey(tableName)) {
+            return getForeignKeyImCache().get(tableName);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Selects the Exported Keys defined for a particular table.
+     */
+    public @NotNull List<ForeignKeyDefinition> getTableExportedKeys(String tableName) {
+        if (getForeignKeyExCache().containsKey(tableName)) {
+            return getForeignKeyExCache().get(tableName);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Selects the indexes for a particular table.
+     */
+    public List<String> getTableIndexes(String tableName) {
+        if (getIndexCache().containsKey(tableName)) {
+            return getIndexCache().get(tableName);
+        }
+        return Collections.emptyList();
+    }
+
+
 }
