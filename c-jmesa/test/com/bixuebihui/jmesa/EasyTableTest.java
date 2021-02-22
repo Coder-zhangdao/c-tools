@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -219,6 +220,19 @@ public class EasyTableTest {
                 "select * from t_config where c_key =0","a","表名",  "a,b,c" );
        assertEquals( "a,b,c", et.getColsList());
 
+    }
+
+    @Test
+    public void testJson() throws SQLException {
+        String tableName = "t_config";
+        String baseSql = " select c_key, c_name , c_value from t_config";
+        EasyTable et = new EasyTable(dbHelper, tableName, baseSql);
+
+        String res = et.json("{\"exportType\":\"json\"}");
+
+        assertThat("must contains", res, StringContains.containsString("t_config"));
+        assertFalse("must contains", res.contains("<td>"));
+        //System.out.println(res);
     }
 
 }

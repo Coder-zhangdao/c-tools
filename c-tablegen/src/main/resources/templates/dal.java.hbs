@@ -92,7 +92,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 {{! writeGetSetId(tableName, keyData, colData);}}
     @Override
     public {{firstKeyType}} getId({{pojoClassName}} info) {
-        return " + this.getOneId(keyData) + ";
+        return info.get{{firstUp firstKeyName}}();
     }
 
     @Override
@@ -101,9 +101,8 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         info.set{{firstUp firstKeyName}}(id);
     {{else}}
         //no key to set, don't this method!
-    {{/if}}
+    {{/if ~}}
     }
-
 
     @Override
     public void setIdLong({{pojoClassName}} info, long id) {

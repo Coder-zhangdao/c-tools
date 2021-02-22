@@ -11,7 +11,7 @@ class DalGeneratorTest {
     void getExtendsClasses() throws IOException {
         DalGenerator gen = new DalGenerator();
         gen.init(this.getClass().getResource("/tablegen.properties").getPath());
-        String res = gen.generate("test");
+        String res = gen.generate("test_gen");
 
         System.out.println(res);
     }

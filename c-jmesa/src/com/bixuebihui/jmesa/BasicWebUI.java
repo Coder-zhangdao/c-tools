@@ -1,11 +1,13 @@
 package com.bixuebihui.jmesa;
 
 import com.bixuebihui.jdbc.IBaseListService;
+import com.bixuebihui.jmesa.mock.SimpleHttpServletRequest;
 import com.bixuebihui.util.ParameterUtils;
 import org.jmesa.core.preference.Preferences;
 import org.jmesa.limit.Limit;
 import org.jmesa.limit.LimitFactory;
 import org.jmesa.model.ExportTypes;
+import org.jmesa.model.NWTableModel;
 import org.jmesa.model.TableModel;
 import org.jmesa.model.TableModelUtils;
 import org.jmesa.view.component.Column;
@@ -53,15 +55,23 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
         this.uniquePropertyName = uniquePropertyName;
     }
 
+    protected TableModel createTableModel(String id, HttpServletRequest request,
+                     HttpServletResponse response ){
+//        if(request instanceof SimpleHttpServletRequest){
+//            return new NWTableModel(id, request, response);
+//        }
+        return new TableModel(id, request, response);
+    }
+
     @Override
     protected String render(HttpServletRequest request,
                             HttpServletResponse response) {
 
-        TableModel tableFacade = new TableModel(id, request, response);
+        TableModel tableFacade = createTableModel(id, request, response);
 
         Object json = request.getAttribute(JSON_QUERY);
         if (json != null) {
-            LimitFactory limitFactory = json instanceof Map ? new LimitFactory(id, (Map<String, Object>) json) :
+            LimitFactory limitFactory = (json instanceof Map) ? new LimitFactory(id, (Map<String, Object>) json) :
                     new LimitFactory(id, json.toString());
             Limit limit = limitFactory.createLimit();
             tableFacade.setLimit(limit);
