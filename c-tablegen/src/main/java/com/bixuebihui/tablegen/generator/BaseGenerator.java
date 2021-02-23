@@ -141,6 +141,7 @@ public abstract class BaseGenerator {
         v.put("keys", setInfo.getTableKeys(tableName));
         v.put("importKeys", setInfo.getTableImportedKeys(tableName));
         v.put("exportKeys", setInfo.getTableExportedKeys(tableName));
+        v.put("indexData", setInfo.getTableIndexes(tableName));
         v.put("pojoClassName", this.getPojoClassName(tableName));
         v.put("className", this.getClassName(tableName));
         v.put("interface", this.getInterface(tableName));

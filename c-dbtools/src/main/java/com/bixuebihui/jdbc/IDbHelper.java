@@ -234,7 +234,9 @@ public interface IDbHelper {
 	 */
 	Connection getConnection(boolean readOnly) throws SQLException;
 
-	/**
+    DataSource getDataSource();
+
+    /**
 	 * <p>setDataSource.</p>
 	 *
 	 * @param connManager a {@link javax.sql.DataSource} object.

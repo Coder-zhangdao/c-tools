@@ -1420,8 +1420,9 @@ public class TableGen implements DiffHandler {
         out("    String query = \"" + query + where + ";");
         out("    List<" + getPojoClassName(tableName) + "> info = dbHelper.executeQuery(query, " + objs
                 + ", new RowMapperResultReader<" + getPojoClassName(tableName) + ">(this));");
-        out("    if(info!=null && info.size()>0)");
-        out("         return (" + getPojoClassName(tableName) + ") info.get(0);");
+        out("    if(info!=null && info.size()>0) {");
+        out("         return  info.get(0);");
+        out("    }");
         out(" return null;");
         out("}");
         out("");
@@ -1565,7 +1566,7 @@ public class TableGen implements DiffHandler {
         out("public boolean " + methodName + "(" + this.getPojoClassName(tableName) + " info"
                 + (isWithConn ? ", Connection cn" : "") + ") throws SQLException");
         out("{");
-        out("    String updateSql = getUpdateSql()+\" and version=?\";");
+        out("    String updateSql = getUpdateSql()"+(isWithVersion? "": "+\" and version=?\"")+";");
 
         StringBuilder objs = new StringBuilder();
         for (ColumnData cd : columnData) {
@@ -1766,10 +1767,10 @@ public class TableGen implements DiffHandler {
         out("  * Get all related  " + def.getFKTableName() + " which have same " + def.getFKColList());
         out("  */");
 
-        out(createMethodLine("getRelated" + def.getFKTableName() + "__" + def.getFKColumnName(), def.getPKFields(),
+        out(createMethodLine("getRelated" + firstUp(def.getFKTableName()) + "__" + firstUp(def.getFKColumnName()), def.getPKFields(),
                 "List<" + this.getPojoClassName(def.getFKTableName()) + "> ", columnData));
         out("{");
-        out("\t" + firstUp(def.getFKTableName()) + "Manager x = new " + firstUp(def.getFKTableName()) + "Manager();");
+        out("\t" + firstUp(def.getFKTableName()) + "Manager x = new " + firstUp(def.getFKTableName()) + "Manager(this.getDbHelper().getDataSource());");
         out("\treturn x.selectBy" + def.getFKTableName() + "__" + def.getFKColumnName() + "(" + def.getPKColList() + ");");
         out("}");
     }
@@ -1785,7 +1786,7 @@ public class TableGen implements DiffHandler {
         out(createMethodLine("get" + firstUp(def.getPKTableName()) + "By" + def.getFKColumnName(), def.getFKFields(),
                 firstUp(def.getPKTableName()), columnData));
         out("{");
-        out("\t" + firstUp(def.getPKTableName()) + "Manager x = new " + firstUp(def.getPKTableName()) + "Manager();");
+        out("\t" + firstUp(def.getPKTableName()) + "Manager x = new " + firstUp(def.getPKTableName()) + "Manager(this.getDbHelper().getDataSource());");
         out("\treturn x.selectByKey(" + def.getFKColList() + ");");
         out("}");
         writeSelectAll(tableName, def.getFKFields(), false,

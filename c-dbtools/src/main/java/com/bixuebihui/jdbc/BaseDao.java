@@ -598,7 +598,6 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      *
      * @param convertors a {@link java.util.Map} object.
      */
-    @SuppressWarnings("rawtypes")
     public static void registerConverters(Map<Class, Converter> convertors) {
         BeanUtilsBean b = BeanUtilsBean.getInstance();
         for (Entry<Class, Converter> entry : convertors.entrySet()) {
@@ -991,7 +990,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     public @NotNull
     List<T> selectWithJoin(String fieldList, String whereClause, Object[] params, String orderByClause,
                            int beginNum, int endNum) throws SQLException {
-        String query = "select " + fieldList + " from " + getTableName() + " " + " " + whereClause;
+        String query = "select " + fieldList + " from " + getTableName() + " " + whereClause;
         if (this.getDbType() != BaseDao.DERBY) {
             query += orderByClause;
         }

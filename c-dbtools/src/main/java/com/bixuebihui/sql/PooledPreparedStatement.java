@@ -13,20 +13,21 @@ import java.util.Calendar;
  * @author xingwx
  * @version $Id: $Id
  */
+@SuppressWarnings("AliDeprecation")
 public class PooledPreparedStatement extends PooledStatement
         implements PreparedStatement
 {
     /**
      * <p>Constructor for PooledPreparedStatement.</p>
      *
-     * @param preparedstatement a {@link java.sql.PreparedStatement} object.
+     * @param preparedStatement a {@link java.sql.PreparedStatement} object.
      * @throws java.sql.SQLException if any.
      */
-    public PooledPreparedStatement(PreparedStatement preparedstatement) throws SQLException {
-        super.stmt = preparedstatement;
-        pstmt = preparedstatement;
+    public PooledPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        super.stmt = preparedStatement;
+        pstmt = preparedStatement;
         if(pstmt==null) {
-            throw new SQLException("Null preparedstatement!");
+            throw new SQLException("Null preparedStatement!");
         }
     }
 

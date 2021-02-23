@@ -28,43 +28,9 @@ import java.util.Map;
  */
 public class DbHelper implements IDbHelper {
 
-	private Connection connection = null;
-
 	private static final Log LOG = LogFactory.getLog(DbHelper.class);
-
+	private Connection connection = null;
 	private DataSource dataSource = null;
-
-	/**
-	 * <p>Getter for the field <code>connection</code>.</p>
-	 *
-	 * @return a {@link java.sql.Connection} object.
-	 * @throws java.sql.SQLException if any.
-	 */
-	@Override
-	public Connection getConnection() throws SQLException {
-		return connection != null ? connection : dataSource.getConnection();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * this method for subclass override
-	 */
-	@Override
-	public Connection getConnection(boolean readOnly) throws SQLException {
-		return getConnection();
-	}
-
-
-	/**
-	 * <p>freeConnection.</p>
-	 *
-	 * @param cn a {@link java.sql.Connection} object.
-	 * @throws java.sql.SQLException if any.
-	 */
-	public static void freeConnection(Connection cn) throws SQLException {
-		cn.close();
-	}
 
 	/**
 	 * <p>Constructor for DbHelper.</p>
@@ -82,6 +48,125 @@ public class DbHelper implements IDbHelper {
 		connection = cn;
 	}
 
+	/**
+	 * <p>freeConnection.</p>
+	 *
+	 * @param cn a {@link java.sql.Connection} object.
+	 * @throws java.sql.SQLException if any.
+	 */
+	public static void freeConnection(Connection cn) throws SQLException {
+		cn.close();
+	}
+
+	/**
+	 * public java.sql.Result exeSql(String strSQl) {
+	 *
+	 * return new Result(); }
+	 *
+	 * @param stmt statement to be closed
+	 */
+	public static void close(Statement stmt) {
+		if (stmt != null) {
+			try {
+				stmt.close();
+			} catch (SQLException sqlexception) {
+				LOG.error(sqlexception);
+			}
+		}
+	}
+
+	/**
+	 * <p>close.</p>
+	 *
+	 * @param rs a {@link java.sql.ResultSet} object.
+	 */
+	public static void close(ResultSet rs) {
+		if (rs != null) {
+			try {
+				rs.close();
+			} catch (SQLException sqlexception) {
+				LOG.error(sqlexception);
+			}
+		}
+	}
+
+	/**
+	 * <p>close.</p>
+	 *
+	 * @param conn a {@link java.sql.Connection} object.
+	 */
+	public static void close(Connection conn) {
+		try {
+			if (conn != null && !conn.isClosed()) {
+				freeConnection(conn);
+			}
+		} catch (SQLException sqlexception) {
+			LOG.error(sqlexception);
+		}
+	}
+
+	private static void dumpSql(SQLException ex, String sql, Object[] params) {
+		LOG.warn(ex.getMessage());
+		LOG.warn("==="+sql);
+		if(params!=null) {
+			for (Object o : params) {
+				LOG.warn("===" + o);
+			}
+		}
+	}
+
+	private static void dumpSql(SQLException ex, String[] sql) {
+		LOG.warn(ex.getMessage());
+		for(String s:sql) {
+			LOG.warn("=="+s);
+		}
+	}
+
+	public static String clob2Str(Clob clobObject) throws SQLException, IOException {
+		InputStream in = clobObject.getAsciiStream();
+		StringWriter w = new StringWriter();
+		IOUtils.copy(in, w, Charset.defaultCharset());
+		return w.toString();
+	}
+
+
+	/** {@inheritDoc} */
+	@Override
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	// 用于事务处理
+
+	/**
+	 * <p>Getter for the field <code>connection</code>.</p>
+	 *
+	 * @return a {@link java.sql.Connection} object.
+	 * @throws java.sql.SQLException if any.
+	 */
+	@Override
+	public Connection getConnection() throws SQLException {
+		return connection != null ? connection : dataSource.getConnection();
+	}
+
+	// 用于事务处理
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * this method for subclass override
+	 */
+	@Override
+	public Connection getConnection(boolean readOnly) throws SQLException {
+		return getConnection();
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public void close() throws SQLException {
@@ -89,7 +174,6 @@ public class DbHelper implements IDbHelper {
 			connection.close();
 		}
 	}
-
 
 	/**
 	 * do not use this if you don't know what to do...
@@ -138,42 +222,9 @@ public class DbHelper implements IDbHelper {
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see com.bixuebihui.zichan.dal.IDbHelper#executeNoQuery(java.lang.String[])
+	 * @see com.bixuebihui.zichan.dal.IDbHelper#executeQuery(java.lang.String,
+	 * com.bixuebihui.util.db.RowCallbackHandler)
 	 */
-
-	/**
-	 * public java.sql.Result exeSql(String strSQl) {
-	 *
-	 * return new Result(); }
-	 *
-	 * @param stmt statement to be closed
-	 */
-	public static void close(Statement stmt) {
-		if (stmt != null) {
-			try {
-				stmt.close();
-			} catch (SQLException sqlexception) {
-				LOG.error(sqlexception);
-			}
-		}
-	}
-
-	/**
-	 * <p>close.</p>
-	 *
-	 * @param rs a {@link java.sql.ResultSet} object.
-	 */
-	public static void close(ResultSet rs) {
-		if (rs != null) {
-			try {
-				rs.close();
-			} catch (SQLException sqlexception) {
-				LOG.error(sqlexception);
-			}
-		}
-	}
-
-	// 用于事务处理
 
 	/**
 	 * <p>executeNoQuery.</p>
@@ -192,33 +243,6 @@ public class DbHelper implements IDbHelper {
 		}
 	}
 
-	// 用于事务处理
-
-	/**
-	 * <p>close.</p>
-	 *
-	 * @param conn a {@link java.sql.Connection} object.
-	 */
-	public static void close(Connection conn) {
-		try {
-			if (conn != null && !conn.isClosed()) {
-				freeConnection(conn);
-			}
-		} catch (SQLException sqlexception) {
-			LOG.error(sqlexception);
-		}
-	}
-
-	private static void dumpSql(SQLException ex, String sql, Object[] params) {
-		LOG.warn(ex.getMessage());
-		LOG.warn("==="+sql);
-		if(params!=null) {
-			for (Object o : params) {
-				LOG.warn("===" + o);
-			}
-		}
-	}
-
 	/** {@inheritDoc} */
 	@Override
 	public int executeNoQueryBatch(String strSql, Iterable<Object[]> params) throws SQLException {
@@ -229,20 +253,6 @@ public class DbHelper implements IDbHelper {
 	@Override
 	public int executeNoQueryBatch(String strSql, int total, ParamsIterator.CurrentParameters cur, Connection cn) throws SQLException {
 		return executeNoQueryBatch(strSql, new ParamsIterator(total, cur), cn);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.bixuebihui.zichan.dal.IDbHelper#executeQuery(java.lang.String,
-	 * com.bixuebihui.util.db.RowCallbackHandler)
-	 */
-
-	private static void dumpSql(SQLException ex, String[] sql) {
-		LOG.warn(ex.getMessage());
-		for(String s:sql) {
-			LOG.warn("=="+s);
-		}
 	}
 
 	/** {@inheritDoc} */
@@ -285,7 +295,6 @@ public class DbHelper implements IDbHelper {
 		return n;
 	}
 
-
 	/**
 	 * 批量在事条里执行SQL语句数组
 	 *
@@ -324,7 +333,6 @@ public class DbHelper implements IDbHelper {
 		}
 		return j;
 	}
-
 
 	/** {@inheritDoc} */
 	@Override
@@ -366,13 +374,6 @@ public class DbHelper implements IDbHelper {
 			throw ex;
 		}
 		return n;
-	}
-
-	public static String clob2Str(Clob clobObject) throws SQLException, IOException {
-		InputStream in = clobObject.getAsciiStream();
-		StringWriter w = new StringWriter();
-		IOUtils.copy(in, w, Charset.defaultCharset());
-		return w.toString();
 	}
 
 	/** {@inheritDoc} */
@@ -683,7 +684,6 @@ public class DbHelper implements IDbHelper {
 		return executeScalar(sql, params, null);
 	}
 
-
 	/**
 	 * <p>fillParameter.</p>
 	 *
@@ -830,12 +830,6 @@ public class DbHelper implements IDbHelper {
 			throws SQLException {
 		return executeNoQuery(sql, params, targetSqlTypes, null);
 
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
 	}
 
 	/** {@inheritDoc} */

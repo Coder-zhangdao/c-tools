@@ -28,6 +28,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	SqlSort orderStack = new SqlSort();
 	SqlHelper filterStack = new SqlHelper();
 	SqlLimit limit;
+	String resultFields;
 
 
 	/**
@@ -201,6 +202,16 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 		} finally {
 			clear();
 		}
+	}
+
+	@Override
+	public <K> List<K> findAll(Class<K> clz) throws SQLException {
+		SqlPocket p = this.getSql();
+		String where = p.getCondition().toString();
+		Object[] params = p.getParams().toArray();
+		String select = "select " + resultFields + " from " + getTableName() + " " ;
+		return select(select, where, parseOrder(), params, limit.getBegin(),
+				limit.getEnd(), clz);
 	}
 
 	private void clear() {
@@ -424,7 +435,8 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	/** {@inheritDoc} */
 	@Override
 	public ActiveRecord<T> fields(String resultFields) {
-		return null;
+		this.resultFields = resultFields;
+		return this;
 	}
 
 

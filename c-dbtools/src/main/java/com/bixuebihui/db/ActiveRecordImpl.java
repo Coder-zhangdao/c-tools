@@ -46,7 +46,6 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 		orderStack = new SqlSort();
 		filterStack = new SqlHelper();
 		limit = SqlLimit.LIMIT_MAX;
-
 	}
 
 	/**
@@ -197,6 +196,21 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 
 			return operator.selectWithJoin(resultFields, where, params, parseOrder(),
 					limit.getBegin(), limit.getEnd());
+		} finally {
+			clear();
+		}
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public <K> List<K> findAll(Class<K> clz) throws SQLException {
+		try {
+			sqlPocket = this.getSql();
+			String where = formWhereClause();
+			Object[] params = sqlPocket.getParams().toArray();
+			String select = "select " + resultFields + " from " + operator.getTableName() + " " ;
+			return operator.select(select, where, parseOrder(), params, limit.getBegin(),
+			limit.getEnd(), clz);
 		} finally {
 			clear();
 		}

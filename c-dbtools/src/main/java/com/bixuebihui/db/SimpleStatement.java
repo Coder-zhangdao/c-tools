@@ -4,33 +4,26 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
  * Date: 13-4-18
  * Time: 下午6:04
- * To change this template use File | Settings | File Templates.
  * 简单的数据库查询
  * @author xingwx
  * @version $Id: $Id
  */
 public interface SimpleStatement<T,V> {
 
-
-    //插入单个
-
     /**
      * <p>insert.</p>
-     *
+     * 插入单个
      * @param entity a T object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
     boolean insert(T entity)throws SQLException;
 
-    //插入并插入依赖
-
     /**
      * <p>insertAndReferences.</p>
-     *
+     * 插入并插入依赖
      * @param entity a T object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
@@ -104,44 +97,38 @@ public interface SimpleStatement<T,V> {
     boolean update(T entity) throws SQLException;
 
 
-    //更新并更新依赖
-
     /**
      * <p>updateAndReferences.</p>
-     *
+     * 更新并更新依赖
      * @param entity a T object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
     boolean updateAndReferences(T entity)throws SQLException;
 
-    //批量更新
 
     /**
      * <p>update.</p>
-     *
+     * 批量更新
      * @param entities a {@link java.util.List} object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
     boolean update(List<T> entities)throws SQLException;
 
-    //删除单个
-
     /**
      * <p>delete.</p>
-     *
+     * 删除单个
      * @param entity a T object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
     boolean delete(T entity)throws SQLException;
 
-    //删除单个
 
     /**
      * <p>deleteByKey.</p>
-     *
+     * 删除单个
      * @param id a V object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.

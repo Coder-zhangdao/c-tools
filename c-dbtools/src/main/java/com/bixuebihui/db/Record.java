@@ -18,48 +18,57 @@ public interface Record<T> {
 	 *
 	 * @param field a {@link java.lang.String} object.
 	 * @return a {@link java.util.List} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	List<Object> getVector(String field) throws SQLException;
 
-	//查询多条
+
 
 	/**
 	 * <p>findAll.</p>
-	 *
+	 * 查询多条
 	 * @return a {@link java.util.List} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	List<T> findAll() throws SQLException;
 
-	//查询单条
+	/**
+	 * <p>findAll.</p>
+	 * @param clz the custom return type, for example a entity type that exclude return for blob/clob fields,
+	 *            used in combination with the .fields() method.
+	 * @return a {@link java.util.List} object.
+	 * @throws SQLException if any.
+	 */
+	<K> List<K> findAll(Class<K> clz) throws SQLException;
+
+
 
 	/**
 	 * <p>find.</p>
-	 *
+	 * 查询单条
 	 * @return a T object.
 	 * @throws java.sql.SQLException if any.
 	 */
 	T find() throws SQLException;
 
-	//删除
+
 
 	/**
 	 * <p>delete.</p>
-	 *
+	 * 删除
 	 * @return a boolean.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	boolean delete() throws SQLException;
 
-	//获得单个字段
+
 
 	/**
 	 * <p>get.</p>
-	 *
+	 * 获得单个字段
 	 * @param field a {@link java.lang.String} object.
 	 * @return a {@link java.lang.Object} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	Object get(String field) throws SQLException;
 
@@ -67,7 +76,7 @@ public interface Record<T> {
 	 * <p>count.</p> 获得数量
 	 *
 	 * @return a int.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	int count() throws SQLException;
 
@@ -77,7 +86,7 @@ public interface Record<T> {
 	 * @param field a {@link java.lang.String} object.
 	 * @param fun a {@link GroupFunction} object.
 	 * @return a {@link CountValue} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	CountValue countValue(String field, GroupFunction fun) throws SQLException;
 
@@ -89,7 +98,7 @@ public interface Record<T> {
 	 * @param objectType a {@link java.lang.Class} object.
 	 * @param <K> a K object.
 	 * @return a {@link CountObject} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	<K> CountObject<K> countObject(String field, GroupFunction fun, Class<K> objectType) throws SQLException;
 
@@ -98,7 +107,7 @@ public interface Record<T> {
 	 *
 	 * @param field a {@link java.lang.String} object.
 	 * @return a {@link CountValue} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	CountValue countSum(String field) throws SQLException;
 
@@ -106,7 +115,7 @@ public interface Record<T> {
 	 * <p>getSql.</p> 获得生产的sql
 	 *
 	 * @return a {@link SqlPocket} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	SqlPocket getSql() throws SQLException;
 
@@ -115,7 +124,7 @@ public interface Record<T> {
 	 * 是否存在至少一条符合条件的记录
 	 *
 	 * @return true 存在
-	 * @throws java.sql.SQLException 数据库异常
+	 * @throws SQLException 数据库异常
 	 */
 	boolean exists() throws SQLException;
 
@@ -124,7 +133,7 @@ public interface Record<T> {
 	 *
 	 * @param field a {@link java.lang.String} object.
 	 * @return a {@link java.util.List} object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	List<String> getStringVector(String field) throws SQLException;
 
@@ -133,7 +142,7 @@ public interface Record<T> {
 	 *
 	 * @param field 字段名
 	 * @return List&lt;Long&gt; 长整形列表
-	 * @throws java.sql.SQLException 数据库执行出错
+	 * @throws SQLException 数据库执行出错
 	 */
 	List<Long> getLongVector(String field) throws SQLException;
 
@@ -204,7 +213,7 @@ public interface Record<T> {
 	 *
 	 * @param field  字段名
 	 * @return 影响的行数
-	 * @throws java.sql.SQLException  数据库异常
+	 * @throws SQLException  数据库异常
 	 */
 	int inc(String field) throws SQLException;
 
@@ -214,7 +223,7 @@ public interface Record<T> {
 	 * @param fields 表字段名
 	 * @param values 字段值， 如果values是SqlString 类型，将不参与形成预编译语句的占位符，而是原样输出
 	 * @return 影响的行数
-	 * @throws java.sql.SQLException  数据库异常
+	 * @throws SQLException  数据库异常
 	 */
 	int update(String[] fields, Object[] values)throws SQLException;
 
@@ -224,7 +233,7 @@ public interface Record<T> {
 	 * @param fields a {@link java.lang.String} object.
 	 * @param values a {@link java.lang.Object} object.
 	 * @return a int.
-	 * @throws java.sql.SQLException if any.
+	 * @throws SQLException if any.
 	 */
 	int update(String fields, Object values)throws SQLException;
 

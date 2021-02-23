@@ -12,7 +12,7 @@ Configuration:
       - name: log.path
         # “sys:”表示：如果VM参数中没指定这个变量值，则使用本文件中定义的缺省全局变量值
         # ${sys:catalina.home} 指向tomcat安装目录
-        value: ${sys:catalina.home}/logs
+        value: target/logs
       - name: project.name
         value: CloudEmploy
       - name: log.pattern

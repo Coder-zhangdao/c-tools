@@ -167,6 +167,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     /**
      * Deletes from the database for table {{tableName}} with connection
      */
+    @Override
     public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}}, {{/each}}  Connection cn ) throws SQLException
     {
         return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} }, cn);
@@ -175,6 +176,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     /**
     * Deletes from the database for table {{tableName}}
     */
+    @Override
     public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}} {{#unless @last}}, {{/unless}}{{/each}}) throws SQLException
     {
         return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} });
@@ -182,11 +184,13 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
 {{else}}
     {{! writeDummyUpdate(tableName, "updateByKey"); }}
+    @Override
     public boolean updateByKey({{pojoClassName}} info) throws SQLException {
         throw new SQLException("This operation is not supported, because table {{tableName}} not have a unique key!");
     }
 
-    {{! writeDummyDelete(tableName, keyData, "deleteByKey", colData); }}
+     {{! writeDummyDelete(tableName, keyData, "deleteByKey", colData); }}
+    @Override
     public boolean deleteByKey({{firstKeyType}}  key) throws SQLException {
         throw new SQLException("This operation is not supported, because table {{ tableName }} not have a unique key!");
     }
@@ -200,14 +204,14 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     public {{getPojoClassName this.pkTableName}} get{{getPojoClassName this.pkTableName}}By{{this.fKColumnName}}(
     {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
     {
-        {{getPojoClassName this.pkTableName}}Manager x = new {{getPojoClassName this.pkTableName}}Manager();
+        {{getPojoClassName this.pkTableName}}Manager x = new {{getPojoClassName this.pkTableName}}Manager(this.getDbHelper().getDataSource());
         return x.selectByKey({{this.fKColList}});
     }
 
     /**
     * Select from the database for table {{tableName}} "
     */
-    public List<{{pojoClassName}}> selectBy{{this.fKTableName}}__{{this.fKColumnName}}(  {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    public List<{{pojoClassName}}> selectBy{{firstUp this.fKTableName}}{{firstUp this.fKColumnName}}(  {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
     {
         String query = "select * from {{tableName}}";
         String where = " where {{#each this.fKFields}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}}";
@@ -224,15 +228,37 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     /**
     * Get all related  {{this.fKTableName}} which have same {{this.fKColList}}
     */
-    public List<{{getPojoClassName this.fkTableName}}> getRelated{{this.fkTableName}}__{{this.fKColumnName}}(
+    public List<{{getPojoClassName this.fkTableName}}> getRelated{{firstUp this.fkTableName}}{{firstUp this.fKColumnName}}(
     {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
     {
-        {{getPojoClassName this.fKTableName}}Manager x = new {{getPojoClassName this.fKTableName}}Manager();
+        {{getPojoClassName this.fKTableName}}Manager x = new {{getPojoClassName this.fKTableName}}Manager(this.getDbHelper().getDataSource());
         return x.selectBy{{this.fKTableName}}__{{this.fKColumnName}}({{#each this.pKColList}} {{name}} {{#unless @last}},{{/unless}} {{/each}});
     }
 {{/each}}
 
 {{! foreign key }}
+{{#if config.indexes}}{{#not indexData.empty}}
+
+
+    /**
+    * Select from the database for table {{tableName}} "
+    */
+    public List<{{pojoClassName}}> selectByIndex(  {{#each indexData as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    {
+        String query = "select * from {{tableName}}";
+        String where = " where {{#each this.indexData}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}}";
+        String query = query + where ;
+
+        List<{{pojoClassName}}> info = dbHelper.executeQuery(query, Object[]{
+          {{#each indexData}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} } , new RowMapperResultReader<" + getPojoClassName(tableName) + ">(this));");
+        if(info!=null && info.size()>0) {
+          return  info.get(0);
+        }
+        return null;
+    }
+
+
+{{/not}}{{/if}}
 {{!
             if (config.indexes) {
             List<String> indexData = getTableIndexes(tableName); // updates the indexData

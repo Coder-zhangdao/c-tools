@@ -98,6 +98,20 @@ public class TableUtils {
 
     /**
      * Selects the Imported Keys defined for a particular table.
+     *     1, "PKTABLE_CAT", Types.VARCHAR
+     *     2, "PKTABLE_SCHEM", Types.VARCHAR
+     *     3, "PKTABLE_NAME", Types.VARCHAR
+     *     4, "PKCOLUMN_NAME", Types.VARCHAR
+     *     5, "FKTABLE_CAT", Types.VARCHAR
+     *     6, "FKTABLE_SCHEM", Types.VARCHAR
+     *     7, "FKTABLE_NAME", Types.VARCHAR
+     *     8, "FKCOLUMN_NAME", Types.VARCHAR
+     *     9, "KEY_SEQ", Types.SMALLINT
+     *     10, "UPDATE_RULE", Types.SMALLINT
+     *     11, "DELETE_RULE", Types.SMALLINT
+     *     12, "FK_NAME", Types.VARCHAR
+     *     13, "PK_NAME", Types.VARCHAR
+     *     14, "DEFERABILITY", Types.SMALLINT
      */
     public static List<ForeignKeyDefinition> getTableImportedKeys(
             DatabaseMetaData metaData, String catalog, String schema,

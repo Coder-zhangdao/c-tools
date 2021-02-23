@@ -21,13 +21,9 @@ public interface ActiveRecord<T> extends Record<T> {
     /** Constant <code>ORDER_DESC=1</code> */
     int ORDER_DESC=1;
 
-    // ActiveRecord<T> ignoreBlank(boolean conditionWhenNotBlank);
-
-    //条件
-
     /**
      * <p>in.</p>
-     *
+     * 条件
      * @param field a {@link java.lang.String} object.
      * @param values an array of {@link java.lang.Object} objects.
      * @return a {@link ActiveRecord} object.
@@ -85,7 +81,7 @@ public interface ActiveRecord<T> extends Record<T> {
      * @param fields an array of {@link java.lang.String} objects.
      * @param value an array of {@link java.lang.Object} objects.
      * @return a {@link ActiveRecord} object.
-     * @throws java.sql.SQLException if any.
+     * @throws SQLException if any.
      */
     ActiveRecord<T> eq(String[] fields, Object[] value) throws SQLException;
 
@@ -140,8 +136,18 @@ public interface ActiveRecord<T> extends Record<T> {
      */
     Record<T> last();
 
+    /**
+     * @param field db field
+     * @param value value to compare
+     * @return this
+     */
     ActiveRecord<T> greaterOrEqualThan(String field, Object value);
 
+    /**
+     * @param field db field
+     * @param value value to compare
+     * @return this
+     */
     ActiveRecord<T> smallerOrEqualThan(String field, Object value);
 
     /**

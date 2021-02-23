@@ -14,7 +14,6 @@ import java.util.*;
 
 public class ForeignKeyDefinition
 {
-	//Unread public/protected field NOT USED
 	protected String foreignKeyName;
 	protected String foreignKeyTableName;
 	protected String primaryKeyTableName;
