@@ -313,62 +313,65 @@ public class ProjectConfig {
         this.excludeTablesList = excludeTablesList;
     }
 
-    public void readFrom(Properties props, String baseDir) {
-        this.baseDir = baseDir;
+    public static ProjectConfig readFrom(Properties props, String baseDir) {
+        ProjectConfig c = new ProjectConfig();
 
-        srcDir = baseDir + props.getProperty("src_dir");
-        LOG.debug("src_dir:" + srcDir);
-        resourceDir = baseDir + props.getProperty("resource_dir");
-        LOG.debug("resource_dir:" + resourceDir);
+        c.baseDir = baseDir;
 
-        if (StringUtils.isEmpty(resourceDir)) {
-            resourceDir = srcDir;
+        c.srcDir = baseDir + props.getProperty("src_dir");
+        LOG.debug("src_dir:" +  c.srcDir);
+        c.resourceDir = baseDir + props.getProperty("resource_dir");
+        LOG.debug("resource_dir:" +  c.resourceDir);
+
+        if (StringUtils.isEmpty( c.resourceDir)) {
+            c.resourceDir =  c.srcDir;
         }
 
-        testDir = baseDir + props.getProperty("test_dir");
-        LOG.debug("test_dir:" + testDir);
-        jspDir = baseDir + props.getProperty("jsp_dir");
-        LOG.debug("jsp_dir:" + jspDir);
-        packageName = props.getProperty("package_name");
-        LOG.debug("package_name:" + packageName);
-        schema = props.getProperty("schema");
-        LOG.debug("schema:" + schema);
-        tableOwner = props.getProperty("table_owner");
-        LOG.debug("table_owner:" + tableOwner);
+        c.testDir = baseDir + props.getProperty("test_dir");
+        LOG.debug("test_dir:" +  c.testDir);
+        c.jspDir = baseDir + props.getProperty("jsp_dir");
+        LOG.debug("jsp_dir:" +  c.jspDir);
+        c.packageName = props.getProperty("package_name");
+        LOG.debug("package_name:" +  c.packageName);
+        c.schema = props.getProperty("schema");
+        LOG.debug("schema:" +  c.schema);
+        c.tableOwner = props.getProperty("table_owner");
+        LOG.debug("table_owner:" +  c.tableOwner);
 
-        indexes = getBooleanCfg(props, "indexes");
-        useCustomMetaTable = getBooleanCfg(props, "kuozhanbiao");
+        c.indexes = getBooleanCfg(props, "indexes");
+        c.useCustomMetaTable = getBooleanCfg(props, "kuozhanbiao");
 
-        generate_procedures = getBooleanCfg(props, "generate_procedures");
+        c.generate_procedures = getBooleanCfg(props, "generate_procedures");
 
-        prefix = props.getProperty("prefix");
-        if (prefix == null) {
-            prefix = "";
+        c.prefix = props.getProperty("prefix");
+        if ( c.prefix == null) {
+            c.prefix = "";
         }
 
-        parseTableNames(props.getProperty("table_list"));
-        parseExcludeTableNames(props.getProperty("exclude_table_list"));
+        c.parseTableNames(props.getProperty("table_list"));
+        c.parseExcludeTableNames(props.getProperty("exclude_table_list"));
 
         // 有扩展表时用以下interface的设置值
-        pojo_node_interface = props.getProperty("pojo_node_interface");
-        pojo_version_interface = props.getProperty("pojo_version_interface");
-        pojo_state_interface = props.getProperty("pojo_state_interface");
-        pojo_uuid_interface = props.getProperty("pojo_uuid_interface");
-        pojo_modifydate_interface = props.getProperty("pojo_modifydate_interface");
+        c.pojo_node_interface = props.getProperty("pojo_node_interface");
+        c.pojo_version_interface = props.getProperty("pojo_version_interface");
+        c.pojo_state_interface = props.getProperty("pojo_state_interface");
+        c.pojo_uuid_interface = props.getProperty("pojo_uuid_interface");
+        c.pojo_modifydate_interface = props.getProperty("pojo_modifydate_interface");
 
-        pojo_node_interface_list = makeList(props.getProperty("pojo_node_interface_list"));
-        pojo_version_interface_list = makeList(props.getProperty("pojo_version_interface_list"));
-        pojo_state_interface_list = makeList(props.getProperty("pojo_state_interface_list"));
-        pojo_uuid_interface_list = makeList(props.getProperty("pojo_uuid_interface_list"));
-        pojo_modifydate_interface_list = makeList(props.getProperty("pojo_modifydate_interface_list"));
+        c.pojo_node_interface_list =  makeList(props.getProperty("pojo_node_interface_list"));
+        c.pojo_version_interface_list = makeList(props.getProperty("pojo_version_interface_list"));
+        c.pojo_state_interface_list = makeList(props.getProperty("pojo_state_interface_list"));
+        c.pojo_uuid_interface_list = makeList(props.getProperty("pojo_uuid_interface_list"));
+        c.pojo_modifydate_interface_list = makeList(props.getProperty("pojo_modifydate_interface_list"));
 
-        overWriteAll = getBooleanCfg(props, "over_write_all");
-        use_annotation = getBooleanCfg(props, "use_annotation");
-        use_autoincrement = getBooleanCfg(props, "use_autoincrement");
-        generateAll = getBooleanCfg(props, "generate_all");
+        c.overWriteAll = getBooleanCfg(props, "over_write_all");
+        c.use_annotation = getBooleanCfg(props, "use_annotation");
+        c.use_autoincrement = getBooleanCfg(props, "use_autoincrement");
+        c.generateAll = getBooleanCfg(props, "generate_all");
 
-        extra_setting = props.getProperty("extra_setting");
+        c.extra_setting = props.getProperty("extra_setting");
 
+        return c;
     }
 
     /**
@@ -407,11 +410,11 @@ public class ProjectConfig {
         }
     }
 
-    private boolean getBooleanCfg(Properties props, String key) {
+    private static boolean getBooleanCfg(Properties props, String key) {
         return "yes".equalsIgnoreCase(props.getProperty(key));
     }
 
-    private List<String> makeList(String property) {
+    private static List<String> makeList(String property) {
         List<String> res = new ArrayList<>();
         if (StringUtils.isNotEmpty(property)) {
             res.addAll(Arrays.asList(property.trim().split(",")));

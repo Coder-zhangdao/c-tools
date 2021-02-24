@@ -6,8 +6,6 @@ import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.tablegen.NameUtils;
 import com.bixuebihui.tablegen.ProjectConfig;
 import com.bixuebihui.tablegen.TableGen;
-import com.bixuebihui.tablegen.TableUtils;
-import com.bixuebihui.tablegen.entry.TableInfo;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
@@ -66,16 +64,23 @@ public abstract class BaseGenerator {
         this.setInfo = setInfo;
     }
 
-    public synchronized void readDb(DatabaseConfig dbConfig) throws SQLException, InstantiationException, IOException, IllegalAccessException {
-
+    public synchronized void readDbMetaData(DatabaseConfig dbConfig) throws SQLException, InstantiationException, IOException, IllegalAccessException {
         IDbHelper helper = TableGen.getDbHelper(dbConfig);
-
         DatabaseMetaData metaData = helper.getConnection().getMetaData();
         setInfo.getTableData(config, helper, metaData);
     }
 
+    /**
+     * name of file to generate
+     * @param tableName database table name
+     * @return full path of file name
+     */
     abstract String getTargetFileName(String tableName);
 
+    /**
+     * template file name
+     * @return template file name
+     */
     abstract String getTemplateFileName();
 
     public String getPojoClassName(String tableName) {
@@ -97,11 +102,11 @@ public abstract class BaseGenerator {
 
             props.load(fis);
 
-            dbConfig.readDbConfig(props);
+            dbConfig = DatabaseConfig.newInstance(props);
 
-            config.readFrom(props, getConfigBaseDir(propertiesFilename));
+            config = ProjectConfig.readFrom(props, getConfigBaseDir(propertiesFilename));
 
-            readDb(dbConfig);
+            readDbMetaData(dbConfig);
 
         } catch (IOException | SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();

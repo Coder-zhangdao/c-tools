@@ -4,6 +4,9 @@ import com.bixuebihui.BeanFactory;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.cache.DictionaryItem;
 import com.bixuebihui.jdbc.IDbHelper;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foundationdb.sql.StandardException;
 import org.hamcrest.collection.ArrayAsIterableMatcher;
 import org.hamcrest.collection.ArrayMatching;
@@ -231,8 +234,31 @@ public class EasyTableTest {
         String res = et.json("{\"exportType\":\"json\"}");
 
         assertThat("must contains", res, StringContains.containsString("t_config"));
-        assertFalse("must contains", res.contains("<td>"));
+        assertFalse("must not contains", res.contains("<td>"));
         //System.out.println(res);
+    }
+
+
+    @Test
+    public void testJsonPaging() throws SQLException, JsonProcessingException {
+        String tableName = "t_config";
+        String baseSql = " select c_key, c_name , c_value from t_config";
+        EasyTable et = new EasyTable(dbHelper, tableName, baseSql);
+
+        int size=2;
+        String res = et.json("{\"exportType\":\"json\", \"maxRows\":"+size+"}");
+        ObjectMapper mapper = new ObjectMapper();
+        Map map= mapper.readValue(res, Map.class);
+
+        Object obj = map.get("data");
+        assertEquals(size, ((List)obj).size());
+
+        res = et.json("{\"exportType\":\"json\", \"maxRows\":1, \"page\":2}");
+        Map map2= mapper.readValue(res, Map.class);
+
+        Object obj2 = map2.get("data");
+        assertEquals(1, ((List)obj2).size());
+
     }
 
 }

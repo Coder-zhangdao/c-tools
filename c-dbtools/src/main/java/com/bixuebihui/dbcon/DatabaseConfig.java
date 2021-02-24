@@ -315,15 +315,17 @@ public class DatabaseConfig
         this.removeAbandoned = removeAbandoned;
     }
 
-    public void readDbConfig(Properties props) {
-        setAlias(props.getProperty("alias"));
-        setClassName(props.getProperty("className"));
-        setDburl(props.getProperty("dburl"));
-        setUsername(props.getProperty("username"));
-        setPassword(props.getProperty("password"));
-        if (StringUtils.trimToNull(getAlias()) == null) {
-            setAlias("defaultdbcpalias");
+    public static DatabaseConfig newInstance(Properties props) {
+        DatabaseConfig config = new DatabaseConfig();
+        config.setAlias(props.getProperty("alias"));
+        config.setClassName(props.getProperty("className"));
+        config.setDburl(props.getProperty("dburl"));
+        config.setUsername(props.getProperty("username"));
+        config.setPassword(props.getProperty("password"));
+        if (StringUtils.trimToNull(config.getAlias()) == null) {
+            config.setAlias("defaultdbcpalias");
         }
+        return config;
     }
 
 }

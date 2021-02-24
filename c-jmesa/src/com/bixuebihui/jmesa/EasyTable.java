@@ -81,7 +81,7 @@ public class EasyTable extends BasicWebUI {
         if (isOnePage()) {
             this.maxRows = 500;
             this.maxRowsIncrements[0] = maxRows;
-            log.info("maxRows=" + maxRows + "  maxRowsIncrements[0]=" + this.maxRowsIncrements[0]);
+            log.debug("maxRows=" + maxRows + "  maxRowsIncrements[0]=" + this.maxRowsIncrements[0]);
         }
         ((BasicListService) this.service).setCoreSql(baseSql);
     }

@@ -16,3 +16,5 @@ CREATE TABLE IF NOT EXISTS test_gen (id int(11) NOT NULL AUTO_INCREMENT COMMENT 
 
 
 
+--  CREATE <索引名> ON <表名> (<列名> [<长度>] [ ASC | DESC])
+create index ind_test_gen on test_gen (edu_id desc, name);

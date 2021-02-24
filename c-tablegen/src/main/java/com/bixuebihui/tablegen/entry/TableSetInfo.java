@@ -36,7 +36,15 @@ public class TableSetInfo {
     private final Map<String, List<ForeignKeyDefinition>> foreignKeyImCache = new LRULinkedHashMap<>(
             400);
     private final Map<String, List<String>> keyCache = new LRULinkedHashMap<>(500);
-    private final Map<String, List<String>> indexCache = new LRULinkedHashMap<>(200);
+
+    /**
+     * TODO  union keys and indexes store in multiline of metadate, currently only support signle field index
+     *  so need use: Map<tableName, Map<indexName, List<ColNames>> indexCache
+     */
+    //private final Map<String, List<String>> indexCache = new LRULinkedHashMap<>(200);
+    private final Map<String, Map<String, List<String>>> indexCache = new HashMap<>(200);
+
+
     private final Map<String, List<ForeignKeyDefinition>> foreignKeyExCache = new LRULinkedHashMap<>(
             400);
     private  Map<String, T_metatable> tableDataExt;
@@ -58,8 +66,9 @@ public class TableSetInfo {
         return keyCache;
     }
 
-    public Map<String, List<String>> getIndexCache() {
-        return indexCache;
+    protected static int getPos(List list, int desiredPos){
+        if(list.size()>desiredPos)return desiredPos;
+        return list.size();
     }
 
     public Map<String, List<ForeignKeyDefinition>> getForeignKeyExCache() {
@@ -165,72 +174,8 @@ public class TableSetInfo {
         return Collections.emptyMap();
     }
 
-
-    /**
-     * Retrieves all the table data required.
-     *
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws IOException
-     */
-    public synchronized void getTableData(ProjectConfig config, IDbHelper dbHelper, @NotNull DatabaseMetaData metaData) throws SQLException, InstantiationException, IllegalAccessException, IOException {
-
-        LinkedHashMap<String, TableInfo> col = getTableInfos();
-
-        try(Connection cn = dbHelper.getConnection()) {
-            if (CollectionUtils.isEmpty(col)) {
-
-                //表名
-                List<String> tableNames =
-                        TableUtils.getTableData(metaData, config.getCatalog(), config.getSchema(),
-                                config.getTableOwner(), config.getTablesList(), config.getExcludeTablesList());
-                LinkedHashMap<String, TableInfo> tables = new LinkedHashMap<>();
-                for (String name : tableNames) {
-                    TableInfo table = new TableInfo(name);
-
-                    // Fill columns info
-                    TableInfo newInfo = TableUtils.getColumnData(metaData, config.getCatalog(), config.getSchema(), name);
-                    table.setFields(newInfo.getFields());
-                    tables.put(name, table);
-
-                    // Primary keys info
-                    List<String> keyData = TableUtils.getTableKeys(metaData, config.getCatalog(), config.getSchema(), name);
-                    getKeyCache().put(name, keyData);
-
-                    // foreign keys import info
-                    initImportKeys(config, dbHelper, metaData, name);
-
-                    // foreign keys export info
-                    initExportKeys(config, dbHelper, metaData, name);
-
-                    // index info
-                    initIndex(config, dbHelper, metaData, name);
-
-                    // table & column's  comment
-                    if(isMysql(metaData)) {
-                        fillComment(cn, table);
-                    }
-
-                }
-
-
-                setTableInfos(tables);
-            } else {
-                LOG.info("tableNames already set, retrieve from db skipped.");
-            }
-
-            // Custom meta info from db table
-            if (config.isUseCustomMetaTable()) {
-                setTableDataExt(getTableDataExt(dbHelper, getTableInfos()));
-            }
-
-            // Custom meta info from xml
-            if (StringUtils.isNotEmpty(config.getExtra_setting())) {
-                setTableDataExt(getExtraTableDataFromXml(
-                        config.getBaseDir() + config.getExtra_setting(), getTableDataExt()));
-            }
-        }
-
+    public Map<String, Map<String, List<String>>> getIndexCache() {
+        return indexCache;
     }
 
 
@@ -347,25 +292,125 @@ public class TableSetInfo {
         }
     }
 
+    /**
+     * Retrieves all the table data required.
+     *
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws IOException
+     */
+    public synchronized void getTableData(ProjectConfig config, IDbHelper dbHelper, @NotNull DatabaseMetaData metaData) throws SQLException, InstantiationException, IllegalAccessException, IOException {
 
-    private void initIndex(ProjectConfig config, IDbHelper dbHelper, DatabaseMetaData metaData, String tableName) {
+        LinkedHashMap<String, TableInfo> col = getTableInfos();
+
+        try(Connection cn = dbHelper.getConnection()) {
+            if (CollectionUtils.isEmpty(col)) {
+
+                //表名
+                List<String> tableNames =
+                        TableUtils.getTableData(metaData, config.getCatalog(), config.getSchema(),
+                                config.getTableOwner(), config.getTablesList(), config.getExcludeTablesList());
+                LinkedHashMap<String, TableInfo> tables = new LinkedHashMap<>();
+                for (String name : tableNames) {
+                    TableInfo table = new TableInfo(name);
+
+                    // Fill columns info
+                    TableInfo newInfo = TableUtils.getColumnData(metaData, config.getCatalog(), config.getSchema(), name);
+                    table.setFields(newInfo.getFields());
+                    tables.put(name, table);
+
+                    // Primary keys info
+                    List<String> keyData = TableUtils.getTableKeys(metaData, config.getCatalog(), config.getSchema(), name);
+                    getKeyCache().put(name, keyData);
+
+                    // foreign keys import info
+                    initImportKeys(config, dbHelper, metaData, name);
+
+                    // foreign keys export info
+                    initExportKeys(config, dbHelper, metaData, name);
+
+                    // index info
+                    initIndex(config, metaData, name);
+
+                    // table & column's  comment
+                    if(isMysql(metaData)) {
+                        fillComment(cn, table);
+                    }
+
+                }
+
+
+                setTableInfos(tables);
+            } else {
+                LOG.info("tableNames already set, retrieve from db skipped.");
+            }
+
+            // Custom meta info from db table
+            if (config.isUseCustomMetaTable()) {
+                setTableDataExt(getTableDataExt(dbHelper, getTableInfos()));
+            }
+
+            // Custom meta info from xml
+            if (StringUtils.isNotEmpty(config.getExtra_setting())) {
+                setTableDataExt(getExtraTableDataFromXml(
+                        config.getBaseDir() + config.getExtra_setting(), getTableDataExt()));
+            }
+        }
+
+    }
+
+    /**
+     * 1. TABLE_CAT==test
+     * 2. TABLE_SCHEM==null
+     * 3. TABLE_NAME=  表名称
+     * 4. NON_UNIQUE==false  索引值是否可以不惟一。TYPE 为 tableIndexStatistic 时索引值为 false
+     * 5. INDEX_QUALIFIER==
+     * 6. INDEX_NAME==PRIMARY   索引名称；TYPE 为 tableIndexStatistic 时索引名称为 null
+     * 7. TYPE==3 ,short => 索引类型：
+     *          0 tableIndexStatistic - 此标识与表的索引描述一起返回的表统计信息
+     *          1 tableIndexClustered - 此为集群(聚簇？)索引
+     *          2 tableIndexHashed - 此为散列索引
+     *          3 tableIndexOther - 此为某种其他样式的索引
+     * 8、 ORDINAL_POSITION==1   索引中的列序列号；TYPE 为 tableIndexStatistic 时该序列号为零
+     * 9.  COLUMN_NAME String => 列名称；TYPE 为 tableIndexStatistic 时列名称为 null
+     * 10. ASC_OR_DESC==A, tring => 列排序序列，”A” => 升序，”D” => 降序，如果排序序列不受支持，可能为 null；TYPE 为 tableIndexStatistic 时排序序列为 null
+     * 11. CARDINALITY==0,  int => TYPE 为 tableIndexStatistic 时，它是表中的行数；否则，它是索引中惟一值的数量。
+     * 12. PAGES==0, int => TYPE 为 tableIndexStatisic 时，它是用于表的页数，否则它是用于当前索引的页数。
+     * 13。 FILTER_CONDITION==null, String => 过滤器条件，如果有的话。（可能为 null）
+     * @param config
+     * @param metaData
+     * @param tableName
+     */
+    protected void initIndex(ProjectConfig config, DatabaseMetaData metaData, String tableName) {
         // use a hashmap to temporarily store the indexes as well
         // so we can avoid duplicate values.
-        HashMap<String, String> checkIndexes = new HashMap<>();
-        String index;
-        short indexType;
-        List<String> indexData;
-        indexData = new ArrayList<>();
+        String primary ="PRIMARY";
+        String indexColName, indexName;
+        short indexType, pos;
+        Map<String,List<String>> indexData= new HashMap<>();
 
+        /**
+         * metaData.getIndexInfo 参数说明：
+         * catalog : 类别名称，因为存储在此数据库中，所以它必须匹配类别名称。该参数为 “” 则检索没有类别的描述，为 null 则表示该类别名称不应用于缩小搜索范围
+         * schema : 模式名称，因为存储在此数据库中，所以它必须匹配模式名称。该参数为 “” 则检索那些没有模式的描述，为 null 则表示该模式名称不应用于缩小搜索范围
+         * table : 表名称，因为存储在此数据库中，所以它必须匹配表名称
+         * unique : 该参数为 true 时，仅返回惟一值的索引；该参数为 false 时，返回所有索引，不管它们是否惟一
+         * approximate : 该参数为 true 时，允许结果是接近的数据值或这些数据值以外的值；该参数为 false 时，要求结果是精确结果
+         */
         try( ResultSet r = metaData.getIndexInfo(config.getCatalog(), config.getSchema(), tableName, false, false) ) {
             while (r.next()) {
+                indexName = r.getString(6);
+                //skip primary key, 主键不处理
+                if(primary.equals(indexName)){
+                    continue;
+                }
                 indexType = r.getShort(7);
-                index = r.getString(9);
-                if (indexType != DatabaseMetaData.tableIndexStatistic &&
-                        // ensure that it is not a duplicate value.
-                        checkIndexes.get(index) == null) {
-                    indexData.add(index);
-                    checkIndexes.put(index, index);
+                indexColName = r.getString(9);
+                pos= r.getShort(8);
+                if (indexType != DatabaseMetaData.tableIndexStatistic) {
+                    List<String> cols = indexData.getOrDefault(indexName, new ArrayList<>());
+                    cols.add(getPos(cols, pos), indexColName);
+                    indexData.putIfAbsent(indexName, cols);
                 }
             }
         } catch (SQLException throwables) {
@@ -540,11 +585,11 @@ public class TableSetInfo {
     /**
      * Selects the indexes for a particular table.
      */
-    public List<String> getTableIndexes(String tableName) {
+    public Map<String, List<String>> getTableIndexes(String tableName) {
         if (getIndexCache().containsKey(tableName)) {
             return getIndexCache().get(tableName);
         }
-        return Collections.emptyList();
+        return Collections.emptyMap();
     }
 
 

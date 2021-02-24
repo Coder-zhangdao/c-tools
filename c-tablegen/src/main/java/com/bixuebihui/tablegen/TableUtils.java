@@ -400,20 +400,18 @@ public class TableUtils {
 
             List<ForeignKeyDefinition> foreignKeyData = map.computeIfAbsent(sFKTable, k -> new ArrayList<>());
 
-            ForeignKeyDefinition dt = getFkDefinition(sFKName, foreignKeyData);
-            if (dt != null) {
-                return dt;
+            ForeignKeyDefinition fkDefinition = getFkDefinition(sFKName, foreignKeyData);
+            if (fkDefinition == null) {
+                fkDefinition = new ForeignKeyDefinition(sPKTable, sFKTable, sFKName);
+                foreignKeyData.add(fkDefinition);
             }
 
-
-            ForeignKeyDefinition f = new ForeignKeyDefinition(sPKTable, sFKTable, sFKName);
             String sFKColumn = r.getString("FKCOLUMN_NAME"); //8
             String sPKColumn = r.getString("PKCOLUMN_NAME"); //4
-            f.addField(sFKColumn, sPKColumn);
-            foreignKeyData.add(f);
+            fkDefinition.addField(sFKColumn, sPKColumn);
 
             LOG.info("sequence=" + sequence + " FKName=" + sFKName + " FKTable=" + sFKTable + " PKTable=" + sPKTable + " FKColumn=" + sFKColumn + " sPKColumn=" + sPKColumn);
-            return f;
+            return fkDefinition;
         }));
     }
 

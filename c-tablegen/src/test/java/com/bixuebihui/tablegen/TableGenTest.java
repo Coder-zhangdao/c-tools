@@ -53,7 +53,7 @@ public class TableGenTest {
 	@Test
 	public void testGetPojoClassName() throws IOException {
 		TableGen tg = new TableGen();
-		tg.config.prefix="";
+		tg.getConfig().prefix="";
 
 		String extra_setting2="src/main/resources/pojos.xml";
 		String name = "sm_template_suite";
@@ -108,9 +108,9 @@ public class TableGenTest {
 				.getFile());
 		tg.init(this.getClass().getResource("/tablegen.properties")
 				.getFile());
-		IDbHelper helper = TableGen.getDbHelper(tg.dbconfig);
+		IDbHelper helper = TableGen.getDbHelper(tg.getDbConfig());
 		DatabaseMetaData meta = tg.connect(helper.getConnection());
-		tg.setInfo.getTableData(tg.config, helper, meta);
+		tg.setInfo.getTableData(tg.getConfig(), helper, meta);
 		LinkedHashMap<String, TableInfo> tables = tg.setInfo.getTableInfos();
 		for(TableInfo t:tables.values()){
 			System.out.println(t);
@@ -127,10 +127,10 @@ public class TableGenTest {
 		try {
 			tg.init(this.getClass().getResource("/tablegen.properties")
 					.getFile());
-			IDbHelper helper = TableGen.getDbHelper(tg.dbconfig);
+			IDbHelper helper = TableGen.getDbHelper(tg.getDbConfig());
 			DatabaseMetaData meta = tg.connect(helper.getConnection());
 
-			tg.setInfo.getTableData(tg.config, helper, meta);
+			tg.setInfo.getTableData(tg.getConfig(), helper, meta);
 			T_metatableManager manager = new T_metatableManager();
 			manager.setDbHelper(helper);
 			boolean res  = tg.setInfo.initTableData(tg.setInfo.getTableInfos(), manager);

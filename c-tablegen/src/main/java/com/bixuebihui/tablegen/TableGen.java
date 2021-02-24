@@ -38,7 +38,6 @@ import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableInfo;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
-import com.bixuebihui.tablegen.generator.DalGenerator;
 import com.bixuebihui.tablegen.generator.PojoGenerator;
 import com.bixuebihui.util.other.CMyFile;
 import org.apache.commons.dbutils.DbUtils;
@@ -50,7 +49,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.text.CaseUtils;
 import org.springframework.util.CollectionUtils;
 
-import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -73,28 +71,20 @@ public class TableGen implements DiffHandler {
     public static final String BUSINESS = "business";
     private static final Log LOG = LogFactory.getLog(TableGen.class);
     static String[] genericFiles = {"BaseList"};
-
-    ProjectConfig config = new ProjectConfig();
-
+    TableSetInfo setInfo = new TableSetInfo();
     BufferedWriter currentOutput;
-
     /**
      * Writes out the variables initial value if not null able.
      */
     Map<String, String> typeDefaultValue = defaultTypeValue();
+    private ProjectConfig config;
+    private DatabaseConfig dbConfig;
     /**
      * Whether the generation is successful
      */
     private boolean generateFlag = true;
-
     private boolean traceEnable = false;
-
-    TableSetInfo setInfo = new TableSetInfo();
-
-
-    protected DatabaseConfig dbconfig = new DatabaseConfig();
     private PrintStream console = System.out;
-
     public TableGen(OutputStream outputStream) {
         initConsole(outputStream);
     }
@@ -131,7 +121,6 @@ public class TableGen implements DiffHandler {
         System.exit(code);
     }
 
-
     public static Map<String, String> defaultTypeValue() {
         Map<String, String> map = new HashMap<>();
         map.put("String", "\"\"");
@@ -150,6 +139,70 @@ public class TableGen implements DiffHandler {
         return map;
     }
 
+    public static IDbHelper getDbHelper(DatabaseConfig dbconfig) {
+        DbHelper db = new DbHelper();
+        BitmechanicDataSource ds = new BitmechanicDataSource();
+        ds.setDatabaseConfig(dbconfig);
+        db.setDataSource(ds);
+        return db;
+    }
+
+    /**
+     * only keys used as parameters in where clause, so here params mean key columns.
+     * @param params keys of table
+     * @param withLike like for true or equal for false
+     * @param columnData columns of table
+     * @return string starts with 'where' or empty string
+     * @throws GenException
+     */
+    public static String createPreparedWhereClause(List<String> params, boolean withLike, List<ColumnData> columnData) {
+        StringBuilder where = new StringBuilder();
+
+        // if we have keys passed in then we add a "where" to the count
+        // e.g. se
+        //
+        if (params != null) {
+            // work out the "where" part of the update first..
+            //
+            where.append("+\" where ");
+            String key;
+            String keyType;
+            for (Iterator<String> e = params.iterator(); e.hasNext(); ) {
+                key = e.next();
+                keyType = getColType(key, columnData);
+
+                // only allow likes on String types...
+                // Hmmm should we allow more than this???
+                //
+                if ((withLike) && ("String".equals(keyType))) {
+                    where.append(key).append(" like ?");
+                } else {
+                    where.append(key).append("=?");
+                }
+
+                if (e.hasNext()) {
+                    where.append(" and ");
+                }
+            }
+
+            where.append("\"");
+        }
+
+        return where.toString();
+    }
+
+    public ProjectConfig getConfig() {
+        return config;
+    }
+
+    public DatabaseConfig getDbConfig() {
+        return dbConfig;
+    }
+
+    public void setDbConfig(DatabaseConfig dbConfig) {
+        this.dbConfig = dbConfig;
+    }
+
     private void initConsole(OutputStream out) {
         if (out instanceof PrintStream) {
             console = (PrintStream) out;
@@ -159,14 +212,6 @@ public class TableGen implements DiffHandler {
             console = new PrintStream(out);
         }
 
-    }
-
-    public static IDbHelper getDbHelper(DatabaseConfig dbconfig) {
-        DbHelper db = new DbHelper();
-        BitmechanicDataSource ds = new BitmechanicDataSource();
-        ds.setDatabaseConfig(dbconfig);
-        db.setDataSource(ds);
-        return db;
     }
 
     public void info(String message) {
@@ -191,10 +236,10 @@ public class TableGen implements DiffHandler {
         if (filename != null && filename.length() > 0) {
             init(filename);
         }
-        IDbHelper dbHelper = getDbHelper(dbconfig);
+        IDbHelper dbHelper = getDbHelper(dbConfig);
         try {
             makeDir();
-            DatabaseMetaData meta = connect(dbHelper.getConnection()); // get MetaData as well
+            DatabaseMetaData meta = connect(dbHelper.getConnection());
             setInfo.getTableData(config, dbHelper, meta);
 
             /**
@@ -221,7 +266,7 @@ public class TableGen implements DiffHandler {
                 }
             } else {
 
-                Connection conn = getDbHelper(dbconfig).getConnection();
+                Connection conn = getDbHelper(dbConfig).getConnection();
                 try {
                     DbDiff dd = new DbDiff(getTableDataFromLocalCache(), conn, config.catalog, config.schema);
                     dd.addDiffHandler(this);
@@ -339,7 +384,6 @@ public class TableGen implements DiffHandler {
 
     }
 
-
     private String getCachedColumnDataFilePath() {
 
         String src_dir = "target";
@@ -366,7 +410,6 @@ public class TableGen implements DiffHandler {
 
     }
 
-
     protected String getTableComment(String tableName) {
         if (config.useCustomMetaTable) {
             DictionaryItem item = DictionaryCache
@@ -381,7 +424,6 @@ public class TableGen implements DiffHandler {
         Map<String, T_metacolumn> cols = setInfo.getColumnsExtInfo(tableName);
         return TableUtils.getColumnDescription(config, cols, tableName, col);
     }
-
 
     private void generateJsp() throws SQLException {
 
@@ -459,50 +501,6 @@ public class TableGen implements DiffHandler {
         }
     }
 
-    /**
-     * only keys used as parameters in where clause, so here params mean key columns.
-     * @param params keys of table
-     * @param withLike like for true or equal for false
-     * @param columnData columns of table
-     * @return string starts with 'where' or empty string
-     * @throws GenException
-     */
-    public static String createPreparedWhereClause(List<String> params, boolean withLike, List<ColumnData> columnData) {
-        StringBuilder where = new StringBuilder();
-
-        // if we have keys passed in then we add a "where" to the count
-        // e.g. se
-        //
-        if (params != null) {
-            // work out the "where" part of the update first..
-            //
-            where.append("+\" where ");
-            String key;
-            String keyType;
-            for (Iterator<String> e = params.iterator(); e.hasNext(); ) {
-                key = e.next();
-                keyType = getColType(key, columnData);
-
-                // only allow likes on String types...
-                // Hmmm should we allow more than this???
-                //
-                if ((withLike) && ("String".equals(keyType))) {
-                    where.append(key).append(" like ?");
-                } else {
-                    where.append(key).append("=?");
-                }
-
-                if (e.hasNext()) {
-                    where.append(" and ");
-                }
-            }
-
-            where.append("\"");
-        }
-
-        return where.toString();
-    }
-
     private void writeInsertDummyTest(String tableName, String methodName) throws IOException {
         out("public void test" + firstUp(methodName) + "() throws SQLException");
         out("{");
@@ -565,9 +563,9 @@ public class TableGen implements DiffHandler {
 
             props.load(fis);
 
-            dbconfig.readDbConfig(props);
+            dbConfig = DatabaseConfig.newInstance(props);
 
-            config.readFrom(props, getConfigBaseDir(propertiesFilename));
+            config = ProjectConfig.readFrom(props, getConfigBaseDir(propertiesFilename));
 
         } catch (IOException e) {
             e.printStackTrace(console);
@@ -987,20 +985,21 @@ public class TableGen implements DiffHandler {
             trace("foreignKeys :" + sw.getSplitTime());
 
             if (config.indexes) {
-                List<String> indexData = setInfo.getTableIndexes(tableName); // updates the indexData
+                Map<String, List<String>> indexData = setInfo.getTableIndexes(tableName); // updates the indexData
                 // variable
-                if (isNotEmpty(indexData)) {
-                    writeSelect(tableName, indexData, "selectByIndex", colData);
-                    writeSelectAll(tableName, indexData, false, "selectAllLikeIndex", true, colData);
+                for (String indexName: indexData.keySet()) {
+                    List<String> cols = indexData.get(indexName);
+                    String name= firstUp(indexName);
+                    writeSelect(tableName, cols, "selectBy"+name, colData);
+                    writeSelectAll(tableName, cols, false, "selectAllLike"+name, true, colData);
 
-                    writeUpdate(tableName, indexData, "updateByIndex", false, false, colData);
-                    writeUpdate(tableName, indexData, "updateByIndex", true, false, colData);
+                    writeUpdate(tableName, cols, "updateBy"+name, false, false, colData);
+                    writeUpdate(tableName, cols, "updateBy"+name, true, false, colData);
 
-                    writeDelete(tableName, indexData, "deleteByIndex", false, colData);
-                    writeDelete(tableName, indexData, "deleteByIndex", true, colData);
-                    writeCount(indexData, false, "countByIndex", colData);
-                    writeCount(indexData, true, "countLikeIndex", colData);
-
+                    writeDelete(tableName, cols, "deleteBy"+name, false, colData);
+                    writeDelete(tableName, cols, "deleteBy"+name, true, colData);
+                    writeCount(cols, false, "countBy"+name, colData);
+                    writeCount(cols, true, "countLike"+name, colData);
                 }
             }
 

@@ -57,4 +57,4 @@ CREATE TABLE t_config (
 
 insert into t_config values ( 'key', 'name','value');
 insert into t_config values ( 'key1', 'name1','value1');
-
+insert into t_config values('key2','name2', 'value2');
