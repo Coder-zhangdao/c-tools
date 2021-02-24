@@ -38,7 +38,7 @@ public class TableSetInfo {
     private final Map<String, List<String>> keyCache = new LRULinkedHashMap<>(500);
 
     /**
-     * TODO  union keys and indexes store in multiline of metadate, currently only support signle field index
+     *  union keys and indexes store in multiline of metadata, currently only support single field index
      *  so need use: Map<tableName, Map<indexName, List<ColNames>> indexCache
      */
     //private final Map<String, List<String>> indexCache = new LRULinkedHashMap<>(200);
