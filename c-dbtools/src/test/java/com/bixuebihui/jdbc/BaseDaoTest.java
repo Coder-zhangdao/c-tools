@@ -3,7 +3,10 @@ package com.bixuebihui.jdbc;
 import com.bixuebihui.datasource.DataSourceTest;
 import com.bixuebihui.datasource.DbcpDataSource;
 import com.bixuebihui.db.ActiveRecord;
+import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+import org.springframework.aop.framework.ProxyFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -381,5 +384,115 @@ public class BaseDaoTest extends TestCase {
 		System.out.println(mybd.getLast().dt);
 		System.out.println(mybd.getFirst().dt);
 
+	}
+
+	@Test
+	public void testConvert() throws SQLException {
+
+		DbcpDataSource ds = new DbcpDataSource();
+		ds.setDatabaseConfig(DataSourceTest.getConfigDerby());
+		DbHelper db = new DbHelper();
+		db.setDataSource(ds);
+		ProxyFactory obj = new ProxyFactory(db);
+		obj.addAdvice(new DbHelperAroundAdvice());
+		IDbHelper dbHelper = (IDbHelper) obj.getProxy();
+
+		try{
+			dbHelper.executeNoQuery("drop table test2");}catch(SQLException ex){
+		}
+		try{
+			dbHelper.executeNoQuery("create table test2(id int, name_Snake varchar(100), dt timestamp  default current_timestamp, primary key (id))");
+			dbHelper.executeNoQuery("insert into test2(id , name_Snake, dt) values(300,'MKD', null)");
+			dbHelper.executeNoQuery("insert into test2(id , name_Snake, dt) values(100,'abc', current_timestamp)");
+			dbHelper.executeNoQuery("insert into test2(id , name_Snake, dt) values(200,'efg', current_timestamp)");
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+
+		class BD extends BaseDao<DbObj2, Long> {
+			public BD(IDbHelper db) {
+				super(db);
+			}
+			public DbObj2 mapRow(ResultSet rs, int index) throws SQLException {
+				DbObj2 o= new DbObj2();
+				o.id = rs.getLong(1);
+				o.nameSnake = rs.getString(2);
+				o.dt = rs.getTimestamp(3);
+				return o;
+			}
+
+			@Override
+			public String getKeyName() {
+				return "ID";
+			}
+			@Override
+			public String getTableName() {
+				return "test2";
+			}
+			@Override
+			public boolean insertDummy() throws SQLException {
+				return false;
+			}
+			@Override
+			public Long getId(DbObj2 info) {
+				return info.id;
+			}
+			@Override
+			public void setId(DbObj2 info, Long id) {
+				info.id = id;
+			}
+			@Override
+			public Long getNextKey() {
+				return null;
+			}
+
+			@Override
+			protected void setIdLong(DbObj2 info, long id) {
+				setId(info, id);
+			}
+
+		}
+
+		BD mybd = new BD(dbHelper);
+		List<DbObj2> list = mybd.ar().asc("name_Snake").findAll(DbObj2.class);
+
+		assertEquals("MKD", list.get(0).nameSnake);
+		assertEquals("efg", list.get(2).nameSnake);
+		System.out.println(mybd.getLast().dt);
+		System.out.println(mybd.getFirst().dt);
+
+	}
+
+	public static class DbObj2{
+		long id;
+		String nameSnake;
+		Timestamp dt;
+
+		public DbObj2(){
+		}
+
+		public long getId() {
+			return id;
+		}
+
+		public void setId(long id) {
+			this.id = id;
+		}
+
+		public String getNameSnake() {
+			return nameSnake;
+		}
+
+		public void setNameSnake(String nameSnake) {
+			this.nameSnake = nameSnake;
+		}
+
+		public Timestamp getDt() {
+			return dt;
+		}
+
+		public void setDt(Timestamp dt) {
+			this.dt = dt;
+		}
 	}
 }

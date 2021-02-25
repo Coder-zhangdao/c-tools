@@ -229,7 +229,8 @@ public class DataSourceTest extends TestCase {
 		}
 		DatabaseConfig cfg = new DatabaseConfig();
 		cfg.setAlias("derby");
-		cfg.setClassName("org.apache.derby.jdbc.EmbeddedDriver");
+		// cfg.setClassName("org.apache.derby.jdbc.EmbeddedDriver");
+		cfg.setClassName("org.apache.derby.iapi.jdbc.AutoloadedDriver");
 		cfg.setUsername("");
 		cfg.setPassword("");
 		cfg.setDburl("jdbc:derby:"+dbName+";create=true");

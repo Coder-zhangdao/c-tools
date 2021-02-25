@@ -364,8 +364,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     private static String getPagingSqlDerby(String selectSql, int startNum, int endNum) {
 
+        String orderBy = selectSql.indexOf("order by")>0 ?  selectSql.substring(selectSql.indexOf("order by")):"";
+        selectSql = selectSql.substring(0, selectSql.indexOf("order by"));
+
         return SELECT_FROM + "(select FR.*,ROW_NUMBER() OVER() AS RN from (" + selectSql
-                + ")as FR) as ttt where RN<=" + endNum + " and RN>" + startNum;
+                + ")as FR "+orderBy+") as ttt where RN<=" + endNum + " and RN>" + startNum;
 
     }
 
@@ -852,7 +855,10 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
             try {
                 // b.copyProperty(receiver, key.toLowerCase(), value);
-                b.copyProperty(receiver,  CaseUtils.toCamelCase(key, true, '_'), value);
+                if(dbtype==DERBY){
+                    key = key.toLowerCase(Locale.ROOT);
+                }
+                b.copyProperty(receiver,  CaseUtils.toCamelCase(key, false, '_'), value);
             } catch (IllegalAccessException e) {
                 mLog.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
                         + ", ask xwx@live.cn to add a convertor for this type.");
@@ -885,7 +891,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     <K> List<K> select(String select, String whereClause, String orderBy, Object[] params, int rowStart,
                        int rowEnd, Class<K> clz) throws SQLException {
 
-        String selectSql = select + " " + whereClause + " " + (this.getDbType() == BaseDao.DERBY ? "" : orderBy);
+        String selectSql = select + " " + whereClause + " " + orderBy; //(this.getDbType() == BaseDao.DERBY ? "" : orderBy);
 
         List<Map<String, Object>> v = getDbHelper().executeQuery(this.getPagingSql(selectSql, rowStart, rowEnd),
                 params);
@@ -899,7 +905,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             for (Map<String, Object> h : v) {
                 try {
                     // v1.add(convertCaseSensitive(h, clz.getDeclaredConstructor().newInstance()));
-                    v1.add(convert(h, clz.getDeclaredConstructor().newInstance()));
+                    v1.add(convert(h, clz.getConstructor().newInstance()));
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
                     throw new SQLException(e);
                 }
