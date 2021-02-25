@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author xwx
+ */
 public class NameUtils {
 	static char KEYWORD_APPEND_CHAR = '_';
 

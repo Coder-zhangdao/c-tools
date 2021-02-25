@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.bixuebihui.sequence.SequenceUtils;
+import org.apache.commons.text.CaseUtils;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
@@ -815,7 +816,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         // access properties as Map
         Map<String, String> properties = BeanUtils.describe(receiver);
-        Map<String, Object> values = new HashMap<>(16);
+        Map<String, Object> values = new HashMap<>(h.size()*2);
         for (Map.Entry<String, ?> e : properties.entrySet()) {
             Object o = h.get(e.getKey());
             values.put(e.getKey(), o);
@@ -850,7 +851,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             }
 
             try {
-                b.copyProperty(receiver, key.toLowerCase(), value);
+                // b.copyProperty(receiver, key.toLowerCase(), value);
+                b.copyProperty(receiver,  CaseUtils.toCamelCase(key, true, '_'), value);
             } catch (IllegalAccessException e) {
                 mLog.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
                         + ", ask xwx@live.cn to add a convertor for this type.");
@@ -896,7 +898,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         } else {
             for (Map<String, Object> h : v) {
                 try {
-                    v1.add(convertCaseSensitive(h, clz.getDeclaredConstructor().newInstance()));
+                    // v1.add(convertCaseSensitive(h, clz.getDeclaredConstructor().newInstance()));
+                    v1.add(convert(h, clz.getDeclaredConstructor().newInstance()));
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
                     throw new SQLException(e);
                 }

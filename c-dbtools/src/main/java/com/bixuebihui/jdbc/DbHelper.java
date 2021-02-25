@@ -495,19 +495,19 @@ public class DbHelper implements IDbHelper {
 			return result;
 		}
 
-		ResultSetMetaData rsmdQuery = rs.getMetaData();
-		int iColumnNumber = rsmdQuery.getColumnCount();
+		ResultSetMetaData metaData = rs.getMetaData();
+		int iColumnNumber = metaData.getColumnCount();
 
 		while (rs.next()) {
 			Map<String, Object> mapColumn = new HashMap<>(32);
 			for (int i = 1; i <= iColumnNumber; i++) {
 
-				String colTypeName = rsmdQuery.getColumnTypeName(i).toUpperCase();
+				String colTypeName = metaData.getColumnTypeName(i).toUpperCase();
 
-				String colName = rsmdQuery.getColumnName(i);
+				String colName = metaData.getColumnName(i);
 
-				if(!StringUtils.isBlank(rsmdQuery.getColumnLabel(i))) {
-					colName = rsmdQuery.getColumnLabel(i);
+				if(!StringUtils.isBlank(metaData.getColumnLabel(i))) {
+					colName = metaData.getColumnLabel(i);
 				}
 
 				if(mapColumn.containsKey(colName) && rs.getObject(i)==null){
@@ -529,7 +529,7 @@ public class DbHelper implements IDbHelper {
 					case "INT UNSIGNED":
 					case "MEDIUMINT UNSIGNED":
 
-						dealNumber(rs, rsmdQuery, mapColumn, i, colTypeName, colName);
+						dealNumber(rs, metaData, mapColumn, i, colTypeName, colName);
 
 						break;
 					case "BIGINT":
