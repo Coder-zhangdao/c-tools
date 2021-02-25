@@ -5,7 +5,9 @@ import org.jmesa.view.html.HtmlBuilder;
 import org.jmesa.view.html.HtmlSnippets;
 
 /**
- * Created by super on 14-3-20.
+ *
+ * @author xwx
+ * @date 14-3-20
  */
 public class MenuHtmlView extends AbstractHtmlView {
     @Override
@@ -20,11 +22,6 @@ public class MenuHtmlView extends AbstractHtmlView {
 
         html.append(snippets.theadStart());
 
-
-//        html.append(snippets.filter());
-
-//        html.append(snippets.header());
-
         html.append(snippets.theadEnd());
 
         html.append(snippets.tbodyStart());
@@ -36,8 +33,6 @@ public class MenuHtmlView extends AbstractHtmlView {
         html.append(snippets.footer());
 
         html.append(snippets.toolbar());
-
-//        html.append(snippets.statusBar());
 
         html.append(snippets.tableEnd());
 

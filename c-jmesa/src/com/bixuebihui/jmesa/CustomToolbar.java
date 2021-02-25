@@ -69,7 +69,6 @@ public class CustomToolbar extends SimpleToolbar {
 
         item.setImage(getImage(actionCode + ".gif", getWebContext(), getCoreContext()));
         item.setAlt(this.getCoreContext().getMessage("html.toolbar.text." + actionCode));
-        //item.setToolbarItemRenderer();
 
         return item;
     }

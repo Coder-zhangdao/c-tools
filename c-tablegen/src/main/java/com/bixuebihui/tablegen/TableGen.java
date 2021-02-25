@@ -122,7 +122,7 @@ public class TableGen implements DiffHandler {
     }
 
     public static Map<String, String> defaultTypeValue() {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(16);
         map.put("String", "\"\"");
         map.put("int", "0");
         map.put("byte", "0");
@@ -242,7 +242,7 @@ public class TableGen implements DiffHandler {
             DatabaseMetaData meta = connect(dbHelper.getConnection());
             setInfo.getTableData(config, dbHelper, meta);
 
-            /**
+            /*
              * 如果generator_all == yes，则生成所有表 否则，进行本地快照和数据库的比对
              */
             generateBaseList();
@@ -276,9 +276,8 @@ public class TableGen implements DiffHandler {
                 }
             }
 
-        } catch (SQLException | InstantiationException | IOException ex1) {
-            ex1.printStackTrace(console);
-        } catch (IllegalAccessException e) {
+        } catch (SQLException | IOException e) {
+            e.printStackTrace(console);
             LOG.error(e);
         }
 
@@ -326,7 +325,7 @@ public class TableGen implements DiffHandler {
             TableInfo table = new TableInfo("Procedures");
             String fileName = config.getBaseSrcDir() + File.separator + "stub" + File.separator + table.getName() + ".java";
             currentOutput = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
+                    new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
             writeHeader(table, "stub", "extends BaseList<Object, Object>");
 
@@ -479,7 +478,7 @@ public class TableGen implements DiffHandler {
 
             String fileName = config.jspDir + File.separator + "list" + File.separator + "index.jsp";
             currentOutput = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
+                    new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
             // BufferedWriter(new
             out("<%@ page language=\"java\" import=\"java.util.*\" pageEncoding=\"UTF-8\"%>\n" + "<html>\n" + "<head>\n"
                     + "</head>\n" + "<body><ul>\n");
@@ -718,15 +717,15 @@ public class TableGen implements DiffHandler {
             writeHeader(table, "pojo", interfaces + PojoGenerator.getExtendsClasses(setInfo, tableName));
 
             // handle the variables
-            for (ColumnData e2 : colData) {
-                writeVariable(tableName, e2);
+            for (ColumnData columnData : colData) {
+                writeVariable(tableName, columnData);
             }
 
             boolean findNode = false;
             // handle the variable access functions (set/get)
-            for (ColumnData e2 : colData) {
-                writeSetGet(tableName, e2);
-                if ("relation_code".equalsIgnoreCase(e2.getName())) {
+            for (ColumnData columnData : colData) {
+                writeSetGet(tableName, columnData);
+                if ("relation_code".equalsIgnoreCase(columnData.getName())) {
                     findNode = true;
                 }
             }
@@ -743,10 +742,10 @@ public class TableGen implements DiffHandler {
             // handle the constructor
             out(" public " + getPojoClassName(tableName) + "()");
             out("     {");
-            for (ColumnData e2 : colData) {
-                writeInit(e2);
+            for (ColumnData columnData : colData) {
+                writeInit(columnData);
             }
-            out("     }");// toXml
+            out("     }");
 
             // handle the toXml functions
             out(" public String toXml()");
@@ -767,7 +766,7 @@ public class TableGen implements DiffHandler {
             out("     s.append(\" />\");");
             out("     s.append(ln);");
             out("    return s.toString();");
-            out("     }");// toXml
+            out("     }");
 
             out("}");
 
@@ -985,7 +984,7 @@ public class TableGen implements DiffHandler {
             trace("foreignKeys :" + sw.getSplitTime());
 
             if (config.indexes) {
-                Map<String, List<String>> indexData = setInfo.getTableIndexes(tableName); // updates the indexData
+                Map<String, List<String>> indexData = setInfo.getTableIndexes(tableName);
                 // variable
                 for (String indexName: indexData.keySet()) {
                     List<String> cols = indexData.get(indexName);
@@ -1117,7 +1116,7 @@ public class TableGen implements DiffHandler {
                 boolean fileExists = f.exists();
                 if (config.overWriteAll || !fileExists) {
                     currentOutput = new BufferedWriter(
-                            new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));// new
+                            new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
 
                     List<ColumnData> colData = table.getFields();
                     List<String> keyData = setInfo.getTableKeys(tableName);
@@ -1197,7 +1196,6 @@ public class TableGen implements DiffHandler {
         out("  import com.bixuebihui.jdbc.MSDbHelper;");
         out("  import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;");
         out("  import org.springframework.aop.framework.ProxyFactory;");
-//		out("  import org.springframework.beans.factory.annotation.Autowired;");
 
         out("  import javax.sql.DataSource;");
         out("  import java.sql.SQLException;");

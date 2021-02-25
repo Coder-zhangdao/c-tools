@@ -41,7 +41,6 @@ public class TableSetInfo {
      *  union keys and indexes store in multiline of metadata, currently only support single field index
      *  so need use: Map<tableName, Map<indexName, List<ColNames>> indexCache
      */
-    //private final Map<String, List<String>> indexCache = new LRULinkedHashMap<>(200);
     private final Map<String, Map<String, List<String>>> indexCache = new HashMap<>(200);
 
 
@@ -66,8 +65,10 @@ public class TableSetInfo {
         return keyCache;
     }
 
-    protected static int getPos(List list, int desiredPos){
-        if(list.size()>desiredPos)return desiredPos;
+    protected static int getPos(List<?> list, int desiredPos){
+        if(list.size()>desiredPos){
+            return desiredPos;
+        }
         return list.size();
     }
 
@@ -84,9 +85,6 @@ public class TableSetInfo {
     }
 
     public List<ColumnData> getTableCols(String tableName){
-        if(tableName==null){
-            return Collections.emptyList();
-        }
        return this.getTableInfos().get(tableName).getFields();
     }
 
@@ -178,11 +176,31 @@ public class TableSetInfo {
         return indexCache;
     }
 
+    /**
+     * this below two methods are valid only for MySQL
+     * @param conn
+     * @param tableInfo
+     * @return
+     */
+    private static void fillComment(Connection conn, TableInfo tableInfo ) {
+        String tableName =tableInfo.getName();
+        try( Statement showTableStatement = conn.createStatement();
+             ResultSet showTableResultSet = showTableStatement.executeQuery("show create table " + tableName)
+        ){ showTableResultSet.next();
+            String createTableSql = showTableResultSet.getString(2);
+            findFieldComment(tableName, tableInfo.getFields(), createTableSql);
+            String comment =  findTableComment(createTableSql);
+            tableInfo.setComment(comment);
+        } catch (SQLException e) {
+            LOG.warn("fail to execute: show create table " + tableName);
+            LOG.warn(e.getMessage(), e);
+        }
 
+    }
 
     public Map<String, T_metatable> getTableDataExt(IDbHelper dbHelper, LinkedHashMap<String, TableInfo> tables)
             throws SQLException {
-        HashMap<String, T_metatable> ht = new HashMap<>();
+        HashMap<String, T_metatable> ht = new HashMap<>(tables.size()*2);
         T_metatableManager daoMetaTable = new T_metatableManager();
         daoMetaTable.setDbHelper(dbHelper);
 
@@ -192,49 +210,11 @@ public class TableSetInfo {
             names.add(table.getName());
         }
 
-
         Collection<T_metatable> c = daoMetaTable.getTableDataExt(names);
         for (T_metatable t : c) {
             ht.put(t.getTname(), t);
         }
         return ht;
-    }
-
-
-    public boolean setupMetatable(IDbHelper dbHelper, T_metatableManager daoMetaTable) {
-        Connection conn = null;
-        boolean res = false;
-        try {
-            LOG.info("[CYC]数据库安装...");
-            conn = dbHelper.getConnection();
-            if (!JDBCUtils.tableOrViewExists(null, null, daoMetaTable.getTableName(), conn)) {
-                SqlFileExecutor ex = new SqlFileExecutor();
-                String filename;
-
-                if (daoMetaTable.getDbType() == BaseDao.POSTGRESQL) {
-                    filename = "postgresql";
-                } else {
-                    filename = "mysql";
-                }
-
-                DefaultResourceLoader loader = new DefaultResourceLoader();
-                String beanConfigFile = "classpath:dbscript/ext." + filename + ".sql";
-                LOG.info(loader.getResource(beanConfigFile).getFilename());
-                ex.execute(conn, loader.getResource(beanConfigFile).getInputStream());
-
-                res = initTableData(getTableInfos(), daoMetaTable);
-            }
-            if (res) {
-                LOG.info("[CYC]数据库已成功安装");
-            } else {
-                LOG.info(DB_ERROR);
-            }
-        } catch (Exception e) {
-            LOG.info(DB_ERROR, e);
-        } finally {
-            JDBCUtils.close(conn);
-        }
-        return false;
     }
 
 
@@ -292,71 +272,40 @@ public class TableSetInfo {
         }
     }
 
-    /**
-     * Retrieves all the table data required.
-     *
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws IOException
-     */
-    public synchronized void getTableData(ProjectConfig config, IDbHelper dbHelper, @NotNull DatabaseMetaData metaData) throws SQLException, InstantiationException, IllegalAccessException, IOException {
+    public boolean setupMetatable(IDbHelper dbHelper, T_metatableManager daoMetaTable) {
+        Connection conn = null;
+        boolean res = false;
+        try {
+            LOG.info("[Auto] Setup Metadata Tables to DB...");
+            conn = dbHelper.getConnection();
+            if (!JDBCUtils.tableOrViewExists(null, null, daoMetaTable.getTableName(), conn)) {
+                SqlFileExecutor ex = new SqlFileExecutor();
+                String filename;
 
-        LinkedHashMap<String, TableInfo> col = getTableInfos();
-
-        try(Connection cn = dbHelper.getConnection()) {
-            if (CollectionUtils.isEmpty(col)) {
-
-                //表名
-                List<String> tableNames =
-                        TableUtils.getTableData(metaData, config.getCatalog(), config.getSchema(),
-                                config.getTableOwner(), config.getTablesList(), config.getExcludeTablesList());
-                LinkedHashMap<String, TableInfo> tables = new LinkedHashMap<>();
-                for (String name : tableNames) {
-                    TableInfo table = new TableInfo(name);
-
-                    // Fill columns info
-                    TableInfo newInfo = TableUtils.getColumnData(metaData, config.getCatalog(), config.getSchema(), name);
-                    table.setFields(newInfo.getFields());
-                    tables.put(name, table);
-
-                    // Primary keys info
-                    List<String> keyData = TableUtils.getTableKeys(metaData, config.getCatalog(), config.getSchema(), name);
-                    getKeyCache().put(name, keyData);
-
-                    // foreign keys import info
-                    initImportKeys(config, dbHelper, metaData, name);
-
-                    // foreign keys export info
-                    initExportKeys(config, dbHelper, metaData, name);
-
-                    // index info
-                    initIndex(config, metaData, name);
-
-                    // table & column's  comment
-                    if(isMysql(metaData)) {
-                        fillComment(cn, table);
-                    }
-
+                if (daoMetaTable.getDbType() == BaseDao.POSTGRESQL) {
+                    filename = "postgresql";
+                } else {
+                    filename = "mysql";
                 }
 
+                DefaultResourceLoader loader = new DefaultResourceLoader();
+                String beanConfigFile = "classpath:dbscript/ext." + filename + ".sql";
+                LOG.info(loader.getResource(beanConfigFile).getFilename());
+                ex.execute(conn, loader.getResource(beanConfigFile).getInputStream());
 
-                setTableInfos(tables);
+                res = initTableData(getTableInfos(), daoMetaTable);
+            }
+            if (res) {
+                LOG.info("[Auto] The metadata tables created!");
             } else {
-                LOG.info("tableNames already set, retrieve from db skipped.");
+                LOG.info(DB_ERROR);
             }
-
-            // Custom meta info from db table
-            if (config.isUseCustomMetaTable()) {
-                setTableDataExt(getTableDataExt(dbHelper, getTableInfos()));
-            }
-
-            // Custom meta info from xml
-            if (StringUtils.isNotEmpty(config.getExtra_setting())) {
-                setTableDataExt(getExtraTableDataFromXml(
-                        config.getBaseDir() + config.getExtra_setting(), getTableDataExt()));
-            }
+        } catch (Exception e) {
+            LOG.info(DB_ERROR, e);
+        } finally {
+            JDBCUtils.close(conn);
         }
-
+        return false;
     }
 
     /**
@@ -431,7 +380,6 @@ public class TableSetInfo {
             }
             if(getForeignKeyExCache().containsKey(tableName)) {
                 LOG.info(tableName +" has  ExportKey in cache:"+ getForeignKeyExCache().get(tableName));
-                return;
             }else{
                 LOG.debug(tableName +" does not have a ExportKey in cache");
             }
@@ -439,6 +387,69 @@ public class TableSetInfo {
         }
         List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableExportedKeys(metaData, config.getCatalog(), config.getTableOwner(), tableName);
         getForeignKeyExCache().put(tableName, foreignKeyData);
+    }
+
+    /**
+     * Retrieves all the table data required.
+     *
+     * @throws IOException
+     */
+    public synchronized void getTableData(ProjectConfig config, IDbHelper dbHelper, @NotNull DatabaseMetaData metaData) throws SQLException, IOException {
+
+        LinkedHashMap<String, TableInfo> col = getTableInfos();
+
+        try(Connection cn = dbHelper.getConnection()) {
+            if (CollectionUtils.isEmpty(col)) {
+
+                //表名
+                List<String> tableNames =
+                        TableUtils.getTableData(metaData, config.getCatalog(), config.getSchema(),
+                                config.getTableOwner(), config.getTablesList(), config.getExcludeTablesList());
+                LinkedHashMap<String, TableInfo> tables = new LinkedHashMap<>();
+                for (String name : tableNames) {
+                    TableInfo table = new TableInfo(name);
+
+                    // Fill columns info
+                    TableInfo newInfo = TableUtils.getColumnData(metaData, config.getCatalog(), config.getSchema(), name);
+                    table.setFields(newInfo.getFields());
+                    tables.put(name, table);
+
+                    // Primary keys info
+                    List<String> keyData = TableUtils.getTableKeys(metaData, config.getCatalog(), config.getSchema(), name);
+                    getKeyCache().put(name, keyData);
+
+                    // foreign keys import info
+                    initImportKeys(config, dbHelper, metaData, name);
+
+                    // foreign keys export info
+                    initExportKeys(config, dbHelper, metaData, name);
+
+                    // index info
+                    initIndex(config, metaData, name);
+
+                    // table & column's  comment
+                    if(isMysql(metaData)) {
+                        fillComment(cn, table);
+                    }
+                }
+
+                setTableInfos(tables);
+            } else {
+                LOG.info("tableNames already set, retrieve from db skipped.");
+            }
+
+            // Custom meta info from db table
+            if (config.isUseCustomMetaTable()) {
+                setTableDataExt(getTableDataExt(dbHelper, getTableInfos()));
+            }
+
+            // Custom meta info from xml
+            if (StringUtils.isNotEmpty(config.getExtra_setting())) {
+                setTableDataExt(getExtraTableDataFromXml(
+                        config.getBaseDir() + config.getExtra_setting(), getTableDataExt()));
+            }
+        }
+
     }
 
     private  void initImportKeys(ProjectConfig config, IDbHelper dbHelper, DatabaseMetaData metaData, String tableName) throws SQLException {
@@ -449,51 +460,13 @@ public class TableSetInfo {
             }
             if(getForeignKeyImCache().containsKey(tableName)) {
                 LOG.info(tableName +" has  ImportKey in cache:"+ getForeignKeyImCache().get(tableName));
-                return;
             }else{
                 LOG.debug(tableName +"have not a ImportKey in cache");
-                return;
             }
+            return;
         }
         List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableImportedKeys(metaData, config.getCatalog(), config.getTableOwner(), tableName);
         getForeignKeyImCache().put(tableName, foreignKeyData);
-    }
-
-
-
-    /**
-     * this below two methods are valid only for MySQL
-     * @param conn
-     * @param tableInfo
-     * @return
-     */
-    private static void fillComment(Connection conn, TableInfo tableInfo ) {
-        ResultSet showTableResultSet = null;
-        Statement showTableStatement = null;
-        String tableName =tableInfo.getName();
-        try {
-            showTableStatement = conn.createStatement();
-            showTableResultSet = showTableStatement.executeQuery("show create table " + tableName);
-            showTableResultSet.next();
-            String createTableSql = showTableResultSet.getString(2);
-            findFieldComment(tableName, tableInfo.getFields(), createTableSql);
-            String comment =  findTableComment(createTableSql);
-            tableInfo.setComment(comment);
-        } catch (Exception e) {
-            LOG.warn("fail to execute: show create table "+tableName);
-            LOG.warn(e.getMessage(), e);
-        } finally {
-            try {
-                if (showTableResultSet != null) {
-                    showTableResultSet.close();
-                }
-                if (showTableStatement != null) {
-                    showTableStatement.close();
-                }
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
     }
 
 
@@ -555,41 +528,28 @@ public class TableSetInfo {
      * Selects the primary keys for a particular table.
      */
     public @NotNull List<String> getTableKeys(String tableName){
-        if (getKeyCache().containsKey(tableName)) {
-            return getKeyCache().get(tableName);
-        }
-        return Collections.emptyList();
+        return getKeyCache().getOrDefault(tableName, Collections.emptyList());
     }
 
     /**
      * Selects the Imported Keys defined for a particular table.
      */
     public @NotNull List<ForeignKeyDefinition> getTableImportedKeys(String tableName){
-
-        if (getForeignKeyImCache().containsKey(tableName)) {
-            return getForeignKeyImCache().get(tableName);
-        }
-        return Collections.emptyList();
+        return getForeignKeyImCache().getOrDefault(tableName, Collections.emptyList());
     }
 
     /**
      * Selects the Exported Keys defined for a particular table.
      */
     public @NotNull List<ForeignKeyDefinition> getTableExportedKeys(String tableName) {
-        if (getForeignKeyExCache().containsKey(tableName)) {
-            return getForeignKeyExCache().get(tableName);
-        }
-        return Collections.emptyList();
+        return getForeignKeyExCache().getOrDefault(tableName, Collections.emptyList());
     }
 
     /**
      * Selects the indexes for a particular table.
      */
     public Map<String, List<String>> getTableIndexes(String tableName) {
-        if (getIndexCache().containsKey(tableName)) {
-            return getIndexCache().get(tableName);
-        }
-        return Collections.emptyMap();
+        return getIndexCache().getOrDefault(tableName,Collections.emptyMap());
     }
 
 

@@ -177,18 +177,10 @@ public class ObjectCache {
         Dictionary dict = parseKey(key);
         DictionaryDefine def = dict.getDictDef();
         IBaseListService list = def.getServiceClass();
-        boolean res = list.insertAutoNewKey(info);
-
-        //TODO 如何自动获取新增ID
-        //Map<String, Object> all = (Map<String, Object>) getMap(dict.getStoreKey(), def.getMaxCapacity());
-        //all.put(id, info);
-
-        return res;
+        return list.insertAutoNewKey(info);
     }
 
     public void destroy() {
-        // TODO Auto-generated method stub
-
         admin.destroy();
     }
 

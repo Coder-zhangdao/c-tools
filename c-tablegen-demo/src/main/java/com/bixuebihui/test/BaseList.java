@@ -1,7 +1,7 @@
 package com.bixuebihui.test;
 /*
   * BaseList
-  * 
+  *
   * Notice! Automatically generated file!
   * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
   * Code Generator originally by J.A.Carter
@@ -17,6 +17,9 @@ package com.bixuebihui.test;
   import javax.sql.DataSource;
   import java.sql.SQLException;
 
+/**
+ * @author xwx
+ */
 public abstract class BaseList<T,V> extends BaseDao<T,V>
 {
 

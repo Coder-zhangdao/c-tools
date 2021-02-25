@@ -92,6 +92,8 @@ public class ColumnData implements Serializable {
                 break;
 
             case -3:
+            case -4:
+                //LONG RAW which maps to LONGVARBINARY
                 // MySQL
                 // medium blob / blob to LONGVARBINARY
                 type = 19;
@@ -109,13 +111,6 @@ public class ColumnData implements Serializable {
                 //Oracle
                 //RAW which maps to VARBINARY
 //        type = 18;
-                break;
-
-
-            case -4:
-                //Oracle
-                //LONG RAW which maps to LONGVARBINARY
-                type = 19;
                 break;
 
             case -5:
@@ -151,14 +146,10 @@ public class ColumnData implements Serializable {
                 break;
 
             case 92:
-                // PostGres
-                // timestamp
-                type = 14;
-                break;
 
             case 93:
-                // MySQL
-                // timestamp
+                // MySQL timestamp
+                // Postgres  timestamp
                 type = 14;
                 break;
 
@@ -364,15 +355,20 @@ public class ColumnData implements Serializable {
         }
 
         return res+(comment==null?"":": "+comment);
-        //return super.toString()+"[type="+type+":"+ sqlTypes[type]+",columns="+columns+",name="+name+",isNullable="+isNullable+"]";
     }
 
 
     /**
      * Writes out the equivalent java type of the column sql type.
+     *             case 11:
+     *                 jType = "Date";
+     *                 // always return Timestamp as it's more accurate
+     *                 // and is a superset of Date
+     *                 // NOPE - lets follow Suns recommendations, so...
+     *                 //jType = "Timestamp";
      */
     public String getJavaType() {
-        String jType = null;
+        String jType;
 
         switch (type) {
             case 1:
@@ -391,11 +387,7 @@ public class ColumnData implements Serializable {
                 break;
 
             case 3:
-                jType = "Long";
-                break;
-
             case 4:
-                // jType = "Integer";
                 jType = "Long";
                 break;
 
@@ -419,10 +411,6 @@ public class ColumnData implements Serializable {
 
             case 11:
                 jType = "Date";
-                // always return Timestamp as it's more accurate
-                // and is a superset of Date
-                // NOPE - lets follow Suns recommendations, so...
-                //jType = "Timestamp";
                 break;
 
             case 14:
@@ -450,7 +438,8 @@ public class ColumnData implements Serializable {
                 break;
 
             case 23:
-                jType = "com.bixuebihui.jdbc.ClobString"; //oracle CLOB
+                //oracle CLOB
+                jType = "com.bixuebihui.jdbc.ClobString";
                 break;
             default:
                 System.err.println("Warning - col type : " + type + " is unknown");

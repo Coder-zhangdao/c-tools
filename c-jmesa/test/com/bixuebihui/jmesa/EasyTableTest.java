@@ -261,4 +261,24 @@ public class EasyTableTest {
 
     }
 
+
+
+    @Test
+    public void testJsonLimit() throws SQLException, JsonProcessingException {
+        String tableName = "t_config";
+        String baseSql = " select c_key, c_name , c_value from t_config";
+        EasyTable et = new EasyTable(dbHelper, tableName, baseSql);
+
+        int size=2;
+        String res = et.json("{\"exportType\":\"json\", \"maxRows\":"+size+"}");
+        ObjectMapper mapper = new ObjectMapper();
+        Map map= mapper.readValue(res, Map.class);
+
+        Object obj = map.get("paging");
+        // paging: {page=1, maxRows=2, rowEnd=2, rowStart=0, totalRows=3}
+        assertEquals(5, ((Map)obj).size());
+
+
+    }
+
 }

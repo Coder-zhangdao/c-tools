@@ -481,7 +481,6 @@ public class TableUtils {
         String[] tableTypes = {"TABLE", "VIEW"};
         List<String> tableNames;
 
-        // ResultSet tables = metaData.getTables(catalog, schema, "%", tableTypes);
         ResultSet tables = metaData.getTables(catalog, schema, null, tableTypes);
         start("getTableData");
         try {

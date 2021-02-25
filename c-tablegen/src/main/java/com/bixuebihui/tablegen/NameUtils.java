@@ -11,8 +11,8 @@ import java.util.Set;
 public class NameUtils {
 	static char KEYWORD_APPEND_CHAR = '_';
 
-	static Set<String> PROJECT_FIELD_KEYWORD = new HashSet<>(Arrays.asList(new String[]{"length", "start", "draw", "count"}));
-	static Set<String> JAVA_KEYWORD = new HashSet<>(Arrays.asList(new String[]{"abstract",
+	static Set<String> PROJECT_FIELD_KEYWORD = new HashSet<>(Arrays.asList("length", "start", "draw", "count"));
+	static Set<String> JAVA_KEYWORD = new HashSet<>(Arrays.asList("abstract",
 			"assert",
 			"boolean",
 			"break",
@@ -29,7 +29,7 @@ public class NameUtils {
 			"new", "package", "private", "protected", "public",
 			"return", "strictfp", "short", "static", "super",
 			"switch", "synchronized", "this", "throw", "throws",
-			"transient", "try", "void", "volatile", "while"}));
+			"transient", "try", "void", "volatile", "while"));
 
 	public static boolean isYes(String str){
 		return "Y".equals(str)
@@ -44,7 +44,9 @@ public class NameUtils {
 	}
 
 	public static String columnNameToConstantName(String columnName){
-		if(columnName==null) return "";
+		if(columnName==null){
+			return "";
+		}
 		if (JAVA_KEYWORD.contains(columnName) || (PROJECT_FIELD_KEYWORD.contains(columnName))) {
 			columnName = KEYWORD_APPEND_CHAR + columnName;
 		}
