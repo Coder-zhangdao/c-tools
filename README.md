@@ -5,3 +5,4 @@
 [![Maven metadata URL](https://img.shields.io/maven-metadata/v/https/oss.sonatype.org/content/repositories/releases/com/github/yujiaao/c-tools/maven-metadata.xml.svg)](https://oss.sonatype.org/content/repositories/snapshots/com/github/yujiaao/c-tools)
 [![Build Status](https://travis-ci.com/yujiaao/c-tools.svg?branch=master)](https://travis-ci.com/yujiaao/c-tools)
 [![codecov](https://codecov.io/gh/yujiaao/c-tools/branch/master/graph/badge.svg?token=NIRX0PUZ2A)](https://codecov.io/gh/yujiaao/c-tools)
+[![license](https://badgen.net/maven/v/maven-central/com.github.yujiaao/c-tools)](https://github.com/yujiaao/c-tools/blob/main/LICENSE)
