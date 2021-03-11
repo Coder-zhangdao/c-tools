@@ -60,7 +60,11 @@ public class BasicWebUI extends AbstractWebUI<Object, Long> {
 //        if(request instanceof SimpleHttpServletRequest){
 //            return new NWTableModel(id, request, response);
 //        }
-        return new TableModel(id, request, response);
+        TableModel model = new TableModel(id, request, response);
+
+        // use Database filter & sort, so don't need java custom filter match
+        model.autoFilterAndSort(false);
+        return model;
     }
 
     @Override

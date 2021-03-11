@@ -128,7 +128,7 @@ public class EasyTable extends BasicWebUI {
 
     /**
      * use LimitActionFactoryJsonImpl
-     * json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
+     * json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, "property3": [fromValue, toValue] }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
      */
     public String json(Map<String, Object> paramsMap) throws SQLException {
         SimpleHttpServletRequest request = new SimpleHttpServletRequest();
@@ -141,9 +141,9 @@ public class EasyTable extends BasicWebUI {
     }
 
     /**
-     * use LimitActionFactoryJsonImpl
+     * use {@see LimitActionFactoryJsonImpl}
      * json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123,
-     * "filter": { "property1":value1, "property2":value2, },
+     * "filter": { "property1":value1, "property2":value2, "property3": [fromValue, toValue]},
      * "sort":{ "property1":"asc", "property2":"desc", },
      * "exportType":"json", }
      */
@@ -185,11 +185,13 @@ public class EasyTable extends BasicWebUI {
         this.onePage = onePage;
     }
 
+
     public static class MiniSqlParser {
         public String[] colNames;
         public String[] colLabels;
         public String tableName;
         public String uniquePropertyName;
+        public String[] colTypes;
 
         public static MiniSqlParser parse(String sql) throws StandardException {
             MiniSqlParser sp = new MiniSqlParser();
@@ -247,11 +249,13 @@ public class EasyTable extends BasicWebUI {
                 rsmd = rs.getMetaData();
                 sp.colNames = new String[rsmd.getColumnCount()];
                 sp.colLabels = new String[rsmd.getColumnCount()];
+                sp.colTypes = new String[rsmd.getColumnCount()];
                 sp.tableName = rsmd.getTableName(1);
 
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                     sp.colNames[i - 1] = rsmd.getColumnName(i);
                     sp.colLabels[i - 1] = rsmd.getColumnLabel(i);
+                    sp.colTypes[i-1] = rsmd.getColumnTypeName(i);
                 }
             } finally {
                 DbUtils.close(rs);

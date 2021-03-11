@@ -148,12 +148,8 @@ public class EasyTableTest {
         String tableName = "t_config";
         String pkName = "c_key";
         String baseSql = " select c_key, c_name , c_value from t_config";
-        EasyTable et = new EasyTable(dbHelper, tableName, baseSql, pkName, null);
-        //int maxRows=50;
+        EasyTable et = new EasyTable(dbHelper, tableName, baseSql, pkName, tableName,"c_key,c_name,c_value");
         MockHttpServletRequest request = new MockHttpServletRequest();
-        //request.setParameter("maxRows",maxRows+"");
-        //request.setParameter("ac","max_rows");
-        //request.setParameter(tableName+"_mr_", maxRows+"");
 
         HttpServletResponse response = new MockHttpServletResponse();
 
@@ -280,5 +276,25 @@ public class EasyTableTest {
 
 
     }
+
+
+
+    @Test
+    public void testJsonRangeFilter() throws SQLException, JsonProcessingException {
+        String tableName = "test_gen";
+        String baseSql = " select id, name, age,birth,edu_id from test_gen";
+        EasyTable et = new EasyTable(dbHelper, tableName, baseSql);
+
+        String res = et.json("{\"exportType\":\"json\", \"maxRows\":10, \"filter\":{\"id\":[1,3]}}");
+        ObjectMapper mapper = new ObjectMapper();
+        Map map= mapper.readValue(res, Map.class);
+
+        Object obj = map.get("paging");
+        assertEquals(5, ((Map)obj).size());
+        System.out.println(res);
+
+
+    }
+
 
 }
