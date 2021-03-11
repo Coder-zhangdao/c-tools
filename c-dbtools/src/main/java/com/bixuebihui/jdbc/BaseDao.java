@@ -365,7 +365,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     private static String getPagingSqlDerby(String selectSql, int startNum, int endNum) {
 
         String orderBy = selectSql.indexOf("order by")>0 ?  selectSql.substring(selectSql.indexOf("order by")):"";
-        selectSql = selectSql.substring(0, selectSql.indexOf("order by"));
+        selectSql = selectSql.indexOf("order by")>0 ? selectSql.substring(0, selectSql.indexOf("order by")): selectSql;
 
         return SELECT_FROM + "(select FR.*,ROW_NUMBER() OVER() AS RN from (" + selectSql
                 + ")as FR "+orderBy+") as ttt where RN<=" + endNum + " and RN>" + startNum;

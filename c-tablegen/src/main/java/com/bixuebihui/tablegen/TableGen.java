@@ -132,7 +132,7 @@ public class TableGen implements DiffHandler {
         map.put("Byte", "(byte)0");
         map.put("Long", "0L");
         map.put("Date", "new Date(0)");
-        map.put("Timestamp", "new Timestamp(new java.util.Date().getTime())");
+        map.put("Timestamp", "new Timestamp(System.currentTimeMillis())");
         map.put("Boolean", "Boolean.FALSE");
         map.put("Double", "0.0");
         map.put("Float", "0.0F");
@@ -1667,7 +1667,7 @@ public class TableGen implements DiffHandler {
             out("public " + type + " getNextKey(){\n");
             if (keyData != null && keyData.size() == 1) {
                 if ("Timestamp".equals(type)) {
-                    out("\treturn new Timestamp(new java.util.Date().getTime());");
+                    out("\treturn new Timestamp(System.currentTimeMillis());");
                 } else {
                     out("\treturn java.util.UUID.randomUUID().toString();");
                 }
@@ -1675,12 +1675,11 @@ public class TableGen implements DiffHandler {
             } else if (keyData != null && keyData.size() > 1) {
                 out("\tthrow new IllegalStateException(\"联合主键时，无法生成自增长主键\");");
             } else {//没有主键
-                out("\treturn new java.util.Date().getTime();");
+                out("\treturn System.currentTimeMillis();");
             }
             out("}\n");
             out("\n");
         }
-
 
     }
 

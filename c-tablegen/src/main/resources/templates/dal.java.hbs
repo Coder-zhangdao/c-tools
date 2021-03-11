@@ -22,6 +22,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     }
 
     {{! writeSql(colData, keyData); }}
+    @SuppressWarnings("AlibabaClassNamingShouldBeCamel")
     public static final class F{
         {{#each fields ~}}
         public static final String {{constantName this.name}} = "{{this.name}}";
@@ -116,7 +117,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     {{#if hasKey}}
       {{#eq firstKeyType "Timestamp"}}
           public {{firstKeyType}} getNextKey(){
-        return new Timestamp(new java.util.Date().getTime());
+        return new Timestamp(System.currentTimeMillis());
           }
       {{/eq}}
       {{#eq firstKeyType "String"}}
