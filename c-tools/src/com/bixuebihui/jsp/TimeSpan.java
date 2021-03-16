@@ -90,7 +90,7 @@ public class TimeSpan implements ISqlConditionType {
         Date end = sf.parse(endDate==null? MAX_END_YEAR+"-12-31": endDate);
         Calendar ce = Calendar.getInstance();
         ce.setTime(end);
-        ts.init(cb, ce);
+        ts.init(ce, cb);
         return ts;
     }
 
