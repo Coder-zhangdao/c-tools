@@ -207,14 +207,6 @@
             <scope>provided</scope>
         </dependency>
 
-
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4.5</version>
-        </dependency>
-
-
         <!-- sql parser from derby -->
         <dependency>
             <groupId>com.foundationdb</groupId>
