@@ -5,6 +5,7 @@ import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.ISqlConditionType;
 import com.bixuebihui.util.ParameterUtils;
 import com.bixuebihui.util.Util;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -83,11 +84,11 @@ public class TimeSpan implements ISqlConditionType {
     public static TimeSpan build(String beginDate, String endDate) throws ParseException {
         TimeSpan ts = new TimeSpan();
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-        Date begin = sf.parse(beginDate);
+        Date begin = sf.parse(StringUtils.trimToNull(beginDate)==null? MIN_BEGIN_YEAR+"-01-01": beginDate);
         Calendar cb = Calendar.getInstance();
         cb.setTime(begin);
 
-        Date end = sf.parse(endDate==null? MAX_END_YEAR+"-12-31": endDate);
+        Date end = sf.parse(StringUtils.trimToNull(endDate)==null? MAX_END_YEAR+"-12-31": endDate);
         Calendar ce = Calendar.getInstance();
         ce.setTime(end);
         ts.init(ce, cb);
