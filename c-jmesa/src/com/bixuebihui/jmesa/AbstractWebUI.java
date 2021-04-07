@@ -95,7 +95,11 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
                 sqlFilter.addFilter(prop, numberRange);
             } else if (value instanceof RangeFilter.Pair){
                 RangeFilter.Pair v = (RangeFilter.Pair) value;
-                if(v.getStartValueInclusive().indexOf("-")>0){
+                if(
+                        (v.getStartValueInclusive()!=null && v.getStartValueInclusive().indexOf("-")>0)
+                                ||
+                                (v.getEndValueExclusive()!=null && v.getEndValueExclusive().indexOf("-")>0)
+                ){
                     TimeSpan ts = TimeSpan.build(v.getStartValueInclusive(),v.getEndValueExclusive());
                     sqlFilter.addFilter(prop, ts);
                 }else{
