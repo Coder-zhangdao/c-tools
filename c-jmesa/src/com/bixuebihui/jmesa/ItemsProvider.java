@@ -50,11 +50,12 @@ public class ItemsProvider<T> implements PageItems {
 
         String sortsql = sort.toString();
 
-        if (StringUtils.trimToNull(sortsql) == null
-                && uniquePropertyName != null) {
-            sortsql = "order by " + uniquePropertyName;
-        } else {
-            sortsql = "";
+        if (StringUtils.trimToNull(sortsql) == null) {
+            if (uniquePropertyName != null) {
+                sortsql = "order by " + uniquePropertyName;
+            } else {
+                sortsql = "";
+            }
         }
 
         Collection<T> items = Collections.emptyList();
