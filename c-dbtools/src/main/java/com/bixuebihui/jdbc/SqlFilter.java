@@ -1,6 +1,11 @@
 package com.bixuebihui.jdbc;
 
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.script.ScriptEngine;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +36,7 @@ public class SqlFilter {
 	 * <p>toCondition.</p>
 	 *
 	 * @return a {@link java.lang.StringBuilder} object.
+	 * @deprecated use toSqlObject
 	 */
 	protected StringBuilder toCondition(){
 		StringBuilder criteria = new StringBuilder();
@@ -54,15 +60,48 @@ public class SqlFilter {
 		return criteria;
 	}
 
+	public SqlObject toSqlObject(){
+		SqlObject res = new SqlObject();
+		List<Object> params = new ArrayList<>();
+		StringBuilder criteria = new StringBuilder();
+		if (filters==null || filters.isEmpty()) {
+			res.setSqlString(criteria.toString());
+			return res;
+		}
+		for (Filter filter : filters) {
+			buildSqlObject(criteria, params, filter);
+		}
+
+		if(criteria.length()>0 && criteria.indexOf(AND)==0){
+			criteria.delete(0, 4);
+		}
+
+		if(orCond!=null){
+			criteria.insert(0, " (").append(")");
+			for(SqlFilter it:orCond){
+				SqlObject subObj= it.toSqlObject();
+				criteria.append(" or (").append(subObj.getSqlString().substring("where".length())).append(")");
+				params.addAll(Lists.newArrayList(subObj.getParameters()));
+			}
+		}
+
+		res.setSqlString(where(criteria));
+		res.setParameters(params.toArray());
+		return res;
+	}
+
 	/**
 	 * <p>toString.</p>
 	 *
 	 * @return a {@link java.lang.String} object.
 	 */
 	@Override
+	@Deprecated
 	public String toString() {
-		StringBuilder res = toCondition();
+		return where(toCondition());
+	}
 
+	private String where(StringBuilder res) {
 		if(res.length()>0){
 			if(res.indexOf(AND)==AND.length()) {
 				res.delete(0, AND.length()-1);
@@ -88,6 +127,64 @@ public class SqlFilter {
 
 	}
 
+
+	private void buildSqlObject(StringBuilder criteria, List<Object> params, Filter filter) {
+		criteria.append(AND).append(filter.getProperty());
+		switch (filter.comparison){
+			case IS:
+				criteria.append(" = ? ");
+				break;
+			case IS_NOT:
+				criteria.append(" != ? ");
+				break;
+			case BETWEEN:
+				criteria.append(" between ? and ? ");
+				break;
+			case NOT_BETWEEN:
+				criteria.append(" not between ? and ? ");
+				break;
+			case IS_NULL:
+				criteria.append(" is null ");
+				break;
+			case IS_NOT_NULL:
+				criteria.append(" is not null ");
+				break;
+			case GT:
+				criteria.append(" > ? ");
+				break;
+			case GTE:
+				criteria.append(" >= ? ");
+				break;
+			case LT:
+				criteria.append(" < ? ");
+				break;
+			case LTE:
+				criteria.append(" <= ? ");
+				break;
+
+			case NOT_IN:
+				criteria.append(" not ");
+			case IN:
+				criteria.append(" in (").append(StringUtils.repeat("?", ",", filter.value.length)).append(") ");
+				break;
+
+			case NOT_EXISTS:
+				criteria.append(" not ");
+			case EXISTS:
+				//todo filter filter.value
+				criteria.append(" exist (").append(filter.value).append(") ");
+				break;
+			case CONTAIN:
+				criteria.append(" like concat(?, '%') ");
+				break;
+
+		}
+		if(filter.value!=null && filter.value.length>0) {
+			params.addAll(Lists.newArrayList(filter.value));
+		}
+
+	}
+
 	/**
 	 * 防止sql注入, 会改变原始数据,不建议使用
 	 *
@@ -105,16 +202,17 @@ public class SqlFilter {
 	 * @param value a {@link java.lang.Object} object.
 	 * @return a {@link SqlFilter} object.
 	 */
-	public SqlFilter addFilter(String property, Object value) {
+	public SqlFilter addFilter(String property, Comparison comparison, Object... value) {
 		if(!useNullAsCondition && value==null) {
             return this;
         }
 		if(filters==null) {
             filters = new ArrayList<>();
         }
-		filters.add(new Filter(property, value));
+		filters.add(new Filter(property, comparison, value));
 		return this;
 	}
+
 
 	/**
 	 * 增加
@@ -132,7 +230,7 @@ public class SqlFilter {
                 continue;
             }
 
-			addFilter(key, value);
+			addFilter(key,value instanceof String ? Comparison.CONTAIN : Comparison.IS, value);
 		}
 		return this;
 	}
@@ -198,12 +296,143 @@ public class SqlFilter {
 		this.useNullAsCondition = useNullAsCondition;
 	}
 
+	public SqlFilter is(String field, Object value){
+		return this.addFilter(field, Comparison.IS, value);
+	}
+
+	public SqlFilter isNot(String field, Object value){
+		return this.addFilter(field, Comparison.IS_NOT, value);
+	}
+
+	public SqlFilter isNull(String field){
+		return this.addFilter(field, Comparison.IS_NULL, null);
+	}
+
+	public SqlFilter isNotNull(String field){
+		return this.addFilter(field, Comparison.IS_NOT_NULL, null);
+	}
+
+	public SqlFilter in(String field, Object[] value){
+		return this.addFilter(field, Comparison.IN, value);
+	}
+
+	public SqlFilter notIn(String field, Object[] value){
+		return this.addFilter(field, Comparison.NOT_IN, value);
+	}
+
+	public SqlFilter between(String field, Object valueLeft, Object valueRight){
+		return this.addFilter(field, Comparison.BETWEEN, valueLeft,valueRight);
+	}
+
+	public SqlFilter notBetween(String field, Object valueLeft, Object valueRight){
+		return this.addFilter(field, Comparison.NOT_BETWEEN, valueLeft,valueRight);
+	}
+
+	public SqlFilter gt(String field, Object value){
+		return this.addFilter(field, Comparison.GT, value);
+	}
+
+	public SqlFilter lt(String field, Object value){
+		return this.addFilter(field, Comparison.LT, value);
+	}
+
+	public SqlFilter gte(String field, Object value){
+		return this.addFilter(field, Comparison.GTE, value);
+	}
+
+	public SqlFilter lte(String field, Object value){
+		return this.addFilter(field, Comparison.LTE, value);
+	}
+
+	public SqlFilter contain(String field, Object value){
+		return this.addFilter(field, Comparison.CONTAIN, value);
+	}
+	/**
+	 * Used for filters
+	 * since 4.3
+	 */
+	public enum Comparison {
+		/**
+		 * =
+		 */
+		IS,
+
+		/**
+		 * !=
+		 */
+		IS_NOT,
+
+		/**
+		 * >
+		 */
+		GT,
+
+		/**
+		 * >=
+		 */
+		GTE,
+
+		/**
+		 * <
+		 */
+		LT,
+
+		/**
+		 * <=
+		 */
+		LTE,
+
+		/**
+		 * in (...)
+		 */
+		IN,
+
+		/**
+		 * not in (...)
+		 */
+		NOT_IN,
+
+		/**
+		 * is null
+		 */
+		IS_NULL,
+		/**
+		 * is not null
+		 */
+		IS_NOT_NULL,
+		/**
+		 * need sub query, not implemented yet
+		 */
+		EXISTS,
+		/**
+		 * need sub query, not implemented yet
+		 */
+		NOT_EXISTS,
+
+		/**
+		 * between (from_value, to_value) inclusive
+		 */
+		BETWEEN,
+		/**
+		 * not between (from_value, to_value) inclusive
+		 */
+		NOT_BETWEEN,
+
+
+		/**
+		 * like concat('%', value, '%')
+		 */
+		CONTAIN
+	}
+
 	private static class Filter {
 		private final String property;
-		private final Object value;
+		private final Object[] value;
+		private final Comparison comparison;
 
-		public Filter(String property, Object value) {
+		public Filter(String property,  Comparison comparison, Object... value) {
 			this.property = property;
+			this.comparison = comparison;
 			this.value = value;
 		}
 
@@ -211,9 +440,20 @@ public class SqlFilter {
 			return property;
 		}
 
-		public Object getValue() {
+		public Comparison getComparison() {
+			return comparison;
+		}
+
+		public Object[] getValue() {
 			return value;
 		}
 	}
 
+	//the tow below is dangerous to use because sql injection
+//	public SqlFilter exists(String field, String value){
+//		return this.addFilter(field, Comparison.EXISTS, value);
+//	}
+//	public SqlFilter notExists(String field, String value){
+//		return this.addFilter(field, Comparison.NOT_EXISTS, value);
+//	}
 }

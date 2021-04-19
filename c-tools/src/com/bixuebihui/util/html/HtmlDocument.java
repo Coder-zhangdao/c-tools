@@ -120,7 +120,7 @@ public class HtmlDocument {
         if (content == null || content.size() < 1) {
             return "";
         }
-        StringBuffer textContent = new StringBuffer();
+        StringBuilder textContent = new StringBuilder();
         for (Iterator itr = content.iterator(); itr.hasNext(); textContent.append("\n")) {
             Object obj = itr.next();
             if (obj instanceof HtmlComment) {

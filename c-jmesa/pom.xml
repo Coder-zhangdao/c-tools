@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.github.yujiaao</groupId>
         <artifactId>c-tools-parent</artifactId>
-        <version>1.1.15</version>
+        <version>1.2.0</version>
     </parent>
 
     <properties>
@@ -128,7 +128,7 @@
         <dependency>
             <groupId>com.github.yujiaao</groupId>
             <artifactId>jmesa</artifactId>
-            <version>4.2.1</version>
+            <version>4.3.2</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-core</artifactId>

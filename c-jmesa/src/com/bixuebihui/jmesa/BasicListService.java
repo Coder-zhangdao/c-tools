@@ -38,7 +38,7 @@ public class BasicListService extends AbstractBaseDao {
 
 
     @Override
-    public List<Object> select(String whereClause, String orderBy, int rowStart, int rowEnd)
+    public List<Object> select(String whereClause, Object[] params, String orderBy, int rowStart, int rowEnd)
             throws SQLException {
 
         boolean needOrderBy = true;
@@ -50,7 +50,7 @@ public class BasicListService extends AbstractBaseDao {
         String selectSql = "select * from " + tableName + " " + whereClause + " "
                 + (needOrderBy ? orderBy : "");
 
-        List<Map<String, Object>> v = getDbHelper().executeQuery(this.getPagingSql(selectSql, rowStart, rowEnd), sqlObj.getParameters());
+        List<Map<String, Object>> v = getDbHelper().executeQuery(this.getPagingSql(selectSql, rowStart, rowEnd), params);
         ArrayList<Object> list = new ArrayList<>();
         list.addAll(v);
         return list;

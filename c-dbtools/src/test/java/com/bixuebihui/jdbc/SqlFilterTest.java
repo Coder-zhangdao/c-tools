@@ -10,55 +10,68 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SqlFilterTest {
 
 	@Test
-	public void testToString() {
+	public void testToSqlObject() {
 		SqlFilter filter = new SqlFilter();
-		assertEquals("", filter.toString());
+		SqlObject obj0 = filter.toSqlObject();
 
-		filter.addFilter("name", "abc");
+		assertEquals("", obj0.getSqlString());
 
-		assertEquals("where name like 'abc%'", filter.toString());
+		filter.contain("name", "abc");
+
+		SqlObject obj = filter.toSqlObject();
+		assertEquals(1, obj.getParameters().length);
+		assertEquals("where name like concat(?, '%') ", obj.getSqlString());
 	}
 
 	@Test
 	public void testAddFilter() {
 		SqlFilter filter = new SqlFilter();
-		assertEquals("", filter.toString());
 
-		filter.addFilter("name", "abc");
-		filter.addFilter("cnt", 100);
+		filter.contain("name", "abc");
+		filter.is("cnt", 100);
 
-		assertEquals("where name like 'abc%' and cnt = 100", filter.toString());
+		SqlObject obj = filter.toSqlObject();
+
+		assertEquals("where name like concat(?, '%')  and cnt = ? ", obj.getSqlString());
+		assertEquals(2, obj.getParameters().length);
 	}
 
 	@Test
 	public void testOr(){
 		SqlFilter filter = new SqlFilter();
-		filter.addFilter("name", "abc");
+		filter.contain("name", "abc");
 		SqlFilter cond = new SqlFilter();
-		cond.addFilter("name", "def");
+		cond.contain("name", "def");
 		SqlFilter cond1 = new SqlFilter();
-		cond1.addFilter("name", "dff");
+		cond1.contain("name", "dff");
 		cond.or(cond1);
 		SqlFilter res = filter.or(cond);
 
-		assertEquals("where( name like 'abc%') or (( name like 'def%') or ( name like 'dff%'))",
-				res.toString());
+		SqlObject obj = filter.toSqlObject();
 
+		assertEquals("where ( name like concat(?, '%') ) or ( ( name like concat(?, '%') ) or ( name like concat(?, '%') ))",
+				obj.getSqlString());
+		assertEquals(3, obj.getParameters().length);
 	}
 
 
 	@Test
 	public void testAddFilters(){
 		SqlFilter sf = new 	SqlFilter();
-		Map<String, Object> condition = new HashMap<String, Object>();
+		Map<String, Object> condition = new HashMap<>();
 		condition.put("province", 1L);
 		condition.put("city", 12L);
 		condition.put("count", null);
 
 		sf.addFilters(condition);
-		assertEquals("where province = 1 and city = 12", sf.toString());
-		System.out.println(sf.toString());
+		SqlObject obj = sf.toSqlObject();
+		assertEquals("where province = ?  and city = ? ", obj.getSqlString());
+		assertEquals(2, obj.getParameters().length);
 
+		Object[] objs = obj.getParameters();
+		assertEquals(1L, objs[0]);
+		assertEquals(12L, objs[1]);
+		//assertEquals(null, objs[2]);
 	}
 
 

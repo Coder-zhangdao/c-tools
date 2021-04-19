@@ -2,6 +2,8 @@ package com.bixuebihui.jdbc;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 配合使用完成分页读取数据库表
@@ -22,7 +24,7 @@ public interface IReaderService<T> {
      * @return a {@link java.util.Collection} object.
      * @throws java.sql.SQLException if any.
      */
-    Collection<T> select(String whereClause, String orderBy, int rowStart, int rowEnd) throws SQLException;
+    Collection<T> select(String whereClause, Object[] params, String orderBy, int rowStart, int rowEnd) throws SQLException;
 
     /**
      * <p>count.</p>
@@ -32,5 +34,7 @@ public interface IReaderService<T> {
      * @throws java.sql.SQLException if any.
      */
     int count(String whereClause) throws SQLException;
+    int countWhere(String whereClause, Object[] params) throws SQLException;
+
 
 }

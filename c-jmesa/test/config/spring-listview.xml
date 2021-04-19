@@ -217,7 +217,7 @@
                     <ref bean="dbHelper"/>
                 </constructor-arg>
                 <property name="coreSql">
-                    <value>select count(B.ID) cnt, zone_code, ZS.site_id, ZS.site_domain, ZS.site_name
+                    <value>select count(B.ID) cnt, zoning_code, ZS.site_id, ZS.site_domain, ZS.site_name
                         from Businesses B , Business_CommunityMap BCOM, zoning_site ZS
                         where B.ID=BCOM.BusinessID
                         and BCOM.site_id=ZS.site_id group by zone_code, ZS.site_id, ZS.site_domain, ZS.site_name
@@ -240,10 +240,10 @@
                     <ref bean="dbHelper"/>
                 </constructor-arg>
                 <property name="coreSql">
-                    <value>select count(B.ID) cnt, zone_code, BC.Name category, ZS.site_id, ZS.site_domain, ZS.site_name
+                    <value>select count(B.ID) cnt, zoning_code, BC.Name category, ZS.site_id, ZS.site_domain, ZS.site_name
                         from Businesses B , Business_CategoryMap BCAM, Business_Category BC, Business_CommunityMap BCOM,
                         zoning_site ZS
-                        where B.ID=BCAM.BusinessID and BCAM.category_id=BC.id and B.ID=BCOM.BusinessID
+                        where B.ID=BCAM.BusinessID and BCAM.CategoryId=BC.id and B.ID=BCOM.BusinessID
                         and BCOM.site_id=ZS.site_id and BCOM.site_id=? group by BC.ID, BC.Name
                     </value>
                 </property>

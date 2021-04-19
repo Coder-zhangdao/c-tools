@@ -24,7 +24,7 @@ public class ElExpressionExCellEditorTest {
     @Test
     public void testLambdaAndStream(){
 
-        String temp = "${((x, y) -> x + y)(3, 5.5)} and ${[1,2,3,4].stream().sum()} ${Math.sin(3.14)}";
+        String temp = "${((x, y) -> x + y)(3, 5.5)} and ${[1,2,3,4].stream().sum()} ${fn:sin(3.14)}";
 
         Map<String, Double> map = new HashMap<>();
         Map<String, Object> row =  new HashMap<>();

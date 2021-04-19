@@ -63,6 +63,13 @@ public class NumberRange implements ISqlConditionType {
         return BigDecimal.valueOf(Long.parseLong(src));
     }
 
+    public BigDecimal getBegin() {
+        return begin;
+    }
+
+    public BigDecimal getEnd() {
+        return end;
+    }
 
     @Override
     public String getConditionSql(String sqlFieldName, int databaseType) {

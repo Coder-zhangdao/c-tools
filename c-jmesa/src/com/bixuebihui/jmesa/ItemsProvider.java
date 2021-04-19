@@ -2,6 +2,7 @@ package com.bixuebihui.jmesa;
 
 import com.bixuebihui.jdbc.IReaderService;
 import com.bixuebihui.jdbc.SqlFilter;
+import com.bixuebihui.jdbc.SqlObject;
 import com.bixuebihui.jdbc.SqlSort;
 import org.apache.commons.lang.StringUtils;
 import org.jmesa.limit.Limit;
@@ -10,6 +11,8 @@ import org.jmesa.model.PageItems;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author xwx
@@ -32,7 +35,8 @@ public class ItemsProvider<T> implements PageItems {
         SqlFilter filter = AbstractWebUI.getFilter(limit);
         int totalRows = 0;
         try {
-            totalRows = service.count(filter.toString());
+            SqlObject obj = filter.toSqlObject();
+            totalRows = service.countWhere(obj.getSqlString(), obj.getParameters());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -40,7 +44,6 @@ public class ItemsProvider<T> implements PageItems {
 
     }
 
-    @Override
     public Collection<T> getItems(Limit limit) {
         SqlSort sort = AbstractWebUI.getSort(limit);
         SqlFilter filter = AbstractWebUI.getFilter(limit);
@@ -48,24 +51,24 @@ public class ItemsProvider<T> implements PageItems {
         int rowStart = limit.getRowSelect().getRowStart();
         int rowEnd = limit.getRowSelect().getRowEnd();
 
-        String sortsql = sort.toString();
+        String sortSql = sort.toString();
 
-        if (StringUtils.trimToNull(sortsql) == null) {
+        if (StringUtils.trimToNull(sortSql) == null) {
             if (uniquePropertyName != null) {
-                sortsql = "order by " + uniquePropertyName;
+                sortSql = "order by " + uniquePropertyName;
             } else {
-                sortsql = "";
+                sortSql = "";
             }
         }
 
-        Collection<T> items = Collections.emptyList();
         try {
-            items = service.select(filter.toString(), sortsql,
+            SqlObject obj = filter.toSqlObject();
+             return service.select(obj.getSqlString(), obj.getParameters(), sortSql,
                     rowStart, rowEnd);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return items;
+        return Collections.emptyList();
 
     }
 }

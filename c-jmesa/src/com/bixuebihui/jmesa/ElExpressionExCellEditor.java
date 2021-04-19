@@ -103,11 +103,18 @@ public class ElExpressionExCellEditor extends ElExpressionCellEditor {
                         }
                     }
 
+                    for (Method m : Math.class.getMethods()) {
+                        Class<?>[] types = m.getParameterTypes();
+                        String name = changeName(m, types);
+                        map.put(name, m);
+                    }
+
                     for (Method m : StringUtils.class.getMethods()) {
                         Class<?>[] types = m.getParameterTypes();
                         String name = changeName(m, types);
                         map.put(name, m);
                     }
+
 
                     for (Method m : StringEscapeUtils.class.getMethods()) {
                         Class<?>[] types = m.getParameterTypes();

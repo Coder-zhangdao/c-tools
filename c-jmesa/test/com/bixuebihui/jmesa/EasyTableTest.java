@@ -4,14 +4,12 @@ import com.bixuebihui.BeanFactory;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.cache.DictionaryItem;
 import com.bixuebihui.jdbc.IDbHelper;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foundationdb.sql.StandardException;
-import org.hamcrest.collection.ArrayAsIterableMatcher;
 import org.hamcrest.collection.ArrayMatching;
 import org.hamcrest.core.StringContains;
-import org.hamcrest.core.StringStartsWith;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -19,12 +17,14 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class EasyTableTest {
@@ -99,9 +99,9 @@ public class EasyTableTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         String res = et.handleRequestInternal(request, response);
-        assertEquals(null, res);
+        assertNull(res);
         res = (String) request.getAttribute(et.getId());
-        assertThat("must contain id: t_config_column_数量_1", res,StringContains.containsString("t_config_column_数量_1"));
+        assertThat("must contain id: t_config_s_0_数量", res,StringContains.containsString("t_config_s_0_数量"));
     }
 
 
@@ -110,7 +110,7 @@ public class EasyTableTest {
         String tableName = "t_config";
         String pkName = "c_key";
         String baseSql = " select c_key, c_name , c_value from t_config";
-        EasyTable et = new EasyTable(dbHelper, tableName, baseSql, pkName, null);
+        EasyTable et = new EasyTable(dbHelper, tableName, baseSql, pkName, null,"c_key,c_name,c_value");
 
 
         String[] cols = et.getColNames();
@@ -131,7 +131,7 @@ public class EasyTableTest {
         String tableName = "t_config";
         String pkName = "c_key";
         String baseSql = " select c_key, c_name , c_value from t_config";
-        EasyTable et = new EasyTable(dbHelper, tableName, baseSql, pkName, tableName);
+        EasyTable et = new EasyTable(dbHelper, tableName, baseSql, pkName, tableName,"c_key,c_name,c_value");
 
         HttpServletRequest request = new MockHttpServletRequest();
 
@@ -207,7 +207,7 @@ public class EasyTableTest {
     @Test
     public void testParser() throws StandardException {
         EasyTable.MiniSqlParser mp = EasyTable.MiniSqlParser.parse("select count(*) from article");
-        assertEquals(null, mp.uniquePropertyName);
+        assertNull(mp.uniquePropertyName);
 
         mp = EasyTable.MiniSqlParser.parse("select count(*) CNT from article");
         assertEquals("cnt", mp.uniquePropertyName);
@@ -230,7 +230,7 @@ public class EasyTableTest {
         String res = et.json("{\"exportType\":\"json\"}");
 
         assertThat("must contains", res, StringContains.containsString("t_config"));
-        assertFalse("must not contains", res.contains("<td>"));
+        Assertions.assertFalse(res.contains("<td>"), "must not contains");
         //System.out.println(res);
     }
 
@@ -303,7 +303,7 @@ public class EasyTableTest {
         String baseSql = " select id, name, age,birth,edu_id from test_gen";
         EasyTable et = new EasyTable(dbHelper, tableName, baseSql);
 
-        String res = et.json("{\"exportType\":\"json\", \"maxRows\":10, \"filter\":{\"id\":[1,3]}}");
+        String res = et.json("{\"exportType\":\"json\", \"maxRows\":10, \"filter\":[{\"key\":\"id\",\"comparison\":\"between\",\"value\":[1,3]}]}");
         ObjectMapper mapper = new ObjectMapper();
         Map map= mapper.readValue(res, Map.class);
 

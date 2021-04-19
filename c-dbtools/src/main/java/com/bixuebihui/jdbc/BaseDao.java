@@ -1008,7 +1008,6 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     }
 
     /** {@inheritDoc} */
-    @Override
     public @NotNull
     List<T> select(String whereClause, String orderbyClause, int beginNum, int endNum)
             throws SQLException {
