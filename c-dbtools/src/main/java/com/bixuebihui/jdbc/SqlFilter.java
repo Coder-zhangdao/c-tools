@@ -172,7 +172,7 @@ public class SqlFilter {
 				criteria.append(" not ");
 			case EXISTS:
 				//todo filter filter.value
-				criteria.append(" exist (").append(filter.value).append(") ");
+				criteria.append(" exist (").append(filter.value[0]).append(") ");
 				break;
 			case CONTAIN:
 				criteria.append(" like concat(?, '%') ");
@@ -202,14 +202,16 @@ public class SqlFilter {
 	 * @param value a {@link java.lang.Object} object.
 	 * @return a {@link SqlFilter} object.
 	 */
-	public SqlFilter addFilter(String property, Comparison comparison, Object... value) {
+	public SqlFilter addFilter(String property, Comparison comparison, Object[] value) {
 		if(!useNullAsCondition && value==null) {
             return this;
         }
 		if(filters==null) {
             filters = new ArrayList<>();
         }
+
 		filters.add(new Filter(property, comparison, value));
+
 		return this;
 	}
 
@@ -230,7 +232,7 @@ public class SqlFilter {
                 continue;
             }
 
-			addFilter(key,value instanceof String ? Comparison.CONTAIN : Comparison.IS, value);
+			addFilter(key,value instanceof String ? Comparison.CONTAIN : Comparison.IS, new Object[]{value});
 		}
 		return this;
 	}
@@ -297,11 +299,11 @@ public class SqlFilter {
 	}
 
 	public SqlFilter is(String field, Object value){
-		return this.addFilter(field, Comparison.IS, value);
+		return this.addFilter(field, Comparison.IS, new Object[]{value});
 	}
 
 	public SqlFilter isNot(String field, Object value){
-		return this.addFilter(field, Comparison.IS_NOT, value);
+		return this.addFilter(field, Comparison.IS_NOT, new Object[] {value});
 	}
 
 	public SqlFilter isNull(String field){
@@ -321,31 +323,31 @@ public class SqlFilter {
 	}
 
 	public SqlFilter between(String field, Object valueLeft, Object valueRight){
-		return this.addFilter(field, Comparison.BETWEEN, valueLeft,valueRight);
+		return this.addFilter(field, Comparison.BETWEEN, new Object[]{valueLeft,valueRight});
 	}
 
 	public SqlFilter notBetween(String field, Object valueLeft, Object valueRight){
-		return this.addFilter(field, Comparison.NOT_BETWEEN, valueLeft,valueRight);
+		return this.addFilter(field, Comparison.NOT_BETWEEN,  new Object[]{valueLeft,valueRight});
 	}
 
 	public SqlFilter gt(String field, Object value){
-		return this.addFilter(field, Comparison.GT, value);
+		return this.addFilter(field, Comparison.GT, new Object[]{ value});
 	}
 
 	public SqlFilter lt(String field, Object value){
-		return this.addFilter(field, Comparison.LT, value);
+		return this.addFilter(field, Comparison.LT,  new Object[]{value});
 	}
 
 	public SqlFilter gte(String field, Object value){
-		return this.addFilter(field, Comparison.GTE, value);
+		return this.addFilter(field, Comparison.GTE,  new Object[]{value});
 	}
 
 	public SqlFilter lte(String field, Object value){
-		return this.addFilter(field, Comparison.LTE, value);
+		return this.addFilter(field, Comparison.LTE,  new Object[]{value});
 	}
 
 	public SqlFilter contain(String field, Object value){
-		return this.addFilter(field, Comparison.CONTAIN, value);
+		return this.addFilter(field, Comparison.CONTAIN,  new Object[]{value});
 	}
 	/**
 	 * Used for filters
@@ -430,7 +432,7 @@ public class SqlFilter {
 		private final Object[] value;
 		private final Comparison comparison;
 
-		public Filter(String property,  Comparison comparison, Object... value) {
+		public Filter(String property,  Comparison comparison, Object[] value) {
 			this.property = property;
 			this.comparison = comparison;
 			this.value = value;

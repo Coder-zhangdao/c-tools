@@ -85,7 +85,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
         for (Filter filter : filters) {
             String property = filter.getProperty();
-            Object value = filter.getValue();
+            Object[] value = filter.getValue();
             String prop = tableAlias==null? property : tableAlias + "." + property;
             if (TimeSpan.isTimeSpan(value.toString())) {
                 TimeSpan ts = TimeSpan.build(value.toString());
@@ -93,19 +93,19 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             } else if (NumberRange.isNumberRange(value.toString())){
                 NumberRange numberRange = NumberRange.build(value.toString());
                 sqlFilter.between(prop, numberRange.getBegin(), numberRange.getEnd());
-            } else if (value instanceof RangeFilter.Pair){
-                RangeFilter.Pair v = (RangeFilter.Pair) value;
-                if(
-                        (v.getStartValueInclusive()!=null && v.getStartValueInclusive().indexOf("-")>0)
-                                ||
-                                (v.getEndValueExclusive()!=null && v.getEndValueExclusive().indexOf("-")>0)
-                ){
-                    TimeSpan ts = TimeSpan.build(v.getStartValueInclusive(),v.getEndValueExclusive());
-                    sqlFilter.between(prop, ts.getBeginDate(), ts.getEndDate());
-                }else{
-                    NumberRange numberRange = NumberRange.build(v.getStartValueInclusive(),v.getEndValueExclusive());
-                    sqlFilter.between(prop, numberRange.getBegin(),numberRange.getEnd());
-                }
+//            } else if (value instanceof RangeFilter.Pair){
+//                RangeFilter.Pair v = (RangeFilter.Pair) value;
+//                if(
+//                        (v.getStartValueInclusive()!=null && v.getStartValueInclusive().indexOf("-")>0)
+//                                ||
+//                                (v.getEndValueExclusive()!=null && v.getEndValueExclusive().indexOf("-")>0)
+//                ){
+//                    TimeSpan ts = TimeSpan.build(v.getStartValueInclusive(),v.getEndValueExclusive());
+//                    sqlFilter.between(prop, ts.getBeginDate(), ts.getEndDate());
+//                }else{
+//                    NumberRange numberRange = NumberRange.build(v.getStartValueInclusive(),v.getEndValueExclusive());
+//                    sqlFilter.between(prop, numberRange.getBegin(),numberRange.getEnd());
+//                }
 
             }else {
                 sqlFilter.addFilter(prop, SqlFilter.Comparison.valueOf(filter.getComparison().toString()), value);
