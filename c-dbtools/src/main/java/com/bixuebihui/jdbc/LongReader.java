@@ -19,12 +19,7 @@ public class LongReader extends RowMapperResultReader<Long> {
      */
     public LongReader(List<Long> resultList) {
 
-        super(new RowMapper<Long>() {
-            @Override
-            public Long mapRow(ResultSet rs, int index) throws SQLException {
-                return rs.getLong(1);
-            }
-        },resultList);
+        super((rs, index) -> rs.getLong(1),resultList);
     }
 
 

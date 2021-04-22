@@ -54,7 +54,91 @@ public class ProjectConfig {
      * names of tables to generate for. If null we do all.
      */
     Map<String, String> tablesList;
+    Map<String, String> viewList;
     Map<String, String> excludeTablesList;
+
+    public static ProjectConfig readFrom(Properties props, String baseDir) {
+        ProjectConfig c = new ProjectConfig();
+
+        c.baseDir = baseDir;
+
+        c.srcDir = baseDir + props.getProperty("src_dir");
+        LOG.debug("src_dir:" +  c.srcDir);
+        c.resourceDir = baseDir + props.getProperty("resource_dir");
+        LOG.debug("resource_dir:" +  c.resourceDir);
+
+        if (StringUtils.isEmpty( c.resourceDir)) {
+            c.resourceDir =  c.srcDir;
+        }
+
+        c.testDir = baseDir + props.getProperty("test_dir");
+        LOG.debug("test_dir:" +  c.testDir);
+        c.jspDir = baseDir + props.getProperty("jsp_dir");
+        LOG.debug("jsp_dir:" +  c.jspDir);
+        c.packageName = props.getProperty("package_name");
+        LOG.debug("package_name:" +  c.packageName);
+        c.schema = props.getProperty("schema");
+        LOG.debug("schema:" +  c.schema);
+        c.tableOwner = props.getProperty("table_owner");
+        LOG.debug("table_owner:" +  c.tableOwner);
+
+        c.indexes = getBooleanCfg(props, "indexes");
+        c.useCustomMetaTable = getBooleanCfg(props, "kuozhanbiao");
+
+        c.generate_procedures = getBooleanCfg(props, "generate_procedures");
+
+        c.prefix = props.getProperty("prefix");
+        if ( c.prefix == null) {
+            c.prefix = "";
+        }
+
+        c.parseTableNames(props.getProperty("table_list"));
+        c.parseViewNames(props.getProperty("view_list"));
+
+        c.parseExcludeTableNames(props.getProperty("exclude_table_list"));
+
+        // 有扩展表时用以下interface的设置值
+        c.pojo_node_interface = props.getProperty("pojo_node_interface");
+        c.pojo_version_interface = props.getProperty("pojo_version_interface");
+        c.pojo_state_interface = props.getProperty("pojo_state_interface");
+        c.pojo_uuid_interface = props.getProperty("pojo_uuid_interface");
+        c.pojo_modifydate_interface = props.getProperty("pojo_modifydate_interface");
+
+        c.pojo_node_interface_list =  makeList(props.getProperty("pojo_node_interface_list"));
+        c.pojo_version_interface_list = makeList(props.getProperty("pojo_version_interface_list"));
+        c.pojo_state_interface_list = makeList(props.getProperty("pojo_state_interface_list"));
+        c.pojo_uuid_interface_list = makeList(props.getProperty("pojo_uuid_interface_list"));
+        c.pojo_modifydate_interface_list = makeList(props.getProperty("pojo_modifydate_interface_list"));
+
+        c.overWriteAll = getBooleanCfg(props, "over_write_all");
+        c.use_annotation = getBooleanCfg(props, "use_annotation");
+        c.use_autoincrement = getBooleanCfg(props, "use_autoincrement");
+        c.generateAll = getBooleanCfg(props, "generate_all");
+
+        c.extra_setting = props.getProperty("extra_setting");
+
+        return c;
+    }
+
+    private static boolean getBooleanCfg(Properties props, String key) {
+        return "yes".equalsIgnoreCase(props.getProperty(key));
+    }
+
+    private static List<String> makeList(String property) {
+        List<String> res = new ArrayList<>();
+        if (StringUtils.isNotEmpty(property)) {
+            res.addAll(Arrays.asList(property.trim().split(",")));
+        }
+        return res;
+    }
+
+    public Map<String, String> getViewList() {
+        return viewList;
+    }
+
+    public void setViewList(Map<String, String> viewList) {
+        this.viewList = viewList;
+    }
 
     public boolean isUse_swagger() {
         return use_swagger;
@@ -71,7 +155,6 @@ public class ProjectConfig {
     public void setBaseDir(String baseDir) {
         this.baseDir = baseDir;
     }
-
 
     public String getCatalog() {
         return catalog;
@@ -313,67 +396,6 @@ public class ProjectConfig {
         this.excludeTablesList = excludeTablesList;
     }
 
-    public static ProjectConfig readFrom(Properties props, String baseDir) {
-        ProjectConfig c = new ProjectConfig();
-
-        c.baseDir = baseDir;
-
-        c.srcDir = baseDir + props.getProperty("src_dir");
-        LOG.debug("src_dir:" +  c.srcDir);
-        c.resourceDir = baseDir + props.getProperty("resource_dir");
-        LOG.debug("resource_dir:" +  c.resourceDir);
-
-        if (StringUtils.isEmpty( c.resourceDir)) {
-            c.resourceDir =  c.srcDir;
-        }
-
-        c.testDir = baseDir + props.getProperty("test_dir");
-        LOG.debug("test_dir:" +  c.testDir);
-        c.jspDir = baseDir + props.getProperty("jsp_dir");
-        LOG.debug("jsp_dir:" +  c.jspDir);
-        c.packageName = props.getProperty("package_name");
-        LOG.debug("package_name:" +  c.packageName);
-        c.schema = props.getProperty("schema");
-        LOG.debug("schema:" +  c.schema);
-        c.tableOwner = props.getProperty("table_owner");
-        LOG.debug("table_owner:" +  c.tableOwner);
-
-        c.indexes = getBooleanCfg(props, "indexes");
-        c.useCustomMetaTable = getBooleanCfg(props, "kuozhanbiao");
-
-        c.generate_procedures = getBooleanCfg(props, "generate_procedures");
-
-        c.prefix = props.getProperty("prefix");
-        if ( c.prefix == null) {
-            c.prefix = "";
-        }
-
-        c.parseTableNames(props.getProperty("table_list"));
-        c.parseExcludeTableNames(props.getProperty("exclude_table_list"));
-
-        // 有扩展表时用以下interface的设置值
-        c.pojo_node_interface = props.getProperty("pojo_node_interface");
-        c.pojo_version_interface = props.getProperty("pojo_version_interface");
-        c.pojo_state_interface = props.getProperty("pojo_state_interface");
-        c.pojo_uuid_interface = props.getProperty("pojo_uuid_interface");
-        c.pojo_modifydate_interface = props.getProperty("pojo_modifydate_interface");
-
-        c.pojo_node_interface_list =  makeList(props.getProperty("pojo_node_interface_list"));
-        c.pojo_version_interface_list = makeList(props.getProperty("pojo_version_interface_list"));
-        c.pojo_state_interface_list = makeList(props.getProperty("pojo_state_interface_list"));
-        c.pojo_uuid_interface_list = makeList(props.getProperty("pojo_uuid_interface_list"));
-        c.pojo_modifydate_interface_list = makeList(props.getProperty("pojo_modifydate_interface_list"));
-
-        c.overWriteAll = getBooleanCfg(props, "over_write_all");
-        c.use_annotation = getBooleanCfg(props, "use_annotation");
-        c.use_autoincrement = getBooleanCfg(props, "use_autoincrement");
-        c.generateAll = getBooleanCfg(props, "generate_all");
-
-        c.extra_setting = props.getProperty("extra_setting");
-
-        return c;
-    }
-
     /**
      * Parses a comma separated list of table names into the tablesList List.
      */
@@ -387,6 +409,26 @@ public class ProjectConfig {
             while (st.hasMoreElements()) {
                 name = st.nextToken().trim();
                 tablesList.put(name, name);
+                LOG.info(name);
+            }
+        }
+    }
+
+    /**
+     *  view list is separated by semicolon(;) and before first colon(:) is the view name.
+     *  The view is virtual view, i.e. it is a select SQL.
+     */
+    void parseViewNames(String names) {
+        if (names != null) {
+            if (viewList == null) {
+                viewList = new HashMap<>();
+            }
+            StringTokenizer st = new StringTokenizer(names, ";");
+
+            while (st.hasMoreElements()) {
+                String name = st.nextToken().trim();
+
+                viewList.put(name.substring(0,name.indexOf(":")-1), name.substring(name.indexOf(":")+1));
                 LOG.info(name);
             }
         }
@@ -408,18 +450,6 @@ public class ProjectConfig {
                 LOG.info("exclude table: " + name);
             }
         }
-    }
-
-    private static boolean getBooleanCfg(Properties props, String key) {
-        return "yes".equalsIgnoreCase(props.getProperty(key));
-    }
-
-    private static List<String> makeList(String property) {
-        List<String> res = new ArrayList<>();
-        if (StringUtils.isNotEmpty(property)) {
-            res.addAll(Arrays.asList(property.trim().split(",")));
-        }
-        return res;
     }
 
     public String getBaseSrcDir() {

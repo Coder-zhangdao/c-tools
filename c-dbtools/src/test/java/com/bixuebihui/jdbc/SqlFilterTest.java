@@ -75,7 +75,6 @@ public class SqlFilterTest {
 	}
 
 
-
 	@Test
 	public void testInjection(){
 		assertEquals("", SqlFilter.transactSQLInjection("flksdfjlk ' and 1=1 --"));
@@ -87,4 +86,29 @@ public class SqlFilterTest {
 		String res = SqlFilter.transactSQLInjection("';--");
 		assertEquals("", res);
     }
+
+    void dumpArray(Object[] arr){
+		for(Object o:arr){
+			if(o instanceof Object[]){
+				dumpArray((Object[]) o);
+			}else{
+				System.out.println(o);
+			}
+		}
+	}
+    public void foo(Object...values){
+		dumpArray(values);
+		bar(1,values);
+	}
+
+	public void bar(int a, Object...values){
+		System.out.println(a);
+
+		dumpArray(values);
+	}
+
+    @Test
+	public void varargsTest(){
+		foo(1,2);
+	}
 }
