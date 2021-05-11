@@ -1361,17 +1361,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @throws java.sql.SQLException if any.
      */
     public Long getLastInsertId(Connection cn) throws  SQLException {
-        detectDbType();
-        if (dbtype == DERBY) {
-            return Long.parseLong(this.getDbHelper().executeScalar("select last_insert_id()", null, cn).toString());
-        } else if (dbtype == SQLSERVER || dbtype == SQLSERVER_2005_AND_UP || dbtype == ACCESS) {
-            return Long.parseLong(this.getDbHelper().executeScalar("select scope_identity()", null, cn).toString());
-        } else if (dbtype == MYSQL) {
-            return Long.parseLong(this.getDbHelper().executeScalar("select last_insert_id()", null, cn).toString());
-        } else {
-            throw new SQLException("getLastInsertId is not support for current dbtype=" + dbtype);
-        }
-
+        return Long.parseLong(this.getDbHelper().executeScalar(getLastInsertIdSql(), null, cn).toString());
     }
 
     private String getLastInsertIdSql() throws  SQLException {
@@ -1816,8 +1806,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
     protected boolean insertAutoIncrement(T info) throws SQLException {
         beforeChange(info);
-        setIdLong(info,getDbHelper().executeNoQuery(getInsertSqlAutoIncrement(),
-                getInsertObjs(info) ));
+        setIdLong(info,getDbHelper().insertAndFetchLastId( this.getInsertSql(),
+                getInsertObjs(info), null, null ));
         return true;
     }
 

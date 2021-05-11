@@ -154,7 +154,10 @@ public interface IDbHelper {
 	 */
 	int executeNoQuery(String strSql) throws SQLException;
 
-	/**
+    long insertAndFetchLastId(String sql, Object[] params,
+							  int[] targetSqlTypes, Connection conn) throws SQLException;
+
+    /**
 	 * <p>executeNoQuery.</p>
 	 *
 	 * @param sql a {@link java.lang.String} object.

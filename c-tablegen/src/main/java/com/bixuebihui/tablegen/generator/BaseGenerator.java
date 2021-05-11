@@ -77,6 +77,14 @@ public abstract class BaseGenerator {
      */
     abstract String getTargetFileName(String tableName);
 
+    String getClassSuffix(){return "";}
+
+    String getTargetFileName(String subDir, String tableName) {
+        return
+                config.getBaseSrcDir() + File.separator + subDir + File.separator + getPojoClassName(tableName)
+                        + getClassSuffix() + ".java";
+    }
+
     /**
      * template file name
      * @return template file name

@@ -102,7 +102,7 @@ public class SMTPMXLookup {
 
         // Isolate the domain/machine name and get a list of mail exchangers
         String domain = address.substring(++pos);
-        ArrayList mxList = null;
+        ArrayList mxList;
         try {
             mxList = getMX(domain);
         } catch (NamingException ex) {

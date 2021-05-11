@@ -23,7 +23,6 @@ public class DalGenerator extends BaseGenerator {
 
     private static final Log LOG = LogFactory.getLog(DalGenerator.class);
 
-
     /**
      * Selects the type of a particular column name. Cannot use Hashtables to
      * store columns as it screws up the ordering, so we have to do a crap
@@ -212,11 +211,11 @@ public class DalGenerator extends BaseGenerator {
         return v;
     }
 
+    String getClassSuffix(){return CLASS_SUFFIX;}
+
     @Override
     String getTargetFileName(String tableName) {
-        return
-                config.getBaseSrcDir() + File.separator + "dal" + File.separator + getPojoClassName(tableName)
-                        + CLASS_SUFFIX + ".java";
+        return getTargetFileName("dal", tableName);
     }
 
     @Override

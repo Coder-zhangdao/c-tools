@@ -6,19 +6,13 @@ import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
 import com.github.jknack.handlebars.Handlebars;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
-import java.io.IOException;
-
-import static com.bixuebihui.tablegen.NameUtils.firstUp;
 
 /**
  * @author xwx
  */
 public class PojoGenerator extends BaseGenerator{
-    private static final Log LOG = LogFactory.getLog(PojoGenerator.class);
 
     public static String getExtendsClasses(TableSetInfo setInfo, String tableName) {
         if (setInfo.getTableDataExt() != null) {
@@ -36,29 +30,26 @@ public class PojoGenerator extends BaseGenerator{
 
     public String getAnnotationForClass(){
         /*
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+        import io.swagger.annotations.ApiModel;
+        import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel(value = "用户数据传输对象")
-public class OverseaUserDto {
-    @ApiModelProperty(value = "用户id")
-    private int userId;
-    @ApiModelProperty(value = "用户昵称")
-    private String userNickname;
-    @ApiModelProperty(value = "用户默认昵称")
+        @ApiModel(value = "用户数据传输对象")
+        public class User {
+            @ApiModelProperty(value = "用户id")
+            private int id;
+            @ApiModelProperty(value = "用户昵称")
+            private String nickname;
 
+           https://blog.csdn.net/sdyy321/article/details/40298081
 
-   https://blog.csdn.net/sdyy321/article/details/40298081
+            import com.fasterxml.jackson.annotation.JsonProperty;
 
-    import com.fasterxml.jackson.annotation.JsonProperty;
+            @JsonAlias can be used!
+            @JsonAlias
+        这个注解是在JackSon 2.9版本中才有的。作用是在反序列化的时候可以让Bean的属性接收多个json字段的名称。可以加在字段上或者getter和setter方法上。
 
-    @JsonAlias can be used!
-    @JsonAlias
-这个注解是在JackSon 2.9版本中才有的。作用是在反序列化的时候可以让Bean的属性接收多个json字段的名称。可以加在字段上或者getter和setter方法上。
-
-
-@JsonProperty("template_code")
-@JsonIgnoreProperties
+        @JsonProperty("template_cnode")
+        @JsonIgnoreProperties
          */
         return "io.swagger.annotations.ApiModel;";
     }
@@ -66,9 +57,7 @@ public class OverseaUserDto {
 
     @Override
     public String getTargetFileName(String tableName) {
-
-        return  config.getBaseSrcDir()+File.separator + "pojo" + File.separator + getClassName(tableName)
-                + ".java";
+        return  getTargetFileName("pojo", tableName);
     }
 
     @Override

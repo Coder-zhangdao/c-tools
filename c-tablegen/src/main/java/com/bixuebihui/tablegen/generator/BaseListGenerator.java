@@ -7,7 +7,6 @@ import java.io.File;
  */
 public class BaseListGenerator extends BaseGenerator{
 
-
     @Override
     public String getTargetFileName(String tableName) {
         String baseDir = config.getBaseSrcDir();

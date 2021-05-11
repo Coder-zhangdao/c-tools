@@ -10,7 +10,9 @@ import org.apache.commons.text.StringEscapeUtils;
 {{#if config.use_swagger}}
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javax.annotation.processing.Generated;
 
+@Generated("com.github.yujiaao:tablegen")
 @ApiModel(description ="{{tableInfo.comment}}")
 {{/if~}}
 public class {{className}} {{interface}} {

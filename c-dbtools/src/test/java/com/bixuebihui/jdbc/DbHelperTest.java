@@ -25,6 +25,18 @@ public class DbHelperTest extends TestCase {
         assertTrue(a == 100);
     }
 
+    public void testInsertAndFetchId() throws Exception {
+
+        String sql = "insert into t_log( uid, content)values(?,?)";
+        h.executeNoQuery("delete from t_log where lid<100000");
+        long res = h.insertAndFetchLastId(sql, new Object[]{10000, "test10000" },null, null);
+        assertTrue(res>1);
+        System.out.println(res);
+
+        long a = (long) h.executeScalar("select count(*) from t_log where lid<1000");
+        assertTrue(a == 1);
+    }
+
     public void testExecuteQuery1() throws Exception {
     }
 
