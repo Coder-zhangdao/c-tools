@@ -11,10 +11,7 @@ import org.junit.Test;
 
 public class PojoPropertiesParserTest {
 
-	@Test
-	public void testParse() {
-		Assert.fail("Not yet implemented");
-	}
+
 
 	@Test
 	public void testMergeTableSetting() {

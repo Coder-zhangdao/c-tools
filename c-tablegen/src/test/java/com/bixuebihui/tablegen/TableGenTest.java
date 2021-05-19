@@ -6,6 +6,7 @@ import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.tablegen.entry.TableInfo;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 
 import java.io.IOException;
 import java.sql.BatchUpdateException;
@@ -14,6 +15,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Disabled
 public class TableGenTest {
 
 	@Test

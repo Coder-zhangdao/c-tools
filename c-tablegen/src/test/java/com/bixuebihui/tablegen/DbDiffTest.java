@@ -14,11 +14,6 @@ import org.junit.Test;
 public class DbDiffTest {
 
 	@Test
-	public void testFindTables() {
-		Assert.fail("Not yet implemented");
-	}
-
-	@Test
 	public void testDumpDiffTabs() throws IOException {
 		List<String> tab1 = new ArrayList<>();
 		tab1.add("tab1");
