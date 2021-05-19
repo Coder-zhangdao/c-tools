@@ -7,8 +7,6 @@ import com.bixuebihui.tablegen.entry.TableSetInfo;
 import com.github.jknack.handlebars.Handlebars;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-
 /**
  * @author xwx
  */

@@ -116,7 +116,7 @@ public class ColumnData implements Serializable {
             case -5:
                 // MySQL
                 // bigint
-                type = 3;
+                type = 4;
                 break;
 
             case -6:
@@ -387,8 +387,11 @@ public class ColumnData implements Serializable {
                 break;
 
             case 3:
-            case 4:
                 jType = "Long";
+                break;
+
+            case 4:
+                jType="Integer";
                 break;
 
             case 5:
