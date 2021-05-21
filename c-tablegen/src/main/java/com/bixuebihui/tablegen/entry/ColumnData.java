@@ -66,7 +66,7 @@ public class ColumnData implements Serializable {
             case 2:
                 if (columns > 1) {
                     //derby numeric(n), added by Xing
-                    type = 3;
+                    type = 4;
                 } else {
                     type = 16;
                 }
@@ -116,7 +116,7 @@ public class ColumnData implements Serializable {
             case -5:
                 // MySQL
                 // bigint
-                type = 4;
+                type = 3;
                 break;
 
             case -6:

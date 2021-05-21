@@ -881,13 +881,30 @@ public class TableGen implements DiffHandler {
         out("@Override");
         out("public void setIdLong(" + this.getPojoClassName(tableName) + " info, long id) {");
         if (isNotEmpty(keyData)) {
-            out("    info.set" + firstUp(keyData.get(0)) + "((" + type + ")id);");
+            out("    info.set" + firstUp(keyData.get(0)) + "((" + unboxType(type) + ")id);");
         } else {
             out("   //no key to set, don't this method!");
         }
         out("}");
         out("\n");
 
+    }
+
+    String  unboxType(String type){
+        switch (type){
+            case "Integer":
+                return "int";
+            case "Long":
+                return "long";
+            case "Short":
+                return "short";
+            case "Byte":
+                return "byte";
+            case "Boolean":
+                return "boolean";
+            default:
+                return type;
+        }
     }
 
     private void writeDummyUpdate(String tableName, String methodName) throws IOException {
