@@ -428,7 +428,7 @@ public class ProjectConfig {
             while (st.hasMoreElements()) {
                 String name = st.nextToken().trim();
 
-                viewList.put(name.substring(0,name.indexOf(":")-1), name.substring(name.indexOf(":")+1));
+                viewList.put(name.substring(0,name.indexOf(":")), name.substring(name.indexOf(":")+1));
                 LOG.info(name);
             }
         }

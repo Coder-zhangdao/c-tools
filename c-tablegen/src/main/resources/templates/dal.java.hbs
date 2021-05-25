@@ -1,14 +1,14 @@
-package {{config.packageName}}.{{tableName}}.dal;
+package {{config.packageName}}{{viewModifier}}.dal;
 
 {{> [header-comment.java]}}
 
 import java.sql.*;
 import java.util.List;
 import javax.sql.DataSource;
-import com.bixuebihui.test.business.*;
-import com.bixuebihui.test.pojo.*;
+import {{config.packageName}}{{viewModifier}}.business.*;
+import {{config.packageName}}{{viewModifier}}.pojo.*;
 import com.bixuebihui.jdbc.RowMapperResultReader;
-import com.bixuebihui.test.BaseList;
+import {{config.packageName}}.BaseList;
 import javax.annotation.processing.Generated;
 
 @Generated("com.github.yujiaao:tablegen")
@@ -41,7 +41,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
    @Override
    protected String getInsertSql(){
-       return "insert into {{tableName}} ( {{#each fields ~}}
+       return "insert into "+this.getTableName()+" ( {{#each fields ~}}
             {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}} {{ name }} {{#unless @last}},{{/unless ~}} {{/if ~}}
             {{/each ~}} ) values ( {{#each fields ~}}
             {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) }} ? {{#unless @last}},{{/unless}} {{/if ~}}
@@ -52,7 +52,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
     @Override
     protected String getUpdateSql(){
-        return "update {{tableName}} set {{#each fields ~}}
+        return "update "+this.getTableName()+" set {{#each fields ~}}
             {{#eq config.versionColName name ~}} {{name}}= {{name}} +1 {{else}} {{name}}=? {{/eq ~}}
             {{~#unless @last}},{{/unless~}}
             {{~/each}} {{whereNotLike}}";
@@ -76,7 +76,13 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     @Override
     public String getTableName()
     {
-       return  "{{tableName}}";
+{{#if hasKey ~}}
+      return  "{{tableName}}";
+{{~ else ~}}
+{{!    tripple { for unescape equals sign '='  }}
+      return "({{{tableInfo.comment}}}) as {{tableName}}"
+{{/if ~}}
+
     }
 
     {{!    writeGetKeyName(getFirstKeyName(keyData)); }}
@@ -103,7 +109,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     {{#if hasKey}}
         info.set{{firstUp firstKeyName}}(id);
     {{else}}
-        //no key to set, don't this method!
+        //no key to set, don't use this method!
     {{/if ~}}
     }
 
@@ -112,7 +118,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     {{#if hasKey}}
         info.set{{firstUp firstKeyName}}(({{firstKeyType}})id);
     {{else}}
-        //no key to set, don't this method!
+        //no key to set, don't use this method!
     {{/if}}
     }
 {{! writeGetNextKey(keyData, colData); }}

@@ -1,0 +1,19 @@
+package {{config.packageName}}{{viewModifier}}.business;
+
+{{> [header-comment.java]}}
+
+import java.sql.*;
+import java.util.List;
+import javax.sql.DataSource;
+import {{config.packageName}}{{viewModifier}}.dal.*;
+import {{config.packageName}}{{viewModifier}}.pojo.*;
+import com.bixuebihui.jdbc.RowMapperResultReader;
+import {{config.packageName}}.BaseList;
+import javax.annotation.processing.Generated;
+
+@Generated("com.github.yujiaao:tablegen")
+public class {{className}}  extends {{pojoClassName}}List<{{pojoClassName}}, {{firstKeyType}}>
+{
+    {{! writeDALConstructor(tableName); }}
+    // please write your code here!
+}

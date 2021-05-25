@@ -26,8 +26,7 @@ public class PojoGenerator extends BaseGenerator{
         return "";
     }
 
-    public String getAnnotationForClass(){
-        /*
+    /**
         import io.swagger.annotations.ApiModel;
         import io.swagger.annotations.ApiModelProperty;
 
@@ -49,6 +48,7 @@ public class PojoGenerator extends BaseGenerator{
         @JsonProperty("template_cnode")
         @JsonIgnoreProperties
          */
+    public String getAnnotationForClass(){
         return "io.swagger.annotations.ApiModel;";
     }
 

@@ -15,9 +15,9 @@ import static java.sql.ResultSetMetaData.columnNullable;
  * Suitable to use when view is not available, for example the DBA not allowed to create view for some reasons.
  * So we use plain sql for ORM
  */
-public class AirViewUtils {
+public class OnFlyViewUtils {
 
-    public static TableInfo getColumnData(ResultSetMetaData rs, String tableName, int dbtype) throws SQLException {
+    public static TableInfo getColumnData(ResultSetMetaData rs, String onFlyViewName, int dbtype) throws SQLException {
         List<ColumnData> colData = new ArrayList<>();
 
         ColumnData cd;
@@ -32,12 +32,6 @@ public class AirViewUtils {
             for (int i=1; i<=rs.getColumnCount(); i++) {
 
                 String colName = rs.getColumnName(i);
-
-                //oracle system columns
-                if (colName.contains("#"))
-                {
-                    continue;
-                }
 
                 boolean existsCol = false;
                 for (ColumnData dt : colData) {
@@ -80,7 +74,7 @@ public class AirViewUtils {
             }
             throw e;
         }
-        TableInfo tableInfo = new TableInfo(tableName);
+        TableInfo tableInfo = new TableInfo(onFlyViewName);
         tableInfo.setFields(colData);
 
         return tableInfo;

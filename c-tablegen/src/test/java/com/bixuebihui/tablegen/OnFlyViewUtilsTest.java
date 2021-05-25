@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class AirViewUtilsTest {
+class OnFlyViewUtilsTest {
     static IDbHelper dbHelper;
 
     @BeforeAll
@@ -26,7 +26,7 @@ class AirViewUtilsTest {
     @Test
     void getColumnData() throws SQLException {
         String sql = "select test_gen.*, degree from test_gen left join t_edu on test_gen.edu_id=t_edu.id limit 1";
-        List<TableInfo> list = dbHelper.executeQuery(sql, null, new RowMapperResultReader<>((rs, index) -> AirViewUtils.getColumnData(rs.getMetaData(), "test", BaseDao.MYSQL)));
+        List<TableInfo> list = dbHelper.executeQuery(sql, null, new RowMapperResultReader<>((rs, index) -> OnFlyViewUtils.getColumnData(rs.getMetaData(), "test", BaseDao.MYSQL)));
 
         TableInfo cols = list.get(0);
         assertEquals("Type : INT(11) Name : id", cols.getFields().get(0).toString());

@@ -4,14 +4,8 @@ import com.bixuebihui.algorithm.LRULinkedHashMap;
 import com.bixuebihui.generated.tablegen.business.T_metatableManager;
 import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
-import com.bixuebihui.jdbc.BaseDao;
-import com.bixuebihui.jdbc.IDbHelper;
-import com.bixuebihui.jdbc.JDBCUtils;
-import com.bixuebihui.jdbc.SqlFileExecutor;
-import com.bixuebihui.tablegen.ForeignKeyDefinition;
-import com.bixuebihui.tablegen.PojoPropertiesParser;
-import com.bixuebihui.tablegen.ProjectConfig;
-import com.bixuebihui.tablegen.TableUtils;
+import com.bixuebihui.jdbc.*;
+import com.bixuebihui.tablegen.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -29,10 +23,8 @@ import java.util.*;
  * @author xwx
  */
 public class TableSetInfo {
-    private static final Log LOG = LogFactory.getLog(TableSetInfo.class);
     public static final String DB_ERROR = "[GEN]Error setup database";
-
-
+    private static final Log LOG = LogFactory.getLog(TableSetInfo.class);
     private final Map<String, List<ForeignKeyDefinition>> foreignKeyImCache = new LRULinkedHashMap<>(
             400);
     private final Map<String, List<String>> keyCache = new LRULinkedHashMap<>(500);
@@ -48,6 +40,97 @@ public class TableSetInfo {
             400);
     private  Map<String, T_metatable> tableDataExt;
     private LinkedHashMap<String, TableInfo> tableInfos;
+    private LinkedHashMap<String, TableInfo> viewInfos;
+
+    protected static int getPos(List<?> list, int desiredPos){
+        if(list.size()>desiredPos){
+            return desiredPos;
+        }
+        return list.size();
+    }
+
+    /**
+     * this below two methods are valid only for MySQL
+     * @param conn
+     * @param tableInfo
+     * @return
+     */
+    private static void fillComment(Connection conn, TableInfo tableInfo ) {
+        String tableName =tableInfo.getName();
+        try( Statement showTableStatement = conn.createStatement();
+             ResultSet showTableResultSet = showTableStatement.executeQuery("show create table " + tableName)
+        ){ showTableResultSet.next();
+            String createTableSql = showTableResultSet.getString(2);
+            findFieldComment(tableName, tableInfo.getFields(), createTableSql);
+            String comment =  findTableComment(createTableSql);
+            tableInfo.setComment(comment);
+        } catch (SQLException e) {
+            LOG.warn("fail to execute: show create table " + tableName);
+            LOG.warn(e.getMessage(), e);
+        }
+
+    }
+
+    private static  void findFieldComment(String tableName, List<ColumnData> fields, String tableSql) {
+        String fieldSql = tableSql.substring(tableSql.indexOf("(") + 1, tableSql.lastIndexOf(")"));
+        String[] fieldDescs = org.apache.commons.lang3.StringUtils.split(fieldSql, "\n");
+        Map<String, ColumnData> commentMap = new HashMap<>();
+        for (ColumnData fieldInfo : fields) {
+            commentMap.put(fieldInfo.getName().toUpperCase(), fieldInfo);
+        }
+        for (String fieldDesc : fieldDescs) {
+            String trim = org.apache.commons.lang.StringUtils.trim(fieldDesc);
+            String fieldName = org.apache.commons.lang.StringUtils.split(trim, " ")[0].toUpperCase();
+            fieldName = replace(fieldName);
+            String upper = fieldDesc.toUpperCase();
+            if (upper.contains("AUTO_INCREMENT")) {
+                if (Arrays.asList(org.apache.commons.lang.StringUtils.split(upper, " ")).contains("AUTO_INCREMENT")) {
+                    commentMap.get(fieldName).setAutoIncrement(true);
+                }
+            }
+            if (!fieldDesc.contains("COMMENT")) {
+                continue;
+            }
+            String[] splits = org.apache.commons.lang.StringUtils.split(trim, "COMMENT");
+            String comment = splits[splits.length - 1];
+            comment = replace(comment);
+            if (commentMap.containsKey(fieldName)) {
+                commentMap.get(fieldName).setComment(comment);
+            } else {
+                LOG.info("table:"+tableName+",fileName:"+fieldDesc);
+            }
+        }
+    }
+
+    private static String findTableComment(String tableSql) {
+        if(!tableSql.contains("COMMENT=")){
+            return "";
+        }
+        String classCommentTmp = tableSql.substring(tableSql.lastIndexOf("COMMENT=") + 8).trim();
+        classCommentTmp = replace(classCommentTmp);
+        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
+        return classCommentTmp;
+    }
+
+    private static String replace(String classCommentTmp) {
+        classCommentTmp = org.apache.commons.lang3.StringUtils.split(classCommentTmp, " ")[0];
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "'", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ";", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ",", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "`", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\n", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\t", "");
+        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
+        return classCommentTmp;
+    }
+
+    public LinkedHashMap<String, TableInfo> getViewInfos() {
+        return viewInfos;
+    }
+
+    public void setViewInfos(LinkedHashMap<String, TableInfo> viewInfos) {
+        this.viewInfos = viewInfos;
+    }
 
     public Map<String, T_metatable> getTableDataExt() {
         return tableDataExt;
@@ -63,13 +146,6 @@ public class TableSetInfo {
 
     public Map<String, List<String>> getKeyCache() {
         return keyCache;
-    }
-
-    protected static int getPos(List<?> list, int desiredPos){
-        if(list.size()>desiredPos){
-            return desiredPos;
-        }
-        return list.size();
     }
 
     public Map<String, List<ForeignKeyDefinition>> getForeignKeyExCache() {
@@ -88,6 +164,9 @@ public class TableSetInfo {
        return this.getTableInfos().get(tableName).getFields();
     }
 
+    public List<ColumnData> getViewCols(String tableName){
+        return this.getViewInfos().get(tableName).getFields();
+    }
 
     public String tableName2ClassName(String tableName) {
         if (tableDataExt != null && tableDataExt.get(tableName) != null) {
@@ -136,7 +215,6 @@ public class TableSetInfo {
         return res;
     }
 
-
     public String getInterface(String tableName, ProjectConfig config) {
         StringBuilder sb = new StringBuilder();
         sb.append(" implements Serializable");
@@ -176,28 +254,6 @@ public class TableSetInfo {
         return indexCache;
     }
 
-    /**
-     * this below two methods are valid only for MySQL
-     * @param conn
-     * @param tableInfo
-     * @return
-     */
-    private static void fillComment(Connection conn, TableInfo tableInfo ) {
-        String tableName =tableInfo.getName();
-        try( Statement showTableStatement = conn.createStatement();
-             ResultSet showTableResultSet = showTableStatement.executeQuery("show create table " + tableName)
-        ){ showTableResultSet.next();
-            String createTableSql = showTableResultSet.getString(2);
-            findFieldComment(tableName, tableInfo.getFields(), createTableSql);
-            String comment =  findTableComment(createTableSql);
-            tableInfo.setComment(comment);
-        } catch (SQLException e) {
-            LOG.warn("fail to execute: show create table " + tableName);
-            LOG.warn(e.getMessage(), e);
-        }
-
-    }
-
     public Map<String, T_metatable> getTableDataExt(IDbHelper dbHelper, LinkedHashMap<String, TableInfo> tables)
             throws SQLException {
         HashMap<String, T_metatable> ht = new HashMap<>(tables.size()*2);
@@ -217,7 +273,6 @@ public class TableSetInfo {
         return ht;
     }
 
-
     public boolean insertOrUpdateMetatable(T_metatable metatable, T_metatableManager daoMetaTable) throws SQLException {
         if (metatable.getTid() <= 0) {
             return daoMetaTable.insertAutoNewKey(metatable);
@@ -225,7 +280,6 @@ public class TableSetInfo {
             return daoMetaTable.updateByKey(metatable);
         }
     }
-
 
     public boolean initTableData(LinkedHashMap<String, TableInfo> tableNames,  T_metatableManager daoMetaTable) throws SQLException {
         if (tableNames != null) {
@@ -250,8 +304,6 @@ public class TableSetInfo {
             return false;
         }
     }
-
-
 
     public Map<String, T_metatable> getExtraTableDataFromXml(String extraSettingFileName,
                                                                 Map<String, T_metatable> settingFromDb) throws IOException {
@@ -452,6 +504,46 @@ public class TableSetInfo {
 
     }
 
+
+    /**
+     * Retrieves all the table data required.
+     *
+     * @throws IOException
+     */
+    public synchronized void getOnFlyViewData(ProjectConfig config, IDbHelper dbHelper) throws SQLException, IOException {
+
+        if(config.getViewList()==null) {
+            return;
+        }
+        //虚视图
+        LinkedHashMap<String, TableInfo> viewInfos = new LinkedHashMap<>();
+
+        try(Connection cn = dbHelper.getConnection()) {
+            if (CollectionUtils.isEmpty(viewInfos)) {
+
+                int dbtype = BaseDao.detectDbType(cn.getMetaData().getDriverName());
+
+                for (String name : config.getViewList().keySet()) {
+                    String sql = config.getViewList().get(name);
+                    dbHelper.executeQuery(sql.contains("limit") ? sql :sql + " limit 1",
+                            new Object[0], new RowMapperResultReader((rs, index) -> {
+                                TableInfo info = OnFlyViewUtils.getColumnData(rs.getMetaData(), name, dbtype);
+                                info.setComment(sql);
+                                viewInfos.put(name, info);
+                                return null;
+                            }));
+
+                }
+
+                setViewInfos(viewInfos);
+            } else {
+                LOG.info("tableNames already set, retrieve from db skipped.");
+            }
+
+        }
+
+    }
+
     private  void initImportKeys(ProjectConfig config, IDbHelper dbHelper, DatabaseMetaData metaData, String tableName) throws SQLException {
         if(isMysql(metaData)){
             //针对mysql的优化, 一次加载全部外键
@@ -467,61 +559,6 @@ public class TableSetInfo {
         }
         List<ForeignKeyDefinition> foreignKeyData = TableUtils.getTableImportedKeys(metaData, config.getCatalog(), config.getTableOwner(), tableName);
         getForeignKeyImCache().put(tableName, foreignKeyData);
-    }
-
-
-    private static  void findFieldComment(String tableName, List<ColumnData> fields, String tableSql) {
-        String fieldSql = tableSql.substring(tableSql.indexOf("(") + 1, tableSql.lastIndexOf(")"));
-        String[] fieldDescs = org.apache.commons.lang3.StringUtils.split(fieldSql, "\n");
-        Map<String, ColumnData> commentMap = new HashMap<>();
-        for (ColumnData fieldInfo : fields) {
-            commentMap.put(fieldInfo.getName().toUpperCase(), fieldInfo);
-        }
-        for (String fieldDesc : fieldDescs) {
-            String trim = org.apache.commons.lang.StringUtils.trim(fieldDesc);
-            String fieldName = org.apache.commons.lang.StringUtils.split(trim, " ")[0].toUpperCase();
-            fieldName = replace(fieldName);
-            String upper = fieldDesc.toUpperCase();
-            if (upper.contains("AUTO_INCREMENT")) {
-                if (Arrays.asList(org.apache.commons.lang.StringUtils.split(upper, " ")).contains("AUTO_INCREMENT")) {
-                    commentMap.get(fieldName).setAutoIncrement(true);
-                }
-            }
-            if (!fieldDesc.contains("COMMENT")) {
-                continue;
-            }
-            String[] splits = org.apache.commons.lang.StringUtils.split(trim, "COMMENT");
-            String comment = splits[splits.length - 1];
-            comment = replace(comment);
-            if (commentMap.containsKey(fieldName)) {
-                commentMap.get(fieldName).setComment(comment);
-            } else {
-                LOG.info("table:"+tableName+",fileName:"+fieldDesc);
-            }
-        }
-    }
-
-
-    private static String findTableComment(String tableSql) {
-        if(!tableSql.contains("COMMENT=")){
-            return "";
-        }
-        String classCommentTmp = tableSql.substring(tableSql.lastIndexOf("COMMENT=") + 8).trim();
-        classCommentTmp = replace(classCommentTmp);
-        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
-        return classCommentTmp;
-    }
-
-    private static String replace(String classCommentTmp) {
-        classCommentTmp = org.apache.commons.lang3.StringUtils.split(classCommentTmp, " ")[0];
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "'", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ";", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ",", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "`", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\n", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\t", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
-        return classCommentTmp;
     }
 
     /**

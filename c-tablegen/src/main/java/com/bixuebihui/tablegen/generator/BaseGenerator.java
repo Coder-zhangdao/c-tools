@@ -3,9 +3,11 @@ package com.bixuebihui.tablegen.generator;
 
 import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.jdbc.IDbHelper;
+import com.bixuebihui.tablegen.GenException;
 import com.bixuebihui.tablegen.NameUtils;
 import com.bixuebihui.tablegen.ProjectConfig;
 import com.bixuebihui.tablegen.TableGen;
+import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
@@ -28,10 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static com.bixuebihui.tablegen.NameUtils.firstUp;
 import static com.bixuebihui.tablegen.NameUtils.getConfigBaseDir;
@@ -40,13 +39,17 @@ import static com.bixuebihui.tablegen.TableGenConfig.PROPERTIES_FILENAME;
 /**
  * @author xwx
  */
-public abstract class BaseGenerator {
+public abstract class BaseGenerator implements Generator {
+    public final static String UNKNOWN_TYPE = "unknown";
     protected static final String TEMPLATE_ROOT = "/templates";
-    private static final Log LOG = LogFactory.getLog(BaseGenerator.class);
+    public static final String VIEW_DIR = "view";
+    protected static final Log LOG = LogFactory.getLog(DalGenerator.class);
+
 
     ProjectConfig config;
     DatabaseConfig dbConfig;
     TableSetInfo setInfo;
+    protected boolean isView = false;
 
     public BaseGenerator() {
         config = new ProjectConfig();
@@ -58,24 +61,41 @@ public abstract class BaseGenerator {
         return !CollectionUtils.isEmpty(col);
     }
 
+    /**
+     * Selects the type of a particular column name. Cannot use Hashtables to
+     * store columns as it screws up the ordering, so we have to do a crap
+     * search. (and yes I know it could be better - it's good enough).
+     */
+    public static String getColType(String key, List<ColumnData> columnData) {
+        String type = UNKNOWN_TYPE;
+        for (ColumnData tmp : columnData) {
+            if (tmp.getName().equalsIgnoreCase(key)) {
+                type = tmp.getJavaType();
+                break;
+            }
+        }
+        if (UNKNOWN_TYPE.equals(type)) {
+            LOG.error("unknown type of key:" + key);
+        }
+        return type;
+    }
+
+    public static String getFirstKeyType(List<String> keyData2, List<ColumnData> columnData) throws GenException {
+        return (isNotEmpty(keyData2)) ? BaseGenerator.getColType(keyData2.get(0), columnData) : "Object";
+    }
+
+    /**
+     * to reuse previews created config objects
+     * @param config
+     * @param dbConfig
+     * @param setInfo
+     */
+    @Override
     public void init(ProjectConfig config, DatabaseConfig dbConfig, TableSetInfo setInfo) {
         this.config = config;
         this.dbConfig = dbConfig;
         this.setInfo = setInfo;
     }
-
-    public synchronized void readDbMetaData(DatabaseConfig dbConfig) throws SQLException, InstantiationException, IOException, IllegalAccessException {
-        IDbHelper helper = TableGen.getDbHelper(dbConfig);
-        DatabaseMetaData metaData = helper.getConnection().getMetaData();
-        setInfo.getTableData(config, helper, metaData);
-    }
-
-    /**
-     * name of file to generate
-     * @param tableName database table name
-     * @return full path of file name
-     */
-    abstract String getTargetFileName(String tableName);
 
     String getClassSuffix(){return "";}
 
@@ -84,6 +104,20 @@ public abstract class BaseGenerator {
                 config.getBaseSrcDir() + File.separator + subDir + File.separator + getPojoClassName(tableName)
                         + getClassSuffix() + ".java";
     }
+
+    public synchronized void readDbMetaData(DatabaseConfig dbConfig) throws SQLException, InstantiationException, IOException, IllegalAccessException {
+        IDbHelper helper = TableGen.getDbHelper(dbConfig);
+        DatabaseMetaData metaData = helper.getConnection().getMetaData();
+        setInfo.getTableData(config, helper, metaData);
+        setInfo.getOnFlyViewData(config, helper);
+    }
+
+    /**
+     * name of file to generate
+     * @param tableName database table name
+     * @return full path of file name
+     */
+    public abstract String getTargetFileName(String tableName);
 
     /**
      * template file name
@@ -102,6 +136,10 @@ public abstract class BaseGenerator {
 
     abstract String getClassName(String tableName);
 
+    /**
+     * read config from file
+     * @param filename the configuration file name
+     */
     public synchronized void init(String filename) {
         String propertiesFilename = filename != null ? filename : PROPERTIES_FILENAME;
 
@@ -132,6 +170,7 @@ public abstract class BaseGenerator {
     protected void additionalSetting(Handlebars handlebars) {
     }
 
+    @Override
     public String generate(String tableName) throws IOException {
         Handlebars handlebars = getHandlebars();
 
@@ -149,12 +188,15 @@ public abstract class BaseGenerator {
     protected Map<String, Object> getContextMap(String tableName) {
         Map<String, Object> v = new HashMap<>(20);
         v.put("tableName", tableName);
-        v.put("tableInfo", setInfo.getTableInfos().get(tableName));
-        v.put("fields", setInfo.getTableCols(tableName));
-        v.put("keys", setInfo.getTableKeys(tableName));
-        v.put("importKeys", setInfo.getTableImportedKeys(tableName));
-        v.put("exportKeys", setInfo.getTableExportedKeys(tableName));
-        v.put("indexData", setInfo.getTableIndexes(tableName));
+
+        if(setInfo.getTableInfos().get(tableName)!=null) {
+            v.put("tableInfo", setInfo.getTableInfos().get(tableName));
+            v.put("fields", setInfo.getTableCols(tableName));
+            v.put("keys", setInfo.getTableKeys(tableName));
+            v.put("importKeys", setInfo.getTableImportedKeys(tableName));
+            v.put("exportKeys", setInfo.getTableExportedKeys(tableName));
+            v.put("indexData", setInfo.getTableIndexes(tableName));
+        }
         v.put("pojoClassName", this.getPojoClassName(tableName));
         v.put("className", this.getClassName(tableName));
         v.put("interface", this.getInterface(tableName));
@@ -162,7 +204,18 @@ public abstract class BaseGenerator {
         v.put("hasKey", isNotEmpty(this.setInfo.getTableKeys(tableName)));
         v.put("setInfo", setInfo);
         v.put("config", config);
+
+        if(isView) {
+            setViewContext(v, tableName);
+        }
         return v;
+    }
+
+
+    protected void setViewContext(Map<String, Object> map, String tableName) {
+        map.put("tableInfo", setInfo.getViewInfos().get(tableName));
+        map.put("fields", setInfo.getViewInfos().get(tableName).getFields());
+        map.put("viewModifier","."+ VIEW_DIR);
     }
 
     protected Handlebars getHandlebars() {
@@ -190,4 +243,29 @@ public abstract class BaseGenerator {
         return handlebars;
     }
 
+    String getFirstKeyType(String tableName) {
+        try {
+            List<String> keyData = getKeyData(tableName);
+            List<ColumnData> columnData = getColumnData(tableName);
+            return BaseGenerator.getFirstKeyType(keyData, columnData);
+        } catch (GenException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private List<ColumnData> getColumnData(String tableName) {
+        List<ColumnData> columnData = isView ? setInfo.getViewInfos().get(tableName).getFields() :
+                setInfo.getTableInfos().get(tableName).getFields();
+        return columnData;
+    }
+
+    protected List<String> getKeyData(String tableName) {
+        List<String> keys =  setInfo.getTableKeys(tableName);
+        if(keys.isEmpty() && isView){
+            keys = new ArrayList<>();
+            keys.add(getColumnData(tableName).get(0).getName());
+        }
+        return keys;
+    }
 }

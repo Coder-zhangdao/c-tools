@@ -1,14 +1,13 @@
 package com.bixuebihui.tablegen.generator;
 
-import com.bixuebihui.tablegen.GenException;
 import com.bixuebihui.tablegen.TableGen;
 import com.bixuebihui.tablegen.entry.ColumnData;
 import com.github.jknack.handlebars.Handlebars;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static com.bixuebihui.tablegen.NameUtils.columnNameToConstantName;
 import static com.bixuebihui.tablegen.NameUtils.firstUp;
@@ -18,33 +17,7 @@ import static com.bixuebihui.tablegen.TableGen.INDENT;
  * @author xwx
  */
 public class DalGenerator extends BaseGenerator {
-    public final static String UNKNOWN_TYPE = "unknown";
-    private final static String CLASS_SUFFIX = "List";
-
-    private static final Log LOG = LogFactory.getLog(DalGenerator.class);
-
-    /**
-     * Selects the type of a particular column name. Cannot use Hashtables to
-     * store columns as it screws up the ordering, so we have to do a crap
-     * search. (and yes I know it could be better - it's good enough).
-     */
-    public static String getColType(String key, List<ColumnData> columnData) {
-        String type = UNKNOWN_TYPE;
-        for (ColumnData tmp : columnData) {
-            if (tmp.getName().equalsIgnoreCase(key)) {
-                type = tmp.getJavaType();
-                break;
-            }
-        }
-        if (UNKNOWN_TYPE.equals(type)) {
-            LOG.error("unknown type of key:" + key);
-        }
-        return type;
-    }
-
-    public static String getFirstKeyType(List<String> keyData2, List<ColumnData> columnData) throws GenException {
-        return (isNotEmpty(keyData2)) ? getColType(keyData2.get(0), columnData) : "Object";
-    }
+    protected final static String CLASS_SUFFIX = "List";
 
     public static String getFirstKeyName(List<String> keyData2) {
         if (isNotEmpty(keyData2)) {
@@ -184,7 +157,7 @@ public class DalGenerator extends BaseGenerator {
                 .append(INDENT).append("@Override\n")
                 .append(INDENT).append("public " + pojoClassName + " mapRow (ResultSet r, int index) throws SQLException\n")
                 .append(INDENT).append("{\n")
-                .append(INDENT).append(INDENT).append( pojoClassName + " res = new " + pojoClassName + "();\n");
+                .append(INDENT).append(INDENT).append(pojoClassName + " res = new " + pojoClassName + "();\n");
 
         for (String e : gets) {
             sb.append(INDENT).append(INDENT).append("res.set" + e).append("\n");
@@ -198,23 +171,38 @@ public class DalGenerator extends BaseGenerator {
     @Override
     protected Map<String, Object> getContextMap(String tableName) {
         Map<String, Object> v = super.getContextMap(tableName);
+        List<ColumnData> cols = isView ? this.setInfo.getViewCols(tableName) : this.setInfo.getTableCols(tableName);
+        List<String> keys = getKeyData(tableName);
+        if(keys.isEmpty() && isView){
+            keys = new ArrayList<>();
+            keys.add(cols.get(0).getName());
+        }
 
-        v.put("hasVersionCol", containsVersion(this.setInfo.getTableCols(tableName), config.getVersionColName()));
+        v.put("hasVersionCol", containsVersion(cols
+                , config.getVersionColName()));
+
+        v.put("insertObjects", makeInsertObjects(config.isUse_autoincrement(), cols, config.getVersionColName()));
+        v.put("updateObjects", makeUpdateObjects(keys, cols, config.isUse_autoincrement(), config.getVersionColName()));
+
         v.put("firstKeyType", this.getFirstKeyType(tableName));
         v.put("firstKeyName", this.getFirstKeyName(tableName));
-        v.put("whereNoLike", TableGen.createPreparedWhereClause(this.setInfo.getTableKeys(tableName),
-                false, this.setInfo.getTableCols(tableName)));
-        v.put("insertObjects", makeInsertObjects(config.isUse_autoincrement(), setInfo.getTableCols(tableName), config.getVersionColName()));
-        v.put("updateObjects", makeUpdateObjects(setInfo.getTableKeys(tableName), setInfo.getTableCols(tableName), config.isUse_autoincrement(), config.getVersionColName()));
-        v.put("keyObjects", createKeyObjects(setInfo.getTableKeys(tableName)));
-        v.put("mapRow", mapRow(setInfo.getTableCols(tableName), this.getPojoClassName(tableName)));
+
+        v.put("whereNoLike", TableGen.createPreparedWhereClause(keys,
+                false, cols));
+        v.put("keyObjects", createKeyObjects(keys));
+
+        v.put("isView", isView);
+
+        v.put("mapRow", mapRow(cols, this.getPojoClassName(tableName)));
         return v;
     }
 
-    String getClassSuffix(){return CLASS_SUFFIX;}
+    String getClassSuffix() {
+        return CLASS_SUFFIX;
+    }
 
     @Override
-    String getTargetFileName(String tableName) {
+    public String getTargetFileName(String tableName) {
         return getTargetFileName("dal", tableName);
     }
 
@@ -227,7 +215,7 @@ public class DalGenerator extends BaseGenerator {
     protected void additionalSetting(Handlebars handlebars) {
         super.additionalSetting(handlebars);
         // usage: {{type tableName colName}}
-        handlebars.registerHelper("colType", (tableName, options) -> getColType(options.param(0), this.setInfo.getTableCols((String)tableName)));
+        handlebars.registerHelper("colType", (tableName, options) -> getColType(options.param(0), this.setInfo.getTableCols((String) tableName)));
         // usage: {{where tableName}}
         handlebars.registerHelper("where", (tableName, options) ->
         {
@@ -237,19 +225,8 @@ public class DalGenerator extends BaseGenerator {
 
     }
 
-    String getFirstKeyType(String tableName) {
-        try {
-            List<String> keyData = setInfo.getTableKeys(tableName);
-            List<ColumnData> columnData = setInfo.getTableInfos().get(tableName).getFields();
-            return getFirstKeyType(keyData, columnData);
-        } catch (GenException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
     String getFirstKeyName(String tableName) {
-        List<String> keyData = setInfo.getTableKeys(tableName);
+        List<String> keyData = getKeyData(tableName);
         return getFirstKeyName(keyData);
     }
 

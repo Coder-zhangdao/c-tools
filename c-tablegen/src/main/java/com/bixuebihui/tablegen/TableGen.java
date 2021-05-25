@@ -38,6 +38,7 @@ import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableInfo;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
+import com.bixuebihui.tablegen.generator.GenerateAll;
 import com.bixuebihui.tablegen.generator.PojoGenerator;
 import com.bixuebihui.util.other.CMyFile;
 import org.apache.commons.dbutils.DbUtils;
@@ -63,7 +64,6 @@ import static com.bixuebihui.tablegen.generator.DalGenerator.*;
  * 思路决定出路，创新才有发展，整合才能壮大
  *
  * @author xingwx
- *
  */
 public class TableGen implements DiffHandler {
     public static final String MANAGER_SUFFIX = "Manager";
@@ -82,9 +82,10 @@ public class TableGen implements DiffHandler {
     /**
      * Whether the generation is successful
      */
-    private boolean generateFlag = true;
+    private boolean generateSuccess = true;
     private boolean traceEnable = false;
     private PrintStream console = System.out;
+
     public TableGen(OutputStream outputStream) {
         initConsole(outputStream);
     }
@@ -149,8 +150,9 @@ public class TableGen implements DiffHandler {
 
     /**
      * only keys used as parameters in where clause, so here params mean key columns.
-     * @param params keys of table
-     * @param withLike like for true or equal for false
+     *
+     * @param params     keys of table
+     * @param withLike   like for true or equal for false
      * @param columnData columns of table
      * @return string starts with 'where' or empty string
      * @throws GenException
@@ -230,58 +232,36 @@ public class TableGen implements DiffHandler {
         run(filename, System.out);
     }
 
-    public void run(String filename, OutputStream out) {
-        initConsole(out);
+    @SuppressWarnings("unchecked")
+    public static synchronized Map<String, List<ColumnData>> getTableDataFromLocalCache() {
 
-        if (filename != null && filename.length() > 0) {
-            init(filename);
-        }
-        IDbHelper dbHelper = getDbHelper(dbConfig);
-        try {
-            makeDir();
-            DatabaseMetaData meta = connect(dbHelper.getConnection());
-            setInfo.getTableData(config, dbHelper, meta);
+        String path = getCachedTableDataFilePath();
+        File file = new File(path);
+        if (file.exists()) {
+            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(path))) {
 
-            /*
-             * 如果generator_all == yes，则生成所有表 否则，进行本地快照和数据库的比对
-             */
-            generateBaseList();
-            if (config.generateAll) {
+                Map<String, List<ColumnData>> v = (Map<String, List<ColumnData>>) in.readObject();
 
-                generatePojos();
-                generateDALs();
-
-                generateBusinesses();
-
-                generateWebUI();
-
-                generateTest();
-                if (config.jspDir != null) {
-                    generateJsp();
+                if (v == null) {
+                    return new HashMap<>();
                 }
-                generateSpringXml();
+                return v;
 
-                if (config.generate_procedures) {
-                    generateStoreProcedures(meta);
-                }
-            } else {
-
-                Connection conn = getDbHelper(dbConfig).getConnection();
-                try {
-                    DbDiff dd = new DbDiff(getTableDataFromLocalCache(), conn, config.catalog, config.schema);
-                    dd.addDiffHandler(this);
-                    dd.compareTables();
-                } finally {
-                    DbUtils.close(conn);
-                }
+            } catch (ClassNotFoundException | IOException e) {
+                LOG.warn(e);
             }
-
-        } catch (SQLException | IOException e) {
-            e.printStackTrace(console);
-            LOG.error(e);
         }
 
-        info("Successfully complected!");
+        return new HashMap<>();
+
+    }
+
+    private static String getCachedTableDataFilePath() {
+        String baseDir = System.getProperty("user.dir");
+
+        String src_dir = "target";
+
+        return baseDir + File.separator + src_dir + File.separator + "gen_table_data.cache";
     }
 
     private void generateSpringXml() {
@@ -358,28 +338,14 @@ public class TableGen implements DiffHandler {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private synchronized Map<String, List<ColumnData>> getTableDataFromLocalCache() {
+    public static synchronized void saveTableDataToLocalCache(HashMap<String, List<ColumnData>> data) {
 
         String path = getCachedTableDataFilePath();
-        File file = new File(path);
-        if (file.exists()) {
-            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(path))) {
-
-                Map<String, List<ColumnData>> v = (Map<String, List<ColumnData>>) in.readObject();
-
-                if (v == null) {
-                    return new HashMap<>();
-                }
-                return v;
-
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace(console);
-                LOG.warn(e);
-            }
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path))) {
+            out.writeObject(data);
+        } catch (IOException e) {
+            LOG.warn(e);
         }
-
-        return new HashMap<>();
 
     }
 
@@ -390,23 +356,63 @@ public class TableGen implements DiffHandler {
         return config.getBaseDir() + File.separator + src_dir + File.separator + "gen_column_data.cache";
     }
 
-    private String getCachedTableDataFilePath() {
-        String baseDir = System.getProperty("user.dir");
-
-        String src_dir = "target";
-
-        return baseDir + File.separator + src_dir + File.separator + "gen_table_data.cache";
+    public void run(String filename, OutputStream out) {
+        new GenerateAll().run(filename, out);
     }
 
-    private synchronized void saveTableDataToLocalCache(HashMap<String, List<ColumnData>> data) {
+    public void runV1(String filename, OutputStream out) {
+        initConsole(out);
 
-        String path = getCachedTableDataFilePath();
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path))) {
-            out.writeObject(data);
-        } catch (IOException e) {
-            LOG.warn(e);
+        if (filename != null && filename.length() > 0) {
+            init(filename);
+        }
+        IDbHelper dbHelper = getDbHelper(dbConfig);
+        try {
+            makeDir();
+            DatabaseMetaData meta = connect(dbHelper.getConnection());
+            setInfo.getTableData(config, dbHelper, meta);
+            setInfo.getOnFlyViewData(config, dbHelper);
+
+            /*
+             * 如果generator_all == yes，则生成所有表 否则，进行本地快照和数据库的比对
+             */
+            generateBaseList();
+            if (config.generateAll) {
+
+                generatePojos();
+                generateDALs();
+
+                generateBusinesses();
+
+                generateWebUI();
+
+                generateTest();
+                if (config.jspDir != null) {
+                    generateJsp();
+                }
+                generateSpringXml();
+
+                if (config.generate_procedures) {
+                    generateStoreProcedures(meta);
+                }
+            } else {
+
+                Connection conn = getDbHelper(dbConfig).getConnection();
+                try {
+                    DbDiff dd = new DbDiff(getTableDataFromLocalCache(), conn, config.catalog, config.schema);
+                    dd.addDiffHandler(this);
+                    dd.compareTables();
+                } finally {
+                    DbUtils.close(conn);
+                }
+            }
+
+        } catch (SQLException | IOException e) {
+            e.printStackTrace(console);
+            LOG.error(e);
         }
 
+        info("Successfully complected!");
     }
 
     protected String getTableComment(String tableName) {
@@ -771,7 +777,7 @@ public class TableGen implements DiffHandler {
             out("}");
 
         } catch (IOException ex) {
-            generateFlag = false;
+            generateSuccess = false;
             ex.printStackTrace(console);
         } finally {
             currentOutput.close();
@@ -851,12 +857,11 @@ public class TableGen implements DiffHandler {
     private void writeObjs(String tableName, List<String> params, List<ColumnData> columnData) throws IOException {
 
         out("@Override\nprotected Object[] getInsertObjs(" + this.getPojoClassName(tableName) + " info){\n    return new Object[]{"
-                + makeInsertObjects(config.use_autoincrement,  columnData, config.versionColName) + "};\n}\n");
+                + makeInsertObjects(config.use_autoincrement, columnData, config.versionColName) + "};\n}\n");
         out("@Override\nprotected Object[] getUpdateObjs(" + this.getPojoClassName(tableName) + " info){\n    return new Object[]{"
                 + makeUpdateObjects(params, columnData, config.use_autoincrement, config.versionColName) + "};\n}\n");
 
     }
-
 
 
     private void writeGetSetId(String tableName, List<String> keyData, List<ColumnData> columnData) throws IOException, GenException {
@@ -890,8 +895,8 @@ public class TableGen implements DiffHandler {
 
     }
 
-    String  unboxType(String type){
-        switch (type){
+    String unboxType(String type) {
+        switch (type) {
             case "Integer":
                 return "int";
             case "Long":
@@ -1003,19 +1008,19 @@ public class TableGen implements DiffHandler {
             if (config.indexes) {
                 Map<String, List<String>> indexData = setInfo.getTableIndexes(tableName);
                 // variable
-                for (String indexName: indexData.keySet()) {
+                for (String indexName : indexData.keySet()) {
                     List<String> cols = indexData.get(indexName);
-                    String name= firstUp(indexName);
-                    writeSelect(tableName, cols, "selectBy"+name, colData);
-                    writeSelectAll(tableName, cols, false, "selectAllLike"+name, true, colData);
+                    String name = firstUp(indexName);
+                    writeSelect(tableName, cols, "selectBy" + name, colData);
+                    writeSelectAll(tableName, cols, false, "selectAllLike" + name, true, colData);
 
-                    writeUpdate(tableName, cols, "updateBy"+name, false, false, colData);
-                    writeUpdate(tableName, cols, "updateBy"+name, true, false, colData);
+                    writeUpdate(tableName, cols, "updateBy" + name, false, false, colData);
+                    writeUpdate(tableName, cols, "updateBy" + name, true, false, colData);
 
-                    writeDelete(tableName, cols, "deleteBy"+name, false, colData);
-                    writeDelete(tableName, cols, "deleteBy"+name, true, colData);
-                    writeCount(cols, false, "countBy"+name, colData);
-                    writeCount(cols, true, "countLike"+name, colData);
+                    writeDelete(tableName, cols, "deleteBy" + name, false, colData);
+                    writeDelete(tableName, cols, "deleteBy" + name, true, colData);
+                    writeCount(cols, false, "countBy" + name, colData);
+                    writeCount(cols, true, "countLike" + name, colData);
                 }
             }
 
@@ -1242,11 +1247,11 @@ public class TableGen implements DiffHandler {
         if ("pojo".equals(subPackage) && config.use_annotation) {
             out("import javax.validation.constraints.*;");
             out("import org.apache.commons.text.StringEscapeUtils;");
-            if(config.use_swagger) {
+            if (config.use_swagger) {
                 out("import io.swagger.annotations.ApiModel;");
                 out("import io.swagger.annotations.ApiModelProperty;");
                 out("\n");
-                out("@ApiModel(description = \""+ table.getComment()+"\")");
+                out("@ApiModel(description = \"" + table.getComment() + "\")");
             }
         }
 
@@ -1394,7 +1399,7 @@ public class TableGen implements DiffHandler {
      * match the search pattern.
      */
     void writeSelectAll(String tableName, List<String> params, boolean customWhere, String methodName, boolean bLike, List<ColumnData> columnData)
-            throws IOException{
+            throws IOException {
         String query = "select * from \" + getTableName() + \" \"";
         String where = createPreparedWhereClause(params, bLike, columnData);
         String objs = createPreparedObjects(params, bLike, columnData);
@@ -1504,7 +1509,6 @@ public class TableGen implements DiffHandler {
     }
 
 
-
     /**
      * Writes out the dummy insert (blank record) function.
      *
@@ -1545,7 +1549,6 @@ public class TableGen implements DiffHandler {
     }
 
 
-
     /**
      * Writes out the count function. If "key" is not null then a search based
      * on the key is added. If "withLike" then the search is based on a "like"
@@ -1580,7 +1583,7 @@ public class TableGen implements DiffHandler {
         out("public boolean " + methodName + "(" + this.getPojoClassName(tableName) + " info"
                 + (isWithConn ? ", Connection cn" : "") + ") throws SQLException");
         out("{");
-        out("    String updateSql = getUpdateSql()"+(isWithVersion? "": "+\" and version=?\"")+";");
+        out("    String updateSql = getUpdateSql()" + (isWithVersion ? "" : "+\" and version=?\"") + ";");
 
         StringBuilder objs = new StringBuilder();
         for (ColumnData cd : columnData) {
@@ -1673,6 +1676,7 @@ public class TableGen implements DiffHandler {
 
     /**
      * since c-dbtools 0.7.1, only generate getNextKey for Timestamp and String/UUID
+     *
      * @param keyData db key info
      * @throws IOException io error
      */
@@ -1772,7 +1776,6 @@ public class TableGen implements DiffHandler {
 
 
     /**
-     *
      * write the methods associated to this Exported Foreign key entry.
      */
     protected void writeExportedMethods(ForeignKeyDefinition def, List<ColumnData> columnData) throws IOException, GenException {
@@ -1789,7 +1792,6 @@ public class TableGen implements DiffHandler {
     }
 
     /**
-     *
      * write the methods associated to this Foreign key entry.
      */
     protected void writeImportedMethods(String tableName, ForeignKeyDefinition def, List<ColumnData> columnData) throws IOException, GenException {
@@ -1835,7 +1837,7 @@ public class TableGen implements DiffHandler {
 
     @Override
     public void processEnd(HashMap<String, List<ColumnData>> tableData) {//NOSONAR
-        if (generateFlag) {
+        if (generateSuccess) {
             saveTableDataToLocalCache(tableData);
         }
     }
