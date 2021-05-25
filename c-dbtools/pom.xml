@@ -51,8 +51,8 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.7</version>
                 <configuration>
-                    <includes>com/bixuebihui/*</includes>
-                    <includes>io/shardingjdbc/*</includes>
+                    <includes>com/bixuebihui/**</includes>
+                    <includes>io/shardingjdbc/**</includes>
                 </configuration>
                 <executions>
                     <execution>
