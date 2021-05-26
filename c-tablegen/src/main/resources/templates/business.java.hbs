@@ -2,13 +2,8 @@ package {{config.packageName}}{{viewModifier}}.business;
 
 {{> [header-comment.java]}}
 
-import java.sql.*;
-import java.util.List;
 import javax.sql.DataSource;
-import {{config.packageName}}{{viewModifier}}.dal.*;
-import {{config.packageName}}{{viewModifier}}.pojo.*;
-import com.bixuebihui.jdbc.RowMapperResultReader;
-import {{config.packageName}}.BaseList;
+import {{config.packageName}}{{viewModifier}}.dal.{{pojoClassName}}List;
 
 import org.springframework.stereotype.Repository;
 
