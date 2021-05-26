@@ -9,7 +9,7 @@ import java.util.Map;
  * @author xwx
  */
 public class BusinessGenerator extends BaseGenerator {
-    protected final static String CLASS_SUFFIX = "Business";
+    protected final static String CLASS_SUFFIX = "Manager";
 
     private static final Log LOG = LogFactory.getLog(BusinessGenerator.class);
 

@@ -1024,7 +1024,7 @@ public class TableGen implements DiffHandler {
                 }
             }
 
-            writeInsertDummy(tableName, keyData, "insertDummy", colData);
+            writeInsertDummy(tableName, keyData, colData);
             out("}");
 
             currentOutput.close();
@@ -1512,17 +1512,16 @@ public class TableGen implements DiffHandler {
     /**
      * Writes out the dummy insert (blank record) function.
      *
-     * @param methodName
-     * @param keyData2
+     * @param keyData
      */
-    void writeInsertDummy(String tableName, List<String> keyData2, String methodName, List<ColumnData> columnData) throws IOException {
+    void writeInsertDummy(String tableName, List<String> keyData, List<ColumnData> columnData) throws IOException {
 
         out("/**");
         out("  * Inserts the dummy record of " + this.getPojoClassName(tableName)
                 + " object values into the database.");
         out("  */");
         out("@Override");
-        out("public boolean " + methodName + "() throws SQLException");
+        out("public boolean insertDummy() throws SQLException");
         out("{");
         out("     " + this.getPojoClassName(tableName) + "  info = new " + this.getPojoClassName(tableName) + "();");
 
@@ -1539,8 +1538,8 @@ public class TableGen implements DiffHandler {
             }
         }
 
-        if (isNotEmpty(keyData2)) {
-            out("    info.set" + firstUp(keyData2.get(0)) + "(getNextKey());");
+        if (isNotEmpty(keyData)) {
+            out("    info.set" + firstUp(keyData.get(0)) + "(getNextKey());");
         }
         out("    return this.insert(info);");
 

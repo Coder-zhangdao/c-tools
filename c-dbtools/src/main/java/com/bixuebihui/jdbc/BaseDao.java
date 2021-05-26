@@ -1007,7 +1007,6 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return getDbHelper().executeQuery(query, params, new RowMapperResultReader<>(this));
     }
 
-    /** {@inheritDoc} */
     public @NotNull
     List<T> select(String whereClause, String orderbyClause, int beginNum, int endNum)
             throws SQLException {

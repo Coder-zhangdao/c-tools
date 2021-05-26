@@ -9,6 +9,7 @@ import {{config.packageName}}{{viewModifier}}.business.*;
 import {{config.packageName}}{{viewModifier}}.pojo.*;
 import com.bixuebihui.jdbc.RowMapperResultReader;
 import {{config.packageName}}.BaseList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("com.github.yujiaao:tablegen")
@@ -34,7 +35,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         }
     }
 
-    @Override
+    {{! TODO add to BaseDao @Override }}
     protected String getDeleteSql(){
         return "delete from {{tableName}} where {{#each keys}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}} ";
     }
@@ -76,12 +77,12 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     @Override
     public String getTableName()
     {
-{{#if hasKey ~}}
+{{#if hasKey}}
       return  "{{tableName}}";
 {{~ else ~}}
 {{!    tripple { for unescape equals sign '='  }}
       return "({{{tableInfo.comment}}}) as {{tableName}}"
-{{/if ~}}
+{{/if}}
 
     }
 
@@ -191,21 +192,19 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} });
     }
 
-{{else}}
+{{~ else ~}}
     {{! writeDummyUpdate(tableName, "updateByKey"); }}
     @Override
     public boolean updateByKey({{pojoClassName}} info) throws SQLException {
         throw new SQLException("This operation is not supported, because table {{tableName}} not have a unique key!");
     }
 
-     {{! writeDummyDelete(tableName, keyData, "deleteByKey", colData); }}
+    {{! writeDummyDelete(tableName, keyData, "deleteByKey", colData); }}
     @Override
     public boolean deleteByKey({{firstKeyType}}  key) throws SQLException {
         throw new SQLException("This operation is not supported, because table {{ tableName }} not have a unique key!");
     }
-
 {{/if}}
-
 {{#each foreignKeyData}}
     /**
      * Imported {{tableName}}  PK: {{this.pKTableName}}  FK:{{this.fKTableName}}
@@ -230,9 +229,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
             new Object[]{ {{#each this.fKFields }} {{name}} {{#unless @last}},{{/unless}} {{/each}} },
             new RowMapperResultReader<{{pojoClassName}}>(this));
     }
-
 {{/each}}
-
 {{#each exportedKeys}}
     /**
     * Get all related  {{this.fKTableName}} which have same {{this.fKColList}}
@@ -244,10 +241,8 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         return x.selectBy{{this.fKTableName}}__{{this.fKColumnName}}({{#each this.pKColList}} {{name}} {{#unless @last}},{{/unless}} {{/each}});
     }
 {{/each}}
-
 {{! foreign key }}
 {{#if config.indexes}}{{#not indexData.empty}}
-
 
     /**
     * Select from the database for table {{tableName}} "
@@ -265,7 +260,6 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         }
         return null;
     }
-
 
 {{/not}}{{/if}}
 {{!
@@ -285,8 +279,30 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
                 writeCount(indexData, true, "countLikeIndex", colData);
 
                 }
-                }
-
-                writeInsertDummy(tableName, keyData, "insertDummy", colData);
+            }
 }}
+{{!  writeInsertDummy(tableName, keyData, "insertDummy", colData);  }}
+    /**
+     * Inserts the dummy record of {{pojoClassName}} object values into the database.
+     */
+    @Override
+    public boolean insertDummy() throws SQLException
+    {
+        {{pojoClassName}}  info = new {{pojoClassName}}();
+        java.util.Random rnd = new java.util.Random();
+    {{#each fields ~}}
+    {{#if this.nullable ~}}
+    {{#eq this.javaType "String" ~}}
+        {{#if @first ~}}java.util.Random rnd = new java.util.Random();
+        {{~else~}}info.set{{firstUp this.name}}(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));
+        {{/if ~}}
+    {{/eq ~}}
+    {{/if ~}}
+    {{/each ~}}
+    {{#if hasKey}}
+        info.set{{firstUp keys.[0]}}(getNextKey());
+    {{/if}}
+        return this.insert(info);
+    }
+
 }

@@ -9,11 +9,24 @@ import {{config.packageName}}{{viewModifier}}.dal.*;
 import {{config.packageName}}{{viewModifier}}.pojo.*;
 import com.bixuebihui.jdbc.RowMapperResultReader;
 import {{config.packageName}}.BaseList;
+
+import org.springframework.stereotype.Repository;
+
 import javax.annotation.processing.Generated;
 
 @Generated("com.github.yujiaao:tablegen")
-public class {{className}}  extends {{pojoClassName}}List<{{pojoClassName}}, {{firstKeyType}}>
+@Repository
+public class {{className}}  extends {{pojoClassName}}List
 {
     {{! writeDALConstructor(tableName); }}
+    /**
+     * @param ds datasource for injecting
+     */
+    public {{className}}(DataSource ds)
+    {
+        super(ds);
+    }
+
     // please write your code here!
+
 }

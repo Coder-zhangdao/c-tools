@@ -375,12 +375,12 @@ public class SqlFilter {
 		GTE,
 
 		/**
-		 * <
+		 * &lt;
 		 */
 		LT,
 
 		/**
-		 * <=
+		 * &lt;=
 		 */
 		LTE,
 

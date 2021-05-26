@@ -20,23 +20,21 @@ import javax.sql.DataSource;
 @Generated("com.github.yujiaao:tablegen")
 @Service
 public abstract class BaseList<T, V> extends BaseDao<T, V> {
-    static MSDbHelper dbHelper0 = new MSDbHelper();
-    static IDbHelper dbHelper1;
-    static {
+
+    public BaseList(DataSource ds) {
+
+        MSDbHelper dbHelper0 = new MSDbHelper();
+        dbHelper0.setMasterDatasource(ds);
+        dbHelper0.setDataSource(ds);
+
         if (mLog.isDebugEnabled()) {
             ProxyFactory obj = new ProxyFactory(dbHelper0);
             obj.addAdvice(new DbHelperAroundAdvice());
-            dbHelper1 = (IDbHelper) obj.getProxy();
+            dbHelper = (IDbHelper) obj.getProxy();
         } else {
-            dbHelper1 = dbHelper0;
+            dbHelper = dbHelper0;
         }
 
     }
 
-    public void setDataSource(DataSource ds) {
-        dbHelper0.setMasterDatasource(ds);
-        dbHelper0.setDataSource(ds);
-        dbHelper = dbHelper1;
-    }
-    protected BaseList(){}
 }
