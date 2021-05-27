@@ -83,7 +83,7 @@ public class ProjectConfig {
         LOG.debug("table_owner:" +  c.tableOwner);
 
         c.indexes = getBooleanCfg(props, "indexes");
-        c.useCustomMetaTable = getBooleanCfg(props, "kuozhanbiao");
+        c.useCustomMetaTable = getBooleanCfg(props, "use_custom_meta_table");
 
         c.generate_procedures = getBooleanCfg(props, "generate_procedures");
 
