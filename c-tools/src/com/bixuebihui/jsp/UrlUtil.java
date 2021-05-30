@@ -1,13 +1,13 @@
 package com.bixuebihui.jsp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class UrlUtil {
-    private static final Log LOG = LogFactory.getLog(UrlUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UrlUtil.class);
 
     /**
      * 增加url后面的get参数
@@ -25,7 +25,7 @@ public class UrlUtil {
         try {
             value = URLEncoder.encode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            LOG.warn(e);
+            LOG.warn("",e);
         }
 
         if (url.contains("&" + name + "=")

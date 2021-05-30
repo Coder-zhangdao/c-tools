@@ -6,8 +6,8 @@
 package com.bixuebihui.util;
 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>JavaAlarm class.</p>
@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class JavaAlarm extends Thread
 {
-    private static final Log log = LogFactory.getLog(JavaAlarm.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JavaAlarm.class);
 
     /**
      * {@inheritDoc}
@@ -60,7 +60,7 @@ public final class JavaAlarm extends Thread
                         throw new TimeoutException("Runnable " + r + " did not complete within " + maxWait + "ms");
                     }
                 } catch (InterruptedException e) {
-                    log.warn(e);
+                    LOG.warn("",e);
                     this.interrupt();
                 }
 

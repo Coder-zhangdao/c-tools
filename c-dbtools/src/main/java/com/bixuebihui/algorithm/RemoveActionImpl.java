@@ -1,8 +1,8 @@
 package com.bixuebihui.algorithm;
 
 import com.bixuebihui.sql.PooledPreparedStatement;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
@@ -14,7 +14,7 @@ import java.sql.SQLException;
  */
 public class RemoveActionImpl implements IRemoveAction {
 
-    private static final Log log = LogFactory.getLog(RemoveActionImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RemoveActionImpl.class);
 
     /**
      * {@inheritDoc}
@@ -24,12 +24,12 @@ public class RemoveActionImpl implements IRemoveAction {
         if(val instanceof PooledPreparedStatement){
             try {
                 ((PooledPreparedStatement)val).getStatement().close();
-                log.debug("Debug-RemoveActionImpl-PooledPreparedStatement.close()");
+                LOG.debug("Debug-RemoveActionImpl-PooledPreparedStatement.close()");
             } catch (SQLException e) {
-                log.warn(e);
+                LOG.warn("",e);
             }
         }else{
-            log.debug("Debug-RemoveActionImpl.actionAfterRemove.close()");
+            LOG.debug("Debug-RemoveActionImpl.actionAfterRemove.close()");
         }
         return false;
     }

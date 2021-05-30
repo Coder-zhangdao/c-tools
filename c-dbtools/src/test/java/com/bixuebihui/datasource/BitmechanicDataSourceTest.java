@@ -2,8 +2,8 @@ package com.bixuebihui.datasource;
 
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.bixuebihui.ConnectionManager;
 import junit.framework.TestCase;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.condition.DisabledIf;
 
 public class BitmechanicDataSourceTest extends TestCase {
 
-	private static final Log log = LogFactory.getLog(BitmechanicDataSourceTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BitmechanicDataSourceTest.class);
 
 	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testGetConnection() throws SQLException {
@@ -39,7 +39,7 @@ public class BitmechanicDataSourceTest extends TestCase {
 		}
 
 		public void run() {
-			log.info("start " + num);
+			LOG.info("start " + num);
 			synchronized (this) {
 				BitmechanicDataSource ds = new BitmechanicDataSource();
 
@@ -59,7 +59,7 @@ public class BitmechanicDataSourceTest extends TestCase {
 					e.printStackTrace();
 				}
 			}
-			log.info("end " + num);
+			LOG.info("end " + num);
 		}
 	}
 

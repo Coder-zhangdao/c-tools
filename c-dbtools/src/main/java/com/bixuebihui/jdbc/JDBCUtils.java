@@ -1,8 +1,8 @@
 package com.bixuebihui.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
@@ -17,7 +17,7 @@ public class JDBCUtils {
     /**
      * Constant <code>mLog</code>
      */
-    protected static final Log mLog = LogFactory.getLog(JDBCUtils.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(JDBCUtils.class);
 
     private JDBCUtils(){
         throw new IllegalAccessError("this is a utils class");

@@ -4,8 +4,8 @@ import com.bixuebihui.tablegen.GenException;
 import com.bixuebihui.tablegen.TableGen;
 import com.bixuebihui.tablegen.entry.ColumnData;
 import com.github.jknack.handlebars.Handlebars;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import static com.bixuebihui.tablegen.generator.ViewGenerator.VIEW_DIR;
  */
 public class DalViewGenerator extends DalGenerator {
 
-    private static final Log LOG = LogFactory.getLog(DalViewGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DalViewGenerator.class);
 
     public DalViewGenerator() {
         super.isView = true;

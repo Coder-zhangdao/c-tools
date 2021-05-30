@@ -6,8 +6,8 @@ package com.bixuebihui.util;
  */
 
 import com.bixuebihui.task.ScheduleMonitor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -23,7 +23,7 @@ import java.util.Vector;
 public class OnLineUser
         implements HttpSessionBindingListener, HttpSessionAttributeListener, ServletContextListener {
 
-    Log log = LogFactory.getLog(OnLineUser.class);
+    static final Logger LOG = LoggerFactory.getLogger(OnLineUser.class);
 
     public OnLineUser() {
     }
@@ -81,10 +81,10 @@ public class OnLineUser
         users.trimToSize();
         if (!existUser(name)) {
             users.add(name);
-            log.debug("users object=" + users);
-            log.info(name + "\t 登入到系统\t" + (new Date()) + " 在线用户数为：" + getCount());
+            LOG.debug("users object=" + users);
+            LOG.info(name + "\t 登入到系统\t" + (new Date()) + " 在线用户数为：" + getCount());
         } else {
-            log.info(name + "已经存在");
+            LOG.info(name + "已经存在");
         }
     }
 
@@ -93,8 +93,8 @@ public class OnLineUser
         users.trimToSize();
         String userName = e.getName();
         deleteUser(userName);
-        log.debug("users object=" + users);
-        log.info("会话结束：" + userName + "\t 退出系统\t" + (new Date()) + " 在线用户数为：" + getCount());
+        LOG.debug("users object=" + users);
+        LOG.info("会话结束：" + userName + "\t 退出系统\t" + (new Date()) + " 在线用户数为：" + getCount());
     }
 
     @Override
@@ -110,8 +110,8 @@ public class OnLineUser
 
         if ("user_id".equals(arg0.getName())) {
             deleteUser(arg0.getValue().toString());
-            log.info("attributeRemoved: " + arg0.getValue().toString() + "\t 退出系统\t" + (new Date()));
-            log.info(" 在线用户数为：" + getCount() + ",用户id=" + arg0.getValue().toString() + "退出");
+            LOG.info("attributeRemoved: " + arg0.getValue().toString() + "\t 退出系统\t" + (new Date()));
+            LOG.info(" 在线用户数为：" + getCount() + ",用户id=" + arg0.getValue().toString() + "退出");
         }
 
     }
@@ -135,18 +135,18 @@ public class OnLineUser
         }
         event.getServletContext().log("Destory AppStartListener!");
 
-        log.info("[CYC]系统关闭");
+        LOG.info("[CYC]系统关闭");
     }
 
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        log.info("[CYC]系统启动...");
-        log.info(event.getServletContext().getRealPath("/"));
+        LOG.info("[CYC]系统启动...");
+        LOG.info(event.getServletContext().getRealPath("/"));
         try {
-            log.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
+            LOG.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
         } catch (Exception e) {
-            log.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
         event.getServletContext().log("AppStartListener Launch!");
 

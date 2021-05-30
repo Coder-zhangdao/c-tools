@@ -4,8 +4,8 @@ import com.bixuebihui.BeanFactory;
 import com.bixuebihui.util.html.FormControl;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class DictionaryCacheCaffeine {
     public static final String KEY_SEPARATOR = ".";
     public static final String CONDITION_SEPARATOR = "@";
-    static Log mLog = LogFactory.getLog(DictionaryCacheCaffeine.class);
+    static Logger LOG = LoggerFactory.getLogger(DictionaryCacheCaffeine.class);
     LoadingCache<String, Object> byId;
     LoadingCache<String, Object> byValue;
 
@@ -46,7 +46,7 @@ public class DictionaryCacheCaffeine {
                 dict.condition = null;
             }
         } else {
-            mLog.error("No key find! " + key);
+            LOG.error("No key find! " + key);
         }
         if (keys.length > 1) {
             dict.keyName = keys[1];
@@ -103,7 +103,7 @@ public class DictionaryCacheCaffeine {
     public DictionaryCacheCaffeine build() {
 
         if (byId == null) {
-            mLog.info("create new cache administrator");
+            LOG.info("create new cache administrator");
             byId = Caffeine.newBuilder()
                     .maximumSize(10_000)
                     .expireAfterWrite(5, TimeUnit.MINUTES)
@@ -231,7 +231,7 @@ public class DictionaryCacheCaffeine {
                 return (isById ? mmById : mmByValue).get(dict.keyName);
             }
         } catch (SQLException e) {
-            mLog.error("查询" + dict.tableName + "时数据库出错：");
+            LOG.error("查询" + dict.tableName + "时数据库出错：");
             e.printStackTrace();
             return null;
         }

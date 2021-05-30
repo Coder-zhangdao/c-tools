@@ -1,11 +1,11 @@
 package com.bixuebihui.datasource;
-import java.net.URL;
+
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 
-import org.apache.log4j.helpers.Loader;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.tools.RunScript;
 import java.io.InputStream;
@@ -22,7 +22,7 @@ public class H2DataSource {
 	public final JdbcConnectionPool cpRO = JdbcConnectionPool.
 		    create("jdbc:h2:mem:test1", "sa", "sa");
 
-	public static void main(String[] args) throws SQLException, ClassNotFoundException {
+	public static void main(String[] args) throws SQLException {
 		new H2DataSource().init().close();
 	}
 
@@ -33,15 +33,15 @@ public class H2DataSource {
 
 	public H2DataSource init() throws SQLException {
 		//jdbc:h2:mem:test
-		try{
-			InputStream in = getClass().getResourceAsStream("/h2test.sql");			
+		try(InputStream in = getClass().getResourceAsStream("/h2test.sql")){
+
 			DriverManager.registerDriver((Driver) Class.forName("org.h2.Driver").getDeclaredConstructor().newInstance());
-			
+
+			assert in != null;
 			InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
 
 			RunScript.execute(cp.getConnection(),reader);
-		}catch(ClassNotFoundException| NoSuchMethodException
-		| InstantiationException|IllegalAccessException | InvocationTargetException e){
+		}catch(ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException | IOException e){
 			e.printStackTrace();
 		}
 		return this;

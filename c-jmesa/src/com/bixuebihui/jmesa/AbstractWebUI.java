@@ -8,8 +8,8 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jmesa.limit.*;
 import org.jmesa.model.ExportTypes;
 import org.jmesa.model.TableModel;
@@ -43,7 +43,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
     private static final String TABLE_I18N = "tables";
     public static final String CHECK_BOX_ID = "chkbox";
     protected static ConvertUtilsBean converter = new ConvertUtilsBean();
-    protected static Log log = LogFactory.getLog(BasicWebUI.class);
+    protected static Logger LOG = LoggerFactory.getLogger(BasicWebUI.class);
     /**
      * The unique table id.
       */
@@ -51,7 +51,6 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
     protected String successView;
     protected IBaseListService<T, V> service;
-    protected Log mLog = LogFactory.getLog(AbstractWebUI.class);
     protected String checkboxName = "chk";
     protected String actionParam = "ac";
     protected String editableParam = "editable";
@@ -150,7 +149,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             try {
                 key = bundle.getString(tableName + "." + colNames[i]);
             } catch (Exception e) {
-                mLog.warn(e.getMessage());
+                LOG.warn(e.getMessage());
             }
             table.getRow().getColumn(colNames[i]).setTitle(key);
         }
@@ -171,7 +170,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         TableModel tableModel = new TableModel(id, request, response);
 
         String ac = request.getParameter(actionParam);
-        mLog.debug("AbstractWebUI " + actionParam + " = " + ac);
+        LOG.debug("AbstractWebUI " + actionParam + " = " + ac);
 
         return baseRender(tableModel,
                 "true".equals(request.getParameter(editableParam)), ac,
@@ -252,7 +251,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             tableModel.setExportFileName(tableCaption + ".xls");
         }
 
-        log.debug("Exporting - " + tableModel.getExportType() + ": " + tableCaption + ".xls");
+        LOG.debug("Exporting - " + tableModel.getExportType() + ": " + tableCaption + ".xls");
         tableModel.render();
     }
 
@@ -263,7 +262,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
                 tableCaption = bundle.getString(tableName);
                 return tableCaption;
             } catch (Exception e) {
-                mLog.warn(e.getMessage());
+                LOG.warn(e.getMessage());
                 return tableName;
             }
         }
@@ -286,7 +285,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
      */
     protected void validateColumn(WorksheetColumn worksheetColumn,
                                   String changedValue) {
-        mLog.debug(" NO custom validateColumn method is implemented");
+        LOG.debug(" NO custom validateColumn method is implemented");
     }
 
     public String handleRequestInternal(HttpServletRequest request,
@@ -342,7 +341,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         }
         for (V key : keys) {
             if (!service.deleteByKey(key)) {
-                mLog.warn("fail to delete key=" + key);
+                LOG.warn("fail to delete key=" + key);
             }
         }
     }
@@ -359,7 +358,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
                 list);
         for (T info : infos.values()) {
             if (!service.insertAutoNewKey(info)) {
-                mLog.warn("fail to insert info=" + info.toString());
+                LOG.warn("fail to insert info=" + info.toString());
             }
         }
     }
@@ -381,7 +380,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             infos = service.selectByIds(uniquePropertyName,
                     uniquePropertyValues);
         } catch (SQLException e1) {
-            mLog.error(e1);
+            LOG.error("", e1);
             return;
         }
         worksheet.processRows(worksheetRow -> {
@@ -415,8 +414,8 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
                         PropertyUtils.setProperty(info, property, value);
                     }
-                } catch (Exception ex) {
-                    mLog.error(ex);
+                } catch (Exception e) {
+                    LOG.error("", e);
                     throw new JMesaException(
                             "Not able to set the property [" + property
                                     + "] when saving worksheet.");
@@ -424,10 +423,10 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
                 try {
                     boolean res = isNew ? service.insert(info) : service.updateByKey(info);
                     if (!res) {
-                        mLog.warn("fail to update info=" + info.toString());
+                        LOG.warn("fail to update info=" + info.toString());
                     }
                 } catch (SQLException e) {
-                    mLog.error(e);
+                    LOG.error("", e);
                 }
             }
         });
@@ -482,7 +481,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         //replace %{abc} to ${abc}, to avoid spring xml escaping
         template = template.replaceAll("\\%\\{(.+?)\\}", "\\$\\{$1\\}");
 
-        log.debug("after replace " + var + ":" + template);
+        LOG.debug("after replace " + var + ":" + template);
         CellEditor cellEditor = getCellEditor(context, col, var, template);
 
         col.setCellEditor(cellEditor);

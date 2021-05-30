@@ -3,8 +3,8 @@ package com.bixuebihui;
 import com.bixuebihui.sql.ConnectionPool;
 import com.bixuebihui.sql.ConnectionPoolManager;
 import com.bixuebihui.dbcon.DatabaseConfig;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -33,7 +33,7 @@ public class ConnectionManager {
      */
     private static String defaultAlias = "default";
     private static final Set<String> ALIAS_SET = Collections.synchronizedSet(new HashSet<>(5, 0.7f));
-    private static final Log log  = LogFactory.getLog(ConnectionManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConnectionManager.class);
 
 
     private static final String CONFIG_FILE = "/ConnectionPoolManager.xml";
@@ -43,9 +43,9 @@ public class ConnectionManager {
             DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
             return fact.newDocumentBuilder().parse(in);
         } catch (MissingResourceException e) {
-            log.error("missing file:" + CONFIG_FILE);
+            LOG.error("missing file:" + CONFIG_FILE);
         } catch (IOException | ParserConfigurationException | SAXException e) {
-            log.error(e);
+            LOG.error("readProperties", e);
         }
         return null;
     }
@@ -78,7 +78,7 @@ public class ConnectionManager {
             throw new SQLException("没有获得数据库连接池配置" + CONFIG_FILE + "文档! thread="
                     + Thread.currentThread().getName());
         } else {
-            log.info("find xml^^^ "
+            LOG.info("find xml^^^ "
                     + Thread.currentThread().getName());
         }
 
@@ -109,11 +109,11 @@ public class ConnectionManager {
                     }
                     cpm = tmp;
                 } else {
-                    log.error("bad format " + CONFIG_FILE + " file, expected Alias element but not found");
+                    LOG.error("bad format " + CONFIG_FILE + " file, expected Alias element but not found");
                 }
             }
         } catch (IllegalAccessException | ClassNotFoundException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-            log.error(e);
+            LOG.error("",e);
         }
         return cpm;
     }
@@ -147,7 +147,7 @@ public class ConnectionManager {
         try {
             return pool.getConnection();
         }catch (SQLException e){
-            log.error("Can not get Connection from "+alias+" with "+pool.dumpInfo());
+            LOG.error("Can not get Connection from "+alias+" with "+pool.dumpInfo());
             throw e;
         }
     }
@@ -183,7 +183,7 @@ public class ConnectionManager {
                     sb.append("  Number of timeouts:  ").append(pool.getNumCheckoutTimeouts()).append(lf);
                 }
             } catch (Exception ex) {
-                log.warn(ex);
+                LOG.warn("",ex);
             }
         } else {
             sb.append("Alias==").append(Arrays.toString(ALIAS_SET.toArray(new String[0]))).append(" , cpm==").append(cpm);
@@ -202,7 +202,7 @@ public class ConnectionManager {
                 }
                 ALIAS_SET.clear();
             } catch (SQLException e) {
-                log.warn(e);
+                LOG.warn("",e);
             }
             cpm = null;
         }

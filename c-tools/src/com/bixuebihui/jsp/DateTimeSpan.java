@@ -4,8 +4,8 @@ import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.ISqlConditionType;
 import com.bixuebihui.util.ParameterUtils;
 import com.bixuebihui.util.Util;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;

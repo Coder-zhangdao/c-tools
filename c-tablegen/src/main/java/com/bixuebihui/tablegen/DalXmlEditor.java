@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -19,7 +19,7 @@ import org.dom4j.io.XMLWriter;
  * @author xwx
  */
 public class DalXmlEditor {
-	static final Log log = LogFactory.getLog(DalXmlEditor.class);
+	static final Logger LOG = LoggerFactory.getLogger(DalXmlEditor.class);
 
 	/**
 	 * 对spring beans配置文件增加business/xxxManager的定义
@@ -54,7 +54,7 @@ public class DalXmlEditor {
 			return document;
 
 		} catch (Exception e) {
-		    log.error(e);
+		    LOG.error("",e);
 		}
 		return null;
 	}
@@ -72,7 +72,7 @@ public class DalXmlEditor {
         writer.close();
 
         // Compact format to System.out
-        if(log.isDebugEnabled()){
+        if(LOG.isDebugEnabled()){
 	        format = OutputFormat.createPrettyPrint();
 	        writer = new XMLWriter( System.out, format );
 	        writer.write( document );

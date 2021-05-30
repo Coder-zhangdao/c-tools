@@ -21,8 +21,8 @@ import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public abstract class BaseGenerator implements Generator {
     public final static String UNKNOWN_TYPE = "unknown";
     protected static final String TEMPLATE_ROOT = "/templates";
     public static final String VIEW_DIR = "view";
-    protected static final Log LOG = LogFactory.getLog(DalGenerator.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(DalGenerator.class);
 
 
     ProjectConfig config;
@@ -230,6 +230,8 @@ public abstract class BaseGenerator implements Generator {
         handlebars.registerHelper("firstLow", (name, options) -> NameUtils.firstLow((String) name));
         handlebars.registerHelper("join", (items, options) -> StringUtils.join((Object[]) items, options.param(0)));
         handlebars.registerHelper("typeDefaultValue", (typeName, options) -> TableGen.defaultTypeValue().get(typeName));
+        handlebars.registerHelper("unboxType", (type, options) -> TableGen.unboxType((String) type));
+
         handlebars.registerHelpers(ConditionalHelpers.class);
 
         //copied from AssignHelper

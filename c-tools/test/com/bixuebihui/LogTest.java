@@ -1,11 +1,11 @@
 package com.bixuebihui;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Test;
 
 public class LogTest {
-	final Log log = LogFactory.getLog(this.getClass());
+	static final Logger LOG = LoggerFactory.getLogger(LogTest.class);
 
 	Object o = new Object() {
 		public String toString() {
@@ -23,7 +23,7 @@ public class LogTest {
 
 			new Thread() {
 				public void run() {
-					log.info(o);
+					LOG.info(o.toString());
 				}
 			}.start();
 
@@ -31,7 +31,7 @@ public class LogTest {
 
 			new Thread() {
 				public void run() {
-					log.info("this is fast! " + System.currentTimeMillis());
+					LOG.info("this is fast! " + System.currentTimeMillis());
 				}
 			}.start();
 
@@ -45,7 +45,7 @@ public class LogTest {
 
 			new Thread() {
 				public void run() {
-					log.info(o.toString());
+					LOG.info(o.toString());
 				}
 			}.start();
 
@@ -53,7 +53,7 @@ public class LogTest {
 
 			new Thread() {
 				public void run() {
-					log.info("this is fast! " + System.currentTimeMillis());
+					LOG.info("this is fast! " + System.currentTimeMillis());
 				}
 			}.start();
 

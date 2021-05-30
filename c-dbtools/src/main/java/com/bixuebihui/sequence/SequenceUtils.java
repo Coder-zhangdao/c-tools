@@ -1,8 +1,8 @@
 package com.bixuebihui.sequence;
 
 import com.bixuebihui.jdbc.IDbHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Hashtable;
@@ -21,7 +21,7 @@ public class SequenceUtils {
 	private static SequenceUtils INSTANCE = new SequenceUtils();
 	private Map<String, KeyInfo> keyMap = new Hashtable<>(20); // Sequence载体容器
 	private static final int POOL_SIZE = 10; // Sequence值缓存大小
-	private static final Log LOG = LogFactory.getLog(SequenceUtils.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SequenceUtils.class);
 
 	/**
 	 * 禁止外部实例化
@@ -51,7 +51,7 @@ public class SequenceUtils {
 		try {
 			return getOrCreateKeyInfo(keyName, dbHelper).getNextKey();
 		} catch (SQLException e) {
-			LOG.error(e);
+			LOG.error("",e);
 		}
 		return 0;
 	}
@@ -67,7 +67,7 @@ public class SequenceUtils {
         try {
             getOrCreateKeyInfo(keyName, dbHelper).moveTo(max);
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("",e);
         }
 
     }

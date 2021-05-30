@@ -192,7 +192,6 @@ public class DalGenerator extends BaseGenerator {
         v.put("keyObjects", createKeyObjects(keys));
 
         v.put("isView", isView);
-
         v.put("mapRow", mapRow(cols, this.getPojoClassName(tableName)));
         return v;
     }

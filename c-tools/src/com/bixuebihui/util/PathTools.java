@@ -1,8 +1,8 @@
 package com.bixuebihui.util;
 
 import com.bixuebihui.Loader;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
@@ -15,7 +15,7 @@ import java.security.ProtectionDomain;
 
 
 public class PathTools {
-    private static final Log mLog = LogFactory.getLog(PathTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PathTools.class);
 
 
     public static URL findFile(String fileName) {
@@ -35,26 +35,15 @@ public class PathTools {
             try {
                 url = resource.getURL();
             } catch (IOException e) {
-               mLog.warn(e);
+               LOG.warn("", e);
             }
-            mLog.debug("Using URL [" + url
+            LOG.debug("Using URL [" + url
                     + "] .");
         } else {
-            mLog.debug("Could not find resource: [" + fileName
+            LOG.debug("Could not find resource: [" + fileName
                     + "].");
         }
         return resource;
-    }
-
-    /** 返回给应用当前classes路径 */
-    public String getAppClassesPath() {
-            try {
-                return getFullPathRelateClass("../../..",
-                        PathTools.class) + File.separator;
-            } catch (IOException e) {
-               mLog.warn("Error when getAppClassesPath",e);
-            }
-            return null;
     }
 
     /**
@@ -76,7 +65,7 @@ public class PathTools {
                 try {
                     path = new URL(path).getPath();
                 } catch (MalformedURLException e) {
-                    mLog.warn(e);
+                    LOG.warn("", e);
                 }
                 int location = path.indexOf("!/");
                 if (location != -1) {
@@ -87,30 +76,6 @@ public class PathTools {
             path = file.getCanonicalPath();
         }
         return path;
-    }
-
-    /**
-     * 这个方法可以通过与某个类的class文件的相对路径来获取文件或目录的绝对路径。 通常在程序中很难定位某个相对路径，特别是在B/S应用中。
-     * 通过这个方法，我们可以根据我们程序自身的类文件的位置来定位某个相对路径。
-     * 比如：某个txt文件相对于程序的Test类文件的路径是../../resource/test.txt，
-     * 那么使用本方法Path.getFullPathRelateClass("../../resource/test.txt",Test.class)
-     * 得到的结果是txt文件的在系统中的绝对路径。
-     *
-     * @param relatedPath 相对路径
-     * @param cls         用来定位的类
-     * @return 相对路径所对应的绝对路径
-     * @throws IOException 因为本方法将查询文件系统，所以可能抛出IO异常
-     */
-    public static String getFullPathRelateClass(String relatedPath, Class cls)
-            throws IOException {
-        if (relatedPath == null) {
-            throw new NullPointerException();
-        }
-        String clsPath = getPathFromClass(cls);
-        File clsFile = new File(clsPath);
-        String tempPath = clsFile.getParent() + File.separator + relatedPath;
-        File file = new File(tempPath);
-        return file.getCanonicalPath();
     }
 
     /**
@@ -152,7 +117,7 @@ public class PathTools {
                             result = new URL(result, clsAsResource);
                         }
                     } catch (MalformedURLException ignore) {
-                        mLog.warn(ignore);
+                        LOG.warn("", ignore);
                     }
                 }
             }
@@ -170,6 +135,30 @@ public class PathTools {
         return result;
     }
 
+    /**
+     * 这个方法可以通过与某个类的class文件的相对路径来获取文件或目录的绝对路径。 通常在程序中很难定位某个相对路径，特别是在B/S应用中。
+     * 通过这个方法，我们可以根据我们程序自身的类文件的位置来定位某个相对路径。
+     * 比如：某个txt文件相对于程序的Test类文件的路径是../../resource/test.txt，
+     * 那么使用本方法Path.getFullPathRelateClass("../../resource/test.txt",Test.class)
+     * 得到的结果是txt文件的在系统中的绝对路径。
+     *
+     * @param relatedPath 相对路径
+     * @param cls         用来定位的类
+     * @return 相对路径所对应的绝对路径
+     * @throws IOException 因为本方法将查询文件系统，所以可能抛出IO异常
+     */
+    public static String getFullPathRelateClass(String relatedPath, Class cls)
+            throws IOException {
+        if (relatedPath == null) {
+            throw new NullPointerException();
+        }
+        String clsPath = getPathFromClass(cls);
+        File clsFile = new File(clsPath);
+        String tempPath = clsFile.getParent() + File.separator + relatedPath;
+        File file = new File(tempPath);
+        return file.getCanonicalPath();
+    }
+
     public static void main(String[] args) {
         try {
             System.out.println(getPathFromClass(PathTools.class));
@@ -178,7 +167,18 @@ public class PathTools {
             System.out.println(getFullPathRelateClass(".", PathTools.class));
             System.out.println(new PathTools().getAppClassesPath());
         } catch (Exception e) {
-            mLog.warn(e);
+            LOG.warn("", e);
         }
+    }
+
+    /** 返回给应用当前classes路径 */
+    public String getAppClassesPath() {
+            try {
+                return getFullPathRelateClass("../../..",
+                        PathTools.class) + File.separator;
+            } catch (IOException e) {
+               LOG.warn("Error when getAppClassesPath",e);
+            }
+            return null;
     }
 }

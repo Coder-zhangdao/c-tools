@@ -6,8 +6,8 @@ import com.bixuebihui.jdbc.ISqlConditionType;
 import com.bixuebihui.util.ParameterUtils;
 import com.bixuebihui.util.Util;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
@@ -537,8 +537,8 @@ public class TimeSpan implements ISqlConditionType {
             case BaseDao.ORACLE:
                 return this.getOracleSqlCondition(sqlFieldName);
             default: {
-                Log log = LogFactory.getLog(TimeSpan.class);
-                log.warn("databaseType=" + databaseType + " not implement in  TimeSpan");
+                Logger LOG = LoggerFactory.getLogger(TimeSpan.class);
+                LOG.warn("databaseType=" + databaseType + " not implement in  TimeSpan");
                 return this.getMysqlSqlCondition(sqlFieldName);
             }
         }

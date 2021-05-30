@@ -4,8 +4,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import java.util.Map;
  * @version $Id: $Id
  */
 public class DbHelperAroundAdvice implements MethodInterceptor{
-    private static final Log LOG = LogFactory.getLog(DbHelperAroundAdvice.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DbHelperAroundAdvice.class);
 
     private long before;
     private long after;

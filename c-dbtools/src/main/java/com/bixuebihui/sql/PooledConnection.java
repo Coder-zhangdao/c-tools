@@ -4,8 +4,8 @@ package com.bixuebihui.sql;
 
 import com.bixuebihui.algorithm.LRULinkedHashMap;
 import com.bixuebihui.algorithm.RemoveActionImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.Map;
@@ -90,31 +90,7 @@ public class PooledConnection implements Connection, Runnable {
 		return conn.isValid(timeout);
 	}
 
-	/**
-	 * <p>closeStatements.</p>
-	 *
-	 * @throws java.sql.SQLException if any.
-	 */
-	public void closeStatements() throws SQLException {
-		if (theStatement != null){
-			try{
-				theStatement.cancel();
-				theStatement.getStatement().close();
-			}catch(SQLException e){
-				log.warn(e);
-			}
-		}
-		for (PooledPreparedStatement pooledPreparedStatement : prepStmts.values()) {
-			try {
-				PooledPreparedStatement pooledpreparedstatement = pooledPreparedStatement;
-				pooledpreparedstatement.getStatement().cancel();
-				pooledpreparedstatement.getStatement().close();
-			} catch (SQLException e) {
-				log.warn(e);
-			}
-		}
-
-	}
+	private static final Logger LOG  = LoggerFactory.getLogger(PooledConnection.class);
 
 	/**
 	 * <p>getLock.</p>
@@ -169,20 +145,28 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/**
-	 * <p>run.</p>
+	 * <p>closeStatements.</p>
+	 *
+	 * @throws java.sql.SQLException if any.
 	 */
-	@Override
-	public void run() {
-		try {
-			closeStatements();
-		} catch (SQLException e) {
-			log.warn(e);
+	public void closeStatements() throws SQLException {
+		if (theStatement != null){
+			try{
+				theStatement.cancel();
+				theStatement.getStatement().close();
+			}catch(SQLException e){
+				LOG.warn("closeStatements", e);
+			}
 		}
-		try {
-			conn.close();
-		} catch (SQLException e1) {
-			log.warn(e1);
+		for (PooledPreparedStatement pooledPreparedStatement : prepStmts.values()) {
+			try {
+				pooledPreparedStatement.getStatement().cancel();
+				pooledPreparedStatement.getStatement().close();
+			} catch (SQLException e) {
+				LOG.warn("close pooled prepared statement", e);
+			}
 		}
+
 	}
 
 	/**
@@ -214,13 +198,30 @@ public class PooledConnection implements Connection, Runnable {
 	}
 
 	/**
+	 * <p>run.</p>
+	 */
+	@Override
+	public void run() {
+		try {
+			closeStatements();
+		} catch (SQLException e) {
+			LOG.warn("closeStatements", e);
+		}
+		try {
+			conn.close();
+		} catch (SQLException e1) {
+			LOG.warn("conn.close", e1);
+		}
+	}
+
+	/**
 	 * <p>dumpInfo.</p>
 	 *
 	 * @return a {@link java.lang.String} object.
 	 */
 	public String dumpInfo() {
 		String s = System.getProperty("line.separator");
-		String s1 = "\t\tConnection: " + toString() + s;
+		String s1 = "\t\tConnection: " + this + s;
 		if (pool.isCacheStatements()) {
 			s1 += "\t\t\tPrepared Statements Hits: " + preparedStatementHits
 					+ s;
@@ -246,41 +247,6 @@ public class PooledConnection implements Connection, Runnable {
             s1 += theStatement.dumpInfo();
         }
 		return s1;
-	}
-
-	/**
-	 * <p>guardConnection.</p>
-	 */
-	public void guardConnection(){
-		boolean isClosed;
-		try {
-			isClosed = conn.isClosed();
-		} catch (SQLException sqlexception) {
-			isClosed = true;
-		}
-		if (isClosed) {
-			pool.numConnectionFaults++;
-			String method = "PooledConnection.guardConnection(): ";
-			log.warn(method
-					+ "found closed Connection. "
-					+ "Statement information follows. Attempting to recover.");
-			if (theStatement != null) {
-                log.warn(method
-                        + theStatement.dumpInfo());
-            } else {
-                log.warn(method+" statement was null");
-            }
-			theStatement = null;
-			for (int i = 0; i < MAX_RETRIES_TO_CREATE_CONN; i++) {
-				try {
-					conn = pool.createDriverConnection();
-					log.info(method + "Recovered connection");
-					return;
-				} catch (SQLException sqlexception1) {
-					log.error(method + "failed to create connection on try #" + i);
-				}
-			}
-		}
 	}
 
 	/**
@@ -551,7 +517,40 @@ public class PooledConnection implements Connection, Runnable {
 				maxPrepStmts, new RemoveActionImpl());
 	}
 
-	private static final Log log  = LogFactory.getLog(PooledConnection.class);
+	/**
+	 * <p>guardConnection.</p>
+	 */
+	public void guardConnection(){
+		boolean isClosed;
+		try {
+			isClosed = conn.isClosed();
+		} catch (SQLException sqlexception) {
+			isClosed = true;
+		}
+		if (isClosed) {
+			pool.numConnectionFaults++;
+			String method = "PooledConnection.guardConnection(): ";
+			LOG.warn(method
+					+ "found closed Connection. "
+					+ "Statement information follows. Attempting to recover.");
+			if (theStatement != null) {
+                LOG.warn(method
+                        + theStatement.dumpInfo());
+            } else {
+                LOG.warn(method+" statement was null");
+            }
+			theStatement = null;
+			for (int i = 0; i < MAX_RETRIES_TO_CREATE_CONN; i++) {
+				try {
+					conn = pool.createDriverConnection();
+					LOG.info(method + "Recovered connection");
+					return;
+				} catch (SQLException sqlexception1) {
+					LOG.error(method + "failed to create connection on try #" + i);
+				}
+			}
+		}
+	}
 
 	private ConnectionPool pool;
 	private Connection conn;
@@ -657,7 +656,7 @@ public class PooledConnection implements Connection, Runnable {
 	@Override
 	public void releaseSavepoint(Savepoint savepoint)
 			throws SQLException {
-		log.info(savepoint.toString());
+		LOG.info(savepoint.toString());
 		conn.releaseSavepoint(savepoint);
 	}
 
@@ -786,7 +785,7 @@ public class PooledConnection implements Connection, Runnable {
 				this.theStatement.cancel();
 				this.theStatement.close();
 			}catch(SQLException e){
-				log.warn(e);
+				LOG.warn("abort executor",e);
 			}
 		}
 		conn.abort(executor);

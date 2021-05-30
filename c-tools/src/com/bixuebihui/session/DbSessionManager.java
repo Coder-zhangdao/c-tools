@@ -56,7 +56,7 @@ public class DbSessionManager extends BaseSessionManager {
             return 1 == dbHelper.executeNoQuery(DELETE_SQL, new Object[]{id,
                     (new Date()).getTime()});
         } catch (SQLException e) {
-            mLog.warn(e);
+            LOG.warn("",e);
         }
         return false;
     }
@@ -67,7 +67,7 @@ public class DbSessionManager extends BaseSessionManager {
             return dbHelper.executeNoQuery(GC_SQL,
                     new Object[]{time});
         } catch (SQLException e) {
-            mLog.warn(e);
+            LOG.warn("", e);
         }
         return 0;
     }
@@ -92,7 +92,7 @@ public class DbSessionManager extends BaseSessionManager {
 
             return ss;
         } catch (SQLException ex) {
-            mLog.warn(ex);
+            LOG.warn("", ex);
         }
 
         return null;

@@ -11,8 +11,8 @@ import com.bixuebihui.tablegen.entry.TableInfo;
 import com.bixuebihui.tablegen.entry.TableSetInfo;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StopWatch;
 
 import java.sql.*;
@@ -22,7 +22,7 @@ import java.util.*;
  * @author xwx
  */
 public class TableUtils {
-    private static final Log LOG = LogFactory.getLog(TableUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TableUtils.class);
     private static StopWatch stopWatch = new StopWatch();
     private static boolean first = true;
 
@@ -431,7 +431,7 @@ public class TableUtils {
 
     private static void dump(List<ForeignKeyDefinition> list) {
         for (ForeignKeyDefinition fk : list) {
-            LOG.debug(fk);
+            LOG.debug(fk.toString());
         }
     }
 

@@ -9,8 +9,8 @@ import com.bixuebihui.util.JavaAlarm;
 import com.bixuebihui.util.TimeoutException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,15 +28,13 @@ public class ConnectionPool {
 
     private static final int MIN_TIMEOUT_MILLI_SECONDS = 100;
     private static final int CONNECTION_TIMEOUT = 10000;
-    private static final Log log = LogFactory.getLog(ConnectionPool.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConnectionPool.class);
     /**
      * Constant <code>CONNECTION_POOL="ConnectionPool: "</code>
      */
     public static final String CONNECTION_POOL = "ConnectionPool: ";
-
-    private int maxPrepStmts = 200;
-
-    Executor executor = command -> command.run();
+    Executor executor = Runnable::run;
+    private int maxPrepStmts;
 
     /**
      * <p>Setter for the field <code>cacheStatements</code>.</p>
@@ -162,17 +160,17 @@ public class ConnectionPool {
 
     private void debug(Exception e) {
         if (trace) {
-            log.debug(e);
+            LOG.debug("exception",e);
         }
     }
 
     private void warn(String warning) {
 
-        log.warn(CONNECTION_POOL + alias + " " + warning);
+        LOG.warn(CONNECTION_POOL + alias + " " + warning);
     }
 
     private void error(String errormsg) {
-        log.error(CONNECTION_POOL + alias + " " + errormsg);
+        LOG.error(CONNECTION_POOL + alias + " " + errormsg);
     }
 
     /**
@@ -200,12 +198,12 @@ public class ConnectionPool {
                 } else if (timeoutMilliSeconds > MIN_TIMEOUT_MILLI_SECONDS) {
 
                     error("force stop connection = " + pooledconnection);
-                    log.error(pooledconnection.dumpInfo());
+                    LOG.error(pooledconnection.dumpInfo());
 
                     try {
                         pooledconnection.abort(executor);
                     } catch (SQLException e) {
-                        log.warn(e);
+                        LOG.warn("abort", e);
                     }
 
                     removeConnection(pooledconnection);
@@ -224,7 +222,7 @@ public class ConnectionPool {
 
     private void debug(String msg) {
         if (trace) {
-            log.debug(CONNECTION_POOL + alias + " " + msg);
+            LOG.debug(CONNECTION_POOL + alias + " " + msg);
         }
     }
 
@@ -242,7 +240,7 @@ public class ConnectionPool {
                 pooledconnection.close();
                 connVector.removeElement(pooledconnection);
             } catch (SQLException e) {
-                log.warn(e);
+                LOG.warn("force close", e);
             }
         }
     }
@@ -310,7 +308,7 @@ public class ConnectionPool {
                             debug("create connection with timeoutMiliSeconds = " + timeoutMilliSeconds);
                         } catch (SQLException e) {
                             if (trace) {
-                                log.warn(e);
+                                LOG.warn("network timeout", e);
                             }
                         }
                     } else {
@@ -356,7 +354,7 @@ public class ConnectionPool {
                 cn.setNetworkTimeout(executor, getNetworkTimeout());
             } catch (Exception e) {
                 if (trace) {
-                    log.warn(e);
+                    LOG.warn("timeout", e);
                 }
             }
         }
@@ -417,7 +415,7 @@ public class ConnectionPool {
      */
     public String dumpInfo() {
         String s = System.getProperty("line.separator");
-        String s1 = "Pool: " + toString() + s;
+        String s1 = "Pool: " + this + s;
         s1 += "\tAlias: " + getAlias() + s;
         s1 += "\tMax connections: " + getMaxConn() + s;
         s1 += "\tCheckouts: " + getNumRequests() + s;

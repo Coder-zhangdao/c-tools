@@ -13,8 +13,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +32,7 @@ public class ParameterUtils {
     private static final String SIG = "sig";
     public static final String ENC = "UTF-8";
 
-    private static Log logger = LogFactory.getLog(ParameterUtils.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(ParameterUtils.class.getName());
 
     private ParameterUtils(){
         throw new IllegalAccessError("this is a util class");
@@ -138,7 +138,7 @@ public class ParameterUtils {
                 try {
                     res.append(URLEncoder.encode(paramMap.get(value), ENC));
                 } catch (UnsupportedEncodingException e) {
-                    logger.error(e);
+                    log.error("",e);
                 }
                 if (!(localIterator.hasNext())) {
                     break;
@@ -175,7 +175,7 @@ public class ParameterUtils {
 
         boolean res = md5(s).equals(paramMap.get(SIG));
         if (!res) {
-            logger.debug("str=" + s + " sig=" + paramMap.get(SIG) + " md5="
+            log.debug("str=" + s + " sig=" + paramMap.get(SIG) + " md5="
                     + md5(s));
         }
 
@@ -251,7 +251,7 @@ public class ParameterUtils {
         try {
             li = fu.parseRequest(request);
         } catch (FileUploadException e) {
-            logger.error(e);
+            log.error("",e);
         }
         int m = 0;
         if (li != null) {
@@ -285,7 +285,7 @@ public class ParameterUtils {
                         UploadFile up = new UploadFile();
                         up.saveFileItem(fileNames, m++, storePath, fi);
                     } catch (Exception e) {
-                        logger.error(e);
+                        log.error("",e);
                     }
                 }
             }
@@ -310,14 +310,14 @@ public class ParameterUtils {
                     List<String> v = m.get(s);
                     res = v == null ? null : v.get(0);
                 } else {
-                    logger.debug("'" + s + "\' not find in request! m=" + m.toString() + " m.size=" + m.size()
+                    log.debug("'" + s + "\' not find in request! m=" + m.toString() + " m.size=" + m.size()
                             + ", i am try get it from url...request.getParameter(s)=" + request.getParameter(s));
 
                     res = request.getParameter(s);
 
                 }
             } catch (UnsupportedEncodingException e) {
-               logger.error(e);
+               log.error("",e);
             }
 
         } else {
@@ -420,11 +420,11 @@ public class ParameterUtils {
                     List<String> v = m.get(s);
                     res = v.toArray(new String[0]);
                 } else {
-                    logger.info(s + " not find in request! m=" + m.toString() + " m.size=" + m.size());
+                    log.info(s + " not find in request! m=" + m.toString() + " m.size=" + m.size());
 
                 }
             } catch (UnsupportedEncodingException e) {
-                logger.error(e);
+                log.error("",e);
             }
 
         } else {

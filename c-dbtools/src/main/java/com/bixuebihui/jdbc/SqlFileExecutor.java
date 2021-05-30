@@ -1,7 +1,7 @@
 package com.bixuebihui.jdbc;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.sql.Connection;
@@ -18,7 +18,7 @@ import java.util.List;
  * @version $Id: $Id
  */
 public class SqlFileExecutor {
-	private static final Log mLog = LogFactory.getLog(SqlFileExecutor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SqlFileExecutor.class);
 
 	private boolean batchExecute = false;
 	private String defaultEncoding="UTF-8";
@@ -100,6 +100,19 @@ public class SqlFileExecutor {
         execute(conn, sqlList);
     }
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects.
+     * @throws java.lang.Exception if any.
+     */
+    public static void main(String[] args) throws Exception {
+        List<String> sqlList = new SqlFileExecutor().loadSql(args[0]);
+        LOG.info("size:" + sqlList.size());
+        for (String sql : sqlList) {
+            LOG.info(sql);
+        }
+    }
 
 	private void execute(Connection conn, List<String> sqlList)
 			throws SQLException {
@@ -111,18 +124,18 @@ public class SqlFileExecutor {
 					stmt.addBatch(sql);
 				}
 				int[] rows = stmt.executeBatch();
-				mLog.info("Row count:" + Arrays.toString(rows));
+				LOG.info("Row count:" + Arrays.toString(rows));
 			} else {
 				for (int i = 0; i < sqlList.size(); i++) {
 					String sql = sqlList.get(i);
 					try {
 						if (stmt.execute(sql)) {
-							mLog.info("RETURN RESULT SET IGNORED: " + sql);
+							LOG.info("RETURN RESULT SET IGNORED: " + sql);
 						} else {
-							mLog.info("RETURN UPDATE COUNT: "+stmt.getUpdateCount()+" " + sql);
+							LOG.info("RETURN UPDATE COUNT: "+stmt.getUpdateCount()+" " + sql);
 						}
 					} catch (SQLException e) {
-						mLog.error(e);
+						LOG.error("",e);
 					}
 				}
 
@@ -147,21 +160,7 @@ public class SqlFileExecutor {
         if (!JDBCUtils.tableOrViewExists(null, null, testTableName, conn)) {
             execute(conn, sqlFile);
         } else {
-            mLog.warn("Table [" + testTableName + "] already exists!");
-        }
-    }
-
-    /**
-     * <p>main.</p>
-     *
-     * @param args an array of {@link java.lang.String} objects.
-     * @throws java.lang.Exception if any.
-     */
-    public static void main(String[] args) throws Exception {
-        List<String> sqlList = new SqlFileExecutor().loadSql(args[0]);
-        mLog.info("size:" + sqlList.size());
-        for (String sql : sqlList) {
-            mLog.info(sql);
+            LOG.warn("Table [" + testTableName + "] already exists!");
         }
     }
 

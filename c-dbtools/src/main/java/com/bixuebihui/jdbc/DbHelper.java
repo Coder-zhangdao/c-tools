@@ -4,8 +4,8 @@ import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import javax.validation.constraints.NotNull;
@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class DbHelper implements IDbHelper {
 
-    private static final Log LOG = LogFactory.getLog(DbHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DbHelper.class);
     private Connection connection = null;
     private DataSource dataSource = null;
 
@@ -70,8 +70,8 @@ public class DbHelper implements IDbHelper {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (SQLException sqlexception) {
-                LOG.error(sqlexception);
+            } catch (SQLException e) {
+                LOG.error("", e);
             }
         }
     }
@@ -85,8 +85,8 @@ public class DbHelper implements IDbHelper {
         if (rs != null) {
             try {
                 rs.close();
-            } catch (SQLException sqlexception) {
-                LOG.error(sqlexception);
+            } catch (SQLException e) {
+                LOG.error("",e);
             }
         }
     }
@@ -101,8 +101,8 @@ public class DbHelper implements IDbHelper {
             if (conn != null && !conn.isClosed()) {
                 freeConnection(conn);
             }
-        } catch (SQLException sqlexception) {
-            LOG.error(sqlexception);
+        } catch (SQLException e) {
+            LOG.error("", e);
         }
     }
 
@@ -301,7 +301,7 @@ public class DbHelper implements IDbHelper {
             try {
                 cn.setAutoCommit(true);
             } catch (SQLException e) {
-                LOG.warn(e);
+                LOG.warn("",e);
             }
             close(cn);
         }
@@ -622,7 +622,7 @@ public class DbHelper implements IDbHelper {
                         try {
                             temp = clob2Str(rs.getClob(i));
                         } catch (IOException e) {
-                            LOG.error(e);
+                            LOG.error("",e);
                         }
                         mapColumn.put(colName, temp);
                         break;

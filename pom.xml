@@ -11,7 +11,7 @@
     <groupId>com.github.yujiaao</groupId>
     <artifactId>c-tools-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.3.2</version>
+    <version>1.3.3</version>
 
     <modules>
         <module>c-tools-bom</module>
@@ -33,10 +33,9 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mysql.version>5.1.47</mysql.version>
+        <slf4j.version>1.7.30</slf4j.version>
     </properties>
-    <dependencyManagement>
 
-    </dependencyManagement>
     <dependencies>
 
         <dependency>
@@ -51,7 +50,6 @@
 
     <build>
         <plugins>
-            <!-- 排除部分类的单元测试，如controller-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -60,9 +58,7 @@
                     <argLine>@{argLine} -server -ea -Xmx4g </argLine>
                     <skip>false</skip>
                     <testFailureIgnore>false</testFailureIgnore>
-                    <includes></includes>
                     <excludes>
-                        <!-- 由于测试controller类需要启动auth应用进行登录请求，故剔除 -->
                         <exclude>**/controller/*ControllerTest.java</exclude>
                     </excludes>
                 </configuration>

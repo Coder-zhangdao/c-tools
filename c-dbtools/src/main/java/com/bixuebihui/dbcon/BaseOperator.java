@@ -3,8 +3,8 @@ package com.bixuebihui.dbcon;
 
 import com.bixuebihui.jdbc.IDbHelper;
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
@@ -22,7 +22,7 @@ public class BaseOperator
     protected PreparedStatement pstmt = null;
     protected ResultSet rst = null;
 
-    private static  final Log log = LogFactory.getLog(BaseOperator.class);
+    private static  final Logger LOG = LoggerFactory.getLogger(BaseOperator.class);
 
     /**
      * 通用关闭链接方法
@@ -52,8 +52,8 @@ public class BaseOperator
     protected void rollback() {
         try {
             DbUtils.rollback(conn);
-        } catch(SQLException sqle) {
-            log.error(sqle);
+        } catch(SQLException e) {
+            LOG.error("", e);
         }
     }
 
@@ -65,8 +65,8 @@ public class BaseOperator
     public Connection getConnection() {
         try {
             conn = dbHelper.getConnection();
-        } catch(SQLException sqle) {
-            log.error(sqle);
+        } catch(SQLException e) {
+            LOG.error("",e);
         }
         return conn;
     }
@@ -79,8 +79,8 @@ public class BaseOperator
     public Connection getMyConnection() {
         try {
             return dbHelper.getConnection();
-        } catch(SQLException sqle) {
-            log.error(sqle);
+        } catch(SQLException e) {
+            LOG.error("",e);
         }
         return null;
     }

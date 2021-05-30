@@ -3,8 +3,8 @@ package com.bixuebihui.task;
 import com.bixuebihui.util.Config;
 import com.bixuebihui.util.html.publish.MyFacesResourceFilter;
 import com.bixuebihui.util.html.publish.Url2html;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Date;
 
 public class PagePublisher implements Job {
-    private Log mLog = LogFactory.getLog(PagePublisher.class);
+    private Logger LOG = LoggerFactory.getLogger(PagePublisher.class);
     private long LastWriteDate = 0;
     private String mainpageUrl;
     private String mainpagePath;
@@ -40,11 +40,11 @@ public class PagePublisher implements Job {
 
             if (res) {
                 LastWriteDate = (new Date()).getTime();
-                mLog.debug("[CYC] Quartz task write " + mainpageUrl + ".... to " + mainpagePath + (new Date()));
+                LOG.debug("[CYC] Quartz task write " + mainpageUrl + ".... to " + mainpagePath + (new Date()));
             }
 
         } catch (IOException e) {
-            mLog.warn(e);
+            LOG.warn("", e);
         }
     }
 }

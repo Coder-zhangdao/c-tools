@@ -2,8 +2,8 @@ package com.bixuebihui.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -22,7 +22,7 @@ import java.security.SecureRandom;
  * @author xingwx
  */
 public class EncryptUtil {
-    private final static Log log = LogFactory.getLog(EncryptUtil.class);
+    private final static Logger LOG = LoggerFactory.getLogger(EncryptUtil.class);
 
     /**
      * 加密
@@ -44,7 +44,7 @@ public class EncryptUtil {
             byte[] result = cipher.doFinal(byteContent);
             return result; // 加密
         } catch (GeneralSecurityException | UnsupportedEncodingException e) {
-            log.warn(e);
+            LOG.warn("", e);
         }
         return null;
     }
@@ -70,7 +70,7 @@ public class EncryptUtil {
             byte[] result = cipher.doFinal(content);
             return result; // 加密
         } catch (GeneralSecurityException e) {
-            log.warn(e);
+            LOG.warn("", e);
         }
         return null;
     }
@@ -123,7 +123,7 @@ public class EncryptUtil {
             byte[] result = cipher.doFinal(byteContent);
             return result; // 加密
         } catch (GeneralSecurityException | UnsupportedEncodingException e) {
-            log.warn(e);
+            LOG.warn("", e);
         }
         return null;
     }
@@ -146,8 +146,8 @@ public class EncryptUtil {
             cipher.init(Cipher.DECRYPT_MODE, skeySpec);
             byte[] encrypted1 = sSrc;
             return cipher.doFinal(encrypted1);
-        } catch (Exception ex) {
-            log.warn(ex);
+        } catch (Exception e) {
+            LOG.warn("", e);
         }
         return null;
     }
@@ -174,7 +174,7 @@ public class EncryptUtil {
             encrypted = cipher.doFinal(sSrc);
             return encrypted;
         } catch (GeneralSecurityException | UnsupportedEncodingException e) {
-            log.warn(e);
+            LOG.warn("", e);
         }
         return null;
     }

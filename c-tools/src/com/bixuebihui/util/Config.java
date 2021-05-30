@@ -9,8 +9,8 @@ import org.apache.commons.configuration2.CompositeConfiguration;
 import org.apache.commons.configuration2.DatabaseConfiguration;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import javax.sql.DataSource;
@@ -35,7 +35,7 @@ public class Config implements AutoCloseable {
     private static CompositeConfiguration config = null;
     private static DatabaseConfiguration dbconfig = null;
 
-    private static final Log mLogger = LogFactory.getLog(Config.class);
+    private static final Logger mLogger = LoggerFactory.getLogger(Config.class);
 
     /**
      * 二阶初始化
@@ -342,7 +342,7 @@ public class Config implements AutoCloseable {
         try {
             return formatTime(fmt.parse(dt));
         } catch (ParseException e) {
-            mLogger.warn(e);
+            mLogger.warn("",e);
         }
         return dt;
 

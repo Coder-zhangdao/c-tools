@@ -34,7 +34,7 @@ public abstract class BaseList<T, V> extends BaseDao<T, V> {
             MSDbHelper dbHelper0 = new MSDbHelper();
             dbHelper0.setMasterDatasource(ds);
             dbHelper0.setDataSource(ds);
-            if (mLog.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 ProxyFactory obj = new ProxyFactory(dbHelper0);
                 obj.addAdvice(new DbHelperAroundAdvice());
                 dbHelper = (IDbHelper) obj.getProxy();

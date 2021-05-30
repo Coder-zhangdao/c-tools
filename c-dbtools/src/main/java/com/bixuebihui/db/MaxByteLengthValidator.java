@@ -1,7 +1,7 @@
 package com.bixuebihui.db;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -18,7 +18,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class MaxByteLengthValidator implements ConstraintValidator<Size, String> {
 	private static String UTF_8="UTF-8";
-    private static final Log mLog = LogFactory.getLog(MaxByteLengthValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MaxByteLengthValidator.class);
 
     private int max;
 
@@ -40,7 +40,7 @@ public class MaxByteLengthValidator implements ConstraintValidator<Size, String>
         try {
             return object == null || object.getBytes(UTF_8).length <= this.max;
         } catch (UnsupportedEncodingException e) {
-            mLog.error(e);
+            LOG.error("isValid", e);
         }
         return false;
     }

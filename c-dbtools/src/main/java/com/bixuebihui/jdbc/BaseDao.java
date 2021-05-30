@@ -10,8 +10,8 @@ import org.apache.commons.beanutils.*;
 import org.apache.commons.beanutils.converters.*;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.bixuebihui.sequence.SequenceUtils;
 import org.apache.commons.text.CaseUtils;
 
@@ -42,8 +42,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /** Constant <code>WHERE=" where "</code> */
     protected static final String WHERE = " where ";
     protected IDbHelper dbHelper = null;
-    /** Constant <code>mLog</code> */
-    protected static final Log mLog = LogFactory.getLog(BaseDao.class);
+    /** Constant <code>LOG</code> */
+    protected static final Logger LOG = LoggerFactory.getLogger(BaseDao.class);
     protected final PojoValidator<T> pojoValidator = new PojoValidator<>();
 
     /** Constant <code>UNKNOWN=0</code> */
@@ -700,7 +700,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             try {
                 b.put(e.getKey(), value);
             } catch (IllegalArgumentException ex) {
-                mLog.error("类型错误:key=" + e.getKey() + ", value=" + value + " instanceof " + value.getClass()
+                LOG.error("类型错误:key=" + e.getKey() + ", value=" + value + " instanceof " + value.getClass()
                         + ",but expected " + b.getType(e.getKey().toString()));
                 throw ex;
             }
@@ -786,7 +786,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                     cn.rollback();
                 }
             } catch (Exception e) {
-                mLog.warn(e);
+                LOG.warn("rollback", e);
             }
             throw sqlException;
         } finally {
@@ -795,7 +795,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                     cn.setAutoCommit(true);
                 }
             } catch (Exception e) {
-                mLog.warn(e);
+                LOG.warn("setAutoCommit", e);
             }
 
             DbUtils.closeQuietly(cn);
@@ -860,13 +860,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                 }
                 b.copyProperty(receiver,  CaseUtils.toCamelCase(key, false, '_'), value);
             } catch (IllegalAccessException e) {
-                mLog.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
+                LOG.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
                         + ", ask xwx@live.cn to add a convertor for this type.");
                 throw e;
             } catch (InvocationTargetException e) {
-                mLog.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
+                LOG.error("类型错误:key=" + key + ", value=" + value + " instanceof " + value.getClass()
                         + ", ask xwx@live.cn to add a convertor for this type.");
-                mLog.error(e);
+                LOG.error("copyProperty", e);
             }
         }
 
@@ -1028,7 +1028,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                 return info.get(0);
             }
         } catch (SQLException e) {
-            mLog.warn("Error when execute selectByKey with args: tableName=" + this.getTableName() + " id=" + id);
+            LOG.warn("Error when execute selectByKey with args: tableName=" + this.getTableName() + " id=" + id);
             throw e;
         }
         return null;
@@ -1331,7 +1331,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             if (!alwaysFromBeginning) {
                 beginNum = beginNum + stepMax;
             }
-            mLog.debug("the size of " + this.getTableName() + " selectAllWhereByStep:" + list.size());
+            LOG.debug("the size of " + this.getTableName() + " selectAllWhereByStep:" + list.size());
             handler.process(list);
         }
     }
@@ -1401,7 +1401,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                 try {
                     rec[i] = clz[i].getDeclaredConstructor().newInstance();
                 } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    mLog.warn(e);
+                    LOG.warn("newInstance", e);
                 }
                 this.map2object(h, rec[i]);
             }
@@ -1788,7 +1788,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         try {
             this.getDbHelper().close();
         } catch (SQLException e) {
-            mLog.warn(e);
+            LOG.warn("endForceMasterDB", e);
         }
     }
 
@@ -1801,7 +1801,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         }
     }
 
-    protected void setIdLong(T info, long id){};
+    protected void setIdLong(T info, long id){}
 
     protected boolean insertAutoIncrement(T info) throws SQLException {
         beforeChange(info);

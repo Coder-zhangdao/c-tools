@@ -3,22 +3,22 @@ package com.bixuebihui.cache.cluster;
 import com.opensymphony.oscache.base.events.CacheEntryEvent;
 import com.opensymphony.oscache.plugins.clustersupport.ClusterNotification;
 import com.opensymphony.oscache.plugins.clustersupport.JavaGroupsBroadcastingListener;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author xwx
  */
 public class JavaGroupsBroadcastingListenerImpl extends
         JavaGroupsBroadcastingListener {
-    Log log = LogFactory.getLog(JavaGroupsBroadcastingListenerImpl.class);
+    static  Logger LOG = LoggerFactory.getLogger(JavaGroupsBroadcastingListenerImpl.class);
 
     @Override
     public void handleClusterNotification(ClusterNotification message) {
 
         switch (message.getType()) {
             case CacheConstants.CLUSTER_ENTRY_ADD:
-                log.info("集群新增:" + message.getData());
+                LOG.info("集群新增:" + message.getData());
                 if (message.getData() instanceof QflagCacheEvent) {
                     QflagCacheEvent event = (QflagCacheEvent) message.getData();
                     cache.putInCache(event.getKey(), event.getEntry().getContent(),
@@ -26,7 +26,7 @@ public class JavaGroupsBroadcastingListenerImpl extends
                 }
                 break;
             case CacheConstants.CLUSTER_ENTRY_UPDATE:
-                log.info("集群更新:" + message.getData());
+                LOG.info("集群更新:" + message.getData());
                 if (message.getData() instanceof QflagCacheEvent) {
                     QflagCacheEvent event = (QflagCacheEvent) message.getData();
                     cache.putInCache(event.getKey(), event.getEntry().getContent(),
@@ -34,14 +34,14 @@ public class JavaGroupsBroadcastingListenerImpl extends
                 }
                 break;
             case CacheConstants.CLUSTER_ENTRY_DELETE:
-                log.info("集群删除:" + message.getData());
+                LOG.info("集群删除:" + message.getData());
                 if (message.getData() instanceof QflagCacheEvent) {
                     QflagCacheEvent event = (QflagCacheEvent) message.getData();
                     cache.removeEntry(event.getKey());
                 }
                 break;
             default:
-                log.warn("unknow type of message:" + message);
+                LOG.warn("unknow type of message:" + message);
         }
 
     }

@@ -8,8 +8,8 @@ import com.bixuebihui.jdbc.*;
 import com.bixuebihui.tablegen.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.CollectionUtils;
 
@@ -24,14 +24,14 @@ import java.util.*;
  */
 public class TableSetInfo {
     public static final String DB_ERROR = "[GEN]Error setup database";
-    private static final Log LOG = LogFactory.getLog(TableSetInfo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TableSetInfo.class);
     private final Map<String, List<ForeignKeyDefinition>> foreignKeyImCache = new LRULinkedHashMap<>(
             400);
     private final Map<String, List<String>> keyCache = new LRULinkedHashMap<>(500);
 
     /**
      *  union keys and indexes store in multiline of metadata, currently only support single field index
-     *  so need use: Map<tableName, Map<indexName, List<ColNames>> indexCache
+     *  so need use: Map<tableName, Map<indexName, List<columnNames>> indexCache
      */
     private final Map<String, Map<String, List<String>>> indexCache = new HashMap<>(200);
 
@@ -43,16 +43,13 @@ public class TableSetInfo {
     private LinkedHashMap<String, TableInfo> viewInfos;
 
     protected static int getPos(List<?> list, int desiredPos){
-        if(list.size()>desiredPos){
-            return desiredPos;
-        }
-        return list.size();
+        return Math.min(list.size(), desiredPos);
     }
 
     /**
      * this below two methods are valid only for MySQL
-     * @param conn
-     * @param tableInfo
+     * @param conn database connection
+     * @param tableInfo table structure
      * @return
      */
     private static void fillComment(Connection conn, TableInfo tableInfo ) {
@@ -260,7 +257,7 @@ public class TableSetInfo {
         T_metatableManager daoMetaTable = new T_metatableManager();
         daoMetaTable.setDbHelper(dbHelper);
 
-        setupMetatable(dbHelper, daoMetaTable);
+        setupMetaTable(dbHelper, daoMetaTable);
         List<String> names = new ArrayList<>(32);
         for(TableInfo table: tables.values()){
             names.add(table.getName());
@@ -324,7 +321,7 @@ public class TableSetInfo {
         }
     }
 
-    public boolean setupMetatable(IDbHelper dbHelper, T_metatableManager daoMetaTable) {
+    public boolean setupMetaTable(IDbHelper dbHelper, T_metatableManager daoMetaTable) {
         Connection conn = null;
         boolean res = false;
         try {
@@ -357,7 +354,7 @@ public class TableSetInfo {
         } finally {
             JDBCUtils.close(conn);
         }
-        return false;
+        return res;
     }
 
     /**
@@ -374,11 +371,11 @@ public class TableSetInfo {
      *          3 tableIndexOther - 此为某种其他样式的索引
      * 8、 ORDINAL_POSITION==1   索引中的列序列号；TYPE 为 tableIndexStatistic 时该序列号为零
      * 9.  COLUMN_NAME String => 列名称；TYPE 为 tableIndexStatistic 时列名称为 null
-     * 10. ASC_OR_DESC==A, tring => 列排序序列，”A” => 升序，”D” => 降序，如果排序序列不受支持，可能为 null；TYPE 为 tableIndexStatistic 时排序序列为 null
+     * 10. ASC_OR_DESC==A, string => 列排序序列，”A” => 升序，”D” => 降序，如果排序序列不受支持，可能为 null；TYPE 为 tableIndexStatistic 时排序序列为 null
      * 11. CARDINALITY==0,  int => TYPE 为 tableIndexStatistic 时，它是表中的行数；否则，它是索引中惟一值的数量。
      * 12. PAGES==0, int => TYPE 为 tableIndexStatisic 时，它是用于表的页数，否则它是用于当前索引的页数。
      * 13。 FILTER_CONDITION==null, String => 过滤器条件，如果有的话。（可能为 null）
-     * @param config
+     * @param config generator configuration
      * @param metaData
      * @param tableName
      */
@@ -390,7 +387,7 @@ public class TableSetInfo {
         short indexType, pos;
         Map<String,List<String>> indexData= new HashMap<>();
 
-        /**
+        /*
          * metaData.getIndexInfo 参数说明：
          * catalog : 类别名称，因为存储在此数据库中，所以它必须匹配类别名称。该参数为 “” 则检索没有类别的描述，为 null 则表示该类别名称不应用于缩小搜索范围
          * schema : 模式名称，因为存储在此数据库中，所以它必须匹配模式名称。该参数为 “” 则检索那些没有模式的描述，为 null 则表示该模式名称不应用于缩小搜索范围
@@ -414,10 +411,10 @@ public class TableSetInfo {
                     indexData.putIfAbsent(indexName, cols);
                 }
             }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            LOG.warn("initIndex", e);
         }
-        getIndexCache().put(tableName, indexData);
+        indexCache.put(tableName, indexData);
     }
 
     private boolean isMysql(DatabaseMetaData metaData) throws SQLException {
@@ -457,6 +454,7 @@ public class TableSetInfo {
                 List<String> tableNames =
                         TableUtils.getTableData(metaData, config.getCatalog(), config.getSchema(),
                                 config.getTableOwner(), config.getTablesList(), config.getExcludeTablesList());
+                LOG.info("find tables:"+tableNames);
                 LinkedHashMap<String, TableInfo> tables = new LinkedHashMap<>();
                 for (String name : tableNames) {
                     TableInfo table = new TableInfo(name);
@@ -521,13 +519,13 @@ public class TableSetInfo {
         try(Connection cn = dbHelper.getConnection()) {
             if (CollectionUtils.isEmpty(viewInfos)) {
 
-                int dbtype = BaseDao.detectDbType(cn.getMetaData().getDriverName());
+                int dbType = BaseDao.detectDbType(cn.getMetaData().getDriverName());
 
                 for (String name : config.getViewList().keySet()) {
                     String sql = config.getViewList().get(name);
                     dbHelper.executeQuery(sql.contains("limit") ? sql :sql + " limit 1",
                             new Object[0], new RowMapperResultReader((rs, index) -> {
-                                TableInfo info = OnFlyViewUtils.getColumnData(rs.getMetaData(), name, dbtype);
+                                TableInfo info = OnFlyViewUtils.getColumnData(rs.getMetaData(), name, dbType);
                                 info.setComment(sql);
                                 viewInfos.put(name, info);
                                 return null;

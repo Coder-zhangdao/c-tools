@@ -1,7 +1,7 @@
 package com.bixuebihui.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
@@ -21,7 +21,7 @@ public class ScheduleMonitor {
     //每5分钟查一次超时用户
     private static long tou_interval = 300000L;
 
-    private static Log mLog = LogFactory.getLog(ScheduleMonitor.class);
+    private static Logger LOG = LoggerFactory.getLogger(ScheduleMonitor.class);
 
     /**
      * 重启监控程序
@@ -31,16 +31,16 @@ public class ScheduleMonitor {
      */
     public static boolean restart() throws Exception {
         if (sched != null) {
-            mLog.info("Restart Quartz schedule job...");
+            LOG.info("Restart Quartz schedule job...");
             if (sched.isStarted()) {
                 sched.shutdown();
-                mLog.info("Schedule is running..->..Shutdown current schedule job!");
+                LOG.info("Schedule is running..->..Shutdown current schedule job!");
             }
             sched = StdSchedulerFactory.getDefaultScheduler();
 
             sched.start();
             scheduleon = sched.isStarted();
-            mLog.info("Restart schedule[" + scheduleon + "] finished.");
+            LOG.info("Restart schedule[" + scheduleon + "] finished.");
             return scheduleon;
         }
 
@@ -55,17 +55,17 @@ public class ScheduleMonitor {
      */
     public static boolean shutdown() throws SchedulerException {
         if (sched != null) {
-            mLog.info("Shutdown Quartz schedule job...");
+            LOG.info("Shutdown Quartz schedule job...");
             if (sched.isStarted()) {
                 sched.shutdown();
-                mLog.info("Schedule is running..->..Shutdown current schedule job!");
+                LOG.info("Schedule is running..->..Shutdown current schedule job!");
             }
             if (sched.isShutdown()) {
                 scheduleon = false;
             } else {
                 scheduleon = true;
             }
-            mLog.info("Shutdown schedule finished.[" + !scheduleon + "]");
+            LOG.info("Shutdown schedule finished.[" + !scheduleon + "]");
             return !scheduleon;
         }
 
@@ -82,7 +82,7 @@ public class ScheduleMonitor {
     public static boolean run() throws Exception {
         try {
 
-            mLog.info("Quartz tasks start working(first)...");
+            LOG.info("Quartz tasks start working(first)...");
             sched = StdSchedulerFactory.getDefaultScheduler();
 
             sched.start();

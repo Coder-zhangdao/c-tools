@@ -1,8 +1,8 @@
 package com.bixuebihui.session;
 
 import com.bixuebihui.util.other.CMyException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public abstract class BaseSessionManager implements ISessionManager {
 
-    protected Log mLog = LogFactory.getLog(BaseSessionManager.class);
+    protected Logger LOG = LoggerFactory.getLogger(BaseSessionManager.class);
 
 
     abstract boolean insert(SimpleSession ss) throws CMyException;

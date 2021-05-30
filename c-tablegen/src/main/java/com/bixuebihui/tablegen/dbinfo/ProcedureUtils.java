@@ -2,8 +2,8 @@ package com.bixuebihui.tablegen.dbinfo;
 
 import com.bixuebihui.tablegen.TableUtils;
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -16,7 +16,7 @@ import java.util.Map;
  * @author xwx
  */
 public class ProcedureUtils {
-	private static final Log mLog = LogFactory.getLog(ProcedureUtils.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ProcedureUtils.class);
 
 	/**
      * Retrieves a description of the given catalog's stored procedure parameter
@@ -179,7 +179,7 @@ public class ProcedureUtils {
 						&& owner != null
 						&& !tableOwner.toUpperCase().equals(
 								owner.toUpperCase())) {
-					 mLog.debug("tableOwner is :" + tableOwner + " skip: "
+					 LOG.debug("tableOwner is :" + tableOwner + " skip: "
 					 + owner);
 					continue;
 				}
@@ -197,7 +197,7 @@ public class ProcedureUtils {
 						.add(p);
 						String str="Procedure name = "+tableName+" "+tables.getString(4)+" "+tables.getString(5)+" "+tables.getString(6)+" "+tables.getString(7)+" "+tables.getString(8);
 						System.out.println(str);
-					 mLog.info(str);
+					 LOG.info(str);
 					}
 				}
 
@@ -221,7 +221,7 @@ public class ProcedureUtils {
 		try {
 			procedures = new ArrayList<>();
 
-			String tableName = "";
+			String tableName;
 
 			while (tables.next()) {
 
@@ -230,7 +230,7 @@ public class ProcedureUtils {
 				if (tableOwner != null
 						&& owner != null
 						&& !tableOwner.equalsIgnoreCase(owner)) {
-					 mLog.debug("tableOwner is :" + tableOwner + " skip: "
+					 LOG.debug("tableOwner is :" + tableOwner + " skip: "
 					 + owner);
 					continue;
 				}
@@ -247,7 +247,7 @@ public class ProcedureUtils {
 						procedures.add(p);
 						String str="Procedure name = "+tableName+" "+tables.getString(4)+" "+tables.getString(5)+" "+tables.getString(6)+" "+tables.getString(7)+" "+tables.getString(8);
 						System.out.println(str);
-					 mLog.info(str);
+					 LOG.info(str);
 					}
 
 				}

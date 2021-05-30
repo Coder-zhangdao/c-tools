@@ -8,8 +8,8 @@ import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableInfo;
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ import static com.bixuebihui.tablegen.TableGen.saveTableDataToLocalCache;
 
 public class GenerateAll implements DiffHandler {
 
-    private static final Log LOG = LogFactory.getLog(GenerateAll.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GenerateAll.class);
     boolean generateSuccess = true;
     Generator[] perTableGenerator = new Generator[]{
            new PojoGenerator(), new DalGenerator(), new BusinessGenerator(),
@@ -60,7 +60,9 @@ public class GenerateAll implements DiffHandler {
             generateOnceFiles();
             if (generator.config.isGenerateAll()) {
                 generatorTables(generator.setInfo.getTableInfos());
-                generatorViews(generator.setInfo.getViewInfos());
+
+                if(generator.setInfo.getViewInfos()!=null)
+                    generatorViews(generator.setInfo.getViewInfos());
 
                // generateWebUI();
                // generateTest();
@@ -74,6 +76,8 @@ public class GenerateAll implements DiffHandler {
 //                    generateStoreProcedures(meta);
 //                }
             } else {
+                info("generate_all is off, generate incrementally, " +
+                        "if want regenerate, you can remove cache file 'target/gen_table_data.cache'");
 
                 IDbHelper helper = TableGen.getDbHelper(generator.dbConfig);
 
@@ -90,19 +94,21 @@ public class GenerateAll implements DiffHandler {
 
         } catch (SQLException | IOException e) {
             generateSuccess = false;
-            LOG.error(e);
+            LOG.error("", e);
         }
 
         info("Successfully complected!");
     }
 
     private void info(String s) {
+        System.out.println(s);
         LOG.info(s);
     }
 
     private void generatorTables(LinkedHashMap<String, TableInfo> tableInfos) throws IOException {
         for(Generator g: perTableGenerator){
             for(TableInfo info: tableInfos.values()) {
+                info(info.getName());
                 g.generateToFile(info.getName());
             }
         }
@@ -111,6 +117,7 @@ public class GenerateAll implements DiffHandler {
     private void generatorViews(LinkedHashMap<String, TableInfo> viewInfos) throws IOException {
         for(Generator g: perViewGenerator){
             for(TableInfo info: viewInfos.values()) {
+                info(info.getName());
                 g.generateToFile(info.getName());
             }
         }

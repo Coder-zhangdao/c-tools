@@ -117,7 +117,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     @Override
     public void setIdLong({{pojoClassName}} info, long id) {
     {{#if hasKey}}
-        info.set{{firstUp firstKeyName}}(({{firstKeyType}})id);
+        info.set{{firstUp firstKeyName}}({{{unboxType firstKeyType}}}id);
     {{else}}
         //no key to set, don't use this method!
     {{/if}}
@@ -242,12 +242,12 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     }
 {{/each}}
 {{! foreign key }}
-{{#if config.indexes}}{{#not indexData.empty}}
+{{#if config.indexes}}{{#if indexData.[0]}}
 
     /**
-    * Select from the database for table {{tableName}} "
+    * Select from the database for table {{tableName}} by index  {{#each indexData as | field |}}{{field.name}}{{#unless @last}},{{/unless}}{{/each}}
     */
-    public List<{{pojoClassName}}> selectByIndex(  {{#each indexData as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    public List<{{pojoClassName}}> selectByIndex({{#each indexData as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
     {
         String query = "select * from {{tableName}}";
         String where = " where {{#each this.indexData}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}}";
@@ -261,7 +261,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         return null;
     }
 
-{{/not}}{{/if}}
+{{/if}}{{/if}}
 {{!
             if (config.indexes) {
             List<String> indexData = getTableIndexes(tableName); // updates the indexData

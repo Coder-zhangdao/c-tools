@@ -2,8 +2,8 @@ package com.bixuebihui.excel;
 
 import com.bixuebihui.util.DateConverter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class BaseExcelInput {
 
-    private static final  Log log = LogFactory.getLog(BaseExcelInput.class);
+    private static final  Logger LOG = LoggerFactory.getLogger(BaseExcelInput.class);
 
 
     protected static @NotNull
@@ -190,7 +190,7 @@ public class BaseExcelInput {
             java.util.Date date = formatter.parse(postTime);
              res = new Date(date.getTime());
         } catch (ParseException e) {
-            log.warn(e);
+            LOG.warn("", e);
         }
         return  res;
     }
@@ -240,7 +240,7 @@ public class BaseExcelInput {
             File excelFile = new File(fileName);
 
             if (!excelFile.exists()) {
-                log.warn("检测到文件不存在");
+                LOG.warn("检测到文件不存在");
                 return ht;
             }
             getExcelContent = new FileInputStream(excelFile);
@@ -283,7 +283,7 @@ public class BaseExcelInput {
                         if (!ht.containsKey(tmp.trim())
                                 && !"".equals(tmp.trim())) {
                             ht.put(tmp.trim(), tmp1.trim());
-                            log.info("成功导入" + ht.size() + ": " + tmp
+                            LOG.info("成功导入" + ht.size() + ": " + tmp
                                     + ", " + tmp1);
                         }
                     }
@@ -291,7 +291,7 @@ public class BaseExcelInput {
             }
 
         } catch (Exception e) {
-            log.warn(e);
+            LOG.warn("", e);
         }
         return ht;
     }

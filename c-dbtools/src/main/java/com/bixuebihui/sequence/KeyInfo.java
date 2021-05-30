@@ -2,8 +2,8 @@ package com.bixuebihui.sequence;
 
 import com.bixuebihui.jdbc.IDbHelper;
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -50,7 +50,7 @@ public class KeyInfo {
 
 	private IDbHelper dbHelper;
 
-	protected Log mLog = LogFactory.getLog(KeyInfo.class);
+	protected Logger LOG = LoggerFactory.getLogger(KeyInfo.class);
 
     private void init(String keyName, int poolSize, IDbHelper dbHelper) throws SQLException{
         this.dbHelper = dbHelper;
@@ -124,7 +124,7 @@ public class KeyInfo {
 			while(i<maxTries && res!=1){
 			 res = retrieveFromDB();
 				if(res!=1){
-					mLog.error("数据库主键维护出错,更新时返回结果不对: res="+res+" keyName="+keyName+" nextKey="+nextKey);
+					LOG.error("数据库主键维护出错,更新时返回结果不对: res="+res+" keyName="+keyName+" nextKey="+nextKey);
 				}
 				i++;
 			}
@@ -152,18 +152,18 @@ public class KeyInfo {
 
                 if (o != null) {
                     Long value = Long.valueOf(o.toString());
-                    mLog.debug(keyName + "=" + value+"~"+(value+poolSize));
+                    LOG.debug(keyName + "=" + value+"~"+(value+poolSize));
 
                     maxKey = value + poolSize;
                     minKey = maxKey - poolSize + 1;
                     nextKey = minKey;
 
-                    mLog.debug("更新Sequence最大值！");
+                    LOG.debug("更新Sequence最大值！");
                     res = dbHelper.executeNoQuery(SQL_UPDATE, new Object[] {
                             (long) poolSize, keyName, value }, cn);
 
                 } else {
-                    mLog.debug("执行Sequence数据库初始化工作！");
+                    LOG.debug("执行Sequence数据库初始化工作！");
                     String initSql = "INSERT INTO " + SEQUENCE_TABLE
                             + "(KEYNAME,KEYVALUE) VALUES('" + keyName
                             + "',10000 + " + poolSize + ")";

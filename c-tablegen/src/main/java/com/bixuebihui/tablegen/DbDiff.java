@@ -5,8 +5,8 @@ import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.entry.TableInfo;import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.*;
  * @author xwx
  */
 public class DbDiff {
-    private static final Log LOG = LogFactory.getLog(DbDiff.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DbDiff.class);
 
     Database db1;
     Database db2;
@@ -216,7 +216,7 @@ public class DbDiff {
     private void outputSortedList(Collection<String> res2) {
         ArrayList<String> list = new ArrayList<>(res2);
         Collections.sort(list);
-        LOG.debug(list);
+        LOG.debug(list.toString());
     }
 
     /**
@@ -233,13 +233,13 @@ public class DbDiff {
         boolean changed = false;
         if (!res1.isEmpty()) {
             LOG.debug("cols1 - cols2 =");
-            LOG.debug(res1);
+            LOG.debug(res1.toString());
             changed = true;
         }
 
         if (!res2.isEmpty()) {
             LOG.debug("cols2 - cols1 =");
-            LOG.debug(res2);
+            LOG.debug(res2.toString());
             changed = true;
         }
 

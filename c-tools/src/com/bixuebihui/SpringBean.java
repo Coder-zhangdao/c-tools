@@ -1,7 +1,7 @@
 package com.bixuebihui;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -19,7 +19,7 @@ public class SpringBean {
 
     private String beanConfigFile = "beans.xml";
     private static final String CONFIG_PROPERTIES = "beans.properties";
-    private static final Log LOG = LogFactory.getLog(SpringBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SpringBean.class);
 
 
     public Object getBean(String resourceId) {

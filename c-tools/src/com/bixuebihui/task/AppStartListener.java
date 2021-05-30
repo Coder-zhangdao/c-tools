@@ -1,7 +1,7 @@
 package com.bixuebihui.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServlet;
  * @author xwx
  */
 public class AppStartListener extends HttpServlet implements ServletContextListener {
-    private final static Log log = LogFactory.getLog(AppStartListener.class);
+    private final static Logger LOG = LoggerFactory.getLogger(AppStartListener.class);
     /**
      *
      */
@@ -21,9 +21,9 @@ public class AppStartListener extends HttpServlet implements ServletContextListe
     @Override
     public void contextInitialized(ServletContextEvent event) {
         try {
-            log.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
+            LOG.info("[CYC] 自动监控任务启动:" + ScheduleMonitor.run());
         } catch (Exception e) {
-            log.warn(e);
+            LOG.warn("", e);
         }
         event.getServletContext().log("AppStartListener Launch!");
     }
@@ -33,10 +33,10 @@ public class AppStartListener extends HttpServlet implements ServletContextListe
         try {
             ScheduleMonitor.shutdown();
         } catch (Exception e) {
-            log.warn(e);
+            LOG.warn("contextDestroyed", e);
         }
         event.getServletContext().log("Destory AppStartListener!");
-        log.info("[CYC] Application Listener has been destoryed!");
+        LOG.info("[CYC] Application Listener has been destoryed!");
     }
 
 

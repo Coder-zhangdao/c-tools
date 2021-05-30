@@ -5,8 +5,8 @@ import com.bixuebihui.algorithm.LRULinkedHashMap;
 import com.bixuebihui.jdbc.IBaseListService;
 import com.opensymphony.oscache.base.NeedsRefreshException;
 import com.opensymphony.oscache.general.GeneralCacheAdministrator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,13 +24,13 @@ public class ObjectCache {
     public static final String KEY_SEPARATOR = ".";
     public static final String CONDITION_SEPARATOR = "@";
     private static final long serialVersionUID = -4397192926052141162L;
-    static Log mLog;
+    static Logger LOG;
     static GeneralCacheAdministrator admin;
 
     static {
-        mLog = LogFactory.getLog(ObjectCache.class);
+        LOG = LoggerFactory.getLogger(ObjectCache.class);
         if (admin == null) {
-            mLog.info("create new cache administrator");
+            LOG.info("create new cache administrator");
             admin = new GeneralCacheAdministrator();
         }
     }
@@ -59,7 +59,7 @@ public class ObjectCache {
                 dict.condition = null;
             }
         } else {
-            mLog.error("No key find! " + key);
+            LOG.error("No key find! " + key);
         }
         if (keys.length > 1) {
             dict.keyName = keys[1];
@@ -82,7 +82,7 @@ public class ObjectCache {
                 }
             }
         } catch (NeedsRefreshException e) {
-            mLog.debug("not find in cache " + storeKey);
+            LOG.debug("not find in cache " + storeKey);
             admin.cancelUpdate(storeKey);
         }
         return m;
@@ -93,10 +93,10 @@ public class ObjectCache {
         try {
             mm = (Map) admin.getFromCache(storeKey);
         } catch (NeedsRefreshException e) {
-            mLog.debug("not find in cache " + storeKey);
+            LOG.debug("not find in cache " + storeKey);
             admin.cancelUpdate(storeKey);
         }
-        mLog.debug("mm=" + mm);
+        LOG.debug("mm=" + mm);
         if (mm == null) {
             mm = new LRULinkedHashMap(maxCapacity);
         }
@@ -110,7 +110,7 @@ public class ObjectCache {
         IBaseListService<DictionaryItem, String> list = def.getServiceClass();
         Map<String, DictionaryItem> li = list.selectByIds(def.getIdFieldName(), arr);
 
-        mLog.debug("dump data:" + li);
+        LOG.debug("dump data:" + li);
 
         Map mm = getMap(storekey, def.getMaxCapacity());
         mm.putAll(li);
@@ -123,13 +123,13 @@ public class ObjectCache {
             throws SQLException {
 
         Dictionary dict = parseKey(key);
-        mLog.debug("get from cache " + arr.size());
+        LOG.debug("get from cache " + arr.size());
         Map m = batchGetFromCache(dict.getStoreKey(), arr);
 
         System.out.println("from cache " + m);
 
         if (arr.size() > 0) {
-            mLog.debug("get from db " + arr.size());
+            LOG.debug("get from db " + arr.size());
             m.putAll(batchGetFromDb(dict.getStoreKey(), dict
                     .getDictDef(), arr));
         }

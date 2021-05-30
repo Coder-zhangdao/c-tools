@@ -4,8 +4,8 @@ import com.bixuebihui.BeanFactory;
 import com.bixuebihui.util.html.FormControl;
 import com.opensymphony.oscache.base.NeedsRefreshException;
 import com.opensymphony.oscache.general.GeneralCacheAdministrator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -20,13 +20,13 @@ import java.util.*;
 public class DictionaryCache {
     public static final String KEY_SEPARATOR = ".";
     public static final String CONDITION_SEPARATOR = "@";
-    static Log mLog;
+    static Logger LOG;
     static GeneralCacheAdministrator admin;
 
     static {
-        mLog = LogFactory.getLog(DictionaryCache.class);
+        LOG = LoggerFactory.getLogger(DictionaryCache.class);
         if (admin == null) {
-            mLog.info("create new cache administrator");
+            LOG.info("create new cache administrator");
             admin = new GeneralCacheAdministrator();
         }
     }
@@ -71,7 +71,7 @@ public class DictionaryCache {
                 dict.condition = null;
             }
         } else {
-            mLog.error("No key find! " + key);
+            LOG.error("No key find! " + key);
         }
         if (keys.length > 1) {
             dict.keyName = keys[1];
@@ -189,7 +189,7 @@ public class DictionaryCache {
                         return mm[isById ? 0 : 1].get(dict.keyName);
                     }
                 } catch (SQLException e) {
-                    mLog.error("查询" + dict.tableName + "时数据库出错：");
+                    LOG.error("查询" + dict.tableName + "时数据库出错：");
                     e.printStackTrace();
                     admin.cancelUpdate(key);
                     return null;

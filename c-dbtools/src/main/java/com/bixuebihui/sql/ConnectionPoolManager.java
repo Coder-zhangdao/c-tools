@@ -1,7 +1,7 @@
 package com.bixuebihui.sql;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 
 /**
@@ -34,7 +33,7 @@ public final class ConnectionPoolManager
     private boolean trace;
     Thread thread;
 
-    Log log  = LogFactory.getLog(ConnectionPoolManager.class);
+    Logger log  = LoggerFactory.getLogger(ConnectionPoolManager.class);
 
 
     /**
@@ -203,7 +202,7 @@ public final class ConnectionPoolManager
                     connectionPool.reapIdleConnections();
                 }
             } catch(InterruptedException interruptedexception) {
-                log.info(interruptedexception);
+                log.info("", interruptedexception);
 
                 Thread.currentThread().interrupt();
             }
@@ -377,7 +376,7 @@ public final class ConnectionPoolManager
      * @throws java.sql.SQLFeatureNotSupportedException if any.
      */
     @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 

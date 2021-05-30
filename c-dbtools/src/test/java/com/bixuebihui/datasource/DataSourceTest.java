@@ -8,8 +8,8 @@ import com.bixuebihui.sequence.SequenceUtils;
 import junit.framework.TestCase;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -22,7 +22,7 @@ import java.util.Random;
 
 public class DataSourceTest extends TestCase {
 
-	private static final Log log = LogFactory.getLog(DataSourceTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DataSourceTest.class);
 	protected static DatabaseConfig cfg = new DatabaseConfig();
 	static {
 		cfg.setAlias("test1");
@@ -76,7 +76,7 @@ public class DataSourceTest extends TestCase {
 				if (rs.next()) {
 					assertEquals(1 + i, rs.getInt(1));
 				} else {
-					log.info("dataSourceTest error select");
+					LOG.info("dataSourceTest error select");
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -88,7 +88,7 @@ public class DataSourceTest extends TestCase {
 			}
 		}
 		Date dtEnd = new Date();
-		log.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
+		LOG.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
 	}
 
 
@@ -122,7 +122,7 @@ public class DataSourceTest extends TestCase {
 				if (rs.next()) {
 					assertEquals(i, rs.getInt(2));
 				} else {
-					log.info("dataSourceTestCursor error select region_id=" + i);
+					LOG.info("dataSourceTestCursor error select region_id=" + i);
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -134,7 +134,7 @@ public class DataSourceTest extends TestCase {
 			}
 		}
 		Date dtEnd = new Date();
-		log.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
+		LOG.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
 	}
 
 	public static void dataSourceTestCursor1(DataSource ds) throws SQLException {
@@ -154,7 +154,7 @@ public class DataSourceTest extends TestCase {
 					assertEquals(i, rs.getInt(2));
 
 				} else {
-					log.info("dataSourceTestCursor1 error select");
+					LOG.info("dataSourceTestCursor1 error select");
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -173,7 +173,7 @@ public class DataSourceTest extends TestCase {
 			}
 		}
 		Date dtEnd = new Date();
-		log.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
+		LOG.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
 	}
 
 	public static void dataSourceTestCursor2(DataSource ds) throws SQLException {
@@ -197,7 +197,7 @@ public class DataSourceTest extends TestCase {
 				if (rs.next()) {
 					assertEquals(ids.get(i) + k, rs.getInt(2));
 				} else {
-					log.info("dataSourceTestCursor2 error select");
+					LOG.info("dataSourceTestCursor2 error select");
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -216,7 +216,7 @@ public class DataSourceTest extends TestCase {
 			}
 		}
 		Date dtEnd = new Date();
-		log.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
+		LOG.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
 	}
 
 	public static DatabaseConfig getConfigDerby() {

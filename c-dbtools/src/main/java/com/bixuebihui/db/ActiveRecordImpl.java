@@ -4,8 +4,8 @@ import com.bixuebihui.jdbc.*;
 import com.bixuebihui.jdbc.entity.CountObject;
 import com.bixuebihui.jdbc.entity.CountValue;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import java.sql.Connection;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 
-	private static final Log log = LogFactory.getLog(ActiveRecordImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ActiveRecordImpl.class);
 	/**
 	 * NOTE that: class field make this class can't use in spring as singleton!
 	 */
@@ -344,7 +344,7 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 
 			return limit.toString();
 		}else{
-			log.warn("limit not implemented for this type of BaseDao.getDBTYPE()="+operator.getDbType());
+			LOG.warn("limit not implemented for this type of BaseDao.getDBTYPE()="+operator.getDbType());
 			return "";
 		}
 	}
@@ -417,7 +417,7 @@ public class ActiveRecordImpl<T, V> implements ActiveRecord<T> {
 	@Override
 	public Record<T> last() {
 		if(sqlPocket==null){
-			log.error("ERROR: ActiveRecordImpl.last() - there not conditions set to use last.");
+			LOG.error("ERROR: ActiveRecordImpl.last() - there not conditions set to use last.");
 		}
 		useLast = true;
 		return this;

@@ -81,7 +81,7 @@ public class EasyTable extends BasicWebUI {
         if (isOnePage()) {
             this.maxRows = 500;
             this.maxRowsIncrements[0] = maxRows;
-            log.debug("maxRows=" + maxRows + "  maxRowsIncrements[0]=" + this.maxRowsIncrements[0]);
+            LOG.debug("maxRows=" + maxRows + "  maxRowsIncrements[0]=" + this.maxRowsIncrements[0]);
         }
         ((BasicListService) this.service).setCoreSql(baseSql);
     }
@@ -91,8 +91,8 @@ public class EasyTable extends BasicWebUI {
         try {
             return MiniSqlParser.parse(baseSql);
         } catch (StandardException |RuntimeException e) {
-            log.warn("sql can't be parsed:" + baseSql);
-            log.warn(e.getMessage());
+            LOG.warn("sql can't be parsed:" + baseSql);
+            LOG.warn(e.getMessage());
         }
         return null;
     }
@@ -106,7 +106,7 @@ public class EasyTable extends BasicWebUI {
             if(cols!=null) {
                 return cols.split(",");
             }else {
-                log.error("you must set colNames or colsList");
+                LOG.error("you must set colNames or colsList");
             }
             return new String[0];
         }
@@ -221,11 +221,11 @@ public class EasyTable extends BasicWebUI {
                     sp.tableName = fromList.get(0).getExposedName();
 
                 } else {
-                    log.debug("rn = " + rn);
+                    LOG.debug("rn = " + rn);
                 }
 
             } else {
-                log.warn("not a select!");
+                LOG.warn("not a select!");
             }
 
             assert sp.colNames != null;
