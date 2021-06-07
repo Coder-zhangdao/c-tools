@@ -52,7 +52,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
 
     @Override
-    protected String getUpdateSql(){
+    protected String getUpdateSql(){ {{! TODO the logic below is buggy, update SQL must according with update OBJECTS }}
         return "update "+this.getTableName()+" set {{#each fields ~}}
             {{#eq config.versionColName name ~}} {{name}}= {{name}} +1 {{else}}  {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}} {{ name }}=?{{/if ~}}
             {{/eq ~}}
