@@ -3,6 +3,7 @@ package com.bixuebihui.tablegen.generator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -13,6 +14,10 @@ public class BusinessGenerator extends BaseGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(BusinessGenerator.class);
 
+    @Override
+    public boolean wantToGenerate(String fileName) {
+        return super.wantToGenerate(fileName) && ! new File(fileName).exists();
+    }
 
     String getClassSuffix(){return CLASS_SUFFIX;}
 

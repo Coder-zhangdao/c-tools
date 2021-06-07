@@ -17,6 +17,10 @@ public interface Generator {
 
     String getTargetFileName(String tableName);
 
+    default boolean wantToGenerate(String fileName){
+        return true;
+    }
+
     default void generateToFile(String tableName) throws IOException {
 
         String fileName = getTargetFileName(tableName);
@@ -27,9 +31,11 @@ public interface Generator {
                 throw new IOException("fail to create directory");
             }
         }
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(fileName))) {
-            IOUtils.write(generate(tableName), writer);
-            System.out.println(tableName+": "+ fileName);
+        if(wantToGenerate(fileName)) {
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(fileName))) {
+                IOUtils.write(generate(tableName), writer);
+                System.out.println(tableName + ": " + fileName);
+            }
         }
 
     }

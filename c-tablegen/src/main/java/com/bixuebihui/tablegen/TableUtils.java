@@ -744,17 +744,17 @@ public class TableUtils {
             if ("String".equals(cd.getJavaType())) {
                 //if columns is JSON type, there is no column size.
                 if (sb.indexOf("@Size") < 0 && cd.getColumns()>0) {
-                    sb.append("  @Size(max=").append(cd.getColumns()).append(")\n");
+                    sb.append("    @Size(max=").append(cd.getColumns()).append(")\n");
                 }
             }
             if (isNeedNotNullAnnotation(config, cd)) {
                 if (sb.indexOf("@NotNull") < 0) {
-                    sb.append("  @NotNull\n");
+                    sb.append("    @NotNull\n");
                 }
             }
 
             if(config.use_swagger && StringUtils.isNotBlank(cd.getComment())){
-                sb.append("  @ApiModelProperty(value = \"").append(cd.getComment()).append("\")");
+                sb.append("    @ApiModelProperty(value = \"").append(cd.getComment()).append("\")");
             }
         }
 

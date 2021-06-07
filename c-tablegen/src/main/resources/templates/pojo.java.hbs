@@ -62,7 +62,7 @@ public class {{className}} {{interface}} {
 {{#each fields as | field index | }}
         {{#eq "String" javaType~}}
         s.append(" {{firstLow name}}=\"").append(StringEscapeUtils.escapeXml11(this.get{{firstUp  name }}())).append("\"");
-        {{else~}}
+        {{~else~}}
         s.append(" {{firstLow name}}=\"").append(this.get{{firstUp name}}()).append("\"");
         {{/eq~}}
 {{/each~}}
