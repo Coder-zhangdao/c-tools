@@ -153,10 +153,10 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
             {{#eq name config.versionColName}}
             {{~ else ~}}
                 info.get{{firstUp name}}(),
-            {{/eq}}
+            {{/eq ~}}
         {{/each}}
         {{keyObjects}},info.get{{firstUp config.versionColName}}()
-        , cn );
+        }, cn );
     }
 
     public boolean updateByKeyAndVersion({{pojoClassName}}  info) throws SQLException
