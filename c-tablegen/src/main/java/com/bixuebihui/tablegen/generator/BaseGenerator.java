@@ -174,7 +174,7 @@ public abstract class BaseGenerator implements Generator {
     public String generate(String tableName) throws IOException {
         Handlebars handlebars = getHandlebars();
 
-        Template template = handlebars.compile(File.separator + getTemplateFileName());
+        Template template = handlebars.compile(getTemplateFileName());
 
         Map<String, Object> v = getContextMap(tableName);
         return template.apply(Context.newBuilder(v).resolver(
