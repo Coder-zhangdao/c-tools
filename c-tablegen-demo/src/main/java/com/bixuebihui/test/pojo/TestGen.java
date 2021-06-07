@@ -1,161 +1,152 @@
 package com.bixuebihui.test.pojo;
+
 /*
-  * test_gen: 测试表
-  * 
-  * Notice! Automatically generated file!
-  * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
-  * Code Generator originally by J.A.Carter
-  * Modified by Xing Wanxiang 2008-2021
-  * email: www@qsn.so
-  */
+ *  TestGen
+ *
+ * Notice! Automatically generated file!
+ * Do not edit the pojo and dal packages,use `maven tablegen:gen`!
+ * Code Generator originally by J.A.Carter
+ * Modified by Xing Wanxiang 2008-2021
+ * email: www@qsn.so
+ */
+
 
 import java.sql.*;
 import java.io.Serializable;
 import javax.validation.constraints.*;
 import org.apache.commons.text.StringEscapeUtils;
+
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javax.annotation.processing.Generated;
+
+@Generated("com.github.yujiaao:tablegen")
+@ApiModel(description ="测试表")
+public class TestGen  implements Serializable {
 
 
-@ApiModel(description = "测试表")
-public class TestGen  implements Serializable
-{
-/**
-  * Type : INT Name : id: 这里是id!
-  * id
-  */
-  @ApiModelProperty(value = "这里是id!")
-  protected Long id;
 
-/**
-  * Type : VARCHAR(100) Name : name: 这里是名称！
-  * name
-  */
-  @Size(max=100)
+    /**
+    * id
+    */
+      @ApiModelProperty(value = "这里是id!")
+    protected Integer  id;
+
+
+    /**
+    * name
+    */
+      @Size(max=100)
   @ApiModelProperty(value = "这里是名称！")
-  protected String name;
+    protected String  name;
 
-/**
-  * Type : SMALLINT Name : age: 这里是年龄
-  * age
-  */
-  @ApiModelProperty(value = "这里是年龄")
-  protected Short age;
 
-/**
-  * Type : TIMESTAMP Name : birth: 这里是日期！
-  * birth
-  */
-  @ApiModelProperty(value = "这里是日期！")
-  protected Timestamp birth;
+    /**
+    * age
+    */
+      @ApiModelProperty(value = "这里是年龄")
+    protected Short  age;
 
-/**
-  * Type : INT Name : edu_id: 教育程度
-  * edu_id
-  */
-  @ApiModelProperty(value = "教育程度")
-  protected Long eduId;
 
-/**
-  * Sets the value for id id
-  */
-public void setId(Long id)
-{
-  this.id=id;
-}
+    /**
+    * birth
+    */
+      @ApiModelProperty(value = "这里是日期！")
+    protected Timestamp  birth;
 
-/**
-  * Gets the value for id
-  */
-public Long getId()
-{
-  return id;
-}
 
-/**
-  * Sets the value for name name
-  */
-public void setName(String name)
-{
-  this.name=name;
-}
+    /**
+    * edu_id
+    */
+      @ApiModelProperty(value = "教育程度")
+    protected Integer  eduId;
 
-/**
-  * Gets the value for name
-  */
-public String getName()
-{
-  return name;
-}
 
-/**
-  * Sets the value for age age
-  */
-public void setAge(Short age)
-{
-  this.age=age;
-}
 
-/**
-  * Gets the value for age
-  */
-public Short getAge()
-{
-  return age;
-}
 
-/**
-  * Sets the value for birth birth
-  */
-public void setBirth(Timestamp birth)
-{
-  this.birth=birth;
-}
+    public TestGen()
+    {
 
-/**
-  * Gets the value for birth
-  */
-public Timestamp getBirth()
-{
-  return birth==null ? null: new Timestamp(birth.getTime());
-}
+            id=0;
 
-/**
-  * Sets the value for eduId edu_id
-  */
-public void setEduId(Long eduId)
-{
-  this.eduId=eduId;
-}
+            name="";
 
-/**
-  * Gets the value for eduId
-  */
-public Long getEduId()
-{
-  return eduId;
-}
+            age=0;
 
- public TestGen()
-     {
-      id=0L;
-      name="";
-      age=0;
-      birth=new Timestamp(new java.util.Date().getTime());
-      eduId=0L;
-     }
- public String toXml()
-     {
-      StringBuilder s= new StringBuilder();
-      String ln = System.getProperty("line.separator");
-      s.append("<test_gen ");
-     s.append("id=\"").append(this.getId()).append("\" ");
-     s.append("name=\"").append(StringEscapeUtils.escapeXml11(this.getName())).append("\" ");
-     s.append("age=\"").append(this.getAge()).append("\" ");
-     s.append("birth=\"").append(this.getBirth()).append("\" ");
-     s.append("eduId=\"").append(this.getEduId()).append("\" ");
-     s.append(" />");
-     s.append(ln);
-    return s.toString();
-     }
+            birth=new Timestamp(System.currentTimeMillis());
+
+            eduId=0;
+
+    }
+
+    public Integer getId()
+    {
+      return this.id;
+    }
+
+    public void setId(Integer id)
+    {
+      this.id = id;
+    }
+
+    public String getName()
+    {
+      return this.name;
+    }
+
+    public void setName(String name)
+    {
+      this.name = name;
+    }
+
+    public Short getAge()
+    {
+      return this.age;
+    }
+
+    public void setAge(Short age)
+    {
+      this.age = age;
+    }
+
+    public Timestamp getBirth()
+    {
+      return this.birth;
+    }
+
+    public void setBirth(Timestamp birth)
+    {
+      this.birth = birth;
+    }
+
+    public Integer getEduId()
+    {
+      return this.eduId;
+    }
+
+    public void setEduId(Integer eduId)
+    {
+      this.eduId = eduId;
+    }
+
+    public String toXml()
+    {
+        StringBuilder s= new StringBuilder();
+        String ln = System.getProperty("line.separator");
+        s.append("<test_gen ");
+
+        s.append(" id=\"").append(this.getId()).append("\"");
+
+        s.append(" name=\"").append(StringEscapeUtils.escapeXml11(this.getName())).append("\"");
+
+        s.append(" age=\"").append(this.getAge()).append("\"");
+
+        s.append(" birth=\"").append(this.getBirth()).append("\"");
+
+        s.append(" eduId=\"").append(this.getEduId()).append("\"");
+        s.append(" />");
+        s.append(ln);
+        return s.toString();
+    }
 }

@@ -37,7 +37,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 
     {{! TODO add to BaseDao @Override }}
     protected String getDeleteSql(){
-        return "delete from {{tableName}} where {{#each keys}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}} ";
+        return "delete from "+this.getTableName()+" where {{#each keys}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}} ";
     }
 
    @Override
@@ -81,7 +81,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
       return  "{{tableName}}";
 {{~ else ~}}
 {{!    tripple { for unescape equals sign '='  }}
-      return "({{{tableInfo.comment}}}) as {{tableName}}"
+      return "({{{tableInfo.comment}}}) as {{tableName}}";
 {{/if}}
 
     }
