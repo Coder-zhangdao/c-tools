@@ -166,7 +166,7 @@ public class TableGen implements DiffHandler {
         if (params != null) {
             // work out the "where" part of the update first..
             //
-            where.append("+\" where ");
+            where.append(" where ");
             String key;
             String keyType;
             for (Iterator<String> e = params.iterator(); e.hasNext(); ) {
@@ -187,7 +187,6 @@ public class TableGen implements DiffHandler {
                 }
             }
 
-            where.append("\"");
         }
 
         return where.toString();
@@ -1417,7 +1416,7 @@ public class TableGen implements DiffHandler {
         }
 
         out("{");
-        out("    String query = \"" + query + where + (customWhere ? "+ where;" : ";"));
+        out("    String query = \"" + query +"\""+ where+"\"" + (customWhere ? "+ where;" : ";"));
         out("    return dbHelper.executeQuery(query, " + (objs == null ? "null" : objs) + ", new RowMapperResultReader<"
                 + getPojoClassName(tableName) + ">(this));");
         out("}");
@@ -1437,7 +1436,7 @@ public class TableGen implements DiffHandler {
         out(" */");
         out(createMethodLine(methodName, params, getPojoClassName(tableName), columnData));
         out("{");
-        out("    String query = \"" + query + where + ";");
+        out("    String query = \"" + query +"\""+ where + "\";");
         out("    List<" + getPojoClassName(tableName) + "> info = dbHelper.executeQuery(query, " + objs
                 + ", new RowMapperResultReader<" + getPojoClassName(tableName) + ">(this));");
         out("    if(info!=null && info.size()>0) {");
@@ -1632,7 +1631,7 @@ public class TableGen implements DiffHandler {
         out("  */");
         out(createMethodLine(methodName, params, "int", columnData));
         out("{");
-        out("    String query=\"select count(*) from \" + getTableName() + \" \" " + where + ";");
+        out("    String query=\"select count(*) from \" + getTableName() + \"  " + where + "\";");
         out("    Object o = dbHelper.executeScalar(query," + objs + ");");
         out("  return o==null?0:Integer.parseInt(o.toString());");
 

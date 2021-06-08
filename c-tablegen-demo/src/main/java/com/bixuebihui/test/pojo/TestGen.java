@@ -30,36 +30,36 @@ public class TestGen  implements Serializable {
     /**
     * id
     */
-      @ApiModelProperty(value = "这里是id!")
+        @ApiModelProperty(value = "这里是id!")
     protected Integer  id;
 
 
     /**
     * name
     */
-      @Size(max=100)
-  @ApiModelProperty(value = "这里是名称！")
+        @Size(max=100)
+    @ApiModelProperty(value = "这里是名称！")
     protected String  name;
 
 
     /**
     * age
     */
-      @ApiModelProperty(value = "这里是年龄")
+        @ApiModelProperty(value = "这里是年龄")
     protected Short  age;
 
 
     /**
     * birth
     */
-      @ApiModelProperty(value = "这里是日期！")
+        @ApiModelProperty(value = "这里是日期！")
     protected Timestamp  birth;
 
 
     /**
     * edu_id
     */
-      @ApiModelProperty(value = "教育程度")
+        @ApiModelProperty(value = "教育程度")
     protected Integer  eduId;
 
 
@@ -79,7 +79,6 @@ public class TestGen  implements Serializable {
             eduId=0;
 
     }
-
     public Integer getId()
     {
       return this.id;
@@ -89,7 +88,6 @@ public class TestGen  implements Serializable {
     {
       this.id = id;
     }
-
     public String getName()
     {
       return this.name;
@@ -99,7 +97,6 @@ public class TestGen  implements Serializable {
     {
       this.name = name;
     }
-
     public Short getAge()
     {
       return this.age;
@@ -109,7 +106,6 @@ public class TestGen  implements Serializable {
     {
       this.age = age;
     }
-
     public Timestamp getBirth()
     {
       return this.birth;
@@ -119,7 +115,6 @@ public class TestGen  implements Serializable {
     {
       this.birth = birth;
     }
-
     public Integer getEduId()
     {
       return this.eduId;
@@ -139,7 +134,6 @@ public class TestGen  implements Serializable {
         s.append(" id=\"").append(this.getId()).append("\"");
 
         s.append(" name=\"").append(StringEscapeUtils.escapeXml11(this.getName())).append("\"");
-
         s.append(" age=\"").append(this.getAge()).append("\"");
 
         s.append(" birth=\"").append(this.getBirth()).append("\"");

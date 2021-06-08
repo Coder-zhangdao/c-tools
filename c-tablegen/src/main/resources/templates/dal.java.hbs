@@ -56,7 +56,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         return "update "+this.getTableName()+" set {{#each fields ~}}
             {{#eq config.versionColName name ~}} {{name}}= {{name}} +1  {{~#unless @last}},{{/unless~}} {{else}}  {{#if (not (and config.isUse_autoincrement this.isAutoIncrement)) ~}} {{ name }}=?{{~#unless @last}},{{/unless~}}{{/if ~}}
             {{/eq ~}}
-            {{~/each}} {{whereNotLike}}";
+            {{~/each}} {{{whereNoLike}}}";
     }
 
     {{! writeObjs(tableName, keyData, colData); }}
