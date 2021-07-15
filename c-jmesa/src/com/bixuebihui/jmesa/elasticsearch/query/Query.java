@@ -1105,9 +1105,6 @@ import java.util.Map;
         }
     }
 
-    class Percolate extends Query {
-
-    }
 
     /**
      *  * @author Oleg Cherniy <oleg.cherniy@gmail.com>
