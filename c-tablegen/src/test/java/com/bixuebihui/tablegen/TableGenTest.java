@@ -55,7 +55,7 @@ public class TableGenTest {
 	@Test
 	public void testGetPojoClassName() throws IOException {
 		TableGen tg = new TableGen();
-		tg.getConfig().prefix="";
+		tg.getConfig().addPrefix ="";
 
 		String extra_setting2="src/main/resources/pojos.xml";
 		String name = "sm_template_suite";

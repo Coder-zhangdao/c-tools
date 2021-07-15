@@ -20,7 +20,7 @@ public class SqlFilterTest {
 
 		SqlObject obj = filter.toSqlObject();
 		assertEquals(1, obj.getParameters().length);
-		assertEquals("where name like concat(?, '%') ", obj.getSqlString());
+		assertEquals("where name like concat('%', ?, '%') ", obj.getSqlString());
 	}
 
 	@Test

@@ -125,13 +125,20 @@ public abstract class BaseGenerator implements Generator {
      */
     abstract String getTemplateFileName();
 
+
+
     public String getPojoClassName(String tableName) {
         String classname = setInfo.tableName2ClassName(tableName);
         if (tableName.equals(classname)) {
-            return config.getPrefix() + firstUp(tableName);
+
+            return config.getAddPrefix() + firstUp(removePrefix(tableName, config.getRemovePrefix()));
         } else {
-            return config.getPrefix() + classname;
+            return config.getAddPrefix() + classname;
         }
+    }
+
+    protected  String removePrefix(String tableName, String removePrefix){
+       return StringUtils.removeStart(tableName, removePrefix);
     }
 
     abstract String getClassName(String tableName);

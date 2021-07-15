@@ -175,14 +175,18 @@ public class SqlFilter {
 				criteria.append(" exist (").append(filter.value[0]).append(") ");
 				break;
 			case CONTAIN:
+				criteria.append(" like concat('%', ?, '%') ");
+				break;
+			case START_WITH:
 				criteria.append(" like concat(?, '%') ");
 				break;
 
 		}
-		if(filter.value!=null && filter.value.length>0) {
+		if(filter.value!=null && filter.value.length>0
+				&& filter.comparison!=Comparison.EXISTS
+				&& filter.comparison!=Comparison.NOT_EXISTS) {
 			params.addAll(Lists.newArrayList(filter.value));
 		}
-
 	}
 
 	/**
@@ -349,6 +353,10 @@ public class SqlFilter {
 	public SqlFilter contain(String field, Object value){
 		return this.addFilter(field, Comparison.CONTAIN,  new Object[]{value});
 	}
+
+	public SqlFilter startWith(String field, Object value){
+		return this.addFilter(field, Comparison.START_WITH,  new Object[]{value});
+	}
 	/**
 	 * Used for filters
 	 * since 4.3
@@ -424,10 +432,16 @@ public class SqlFilter {
 		/**
 		 * like concat('%', value, '%')
 		 */
-		CONTAIN
+		CONTAIN,
+
+		/**
+		 * like concat( value, '%')
+		 */
+		START_WITH,
+
 	}
 
-	private static class Filter {
+	protected static class Filter {
 		private final String property;
 		private final Object[] value;
 		private final Comparison comparison;

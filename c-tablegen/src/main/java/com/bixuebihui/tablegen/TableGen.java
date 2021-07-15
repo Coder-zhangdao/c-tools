@@ -401,7 +401,7 @@ public class TableGen implements DiffHandler {
                 String tableName = table.getName();
                 info("Generating JSPs : " + tableName);
 
-                String fileName = config.jspDir + File.separator + "list" + File.separator + config.prefix + tableName.toLowerCase()
+                String fileName = config.jspDir + File.separator + "list" + File.separator + config.addPrefix + tableName.toLowerCase()
                         + "_list.jsp";
                 currentOutput = new BufferedWriter(
                         new OutputStreamWriter(new FileOutputStream(fileName), TableGenConfig.FILE_ENCODING));
@@ -454,7 +454,7 @@ public class TableGen implements DiffHandler {
 
             for (TableInfo table : setInfo.getTableInfos().values()) {
                 String tableName = table.getName();
-                String href = config.prefix + tableName.toLowerCase() + "_list.jsp";
+                String href = config.addPrefix + tableName.toLowerCase() + "_list.jsp";
 
                 out("\t<li><a href='" + href + "' target=\"mainForm\" >" + tableName.toLowerCase()
                         + "</a>&nbsp;<a href='" + href + "?editable=true' target=\"mainForm\" >" + "编辑</a></li>\n");
@@ -1039,9 +1039,9 @@ public class TableGen implements DiffHandler {
     String getPojoClassName(String tableName) {
         String classname = tableName2ClassName(tableName);
         if (tableName.equals(classname)) {
-            return config.prefix + firstUp(tableName);
+            return config.addPrefix + firstUp(tableName);
         } else {
-            return config.prefix + classname;
+            return config.addPrefix + classname;
         }
     }
 

@@ -23,7 +23,8 @@ public class ProjectConfig {
     String resourceDir;
     String jspDir;
     String schema;
-    String prefix;
+    String addPrefix;
+    String removePrefix;
     String versionColName = "version";
     boolean indexes;
     boolean overWriteAll = false;
@@ -87,9 +88,13 @@ public class ProjectConfig {
 
         c.generate_procedures = getBooleanCfg(props, "generate_procedures");
 
-        c.prefix = props.getProperty("prefix");
-        if ( c.prefix == null) {
-            c.prefix = "";
+        c.addPrefix = props.getProperty("add_prefix");
+        if ( c.addPrefix == null) {
+            c.addPrefix = "";
+        }
+        c.removePrefix = props.getProperty("remove_prefix");
+        if ( c.removePrefix == null) {
+            c.removePrefix = "";
         }
 
         c.parseTableNames(props.getProperty("table_list"));
@@ -220,12 +225,12 @@ public class ProjectConfig {
         this.schema = schema;
     }
 
-    public String getPrefix() {
-        return prefix;
+    public String getAddPrefix() {
+        return addPrefix;
     }
 
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
+    public void setAddPrefix(String addPrefix) {
+        this.addPrefix = addPrefix;
     }
 
     public String getVersionColName() {
@@ -464,4 +469,7 @@ public class ProjectConfig {
         }
     }
 
+    public String getRemovePrefix() {
+        return removePrefix;
+    }
 }
