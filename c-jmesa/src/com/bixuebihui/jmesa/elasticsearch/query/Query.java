@@ -27,7 +27,7 @@ import java.util.Map;
          * @param values values
          * @return Match
          */
-        public static Query match(String field, Object[] values) {
+        public static Match match(String field, Map values) {
             return new Match(field, values);
         }
 
@@ -38,7 +38,7 @@ import java.util.Map;
          *
          * @return \Elastica\Query\MultiMatch
          */
-        public static Query multi_match() {
+        public static MultiMatch multi_match() {
             return new MultiMatch();
         }
 
@@ -49,7 +49,7 @@ import java.util.Map;
          *
          * @return \Elastica\Query\BoolQuery
          */
-        public static Query bool() {
+        public static Bool bool() {
             return new Bool();
         }
 
@@ -60,7 +60,7 @@ import java.util.Map;
          *
          * @return Boosting
          */
-        public static Query boosting() {
+        public static Boosting boosting() {
             return new Boosting();
         }
 
@@ -74,7 +74,7 @@ import java.util.Map;
          * @param cutoffFrequency percentage in decimal form (.001 == 0.1%)
          * @return Common
          */
-        public static Query common_terms(String field, String query, float cutoffFrequency) {
+        public static Common common_terms(String field, String query, float cutoffFrequency) {
             return new Common(field, query, cutoffFrequency);
         }
 
@@ -86,7 +86,7 @@ import java.util.Map;
          * @param ids map
          * @return Ids
          */
-        public static Query  ids(List ids) {
+        public static Ids  ids(List ids) {
             return new Ids(ids);
         }
 
@@ -97,7 +97,7 @@ import java.util.Map;
          *
          * @return MatchAll
          */
-        public static Query match_all() {
+        public static MatchAll match_all() {
             return new MatchAll();
         }
 
@@ -108,7 +108,7 @@ import java.util.Map;
          *
          * @return MatchNone
          */
-        public static Query match_none() {
+        public static MatchNone match_none() {
             return new MatchNone();
         }
 
@@ -119,7 +119,7 @@ import java.util.Map;
          *
          * @return MoreLikeThis
          */
-        public static Query more_like_this() {
+        public static MoreLikeThis more_like_this() {
             return new MoreLikeThis();
         }
 
@@ -130,7 +130,7 @@ import java.util.Map;
          *
          * @return Nested
          */
-        public static Query nested() {
+        public static Nested nested() {
             return new Nested();
         }
 
@@ -140,7 +140,7 @@ import java.util.Map;
          * @param ignoreUnmapped default false
          * @return ParentId ParentId
          */
-        public static Query parent_id(String type, String id, boolean ignoreUnmapped) {
+        public static ParentId parent_id(String type, String id, boolean ignoreUnmapped) {
             return new ParentId(type, id, ignoreUnmapped);
         }
 
@@ -152,7 +152,7 @@ import java.util.Map;
          * @param prefix Prefix array
          * @return Prefix
          */
-        public static Query prefix(List prefix) {
+        public static Prefix prefix(List prefix) {
             return new Prefix(prefix);
         }
 
@@ -164,7 +164,7 @@ import java.util.Map;
          * @param queryString OPTIONAL Query string for object
          * @return QueryString
          */
-        public static Query query_string(String queryString) {
+        public static QueryString query_string(String queryString) {
             return new QueryString(queryString);
         }
 
@@ -177,7 +177,7 @@ import java.util.Map;
          * @param fields array
          * @return SimpleQueryString
          */
-        public static Query simple_query_string(String query, List fields) {
+        public static SimpleQueryString simple_query_string(String query, List fields) {
             return new SimpleQueryString(query, fields);
         }
 
@@ -190,7 +190,7 @@ import java.util.Map;
          * @param args      array
          * @return Range
          */
-        public static Query range(String fieldName, List args) {
+        public static Range range(String fieldName, Map args) {
             return new Range(fieldName, args);
         }
 
@@ -204,7 +204,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html
          */
-        public static Query regexp(String key, String value, float boost) {
+        public static Regexp regexp(String key, String value, float boost) {
             return new Regexp(key, value, boost);
         }
 
@@ -217,7 +217,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-first-query.html
          */
-        public static Query span_first(Query match, Integer end) {
+        public static SpanFirst span_first(Query match, Integer end) {
             return new SpanFirst(match, end);
         }
 
@@ -229,7 +229,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-multi-term-query.html
          */
-        public static Query span_multi_term(Query match) {
+        public static SpanMulti span_multi_term(Query match) {
             return new SpanMulti(match);
         }
 
@@ -243,7 +243,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-near-query.html
          */
-        public static Query span_near(Map clauses, int slop, boolean inOrder) {
+        public static SpanNear span_near(Map clauses, int slop, boolean inOrder) {
             return new SpanNear(clauses, slop, inOrder);
         }
 
@@ -256,7 +256,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-not-query.html
          */
-        public static Query span_not(AbstractSpanQuery include, AbstractSpanQuery exclude) {
+        public static SpanNot span_not(AbstractSpanQuery include, AbstractSpanQuery exclude) {
             return new SpanNot(include, exclude);
         }
 
@@ -268,7 +268,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-or-query.html
          */
-        public static Query span_or(List clauses) {
+        public static SpanOr span_or(List clauses) {
             return new SpanOr(clauses);
         }
 
@@ -280,7 +280,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-term-query.html
          */
-        public static Query span_term(List term) {
+        public static SpanTerm span_term(List term) {
             return new SpanTerm(term);
         }
 
@@ -293,7 +293,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-containing-query.html
          */
-        public static Query span_containing(AbstractSpanQuery little, AbstractSpanQuery big) {
+        public static SpanContaining span_containing(AbstractSpanQuery little, AbstractSpanQuery big) {
             return new SpanContaining(little, big);
         }
 
@@ -306,7 +306,7 @@ import java.util.Map;
          * <p>
          * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-span-within-query.html
          */
-        public static Query span_within(AbstractSpanQuery little, AbstractSpanQuery big) {
+        public static SpanWithin span_within(AbstractSpanQuery little, AbstractSpanQuery big) {
             return new SpanWithin(little, big);
         }
 
@@ -318,9 +318,12 @@ import java.util.Map;
          * @param term array
          * @return Term
          */
-        public static Query term(Map term) {
+        public static Term term(Map term) {
             return new Term(term);
         }
+    public static Term term(String key, Object value) {
+        return new Term(key, value);
+    }
 
         /**
          * terms query.
@@ -331,7 +334,7 @@ import java.util.Map;
          * @param terms array
          * @return Terms
          */
-        public static Query terms(String key, Map terms) {
+        public static Terms terms(String key, List terms) {
             return new Terms(key, terms);
         }
 
@@ -345,7 +348,7 @@ import java.util.Map;
          * @param boost OPTIONAL Boost value (default = 1)
          * @return Wildcard
          */
-        public static Query wildcard(String key, String value, float boost) {
+        public static Wildcard wildcard(String key, String value, float boost) {
             return new Wildcard(key, value, boost);
         }
 
@@ -359,7 +362,7 @@ import java.util.Map;
          * @param distance string
          * @return GeoDistance
          */
-        public static Query geo_distance(String key, List<String> location, String distance) {
+        public static GeoDistance geo_distance(String key, List<String> location, String distance) {
             return new GeoDistance(key, location, distance);
         }
 
@@ -371,7 +374,7 @@ import java.util.Map;
          * @param field
          * @return Exists
          */
-        public static Query exists(String field) {
+        public static Exists exists(String field) {
             return new Exists(field);
         }
 
@@ -382,7 +385,7 @@ import java.util.Map;
          *
          * @return Percolate
          */
-        public static  Query percolate() {
+        public static  Percolate percolate() {
             return new Percolate();
         }
 
@@ -403,7 +406,7 @@ import java.util.Map;
          * @param filter Query|array|null
          * @return ConstantScore
          */
-        public Query constant_score(Query filter) {
+        public ConstantScore constant_score(Query filter) {
             return new ConstantScore(filter);
         }
 
@@ -414,7 +417,7 @@ import java.util.Map;
          *
          * @return DisMax
          */
-        public Query dis_max() {
+        public DisMax dis_max() {
             return new DisMax();
         }
 
@@ -425,7 +428,7 @@ import java.util.Map;
          *
          * @return FunctionScore
          */
-        public Query function_score() {
+        public FunctionScore function_score() {
             return new FunctionScore();
         }
 
@@ -438,7 +441,7 @@ import java.util.Map;
          * @param value     String to search for
          * @return Fuzzy
          */
-        public Query fuzzy(String fieldName, String value) {
+        public Fuzzy fuzzy(String fieldName, String value) {
             return new Fuzzy(fieldName, value);
         }
 
@@ -461,11 +464,11 @@ import java.util.Map;
          *              query
          * @return HasChild
          */
-        public Query has_child(String query, String type) {
+        public HasChild has_child(String query, String type) {
             return new HasChild(query, type);
         }
 
-        public Query has_child(Query query, String type) {
+        public HasChild has_child(Query query, String type) {
             return new HasChild(query, type);
         }
 
@@ -485,9 +488,7 @@ import java.util.Map;
 
     }
 
-    class Bool extends Query {
 
-    }
 
     /**
      * Constant score query.
@@ -620,183 +621,7 @@ import java.util.Map;
 
     }
 
-    class Match extends Query {
 
-        static final String ZERO_TERM_NONE = "none";
-        static final String ZERO_TERM_ALL = "all";
-        static final String FUZZINESS_AUTO = "AUTO";
-
-        /**
-         * @param field  string
-         * @param values mixed
-         */
-        public Match(String field, Object values) {
-            if (null != field && null != values) {
-                this.setParam(field, values);
-            }
-        }
-
-        /**
-         * Sets a param for the message array.
-         *
-         * @param field  string
-         * @param values mixed
-         * @return this
-         */
-        public Match setField(String field, Object values) {
-            return (Match) this.setParam(field, values);
-        }
-
-        /**
-         * Sets a param for the given field.
-         *
-         * @param field string
-         * @param key   string
-         * @param value string, int or float
-         * @return this
-         */
-        public Match setFieldParam(String field, String key, Object value) {
-            if (!this.getParams().containsKey(field)) {
-                this.getParams().put(field, new HashMap<>());
-            }
-
-            ((Map) this.getParams().get(field)).put(key, value);
-
-            return this;
-        }
-
-        /**
-         * Sets the query string.
-         *
-         * @param field string
-         * @param query string
-         * @return this
-         */
-        public Match setFieldQuery(String field, String query) {
-            return this.setFieldParam(field, "query", query);
-        }
-
-        /**
-         * Set field operator.
-         *
-         * @param field
-         * @param operator
-         * @return this
-         */
-        public Match setFieldOperator(String field, String operator) {
-            this.setFieldParam(field, "operator", operator == null ? OPERATOR_OR : operator);
-            return this;
-        }
-
-        /**
-         * Set field analyzer.
-         *
-         * @param field    string
-         * @param analyzer string
-         * @return this
-         */
-        public Match setFieldAnalyzer(String field, String analyzer) {
-            return this.setFieldParam(field, "analyzer", analyzer);
-        }
-
-        /**
-         * Set field boost value.
-         * <p>
-         * If not set, defaults to 1.0.
-         *
-         * @param field string
-         * @param boost float default 1.0
-         * @return this
-         */
-        public Match setFieldBoost(String field, float boost) {
-            return this.setFieldParam(field, "boost", boost);
-        }
-
-        /**
-         * Set field minimum should match.
-         *
-         * @param field              string
-         * @param minimumShouldMatch int|string
-         * @return this
-         * <p>
-         * Possible values for minimum_should_match https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-minimum-should-match.html
-         */
-        public Match setFieldMinimumShouldMatch(String field, int minimumShouldMatch) {
-            return this.setFieldParam(field, "minimum_should_match", minimumShouldMatch);
-        }
-
-        /**
-         * Set field fuzziness.
-         *
-         * @param field     string
-         * @param fuzziness mixed
-         * @return this
-         */
-        public Match setFieldFuzziness(String field, Object fuzziness) {
-            return this.setFieldParam(field, "fuzziness", fuzziness);
-        }
-
-        /**
-         * Set field fuzzy rewrite.
-         *
-         * @param field        string
-         * @param fuzzyRewrite string
-         * @return this
-         */
-        public Match setFieldFuzzyRewrite(String field, String fuzzyRewrite) {
-            return this.setFieldParam(field, "fuzzy_rewrite", fuzzyRewrite);
-        }
-
-        /**
-         * Set field prefix length.
-         *
-         * @param field        string
-         * @param prefixLength int
-         * @return this
-         */
-        public Match setFieldPrefixLength(String field, int prefixLength) {
-            return this.setFieldParam(field, "prefix_length", prefixLength);
-        }
-
-        /**
-         * Set field max expansions.
-         *
-         * @param field         string
-         * @param maxExpansions int
-         * @return this
-         */
-        public Match setFieldMaxExpansions(String field, int maxExpansions) {
-            return this.setFieldParam(field, "max_expansions", maxExpansions);
-        }
-
-        /**
-         * Set zero terms query.
-         * <p>
-         * If not set, default to "none"
-         *
-         * @param field         string
-         * @param zeroTermQuery string default ZERO_TERM_NONE
-         * @return this
-         */
-        public Match setFieldZeroTermsQuery(String field, String zeroTermQuery) {
-            return this.setFieldParam(field, "zero_terms_query", zeroTermQuery);
-        }
-
-        /**
-         * Set cutoff frequency.
-         *
-         * @param field           string
-         * @param cutoffFrequency float
-         * @return this
-         */
-        public Match setFieldCutoffFrequency(String field, float cutoffFrequency) {
-            return this.setFieldParam(field, "cutoff_frequency", cutoffFrequency);
-        }
-    }
-
-    class MultiMatch extends Query {
-
-    }
 
     /**
      * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html">match-all-query</a>
@@ -1130,38 +955,7 @@ import java.util.Map;
         }
     }
 
-    /**
-     * Range query.
-     *
-     * @author Nicolas Ruflin <spam@ruflin.com>
-     * <p>
-     * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-range-query.html
-     */
-    class Range extends Query {
-        /**
-         * Constructor.
-         *
-         * @param fieldName Field name
-         * @param args      Field arguments array
-         */
-        public Range(String fieldName, List args) {
-            if (fieldName != null) {
-                this.addField(fieldName, args);
-            }
-        }
 
-        /**
-         * Adds a range field to the query.
-         *
-         * @param fieldName Field name string
-         * @param args      Field arguments, array
-         * @return this
-         */
-        public Range addField(String fieldName, List args) {
-            return (Range) this.setParam(fieldName, args);
-        }
-
-    }
 
     /**
      * 跨度查询是低级位置查询，它提供对指定术语的顺序和接近度的专家控制。这些通常用于对法律文件或专利进行非常具体的查询。
@@ -1230,59 +1024,6 @@ import java.util.Map;
         }
     }
 
-    class Term extends Query {
-
-
-        /**
-         * Constructs the Term query object.
-         *
-         * @param term map term OPTIONAL Calls setTerm with the given term array
-         */
-        public Term(Map term) {
-            this.setRawTerm(term);
-        }
-
-        public Term(String name, String field) {
-            super();
-        }
-
-        /**
-         * Set term can be used instead of addTerm if some more special
-         * values for a term have to be set.
-         *
-         * @param term map Term array
-         * @return this
-         */
-        public Term setRawTerm(Map term) {
-            return (Term) this.setParams(term);
-        }
-
-        /**
-         * Adds a term to the term query.
-         *
-         * @param key   Key to query
-         * @param value string|array  Values(s) for the query. Boost can be set with array
-         * @param boost OPTIONAL Boost value (default = 1.0)
-         * @return this
-         */
-        public Term setTerm(String key, Object value, float boost) {
-            return this.setRawTerm(
-                    ImmutableMap.<String, Map>builder()
-                            .put(key, ImmutableMap.<String, Object>builder()
-                                    .put("value", value)
-                                    .put("boost", boost)
-                                    .build()
-                            ).build()
-            );
-        }
-    }
-
-    class Terms extends Query {
-
-        public Terms(String key, Map terms) {
-            super();
-        }
-    }
 
     class ScoreFunction extends Query {
 
@@ -1369,6 +1110,17 @@ import java.util.Map;
     }
 
     /**
+     *  * @author Oleg Cherniy <oleg.cherniy@gmail.com>
+     *  *
+     *  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
+     *
+     *  An indexed value may not exist for a document’s field due to a variety of reasons:
+     *
+     * The field in the source JSON is null or []
+     * The field has "index" : false set in the mapping
+     * The length of the field value exceeded an ignore_above setting in the mapping
+     * The field value was malformed and ignore_malformed was defined in the mapping
+     *
      * GET /_search
      * {
      * "query": {

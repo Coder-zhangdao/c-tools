@@ -2,38 +2,19 @@ package com.bixuebihui.jmesa.elasticsearch;
 
 import com.bixuebihui.jdbc.ISqlConditionType;
 import com.bixuebihui.jdbc.SqlFilter;
+import com.bixuebihui.jmesa.elasticsearch.query.Bool;
+import com.bixuebihui.jmesa.elasticsearch.query.Query;
+import com.bixuebihui.jmesa.elasticsearch.query.Range;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ElasticSearchFilter extends SqlFilter {
 
-    private String where(StringBuilder res) {
-        if(res.length()>0){
-            if(res.indexOf(AND)==AND.length()) {
-                res.delete(0, AND.length()-1);
-            }
-            res.insert(0, "where");
-        }
-        return res.toString();
-    }
-
-    private void buildCriteria(StringBuilder criteria, String property,
-                               Object value) {
-        if (value instanceof String) {
-            criteria.append(AND).append(property).append(" like ").append(
-                    "'" + transactSQLInjection(value.toString()) + "%'");
-        } else if (value instanceof ISqlConditionType){
-            criteria.append(((ISqlConditionType)value).getConditionSql(property, getDatabaseType()));
-        } else if(value!= null){
-            criteria.append(AND).append(property).append(" = ").append(
-                    transactSQLInjection(value.toString()));
-        } else {
-            criteria.append(AND).append(property).append(" is null ");
-        }
-
-    }
 
 /**
 Test cases:
@@ -89,64 +70,98 @@ Test cases:
  match vs term: term is an exact query, match is a fuzzy query
     */
 
+    private List objToList(Object value){
+        if(value instanceof  List ){
+            return (List)value;
+        }
+        if(value instanceof Object[]){
+            return Arrays.asList((Object[])value);
+        }
+        return Arrays.asList(value);
+    }
 
 
-    private void buildEsObject(StringBuilder criteria, List<Object> params, Filter filter) {
-        criteria.append(AND).append(filter.getProperty());
+    private void buildEsObject(Bool criteria, Filter filter) {
+        Query queryFilter;
         switch (filter.getComparison()){
             case IS:
-                criteria.append(" = ? ");
+                queryFilter = Query.term(filter.getProperty(), filter.getValue());
+                criteria.addMust(queryFilter);
                 break;
             case IS_NOT:
-                criteria.append(" != ? ");
+                queryFilter = Query.term(filter.getProperty(), filter.getValue());
+                criteria.addMustNot(queryFilter);
                 break;
             case BETWEEN:
-                criteria.append(" between ? and ? ");
+                List list = objToList(filter.getValue());
+                queryFilter = Query.range(null, null).between(filter.getProperty(),list.get(0), list.get(1) );
+                criteria.addMust(queryFilter);
                 break;
-            case NOT_BETWEEN:
-                criteria.append(" not between ? and ? ");
+            case NOT_BETWEEN: {
+                List list1 = objToList(filter.getValue());
+                queryFilter = Query.range(null, null).between(filter.getProperty(), list1.get(0), list1.get(1));
+                criteria.addMustNot(queryFilter);
+                }
                 break;
             case IS_NULL:
-                criteria.append(" is null ");
+                queryFilter = Query.term(filter.getProperty(), null);
+                criteria.addMust(queryFilter);
                 break;
             case IS_NOT_NULL:
-                criteria.append(" is not null ");
+                queryFilter = Query.term(filter.getProperty(), null);
+                criteria.addMustNot(queryFilter);
                 break;
             case GT:
-                criteria.append(" > ? ");
+
+                queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.GT, objToList(filter.getValue()).get(0)).build());
+
+                criteria.addMust(queryFilter);
+
                 break;
             case GTE:
-                criteria.append(" >= ? ");
+                queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.GTE, objToList(filter.getValue()).get(0)).build());
+
+                criteria.addMust(queryFilter);
                 break;
             case LT:
-                criteria.append(" < ? ");
+                queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.LT, objToList(filter.getValue()).get(0)).build());
+
+                criteria.addMust(queryFilter);
                 break;
             case LTE:
-                criteria.append(" <= ? ");
+                queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.LTE, objToList(filter.getValue()).get(0)).build());
+
+                criteria.addMust(queryFilter);
                 break;
 
             case NOT_IN:
-                criteria.append(" not ");
+                queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
+
+                criteria.addMustNot(queryFilter);
             case IN:
-                criteria.append(" in (").append(StringUtils.repeat("?", ",", filter.getValue().length)).append(") ");
+                queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
+
+                criteria.addMust(queryFilter);
                 break;
 
             case NOT_EXISTS:
-                criteria.append(" not ");
+                queryFilter = Query.exists(filter.getProperty());
+
+                criteria.addMustNot(queryFilter);
             case EXISTS:
-                //todo filter filter.value
-                criteria.append(" exist (").append(filter.getValue()[0]).append(") ");
+                queryFilter = Query.exists(filter.getProperty());
+
+                criteria.addMust(queryFilter);
                 break;
             case CONTAIN:
-                criteria.append(" like concat(?, '%') ");
+                queryFilter = Query.wildcard(filter.getProperty(), filter.getValue()[0].toString()+"*",1);
+
+                criteria.addMust(queryFilter);
                 break;
 
         }
-        if(filter.getValue() !=null && filter.getValue().length>0
-                && filter.getComparison() != Comparison.EXISTS
-                && filter.getComparison() != Comparison.NOT_EXISTS) {
-            params.addAll(Lists.newArrayList(filter.getValue()));
-        }
+
+
     }
 
 

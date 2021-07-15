@@ -2,20 +2,17 @@ package com.bixuebihui.jmesa.elasticsearch;
 
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public  class EsObjectTest {
-    EsObject esObject = new EsObject();
+    EsObject esObject = new EsObject("test");
 
     @Test
     public void testMatchAll() throws JsonProcessingException {
 
-        String s = esObject.build(Query.match_all());
+        String s = esObject.build(Query.match_all(), 0, 5);
 
         assertEquals("{\"query\":{\"match_all\":{}}}", s);
     }
@@ -38,6 +35,15 @@ public  class EsObjectTest {
          * }
          */
 
+    }
+
+    @Test
+    public void testMatch() throws JsonProcessingException {
+
+        String s = esObject.build(Query.match(null, null)
+                .setFieldQuery("abc","test 123"), 0,5);
+
+        assertEquals("{\"query\":{\"match\":{\"abc\":{\"query\":\"test 123\"}}}}", s);
     }
 
 }

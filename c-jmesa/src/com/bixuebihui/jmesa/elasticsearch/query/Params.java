@@ -3,8 +3,7 @@ package com.bixuebihui.jmesa.elasticsearch.query;
 
 import com.google.common.collect.Maps;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 public class Params implements ArrayableInterface {
     Map<String, Object> rawParams;
@@ -66,6 +65,9 @@ public class Params implements ArrayableInterface {
     }
 
     public Map<String, Object> getParams() {
+        if(params==null){
+            params =  new HashMap<>();
+        }
         return params;
     }
 
@@ -75,9 +77,34 @@ public class Params implements ArrayableInterface {
     }
 
     public Params setParam(String key, Object value) {
+        if(this.params==null){
+            this.params = Maps.newHashMap();
+        }
         this.params.put(key, value);
         return this;
     }
+
+
+    /**
+     * Adds a param to the list.
+     *
+     * This function can be used to add an array of params
+     *
+     * @param  key   Param key
+     * @param  value mixed Value to set
+     *
+     * @return $this
+     */
+    public Params addParam(String key, Object value)
+    {
+        Object o = this.params.get(key);
+        if(!(o instanceof List)) {
+            o = new ArrayList<>();
+        }
+        ((List)o).add(value);
+        return this;
+    }
+
 
     protected String getBaseName() {
         return getParamName(this.getClass());
@@ -118,7 +145,7 @@ public class Params implements ArrayableInterface {
                         ? ((NameableInterface) v).getName() : key, v.toArray());
             } else if (value instanceof Map) {
                 arr.put(key, this._convertArrayable((Map) value));
-            } else {
+            }else {
                 if(value==null){
                     arr.put(key, Collections.emptyMap());
                 }else {
