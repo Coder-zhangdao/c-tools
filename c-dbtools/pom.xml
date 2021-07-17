@@ -214,7 +214,8 @@
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>10.15.2.0</version>
+<!--            <version>10.15.2.0</version> java 9 & higher-->
+            <version>10.14.2.0</version> <!-- java 8 & higher-->
             <scope>test</scope>
         </dependency>
 
