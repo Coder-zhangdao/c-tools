@@ -16,7 +16,7 @@ import java.util.Map.Entry;
  *
  * @author xingwx
  * @version $Id: $Id
- * TODO use SqlHelper is better
+ * TODO use @see SqlHelper is better
  */
 public class SqlFilter {
 
@@ -24,10 +24,10 @@ public class SqlFilter {
 	 * Constant <code>AND=" and "</code>
 	 */
 	public static final String AND = " and ";
-	List<Filter> filters = null;
+	protected List<Filter> filters = null;
 	private int databaseType = BaseDao.MYSQL;
 
-	List<SqlFilter> orCond = null;
+	protected List<SqlFilter> orCond = null;
 
 	private boolean useNullAsCondition = false;
 

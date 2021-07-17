@@ -44,7 +44,7 @@ public class Terms extends Query
      * Sets key and terms for the query.
      *
      * @param  key   Terms key
-     * @param   terms terms for the query
+     * @param  terms terms for the query
      *
      * @return this
      */

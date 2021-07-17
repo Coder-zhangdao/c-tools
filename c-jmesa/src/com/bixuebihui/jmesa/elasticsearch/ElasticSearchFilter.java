@@ -1,15 +1,12 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
-import com.bixuebihui.jdbc.ISqlConditionType;
 import com.bixuebihui.jdbc.SqlFilter;
 import com.bixuebihui.jmesa.elasticsearch.query.Bool;
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.bixuebihui.jmesa.elasticsearch.query.Range;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,7 +16,7 @@ public class ElasticSearchFilter extends SqlFilter {
 /**
 Test cases:
 
-    GET /maincontent_20210127/_search
+    GET /content/_search
     {
         "query":{
         "match_all":{
@@ -27,7 +24,7 @@ Test cases:
     }
     }
 
-    GET /maincontent_2021* /_search
+    GET /content* /_search
     {
         "query":{
         "term" : {
@@ -36,7 +33,7 @@ Test cases:
     }
     }
 
-    GET /maincontent_2021* /_search
+    GET /content* /_search
     {
         "query": {
         "bool" : {
@@ -53,7 +50,7 @@ Test cases:
     }
 
 
-    GET logstash-iis-news-* /_search
+    GET logstash-* /_search
     {
         "size": 20,
         "from":0,
@@ -80,8 +77,23 @@ Test cases:
         return Arrays.asList(value);
     }
 
+    public String toEsObject(String indexName, int from, int size) {
+        EsObject esObject =  new EsObject(indexName);
+        if (filters==null || filters.isEmpty()) {
+            return esObject.build(Query.match_all(), from, size);
+        }
 
-    private void buildEsObject(Bool criteria, Filter filter) {
+        Bool criteria = new Bool();
+
+        for (Filter filter : filters) {
+            buildEsObject(criteria, filter);
+        }
+        return esObject.build(criteria, from, size);
+
+        //TODO or/and group
+    }
+
+        private void buildEsObject(Bool criteria, Filter filter) {
         Query queryFilter;
         switch (filter.getComparison()){
             case IS:
@@ -112,35 +124,27 @@ Test cases:
                 criteria.addMustNot(queryFilter);
                 break;
             case GT:
-
                 queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.GT, objToList(filter.getValue()).get(0)).build());
-
                 criteria.addMust(queryFilter);
-
                 break;
             case GTE:
                 queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.GTE, objToList(filter.getValue()).get(0)).build());
-
                 criteria.addMust(queryFilter);
                 break;
             case LT:
                 queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.LT, objToList(filter.getValue()).get(0)).build());
-
                 criteria.addMust(queryFilter);
                 break;
             case LTE:
                 queryFilter = Query.range(filter.getProperty(), ImmutableMap.builder().put(Range.LTE, objToList(filter.getValue()).get(0)).build());
-
                 criteria.addMust(queryFilter);
                 break;
 
             case NOT_IN:
                 queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
-
                 criteria.addMustNot(queryFilter);
             case IN:
                 queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
-
                 criteria.addMust(queryFilter);
                 break;
 
@@ -158,9 +162,7 @@ Test cases:
 
                 criteria.addMust(queryFilter);
                 break;
-
         }
-
 
     }
 

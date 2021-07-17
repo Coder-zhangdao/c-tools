@@ -93,13 +93,17 @@ public class Params implements ArrayableInterface {
      * @param  key   Param key
      * @param  value mixed Value to set
      *
-     * @return $this
+     * @return this
      */
     public Params addParam(String key, Object value)
     {
+        if(this.params==null){
+            this.params = Maps.newHashMap();
+        }
         Object o = this.params.get(key);
         if(!(o instanceof List)) {
             o = new ArrayList<>();
+            this.params.put(key, o);
         }
         ((List)o).add(value);
         return this;

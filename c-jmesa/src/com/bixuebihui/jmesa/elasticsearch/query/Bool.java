@@ -73,7 +73,7 @@ public class Bool extends Query {
          */
         protected Bool _addQuery(String type, Query args)
         {
-            return (Bool) this.addParam(type, args);
+            return (Bool) this.addParam(type, args.toArray());
         }
 
         /**
