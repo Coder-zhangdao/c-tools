@@ -104,9 +104,23 @@ public class DataSourceTest extends TestCase {
 		assertTrue(v1+1==v2);
 	}
 
+	private static void  createT_LOG(DataSource ds){
+		Connection cn;
+		Statement stmt;
+		try {
+			cn = ds.getConnection();
+			stmt = cn.createStatement();
+			stmt.execute("CREATE TABLE IF NOT EXISTS T_LOG(lid INT PRIMARY KEY, content VARCHAR(255)); ");
+			stmt.close();
+			cn.close();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
 
 	public static void dataSourceTestCursor(DataSource ds) throws SQLException {
 		Date dtStart = new Date();
+		createT_LOG(ds);
 
 		for (int i = 1; i < 2000; i++) {
 			Connection cn = null;
@@ -139,7 +153,7 @@ public class DataSourceTest extends TestCase {
 
 	public static void dataSourceTestCursor1(DataSource ds) throws SQLException {
 		Date dtStart = new Date();
-
+		createT_LOG(ds);
 		for (int i = 1; i < 2000; i++) {
 			Connection cn = null;
 			ResultSet rs = null;
@@ -176,9 +190,12 @@ public class DataSourceTest extends TestCase {
 		LOG.info(ds + " used time:" + (dtEnd.getTime() - dtStart.getTime()) / 1000.0);
 	}
 
+
+
 	public static void dataSourceTestCursor2(DataSource ds) throws SQLException {
 		Date dtStart = new Date();
 
+		createT_LOG(ds);
 		List<Long> ids = getIds(ds, 100);
 
 		for (int i = 1; i < ids.size(); i++) {
@@ -229,8 +246,9 @@ public class DataSourceTest extends TestCase {
 		}
 		DatabaseConfig cfg = new DatabaseConfig();
 		cfg.setAlias("derby");
-		// cfg.setClassName("org.apache.derby.jdbc.EmbeddedDriver");
-		cfg.setClassName("org.apache.derby.iapi.jdbc.AutoloadedDriver");
+		cfg.setClassName("org.apache.derby.jdbc.EmbeddedDriver");
+		// for java 9 derby 10.15.x
+		//cfg.setClassName("org.apache.derby.iapi.jdbc.AutoloadedDriver");
 		cfg.setUsername("");
 		cfg.setPassword("");
 		cfg.setDburl("jdbc:derby:"+dbName+";create=true");

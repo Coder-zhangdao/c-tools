@@ -25,21 +25,18 @@ public class BaseExcelOp {
 
     public Cell createStringCell(Row row, int col, String value) {
         Cell cell = row.createCell(col);
-        cell.setCellType(CellType.STRING);
         cell.setCellValue(value);
         return cell;
     }
 
     public Cell createNumericalCell(Row row, int col, int value) {
         Cell cell = row.createCell(col);
-        cell.setCellType(CellType.NUMERIC);
         cell.setCellValue(value);
         return cell;
     }
 
     public Cell createNumericalCell(Row row, int col, double value) {
         Cell cell = row.createCell(col);
-        cell.setCellType(CellType.NUMERIC);
         cell.setCellValue(value);
         return cell;
     }

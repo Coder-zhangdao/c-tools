@@ -128,7 +128,22 @@ public class EasyTable extends BasicWebUI {
 
     /**
      * use LimitActionFactoryJsonImpl
-     * json format { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, "property3": [fromValue, toValue] }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
+     * request json format:
+     *     { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, "property3": [fromValue, toValue] }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
+     * response:
+     *    {
+     * "caption":"t_config",
+     * "titles": [
+     * "C _key",
+     * "c_name",
+     * "c_value"],
+     * "data": [{
+     * "c_key":"key1",
+     * "c_name":"name1",
+     * "c_value":"value1"}
+     * ],
+     *
+     * "paging":{"page":2,"maxRows":1,"rowEnd":2,"rowStart":1,"totalRows":3}}
      */
     public String json(Map<String, Object> paramsMap) throws SQLException {
         SimpleHttpServletRequest request = new SimpleHttpServletRequest();

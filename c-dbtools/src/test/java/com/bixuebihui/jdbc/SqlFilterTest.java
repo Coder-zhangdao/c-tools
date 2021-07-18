@@ -32,7 +32,7 @@ public class SqlFilterTest {
 
 		SqlObject obj = filter.toSqlObject();
 
-		assertEquals("where name like concat(?, '%')  and cnt = ? ", obj.getSqlString());
+		assertEquals("where name like concat('%', ?, '%')  and cnt = ? ", obj.getSqlString());
 		assertEquals(2, obj.getParameters().length);
 	}
 
@@ -49,7 +49,7 @@ public class SqlFilterTest {
 
 		SqlObject obj = filter.toSqlObject();
 
-		assertEquals("where ( name like concat(?, '%') ) or ( ( name like concat(?, '%') ) or ( name like concat(?, '%') ))",
+		assertEquals("where ( name like concat('%', ?, '%') ) or ( ( name like concat('%', ?, '%') ) or ( name like concat('%', ?, '%') ))",
 				obj.getSqlString());
 		assertEquals(3, obj.getParameters().length);
 	}
