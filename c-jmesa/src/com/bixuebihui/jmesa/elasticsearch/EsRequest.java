@@ -2,8 +2,12 @@ package com.bixuebihui.jmesa.elasticsearch;
 
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import io.burt.jmespath.Expression;
+import io.burt.jmespath.JmesPath;
+import io.burt.jmespath.jackson.JacksonRuntime;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
@@ -26,6 +30,24 @@ import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 public class EsRequest {
 
     String host = "http://127.0.0.1:9200";
+
+    // The first thing you need is a runtime. These objects can compile expressions
+    // and they are specific to the kind of structure you want to search in.
+    // For most purposes you want the Jackson runtime, it can search in JsonNode
+    // structures created by Jackson.
+    JmesPath<JsonNode> jmespath = new JacksonRuntime();
+    // Expressions need to be compiled before you can search. Compiled expressions
+    // are reusable and thread safe. Compile your expressions once, just like database
+    // prepared statements.
+    Expression<JsonNode> exp = jmespath.compile("{caption:hits.hits[0]._index, " +
+            "titles:keys(hits.hits[0]._source),"+
+            "data:hits.hits[*]._source,"+
+            "paging:{totalRows:hits.total.value}}");
+
+    // This you have to fill in yourself, you're probably using Jackson's ObjectMapper
+    // to load JSON data, and that should fit right in here.
+    ObjectMapper mapper = new ObjectMapper();
+
 
     public static void main(String[] args) {
 
@@ -147,6 +169,76 @@ public class EsRequest {
             sb.append(output);
         }
         return sb.toString();
+    }
+
+
+    /**
+     {
+     "took" : 17,
+     "timed_out" : false,
+     "_shards" : {
+     "total" : 1,
+     "successful" : 1,
+     "skipped" : 0,
+     "failed" : 0
+     },
+     "hits" : {
+     "total" : {
+     "value" : 2,
+     "relation" : "eq"
+     },
+     "max_score" : 1.0,
+     "hits" : [
+     {
+     "_index" : "my-index-000001",
+     "_type" : "_doc",
+     "_id" : "1",
+     "_score" : 1.0,
+     "_source" : {
+     "color" : [
+     "blue",
+     "green"
+     ]
+     }
+     },
+     {
+     "_index" : "my-index-000001",
+     "_type" : "_doc",
+     "_id" : "2",
+     "_score" : 1.0,
+     "_source" : {
+     "color" : "blue"
+     }
+     }
+     ]
+     }
+     }
+
+     ==>
+
+     {
+      "caption":"t_config",
+      "titles": [
+      "C _key",
+      "c_name",
+      "c_value"],
+      "data": [{
+      "c_key":"key1",
+      "c_name":"name1",
+      "c_value":"value1"}
+      ],
+
+      "paging":{"page":2,"maxRows":1,"rowEnd":2,"rowStart":1,"totalRows":3}}
+
+     * @param esJson
+     * @return
+     */
+    protected   String esJsonToTableJson(String esJson) throws JsonProcessingException {
+        JsonNode input = mapper.readTree(esJson);
+        // Finally this is how you search a structure. There's really not much more to it.
+        JsonNode resultTotal = exp.search(input);
+        String res = resultTotal.toPrettyString();
+        return res;
     }
 
 

@@ -34,12 +34,13 @@ public class ConnectionManagerTest extends TestCase {
 		}
 	}
 
+	@DisabledIf("!com.bixuebihui.datasource.DataSourceTest.isMysqlAvailable()")
 	public void testGetConnectionString() throws SQLException {
+		ConnectionManager.getInstance().setTracing(true);
 		LOG.info(ConnectionManager.getInstance().toString());
 		String alias = "test1";
 		LOG.info(ConnectionManager.getConnection(alias).toString());
 	}
-
 
 	volatile boolean finish=false;
 
@@ -64,39 +65,38 @@ public class ConnectionManagerTest extends TestCase {
 		 */
 		assertFalse(res);
 
-		new Thread() {
-			public void run() {
-				Connection cn = null;
-				try {
+		new Thread(() -> {
+			Connection cn1 = null;
+			try {
 
-					cn  = ConnectionManager.getConnection(alias);
+				cn1 = ConnectionManager.getConnection(alias);
 
-					Statement s1 = cn.createStatement();
-					s1.setQueryTimeout(2);
+				Statement s1 = cn1.createStatement();
+				s1.setQueryTimeout(2);
 
-					LOG.info("While table is locked and\n\t I get another connection\n\t TRY select form LOCKED table");
+				LOG.info("While table is locked and\n\t I get another connection\n\t TRY select form LOCKED table");
 
-					boolean res = s1.execute("select count(*) from t_log");
-					assert(res);
-					LOG.info("You can see this, because lock write, not read");
+				boolean res1 = s1.execute("select count(*) from t_log");
+				assert(res1);
+				LOG.info("You can see this, because lock write, not read");
 
-					res = s1.execute("delete from t_log where lid=1");
-					res = s1.execute("insert into t_log (lid,uid,content)values(1,1,'test must fail')");
-					res = s1.execute("delete from t_log where lid=1");
-					LOG.error("YOU CAN NOT SEE THIS");
-					assert false:"There a exception is expected";
-				} catch (SQLException e) {
-					LOG.info(e.getSQLState());
-					//assertEquals("08S01", e.getSQLState());
+				s1.execute("delete from t_log where lid=1");
+				s1.execute("insert into t_log (lid,uid,content)values(1,1,'test must fail')");
+				s1.execute("delete from t_log where lid=1");
 
-					assert true:"There a exception is expected";
-				}finally{
-					DbUtils.closeQuietly(cn);
-				}
+				LOG.error("YOU CAN NOT SEE THIS");
+				assert false:"There a exception is expected";
+			} catch (SQLException e) {
+				LOG.info(e.getSQLState());
+				//assertEquals("08S01", e.getSQLState());
 
-				 finish=true;
+				assert true:"There a exception is expected";
+			}finally{
+				DbUtils.closeQuietly(cn1);
 			}
-		}.start();
+
+			 finish=true;
+		}).start();
 
 		while(!finish)
 			Thread.sleep(10);

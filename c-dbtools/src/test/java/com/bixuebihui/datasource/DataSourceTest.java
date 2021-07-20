@@ -30,7 +30,13 @@ public class DataSourceTest extends TestCase {
 		cfg.setUsername("test");
 		cfg.setPassword("test123");
 		cfg.setDburl(
-				"jdbc:mysql://localhost:3306/test?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&mysqlEncoding=utf8&useSSL=false");
+				"jdbc:mysql://localhost:3306/test?autoReconnect=true" +
+						"&useUnicode=true&" +
+						"characterEncoding=utf-8&" +
+						"mysqlEncoding=utf8&" +
+						"useSSL=false&" +
+						"connectTimeout=200" +
+						"&socketTimeout=1000");
 
 	}
 

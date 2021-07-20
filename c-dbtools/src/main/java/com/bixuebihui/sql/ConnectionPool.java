@@ -26,8 +26,8 @@ import java.util.concurrent.Executor;
  */
 public class ConnectionPool {
 
-    private static final int MIN_TIMEOUT_MILLI_SECONDS = 100;
-    private static final int CONNECTION_TIMEOUT = 10000;
+    private static final int MIN_TIMEOUT_MILLI_SECONDS = 50;
+    private static final int CONNECTION_TIMEOUT = 100;
     private static final Logger LOG = LoggerFactory.getLogger(ConnectionPool.class);
     /**
      * Constant <code>CONNECTION_POOL="ConnectionPool: "</code>
@@ -310,6 +310,7 @@ public class ConnectionPool {
                             if (trace) {
                                 LOG.warn("network timeout", e);
                             }
+                            break;
                         }
                     } else {
                         debug(" timeoutMiliSeconds = " + timeoutMilliSeconds + ", which is too small to set ");
