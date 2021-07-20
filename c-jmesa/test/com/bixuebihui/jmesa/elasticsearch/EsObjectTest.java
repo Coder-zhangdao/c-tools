@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public  class EsObjectTest {
-    EsObject esObject = new EsObject("test");
+    EsQueryBuilder esObject = new EsQueryBuilder();
 
     @Test
     public void testMatchAll() throws JsonProcessingException {
 
         String s = esObject.build(Query.match_all(), 0, 5);
 
-        assertEquals("{\"query\":{\"match_all\":{}}}", s);
+        assertEquals("{\"size\":5,\"query\":{\"match_all\":{}}}", s);
     }
 
 
@@ -43,7 +43,7 @@ public  class EsObjectTest {
         String s = esObject.build(Query.match(null, null)
                 .setFieldQuery("abc","test 123"), 0,5);
 
-        assertEquals("{\"query\":{\"match\":{\"abc\":{\"query\":\"test 123\"}}}}", s);
+        assertEquals("{\"size\":5,\"query\":{\"match\":{\"abc\":{\"query\":\"test 123\"}}}}", s);
     }
 
 }

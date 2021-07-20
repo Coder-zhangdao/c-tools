@@ -4,16 +4,15 @@ import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import org.jmesa.limit.SortSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class EsObject {
+public class EsQueryBuilder {
     public static final String EMPTY_JSON_STRING = "{}";
-    static  final Logger logger = LoggerFactory.getLogger(EsObject.class);
+    static  final Logger logger = LoggerFactory.getLogger(EsQueryBuilder.class);
     static final String ACTION_SEARCH = "_search";
     static final String ACTION_BULK = "_bulk";
 
@@ -23,22 +22,12 @@ public class EsObject {
     static final String _SOURCE = "_source";
     static final String QUERY ="query";
 
-    SortSet sortSet;
-    /**
-     * index name to search
-     * 需要检索的索引
-     */
-    String indexName;
 
 
+    static ObjectMapper objectMapper = new ObjectMapper();
 
-    ObjectMapper objectMapper = new ObjectMapper();
 
-    public EsObject(String indexName) {
-        this.indexName = indexName;
-    }
-
-    public  String build(Query query,  int from, int size)  {
+    public static   String build(Query query,  int from, int size)  {
         Map m = query.toArray();
 
         HashMap<Object, Object> queryMap = Maps.newHashMap();

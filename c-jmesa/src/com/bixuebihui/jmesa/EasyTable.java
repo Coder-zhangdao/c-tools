@@ -3,6 +3,7 @@ package com.bixuebihui.jmesa;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jmesa.mock.SimpleHttpServletRequest;
 import com.bixuebihui.jmesa.mock.SimpleHttpServletResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.*;
 import com.sun.istack.Nullable;
@@ -12,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.sql.*;
+import java.text.ParseException;
 import java.util.Map;
 
 /**
@@ -74,6 +76,10 @@ public class EasyTable extends BasicWebUI {
         } else {
             this.setId(tableCaption);
         }
+    }
+
+    public EasyTable() {
+
     }
 
     protected void init(IDbHelper dbHelper, String baseSql) {

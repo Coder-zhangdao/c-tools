@@ -4,10 +4,13 @@ import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.RawValue;
 import com.google.common.collect.Maps;
 import io.burt.jmespath.Expression;
 import io.burt.jmespath.JmesPath;
 import io.burt.jmespath.jackson.JacksonRuntime;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
@@ -15,21 +18,25 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
+import org.jmesa.limit.RowSelect;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
-import static com.bixuebihui.jmesa.elasticsearch.EsObject.EMPTY_JSON_STRING;
+import static com.bixuebihui.jmesa.elasticsearch.EsQueryBuilder.EMPTY_JSON_STRING;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
 public class EsRequest {
 
-    String host = "http://127.0.0.1:9200";
+    String host;
 
     // The first thing you need is a runtime. These objects can compile expressions
     // and they are specific to the kind of structure you want to search in.
@@ -48,48 +55,31 @@ public class EsRequest {
     // to load JSON data, and that should fit right in here.
     ObjectMapper mapper = new ObjectMapper();
 
-
-    public static void main(String[] args) {
-
-        EsRequest esRequest = new EsRequest();
-        esRequest.setEsObject(new EsObject("test*"));
-
-        String s0 = esRequest.query(Query.match_all(), 0, 10);
-        System.out.println(s0);
-
-        System.out.println("===========");
+    /**
+     * index name to search
+     * 需要检索的索引
+     */
+    String indexName;
+    private String username;
+    private String password;
 
 
-        String s = esRequest.query(Query
-                .match(null, null).setFieldQuery("child_endpoint_name",
-                        "{GET}/index/sysGenerator"), 0, 10);
-        System.out.println(s);
-
-    }
-
-    public EsObject getEsObject() {
-        return esObject;
-    }
-
-    public void setEsObject(EsObject esObject) {
-        this.esObject = esObject;
-    }
 
     public String getHost() {
         return host;
     }
 
-    EsObject esObject;
-
-    public void setHost(String host) {
+    public  EsRequest(String host, String username, String password) {
         this.host = host;
+        this.username = username;
+        this.password = password;
     }
 
     public String createDoc(String indexName, List<Document> docs) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         HttpEntityEnclosingRequestBase post;
-        post = new HttpPost(host +"/"+EsObject.ACTION_BULK);
+        post = new HttpPost(host +"/"+ EsQueryBuilder.ACTION_BULK);
         StringBuilder sb = new StringBuilder();
 
         for(Document doc : docs) {
@@ -118,6 +108,11 @@ public class EsRequest {
 
     private String httpJson(HttpEntityEnclosingRequestBase requestBase) {
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+            if(this.username!=null && password!=null) {
+                Header header = new BasicHeader("Authorization", "Basic "
+                        + Base64.getUrlEncoder().encodeToString((this.username+":"+this.password).getBytes(StandardCharsets.UTF_8)));
+                requestBase.addHeader(header);
+            }
 
             HttpResponse response = httpClient.execute(requestBase);
 
@@ -138,8 +133,8 @@ public class EsRequest {
         try {
             HttpGetWithJsonEntity getRequest =
                     HttpGetWithJsonEntity.builder()
-                            .withUrl(host + "/" + esObject.indexName + "/" + EsObject.ACTION_SEARCH)
-                            .withBodyEntry(esObject.build(query, from, size))
+                            .withUrl(host + "/" + indexName + "/" + EsQueryBuilder.ACTION_SEARCH)
+                            .withBodyEntry(EsQueryBuilder.build(query, from, size))
                             .build();
 
             return httpJson(getRequest);
@@ -149,14 +144,19 @@ public class EsRequest {
         return EMPTY_JSON_STRING;
     }
 
-    static class Document{
-        String id;
-        Map<String, Object> values;
+    public String query(String rawJson) {
+        try {
+            HttpGetWithJsonEntity getRequest =
+                    HttpGetWithJsonEntity.builder()
+                            .withUrl(host + "/" + indexName + "/" + EsQueryBuilder.ACTION_SEARCH)
+                            .withBodyEntry(rawJson)
+                            .build();
 
-        public Document(String id, Map<String, Object> values) {
-            this.id = id;
-            this.values = values;
+            return httpJson(getRequest);
+        } catch (UnsupportedEncodingException | URISyntaxException e) {
+            e.printStackTrace();
         }
+        return EMPTY_JSON_STRING;
     }
 
     private String getResponseString(HttpResponse response) throws IOException {
@@ -170,7 +170,6 @@ public class EsRequest {
         }
         return sb.toString();
     }
-
 
     /**
      {
@@ -233,12 +232,31 @@ public class EsRequest {
      * @param esJson
      * @return
      */
-    protected   String esJsonToTableJson(String esJson) throws JsonProcessingException {
+    protected   String esJsonToTableJson(String esJson, RowSelect rowSelect) throws JsonProcessingException {
         JsonNode input = mapper.readTree(esJson);
         // Finally this is how you search a structure. There's really not much more to it.
         JsonNode resultTotal = exp.search(input);
+        JsonNode paging = resultTotal.path("paging");
+        if(rowSelect!=null) {
+            ((ObjectNode) paging).put("maxRows", rowSelect.getMaxRows());
+            ((ObjectNode) paging).put("rowEnd", rowSelect.getRowEnd());
+            ((ObjectNode) paging).put("rowStart", rowSelect.getRowStart());
+            ((ObjectNode) paging).put("page", rowSelect.getPage());
+        }
+
+
         String res = resultTotal.toPrettyString();
         return res;
+    }
+
+    static class Document{
+        String id;
+        Map<String, Object> values;
+
+        public Document(String id, Map<String, Object> values) {
+            this.id = id;
+            this.values = values;
+        }
     }
 
 

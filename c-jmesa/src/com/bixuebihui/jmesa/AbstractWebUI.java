@@ -77,8 +77,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
         return new SqlFilter();
     }
 
-    public static SqlFilter getFilter(Limit limit, String tableAlias) throws ParseException {
-        SqlFilter sqlFilter = new SqlFilter();
+    public static SqlFilter getFilter(SqlFilter sqlFilter, Limit limit, String tableAlias) throws ParseException {
         FilterSet filterSet = limit.getFilterSet();
         Collection<Filter> filters = filterSet.getFilters();
 
@@ -111,6 +110,11 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             }
         }
         return sqlFilter;
+    }
+
+    public static SqlFilter getFilter(Limit limit, String tableAlias) throws ParseException {
+        SqlFilter sqlFilter = new SqlFilter();
+        return getFilter(sqlFilter, limit, tableAlias);
     }
 
     /**

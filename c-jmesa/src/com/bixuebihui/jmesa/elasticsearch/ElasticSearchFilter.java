@@ -78,9 +78,8 @@ Test cases:
     }
 
     public String toEsObject(String indexName, int from, int size) {
-        EsObject esObject =  new EsObject(indexName);
         if (filters==null || filters.isEmpty()) {
-            return esObject.build(Query.match_all(), from, size);
+            return EsQueryBuilder.build(Query.match_all(), from, size);
         }
 
         Bool criteria = new Bool();
@@ -88,7 +87,7 @@ Test cases:
         for (Filter filter : filters) {
             buildEsObject(criteria, filter);
         }
-        return esObject.build(criteria, from, size);
+        return EsQueryBuilder.build(criteria, from, size);
 
         //TODO or/and group
     }

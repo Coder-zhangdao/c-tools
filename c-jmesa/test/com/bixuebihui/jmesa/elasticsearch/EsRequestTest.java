@@ -4,6 +4,7 @@ import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import org.jmesa.limit.RowSelect;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -14,12 +15,34 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EsRequestTest {
+    public static String host= "http://localhost:9200";
+    public static String username = "elastic";
+    public static String password = "changeme";
+
+    EsRequest esRequest= new EsRequest(host, username, password);
+
+
+    @Test
+    public  void testQuery() {
+
+        esRequest.indexName = "test*";
+
+        String s0 = esRequest.query(Query.match_all(), 0, 10);
+        System.out.println(s0);
+
+        System.out.println("===========");
+
+
+        String s = esRequest.query(Query
+                .match(null, null).setFieldQuery("child_endpoint_name",
+                        "{GET}/index/sysGenerator"), 0, 10);
+        System.out.println(s);
+
+    }
 
     @Test
     public void testMatchAll(){
-        EsRequest esRequest= new EsRequest();
-        esRequest.setEsObject(new EsObject("test*"));
-
+        esRequest.indexName = "test*";
         String s0 = esRequest.query(Query.match_all(), 0, 10);
         System.out.println(s0);
     }
@@ -27,15 +50,13 @@ public class EsRequestTest {
     @Test
     @Disabled("run once only")
     void getIndex() {
-        EsRequest esRequest= new EsRequest();
         String s0 = esRequest.createIndex("test");
         System.out.println(s0);
     }
 
     @Test
     void createDoc() throws JsonProcessingException {
-        EsRequest esRequest= new EsRequest();
-        esRequest.setEsObject(new EsObject("test"));
+        esRequest.indexName = "test";
 
         List<EsRequest.Document> list  = Lists.newArrayList();
         for(int i=0; i<10; i++) {
@@ -47,14 +68,13 @@ public class EsRequestTest {
                     .build());
             list.add(doc);
         }
-        String s0 = esRequest.createDoc(esRequest.esObject.indexName, list);
+        String s0 = esRequest.createDoc(esRequest.indexName, list);
         System.out.println(s0);
     }
 
     @Test
     public void testRange(){
-        EsRequest esRequest= new EsRequest();
-        esRequest.setEsObject(new EsObject("test"));
+        esRequest.indexName = "test";
 
         String s0 = esRequest.query(Query.range("age", ImmutableMap.<String, Object>builder()
                 .put("from", 11)
@@ -123,7 +143,8 @@ public class EsRequestTest {
          "paging":{"page":2,"maxRows":1,"rowEnd":2,"rowStart":1,"totalRows":3}}
          */
 
-        Object result = new EsRequest().esJsonToTableJson(json);
+        RowSelect rowSelect = new RowSelect(2, 10000, 50);
+        Object result = esRequest.esJsonToTableJson(json, rowSelect);
 
 
         System.out.println(result);
@@ -136,7 +157,11 @@ public class EsRequestTest {
                 "    \"color\" : \"blue\"\n" +
                 "  } ],\n" +
                 "  \"paging\" : {\n" +
-                "    \"totalRows\" : 2\n" +
+                "    \"totalRows\" : 2,\n" +
+                "    \"maxRows\" : 10000,\n" +
+                "    \"rowEnd\" : 50,\n" +
+                "    \"rowStart\" : 0,\n" +
+                "    \"page\" : 1\n" +
                 "  }\n" +
                 "}", result);
 
