@@ -22,7 +22,7 @@ public class Bool extends Query {
          */
         public Bool addShould(Query args)
         {
-            return this._addQuery("should", args);
+            return this.addQuery("should", args);
         }
 
 
@@ -35,7 +35,7 @@ public class Bool extends Query {
          */
         public Bool addMust(Query args)
         {
-            return this._addQuery("must", args);
+            return this.addQuery("must", args);
         }
 
 
@@ -48,7 +48,7 @@ public class Bool extends Query {
          */
         public Bool addMustNot(Query args)
         {
-            return this._addQuery("must_not", args);
+            return this.addQuery("must_not", args);
         }
 
         /**
@@ -71,7 +71,7 @@ public class Bool extends Query {
          *
          * @return this
          */
-        protected Bool _addQuery(String type, Query args)
+        protected Bool addQuery(String type, Query args)
         {
             return (Bool) this.addParam(type, args.toArray());
         }
@@ -105,6 +105,7 @@ public class Bool extends Query {
          *
          * @return array
          */
+        @Override
         public Map toArray()
         {
             if (this.getParams()==null) {

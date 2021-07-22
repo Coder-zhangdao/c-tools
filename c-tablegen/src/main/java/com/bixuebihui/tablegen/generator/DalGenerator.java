@@ -196,6 +196,7 @@ public class DalGenerator extends BaseGenerator {
         return v;
     }
 
+    @Override
     String getClassSuffix() {
         return CLASS_SUFFIX;
     }

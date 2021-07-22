@@ -559,6 +559,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
+    @Override
     public int countWhere(String where, Object... params) throws SQLException {
         String query = SELECT_COUNT_FROM + getTableName() + " " + where;
         Object o = this.getDbHelper().executeScalar(query, params);
@@ -945,6 +946,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return 数据集
      * @throws java.sql.SQLException 数据库异常
      */
+    @Override
     public @NotNull
     List<T> select(String whereClause, Object[] params, String orderbyClause, int beginNum, int endNum)
             throws SQLException {

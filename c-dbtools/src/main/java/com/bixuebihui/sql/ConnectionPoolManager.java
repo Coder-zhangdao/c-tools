@@ -331,6 +331,7 @@ public final class ConnectionPoolManager
      * @param sleepIntervalInSeconds a int.
      * @throws java.sql.SQLException if any.
      */
+    @SuppressWarnings("AlibabaAvoidManuallyCreateThread")
     public ConnectionPoolManager(int sleepIntervalInSeconds)
             throws SQLException {
         this();

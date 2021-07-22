@@ -1,8 +1,5 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
-import com.bixuebihui.jdbc.SqlSort;
-import com.bixuebihui.jmesa.elasticsearch.processor.Sort;
-import com.bixuebihui.jmesa.elasticsearch.query.Params;
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,20 +9,21 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+/**
+ * @author xwx
+ */
 public class EsQueryBuilder {
     public static final String EMPTY_JSON_STRING = "{}";
     static  final Logger logger = LoggerFactory.getLogger(EsQueryBuilder.class);
     static final String ACTION_SEARCH = "_search";
     static final String ACTION_BULK = "_bulk";
 
-    static final String queryAllFields = "q=?";
+    static final String QUERY_ALL_FIELDS = "q=?";
     static final String SIZE = "size";
     static final String FROM = "from";
-    static final String _SOURCE = "_source";
+    static final String SOURCE = "_source";
     static final String QUERY ="query";
 
 

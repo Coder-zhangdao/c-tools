@@ -164,12 +164,17 @@ public class SqlFilter {
 
 			case NOT_IN:
 				criteria.append(" not ");
+				criteria.append(" in (").append(StringUtils.repeat("?", ",", filter.value.length)).append(") ");
+				break;
 			case IN:
 				criteria.append(" in (").append(StringUtils.repeat("?", ",", filter.value.length)).append(") ");
 				break;
 
 			case NOT_EXISTS:
 				criteria.append(" not ");
+				criteria.append(" exist (").append(filter.value[0]).append(") ");
+
+				break;
 			case EXISTS:
 				//todo filter filter.value
 				criteria.append(" exist (").append(filter.value[0]).append(") ");
@@ -180,6 +185,8 @@ public class SqlFilter {
 			case START_WITH:
 				criteria.append(" like concat(?, '%') ");
 				break;
+
+			default:
 
 		}
 		if(filter.value!=null && filter.value.length>0

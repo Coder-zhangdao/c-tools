@@ -132,6 +132,7 @@ public class Phrase extends Suggest {
         /**
          * {@inheritdoc}
          */
+        @Override
         public Map toArray() {
             Map array = super.toArray();
 

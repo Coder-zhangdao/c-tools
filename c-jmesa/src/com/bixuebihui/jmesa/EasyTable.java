@@ -135,7 +135,9 @@ public class EasyTable extends BasicWebUI {
     /**
      * use LimitActionFactoryJsonImpl
      * request json format:
-     *     { "id": "table-id", "action": "", "maxRows": 500, "page": 123, "filter": { "property1":value1, "property2":value2, "property3": [fromValue, toValue] }, "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
+     *     { "id": "table-id", "action": "", "maxRows": 500, "page": 123,
+     *     "filter": { "property1":value1, "property2":value2, "property3": [fromValue, toValue] },
+     *     "sort":{ "property1":"asc", "property2":"desc", }, "exportType":"json", }
      * response:
      *    {
      * "caption":"t_config",

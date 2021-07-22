@@ -8,34 +8,34 @@ public class IntegerIdentifier implements IIdentifier {
 		String STRING = "string";
 	}
 
-	private int _id;
+	private int id;
 
 	public IntegerIdentifier(int value) {
 		super();
-		_id = value;
+		id = value;
 	}
 
 	@Override
 	public boolean equals(Object rhs) {
 		boolean rc = false;
 		if (rhs != null && rhs.getClass().equals(getClass())) {
-			rc = ((IntegerIdentifier)rhs).toString().equals(toString());
+			rc = rhs.toString().equals(toString());
 		}
 		return rc;
 	}
 
 	@Override
 	public  int hashCode() {
-		return _id;
+		return id;
 	}
 
 	@Override
     public String toString() {
-		return "" + _id;
+		return "" + id;
 	}
 
 	// Only for restoring from XML etc.
 	public void setString(String value) {
-		_id = Integer.parseInt(value);
+		id = Integer.parseInt(value);
 	}
 }

@@ -23,6 +23,9 @@ import java.util.List;
 import static com.bixuebihui.tablegen.TableGen.getTableDataFromLocalCache;
 import static com.bixuebihui.tablegen.TableGen.saveTableDataToLocalCache;
 
+/**
+ * @author xwx
+ */
 public class GenerateAll implements DiffHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenerateAll.class);
@@ -61,8 +64,9 @@ public class GenerateAll implements DiffHandler {
             if (generator.config.isGenerateAll()) {
                 generatorTables(generator.setInfo.getTableInfos());
 
-                if(generator.setInfo.getViewInfos()!=null)
+                if(generator.setInfo.getViewInfos()!=null) {
                     generatorViews(generator.setInfo.getViewInfos());
+                }
 
                // generateWebUI();
                // generateTest();

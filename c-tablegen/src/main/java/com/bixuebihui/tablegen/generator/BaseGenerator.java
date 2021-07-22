@@ -117,6 +117,7 @@ public abstract class BaseGenerator implements Generator {
      * @param tableName database table name
      * @return full path of file name
      */
+    @Override
     public abstract String getTargetFileName(String tableName);
 
     /**

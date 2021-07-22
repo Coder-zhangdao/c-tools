@@ -1,12 +1,10 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
-import com.bixuebihui.jmesa.elasticsearch.processor.Sort;
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.RawValue;
 import com.google.common.collect.Maps;
 import io.burt.jmespath.Expression;
 import io.burt.jmespath.JmesPath;
@@ -36,6 +34,9 @@ import java.util.Map;
 import static com.bixuebihui.jmesa.elasticsearch.EsQueryBuilder.EMPTY_JSON_STRING;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
+/**
+ * @author xwx
+ */
 public class EsRequest {
 
     String host;

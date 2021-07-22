@@ -66,7 +66,7 @@ public class Params implements ArrayableInterface {
 
     public Map<String, Object> getParams() {
         if(params==null){
-            params =  new HashMap<>();
+            params =  new HashMap<>(8);
         }
         return params;
     }
@@ -121,6 +121,7 @@ public class Params implements ArrayableInterface {
      *
      * @return array Filter array
      */
+    @Override
     public Map toArray() {
         Map data = Maps.newHashMap();
 
@@ -130,7 +131,7 @@ public class Params implements ArrayableInterface {
             data.putAll(rawParams);
         }
 
-        return this._convertArrayable(data);
+        return this.convertArrayable(data);
     }
 
     /**
@@ -139,7 +140,7 @@ public class Params implements ArrayableInterface {
      * @param array array
      * @return array
      */
-    protected Map _convertArrayable(Map array) {
+    protected Map convertArrayable(Map array) {
         Map arr = Maps.newHashMap();
 
         array.forEach((key,value) -> {
@@ -148,7 +149,7 @@ public class Params implements ArrayableInterface {
                 arr.put(v instanceof NameableInterface
                         ? ((NameableInterface) v).getName() : key, v.toArray());
             } else if (value instanceof Map) {
-                arr.put(key, this._convertArrayable((Map) value));
+                arr.put(key, this.convertArrayable((Map) value));
             }else {
                 if(value==null){
                     arr.put(key, Collections.emptyMap());

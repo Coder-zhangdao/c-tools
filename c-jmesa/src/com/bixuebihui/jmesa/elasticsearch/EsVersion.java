@@ -8,7 +8,7 @@ import java.util.List;
 public class EsVersion {
 
 
-    protected List<String> $queries = Arrays.asList(
+    protected List<String> queries = Arrays.asList(
             "match",
             "multi_match",
             "bool",
@@ -46,7 +46,7 @@ public class EsVersion {
             "percolate"
     );
 
-    protected List<String> $aggregations = Arrays.asList(
+    protected List<String> aggregations = Arrays.asList(
             "min",
             "max",
             "sum",
@@ -62,7 +62,9 @@ public class EsVersion {
             "geo_bounds",
             "top_hits",
             "scripted_metric",
-            "global_agg", // original: global
+
+            // original: global
+            "global_agg",
             "filter",
             "filters",
             "missing",
@@ -82,7 +84,7 @@ public class EsVersion {
             "serial_diff"
     );
 
-    protected List<String> $suggesters = Arrays.asList(
+    protected List<String> suggesters = Arrays.asList(
             "term",
             "phrase",
             "completion",
@@ -91,22 +93,22 @@ public class EsVersion {
 
 
     /**
-     * returns true if $name is supported, false otherwise.
+     * returns true if name is supported, false otherwise.
      *
-     * @param $name
-     * @param $type
+     * @param name
+     * @param type
      * @return bool
      */
-    public boolean supports(String $name, DSL $type) {
-        switch ($type) {
+    public boolean supports(String name, DSL type) {
+        switch (type) {
             case TYPE_QUERY:
-                return this.$queries.contains($name);
+                return this.queries.contains(name);
             case TYPE_AGGREGATION:
-                return this.$aggregations.contains($name);
+                return this.aggregations.contains(name);
             case TYPE_SUGGEST:
-                return this.$suggesters.contains($name);
+                return this.suggesters.contains(name);
             default:
-                throw new IllegalArgumentException("unknow type:"+$type);
+                throw new IllegalArgumentException("unknow type:"+type);
         }
 
         // disables version check in Facade for custom DSL objects
@@ -117,20 +119,20 @@ public class EsVersion {
      * @return string[]
      */
     public List<String> getAggregations() {
-        return this.$aggregations;
+        return this.aggregations;
     }
 
     /**
      * @return string[]
      */
     public List<String> getQueries() {
-        return this.$queries;
+        return this.queries;
     }
 
     /**
      * @return string[]
      */
     public List<String> getSuggesters() {
-        return this.$suggesters;
+        return this.suggesters;
     }
 }

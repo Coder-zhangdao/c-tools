@@ -1,5 +1,22 @@
 package com.bixuebihui.jmesa.elasticsearch.query;
 
+/**
+ * @author xwx
+ */
+
 public enum DSL {
-        TYPE_QUERY, TYPE_AGGREGATION, TYPE_SUGGEST
-    }
+    /**
+     * for plain search
+     */
+    TYPE_QUERY,
+    /**
+     * for aggregation, not implemented yet
+     * TODO
+     */
+    TYPE_AGGREGATION,
+
+    /**
+     * TODO
+     */
+    TYPE_SUGGEST
+}

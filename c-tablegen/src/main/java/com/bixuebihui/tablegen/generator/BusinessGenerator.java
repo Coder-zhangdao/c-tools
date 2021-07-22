@@ -19,6 +19,7 @@ public class BusinessGenerator extends BaseGenerator {
         return super.wantToGenerate(fileName) && ! new File(fileName).exists();
     }
 
+    @Override
     String getClassSuffix(){return CLASS_SUFFIX;}
 
     @Override

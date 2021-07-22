@@ -80,7 +80,7 @@ Test cases:
         return Arrays.asList(value);
     }
 
-    public String toEsObject(String indexName, int from, int size, LinkedHashMap<String, String> sort) {
+    public String toEsObject(int from, int size, LinkedHashMap<String, String> sort) {
 
 
         if (filters==null || filters.isEmpty()) {
@@ -147,6 +147,7 @@ Test cases:
             case NOT_IN:
                 queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
                 criteria.addMustNot(queryFilter);
+                break;
             case IN:
                 queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
                 criteria.addMust(queryFilter);
@@ -156,6 +157,7 @@ Test cases:
                 queryFilter = Query.exists(filter.getProperty());
 
                 criteria.addMustNot(queryFilter);
+                break;
             case EXISTS:
                 queryFilter = Query.exists(filter.getProperty());
 
@@ -166,6 +168,8 @@ Test cases:
 
                 criteria.addMust(queryFilter);
                 break;
+            default:
+
         }
 
     }

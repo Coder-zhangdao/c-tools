@@ -258,9 +258,9 @@ public class TableGen implements DiffHandler {
     private static String getCachedTableDataFilePath() {
         String baseDir = System.getProperty("user.dir");
 
-        String src_dir = "target";
+        String srcDir = "target";
 
-        return baseDir + File.separator + src_dir + File.separator + "gen_table_data.cache";
+        return baseDir + File.separator + srcDir + File.separator + "gen_table_data.cache";
     }
 
     private void generateSpringXml() {
@@ -328,9 +328,9 @@ public class TableGen implements DiffHandler {
 
     private String getCachedColumnDataFilePath() {
 
-        String src_dir = "target";
+        String srcDir = "target";
 
-        return config.getBaseDir() + File.separator + src_dir + File.separator + "gen_column_data.cache";
+        return config.getBaseDir() + File.separator + srcDir + File.separator + "gen_column_data.cache";
     }
 
     public void run(String filename, OutputStream out) {
