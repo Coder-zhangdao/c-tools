@@ -1,8 +1,8 @@
 package com.bixuebihui;
 
+import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.sql.ConnectionPool;
 import com.bixuebihui.sql.ConnectionPoolManager;
-import com.bixuebihui.dbcon.DatabaseConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -53,8 +53,8 @@ public class ConnectionManager {
     /**
      * <p>destroy.</p>
      */
-    public static void destroy(){
-        if(cpm!=null) {
+    public static void destroy() {
+        if (cpm != null) {
             cpm.destroy();
         }
         ALIAS_SET.clear();
@@ -113,7 +113,7 @@ public class ConnectionManager {
                 }
             }
         } catch (IllegalAccessException | ClassNotFoundException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-            LOG.error("",e);
+            LOG.error("", e);
         }
         return cpm;
     }
@@ -146,8 +146,8 @@ public class ConnectionManager {
         ConnectionPool pool = cpm.getPool(alias);
         try {
             return pool.getConnection();
-        }catch (SQLException e){
-            LOG.error("Can not get Connection from "+alias+" with "+pool.dumpInfo());
+        } catch (SQLException e) {
+            LOG.error("Can not get Connection from " + alias + " with " + pool.dumpInfo());
             throw e;
         }
     }
@@ -170,9 +170,9 @@ public class ConnectionManager {
      */
     public static String state() {
         StringBuilder sb = new StringBuilder();
-        if ( cpm != null) {
+        if (cpm != null) {
             try {
-                for (String s: ALIAS_SET) {
+                for (String s : ALIAS_SET) {
                     ConnectionPool pool = cpm.getPool(s);
                     String lf = "<br>\n";
                     sb.append("Pool Statistics: ").append(s).append(lf);
@@ -183,7 +183,7 @@ public class ConnectionManager {
                     sb.append("  Number of timeouts:  ").append(pool.getNumCheckoutTimeouts()).append(lf);
                 }
             } catch (Exception ex) {
-                LOG.warn("",ex);
+                LOG.warn("", ex);
             }
         } else {
             sb.append("Alias==").append(Arrays.toString(ALIAS_SET.toArray(new String[0]))).append(" , cpm==").append(cpm);
@@ -202,7 +202,7 @@ public class ConnectionManager {
                 }
                 ALIAS_SET.clear();
             } catch (SQLException e) {
-                LOG.warn("",e);
+                LOG.warn("", e);
             }
             cpm = null;
         }
@@ -212,6 +212,12 @@ public class ConnectionManager {
      * <p>addAlias.</p>
      *
      * @param cfg a {@link DatabaseConfig} object.
+     * @throws ClassNotFoundException if any.
+     * @throws InstantiationException if any.
+     * @throws IllegalAccessException if any.
+     * @throws SQLException if any.
+     * @throws NoSuchMethodException if any.
+     * @throws InvocationTargetException if any.
      */
     public static synchronized void addAlias(DatabaseConfig cfg)
             throws ClassNotFoundException, InstantiationException,
@@ -221,8 +227,8 @@ public class ConnectionManager {
         }
         cpm.addAlias(cfg.getAlias(), cfg.getClassName(), cfg.getDburl(),
                 cfg.getUsername(), cfg.getPassword(), cfg.getMaxActive(),
-                (int) cfg.getMaxWaitTime(),(int)cfg.getMaxWaitTime(),
-					 /*cfg.getMaxIdle(),*/  //comment out 2016-02-16 by xwx
+                (int) cfg.getMaxWaitTime(), (int) cfg.getMaxWaitTime(),
+                /*cfg.getMaxIdle(),*/  //comment out 2016-02-16 by xwx
                 cfg.getMaxCheckOutCount());
 
         addAliasString(cfg.getAlias());
