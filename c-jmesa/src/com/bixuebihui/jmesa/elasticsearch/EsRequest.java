@@ -1,5 +1,6 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
+import com.bixuebihui.jmesa.elasticsearch.processor.Sort;
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,6 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +49,8 @@ public class EsRequest {
     // are reusable and thread safe. Compile your expressions once, just like database
     // prepared statements.
     Expression<JsonNode> exp = jmespath.compile("{caption:hits.hits[0]._index, " +
-            "titles:keys(hits.hits[0]._source),"+
+            "titles:keys(hits.hits[0]._source)," +
+            "_id: hits.hits[*]._id,"+
             "data:hits.hits[*]._source,"+
             "paging:{totalRows:hits.total.value}}");
 
@@ -130,11 +133,15 @@ public class EsRequest {
     }
 
     public String query(Query query, int from, int size) {
+        return query(query, from, size, null);
+    }
+
+        public String query(Query query, int from, int size, LinkedHashMap<String,String> sort) {
         try {
             HttpGetWithJsonEntity getRequest =
                     HttpGetWithJsonEntity.builder()
                             .withUrl(host + "/" + indexName + "/" + EsQueryBuilder.ACTION_SEARCH)
-                            .withBodyEntry(EsQueryBuilder.build(query, from, size))
+                            .withBodyEntry(EsQueryBuilder.build(query, from, size, sort))
                             .build();
 
             return httpJson(getRequest);

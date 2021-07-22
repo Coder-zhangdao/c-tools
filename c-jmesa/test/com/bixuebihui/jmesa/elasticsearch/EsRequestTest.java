@@ -27,7 +27,7 @@ public class EsRequestTest {
 
         esRequest.indexName = "test*";
 
-        String s0 = esRequest.query(Query.match_all(), 0, 10);
+        String s0 = esRequest.query(Query.match_all(), 0, 10, null);
         System.out.println(s0);
 
         System.out.println("===========");
@@ -35,7 +35,7 @@ public class EsRequestTest {
 
         String s = esRequest.query(Query
                 .match(null, null).setFieldQuery("child_endpoint_name",
-                        "{GET}/index/sysGenerator"), 0, 10);
+                        "{GET}/index/sysGenerator"), 0, 10, null);
         System.out.println(s);
 
     }
@@ -43,7 +43,7 @@ public class EsRequestTest {
     @Test
     public void testMatchAll(){
         esRequest.indexName = "test*";
-        String s0 = esRequest.query(Query.match_all(), 0, 10);
+        String s0 = esRequest.query(Query.match_all(), 0, 10, null);
         System.out.println(s0);
     }
 
@@ -85,45 +85,45 @@ public class EsRequestTest {
 
     @Test
     public void  esJsonToTableJson() throws IOException {
-       String  json = "{\n" +
-                "     \"took\" : 17,\n" +
-                "     \"timed_out\" : false,\n" +
-                "     \"_shards\" : {\n" +
-                "     \"total\" : 1,\n" +
-                "     \"successful\" : 1,\n" +
-                "     \"skipped\" : 0,\n" +
-                "     \"failed\" : 0\n" +
-                "     },\n" +
-                "     \"hits\" : {\n" +
-                "     \"total\" : {\n" +
-                "     \"value\" : 2,\n" +
-                "     \"relation\" : \"eq\"\n" +
-                "     },\n" +
-                "     \"max_score\" : 1.0,\n" +
-                "     \"hits\" : [\n" +
-                "     {\n" +
-                "     \"_index\" : \"my-index-000001\",\n" +
-                "     \"_type\" : \"_doc\",\n" +
-                "     \"_id\" : \"1\",\n" +
-                "     \"_score\" : 1.0,\n" +
-                "     \"_source\" : {\n" +
-                "     \"color\" : [\n" +
-                "     \"blue\",\n" +
-                "     \"green\"\n" +
-                "     ]\n" +
-                "     }\n" +
-                "     },\n" +
-                "     {\n" +
-                "     \"_index\" : \"my-index-000001\",\n" +
-                "     \"_type\" : \"_doc\",\n" +
-                "     \"_id\" : \"2\",\n" +
-                "     \"_score\" : 1.0,\n" +
-                "     \"_source\" : {\n" +
-                "     \"color\" : \"blue\"\n" +
-                "     }\n" +
-                "     }\n" +
-                "     ]\n" +
-                "     }\n" +
+       String  json = "{ " +
+                "     \"took\" : 17, " +
+                "     \"timed_out\" : false, " +
+                "     \"_shards\" : { " +
+                "     \"total\" : 1, " +
+                "     \"successful\" : 1, " +
+                "     \"skipped\" : 0, " +
+                "     \"failed\" : 0 " +
+                "     }, " +
+                "     \"hits\" : { " +
+                "     \"total\" : { " +
+                "     \"value\" : 2, " +
+                "     \"relation\" : \"eq\" " +
+                "     }, " +
+                "     \"max_score\" : 1.0, " +
+                "     \"hits\" : [ " +
+                "     { " +
+                "     \"_index\" : \"my-index-000001\", " +
+                "     \"_type\" : \"_doc\", " +
+                "     \"_id\" : \"1\", " +
+                "     \"_score\" : 1.0, " +
+                "     \"_source\" : { " +
+                "     \"color\" : [ " +
+                "     \"blue\", " +
+                "     \"green\" " +
+                "     ] " +
+                "     } " +
+                "     }, " +
+                "     { " +
+                "     \"_index\" : \"my-index-000001\", " +
+                "     \"_type\" : \"_doc\", " +
+                "     \"_id\" : \"2\", " +
+                "     \"_score\" : 1.0, " +
+                "     \"_source\" : { " +
+                "     \"color\" : \"blue\" " +
+                "     } " +
+                "     } " +
+                "     ] " +
+                "     } " +
                 "     }";
 
         /**
@@ -151,6 +151,7 @@ public class EsRequestTest {
         assertEquals("{\n" +
                 "  \"caption\" : \"my-index-000001\",\n" +
                 "  \"titles\" : [ \"color\" ],\n" +
+                "  \"_id\" : [ \"1\", \"2\" ],\n" +
                 "  \"data\" : [ {\n" +
                 "    \"color\" : [ \"blue\", \"green\" ]\n" +
                 "  }, {\n" +

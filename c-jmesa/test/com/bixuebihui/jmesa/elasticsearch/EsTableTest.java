@@ -34,4 +34,21 @@ class EsTableTest {
         Object obj2 = map2.get("data");
         assertEquals(1, ((List)obj2).size());
     }
+
+    @Test
+    void jsonWithSort() throws SQLException, JsonProcessingException {
+        String tableName = "test";
+        EsTable et = new EsTable(EsRequestTest.host,
+                EsRequestTest.username, EsRequestTest.password,
+                tableName, tableName);
+
+        int size=2;
+        String res = et.json("{\"exportType\":\"json\", \"maxRows\":"+size+", \"sort\":{\"height\":\"desc\",\"age\":\"desc\"}}");
+        ObjectMapper mapper = new ObjectMapper();
+        Map map= mapper.readValue(res, Map.class);
+
+        Object obj = map.get("data");
+        assertEquals(size, ((List)obj).size());
+
+    }
 }

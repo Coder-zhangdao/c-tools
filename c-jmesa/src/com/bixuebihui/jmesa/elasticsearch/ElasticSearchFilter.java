@@ -1,6 +1,7 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
 import com.bixuebihui.jdbc.SqlFilter;
+import com.bixuebihui.jmesa.elasticsearch.processor.Sort;
 import com.bixuebihui.jmesa.elasticsearch.query.Bool;
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.bixuebihui.jmesa.elasticsearch.query.Range;
@@ -8,7 +9,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ElasticSearchFilter extends SqlFilter {
 
@@ -77,9 +80,11 @@ Test cases:
         return Arrays.asList(value);
     }
 
-    public String toEsObject(String indexName, int from, int size) {
+    public String toEsObject(String indexName, int from, int size, LinkedHashMap<String, String> sort) {
+
+
         if (filters==null || filters.isEmpty()) {
-            return EsQueryBuilder.build(Query.match_all(), from, size);
+            return EsQueryBuilder.build(Query.match_all(), from, size, sort);
         }
 
         Bool criteria = new Bool();
@@ -87,7 +92,7 @@ Test cases:
         for (Filter filter : filters) {
             buildEsObject(criteria, filter);
         }
-        return EsQueryBuilder.build(criteria, from, size);
+        return EsQueryBuilder.build(criteria, from, size, sort);
 
         //TODO or/and group
     }

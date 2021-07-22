@@ -1,18 +1,21 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
+import com.bixuebihui.jmesa.elasticsearch.processor.Sort;
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.commons.compress.utils.Lists;
 import org.junit.jupiter.api.Test;
+
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public  class EsObjectTest {
-    EsQueryBuilder esObject = new EsQueryBuilder();
 
     @Test
-    public void testMatchAll() throws JsonProcessingException {
+    public void testMatchAll() {
 
-        String s = esObject.build(Query.match_all(), 0, 5);
+        String s = EsQueryBuilder.build(Query.match_all(), 0, 5, null);
 
         assertEquals("{\"size\":5,\"query\":{\"match_all\":{}}}", s);
     }
@@ -38,12 +41,28 @@ public  class EsObjectTest {
     }
 
     @Test
-    public void testMatch() throws JsonProcessingException {
+    public void testMatch() {
 
-        String s = esObject.build(Query.match(null, null)
-                .setFieldQuery("abc","test 123"), 0,5);
+        String s = EsQueryBuilder.build(Query.match(null, null)
+                .setFieldQuery("abc","test 123"), 0,5, null);
 
         assertEquals("{\"size\":5,\"query\":{\"match\":{\"abc\":{\"query\":\"test 123\"}}}}", s);
+    }
+
+
+
+    @Test
+    public void testMatchWithSort() {
+
+
+        LinkedHashMap<String, String> sort =new LinkedHashMap<>();
+        sort.put("age", "desc");
+
+
+        String s = EsQueryBuilder.build(Query.match(null, null)
+                .setFieldQuery("abc","test 123"), 0,5, sort);
+
+        assertEquals("{\"size\":5,\"query\":{\"match\":{\"abc\":{\"query\":\"test 123\"}}},\"sort\":{\"age\":\"desc\"}}", s);
     }
 
 }
