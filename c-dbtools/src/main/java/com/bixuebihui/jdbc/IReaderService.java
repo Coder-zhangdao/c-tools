@@ -18,6 +18,7 @@ public interface IReaderService<T> {
      * <p>select.</p>
      *
      * @param whereClause a {@link java.lang.String} object.
+     * @param params parameters for prepared statement
      * @param orderBy     a {@link java.lang.String} object.
      * @param rowStart    a int.
      * @param rowEnd      a int.

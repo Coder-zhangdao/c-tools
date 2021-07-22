@@ -212,10 +212,6 @@ public class ConnectionManager {
      * <p>addAlias.</p>
      *
      * @param cfg a {@link DatabaseConfig} object.
-     * @throws java.lang.ClassNotFoundException if any.
-     * @throws java.lang.InstantiationException if any.
-     * @throws java.lang.IllegalAccessException if any.
-     * @throws java.sql.SQLException if any.
      */
     public static synchronized void addAlias(DatabaseConfig cfg)
             throws ClassNotFoundException, InstantiationException,

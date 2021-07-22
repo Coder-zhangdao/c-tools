@@ -210,6 +210,7 @@ public class SqlFilter {
 	 * <p>addFilter.</p>
 	 *
 	 * @param property a {@link java.lang.String} object.
+	 * @param comparison   operation to compare the property vs value
 	 * @param value a {@link java.lang.Object} object.
 	 * @return a {@link SqlFilter} object.
 	 */
@@ -380,12 +381,12 @@ public class SqlFilter {
 		IS_NOT,
 
 		/**
-		 * >
+		 * &gt;
 		 */
 		GT,
 
 		/**
-		 * >=
+		 * &gt;=
 		 */
 		GTE,
 
