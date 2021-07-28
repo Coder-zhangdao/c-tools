@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 
 /**
@@ -25,12 +26,30 @@ public class SqlFilter {
 	 */
 	public static final String AND = " and ";
 	protected List<Filter> filters = null;
-	private int databaseType = BaseDao.MYSQL;
-
 	protected List<SqlFilter> orCond = null;
-
+	protected List<SqlFilter> subGroups = new ArrayList<>();
+	protected Operator subGroupsJoinOperator;
+	private int databaseType = BaseDao.MYSQL;
 	private boolean useNullAsCondition = false;
 
+	/**
+	 * 防止sql注入, 会改变原始数据,不建议使用
+	 *
+	 * @param sql sql语句
+	 * @return 过滤特殊字符: 单引号, 分号,注释
+	 */
+	public static String transactSQLInjection(String sql) {
+		return sql.replaceAll(".*([';]+|(--)+).*", "");
+	}
+
+	public List<Filter> getFilters() {
+		return filters;
+	}
+
+	public void addSubGroupCondition(Operator operator, SqlFilter... filters){
+		this.subGroups.addAll(Arrays.asList(filters));
+		this.subGroupsJoinOperator =  operator;
+	}
 
 	/**
 	 * <p>toCondition.</p>
@@ -38,9 +57,10 @@ public class SqlFilter {
 	 * @return a {@link java.lang.StringBuilder} object.
 	 * @deprecated use toSqlObject
 	 */
+	@Deprecated
 	protected StringBuilder toCondition(){
 		StringBuilder criteria = new StringBuilder();
-		if (filters==null || filters.isEmpty()) {
+		if (isNoFilters()) {
             return criteria;
         }
 		for (Filter filter : filters) {
@@ -49,6 +69,18 @@ public class SqlFilter {
 
 		if(criteria.length()>0 && criteria.indexOf(AND)==0){
 			criteria.delete(0, 4);
+		}
+
+		if(subGroups!=null && subGroups.size()>0){
+			if(criteria.length()>1) {
+				criteria.insert(0, "(").append(") ").append(AND).append(" ");
+			}
+			criteria.append(" (");
+			for(SqlFilter it:subGroups){
+				criteria.append(" ").append(subGroupsJoinOperator)
+						.append(" (").append(it.toCondition()).append(")");
+			}
+			criteria.append(")");
 		}
 
 		if(orCond!=null){
@@ -60,21 +92,48 @@ public class SqlFilter {
 		return criteria;
 	}
 
+	protected boolean isNoFilters(){
+		return (filters==null || filters.isEmpty())
+				&& subGroups.isEmpty();
+	}
+	/**
+	 * Generate SqlObject: sql string with parameters
+	 * @return SqlObject
+	 */
 	public SqlObject toSqlObject(){
 		SqlObject res = new SqlObject();
 		List<Object> params = new ArrayList<>();
 		StringBuilder criteria = new StringBuilder();
-		if (filters==null || filters.isEmpty()) {
+		if (isNoFilters()) {
 			res.setSqlString(criteria.toString());
 			return res;
 		}
-		for (Filter filter : filters) {
-			buildSqlObject(criteria, params, filter);
+		if(filters!= null) {
+			for (Filter filter : filters) {
+				buildSqlObject(criteria, params, filter);
+			}
 		}
 
 		if(criteria.length()>0 && criteria.indexOf(AND)==0){
 			criteria.delete(0, 4);
 		}
+
+		if(subGroups!=null && subGroups.size()>0){
+			if(criteria.length()>1) {
+				criteria.insert(0, "(").append(") ").append(AND).append(" ");
+			}
+			criteria.append(" (");
+
+			criteria.append(subGroups.stream().map((it) -> {
+					SqlObject sqlObject = it.toSqlObject();
+					params.addAll(Lists.newArrayList(sqlObject.getParameters()));
+					return sqlObject.getSqlString().substring("where".length());
+				}).collect(Collectors.joining(") "+subGroupsJoinOperator.toString()+" ("))
+			);
+
+			criteria.append(")");
+		}
+
 
 		if(orCond!=null){
 			criteria.insert(0, " (").append(")");
@@ -197,16 +256,6 @@ public class SqlFilter {
 	}
 
 	/**
-	 * 防止sql注入, 会改变原始数据,不建议使用
-	 *
-	 * @param sql sql语句
-	 * @return 过滤特殊字符: 单引号, 分号,注释
-	 */
-	public static String transactSQLInjection(String sql) {
-		return sql.replaceAll(".*([';]+|(--)+).*", "");
-	}
-
-	/**
 	 * <p>addFilter.</p>
 	 *
 	 * @param property a {@link java.lang.String} object.
@@ -226,7 +275,6 @@ public class SqlFilter {
 
 		return this;
 	}
-
 
 	/**
 	 * 增加
@@ -268,21 +316,6 @@ public class SqlFilter {
 		return databaseType;
 	}
 
-
-	/**
-	 * <p>or.</p>
-	 *
-	 * @param cond a {@link SqlFilter} object.
-	 * @return a {@link SqlFilter} object.
-	 */
-	public SqlFilter or(SqlFilter cond){
-		if(orCond==null) {
-            orCond = new ArrayList<>();
-        }
-		this.orCond.add(cond);
-		return this;
-	}
-
 	/**
 	 * 设置数据库类型
 	 *
@@ -290,6 +323,22 @@ public class SqlFilter {
 	 */
 	public void setDatabaseType(int databaseType) {
 		this.databaseType = databaseType;
+	}
+
+	/**
+	 * <p>or.</p>
+	 *
+	 * @param cond a {@link SqlFilter} object.
+	 * @return a {@link SqlFilter} object.
+	 * @deprecated since 1.4.1
+	 */
+	@Deprecated
+	public SqlFilter or(SqlFilter cond){
+		if(orCond==null) {
+            orCond = new ArrayList<>();
+        }
+		this.orCond.add(cond);
+		return this;
 	}
 
 	/**
@@ -364,6 +413,10 @@ public class SqlFilter {
 
 	public SqlFilter startWith(String field, Object value){
 		return this.addFilter(field, Comparison.START_WITH,  new Object[]{value});
+	}
+
+	public enum Operator{
+		AND, OR
 	}
 	/**
 	 * Used for filters

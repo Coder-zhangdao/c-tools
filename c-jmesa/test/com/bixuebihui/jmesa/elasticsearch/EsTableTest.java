@@ -1,6 +1,5 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
-import com.bixuebihui.jmesa.EasyTable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -9,16 +8,19 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class EsTableTest {
+//@RunWith(MockitoJUnitRunner.class)
+public class EsTableTest {
 
     @Test
-    void json() throws SQLException, JsonProcessingException {
+    public void json() throws SQLException, JsonProcessingException {
         String tableName = "test";
         EsTable et = new EsTable(EsRequestTest.host,
                 EsRequestTest.username, EsRequestTest.password,
                 tableName, tableName);
+
+        // et.request = Mockito.mock(EsRequest);
 
         int size=2;
         String res = et.json("{\"exportType\":\"json\", \"maxRows\":"+size+"}");
@@ -36,7 +38,7 @@ class EsTableTest {
     }
 
     @Test
-    void jsonWithSort() throws SQLException, JsonProcessingException {
+    public void jsonWithSort() throws SQLException, JsonProcessingException {
         String tableName = "test";
         EsTable et = new EsTable(EsRequestTest.host,
                 EsRequestTest.username, EsRequestTest.password,

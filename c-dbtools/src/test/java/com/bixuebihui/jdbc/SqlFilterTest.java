@@ -55,6 +55,26 @@ public class SqlFilterTest {
 	}
 
 
+
+	@Test
+	public void testSubGroupOperators(){
+		SqlFilter filter = new SqlFilter();
+
+		SqlFilter cond = new SqlFilter();
+		cond.contain("name", "def");
+
+		SqlFilter cond1 = new SqlFilter();
+		cond1.contain("name", "dff");
+
+		filter.addSubGroupCondition(SqlFilter.Operator.OR, cond, cond1);
+
+		SqlObject obj = filter.toSqlObject();
+
+		assertEquals("where ( name like concat('%', ?, '%') ) OR ( name like concat('%', ?, '%') )",
+				obj.getSqlString());
+		assertEquals(2, obj.getParameters().length);
+	}
+
 	@Test
 	public void testAddFilters(){
 		SqlFilter sf = new 	SqlFilter();

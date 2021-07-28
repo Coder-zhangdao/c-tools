@@ -4,6 +4,7 @@ package com.bixuebihui.jmesa;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.jdbc.*;
 import com.bixuebihui.jsp.TimeSpan;
+import io.burt.jmespath.node.Operator;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -79,6 +80,10 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
 
     public static SqlFilter getFilter(SqlFilter sqlFilter, Limit limit, String tableAlias) throws ParseException {
         FilterSet filterSet = limit.getFilterSet();
+        return getFilter(sqlFilter, filterSet, tableAlias);
+    }
+
+    public static SqlFilter getFilter(SqlFilter sqlFilter, FilterSet filterSet, String tableAlias) throws ParseException {
         Collection<Filter> filters = filterSet.getFilters();
 
         for (Filter filter : filters) {
@@ -91,23 +96,21 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
             } else if (NumberRange.isNumberRange(value.toString())){
                 NumberRange numberRange = NumberRange.build(value.toString());
                 sqlFilter.between(prop, numberRange.getBegin(), numberRange.getEnd());
-//            } else if (value instanceof RangeFilter.Pair){
-//                RangeFilter.Pair v = (RangeFilter.Pair) value;
-//                if(
-//                        (v.getStartValueInclusive()!=null && v.getStartValueInclusive().indexOf("-")>0)
-//                                ||
-//                                (v.getEndValueExclusive()!=null && v.getEndValueExclusive().indexOf("-")>0)
-//                ){
-//                    TimeSpan ts = TimeSpan.build(v.getStartValueInclusive(),v.getEndValueExclusive());
-//                    sqlFilter.between(prop, ts.getBeginDate(), ts.getEndDate());
-//                }else{
-//                    NumberRange numberRange = NumberRange.build(v.getStartValueInclusive(),v.getEndValueExclusive());
-//                    sqlFilter.between(prop, numberRange.getBegin(),numberRange.getEnd());
-//                }
 
             }else {
                 sqlFilter.addFilter(prop, SqlFilter.Comparison.valueOf(filter.getComparison().toString()), value);
             }
+        }
+
+        if(!filterSet.getFilterSets().isEmpty()) {
+            List<SqlFilter> subFilters = new ArrayList<>();
+            for (FilterSet set : filterSet.getFilterSets()) {
+                SqlFilter subSqlFilter = new SqlFilter();
+                SqlFilter subFilter = getFilter(subSqlFilter, set, tableAlias);
+                subFilters.add(subFilter);
+            }
+            sqlFilter.addSubGroupCondition(SqlFilter.Operator.valueOf(filterSet.getOperator().toString()),
+                    subFilters.toArray(new SqlFilter[0]));
         }
         return sqlFilter;
     }

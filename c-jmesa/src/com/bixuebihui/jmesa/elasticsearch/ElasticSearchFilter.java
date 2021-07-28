@@ -1,7 +1,6 @@
 package com.bixuebihui.jmesa.elasticsearch;
 
 import com.bixuebihui.jdbc.SqlFilter;
-import com.bixuebihui.jmesa.elasticsearch.processor.Sort;
 import com.bixuebihui.jmesa.elasticsearch.query.Bool;
 import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.bixuebihui.jmesa.elasticsearch.query.Range;
@@ -11,8 +10,10 @@ import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * @author xwx
+ */
 public class ElasticSearchFilter extends SqlFilter {
 
 
@@ -82,8 +83,7 @@ Test cases:
 
     public String toEsObject(int from, int size, LinkedHashMap<String, String> sort) {
 
-
-        if (filters==null || filters.isEmpty()) {
+        if (isNoFilters()) {
             return EsQueryBuilder.build(Query.match_all(), from, size, sort);
         }
 
@@ -92,9 +92,23 @@ Test cases:
         for (Filter filter : filters) {
             buildEsObject(criteria, filter);
         }
-        return EsQueryBuilder.build(criteria, from, size, sort);
 
-        //TODO or/and group
+        for(SqlFilter sqlFilter: subGroups){
+
+            Bool subCriteria = new Bool();
+            for(Filter filter: sqlFilter.getFilters()) {
+                buildEsObject(criteria, filter);
+            }
+
+            if(subGroupsJoinOperator==Operator.AND) {
+                criteria.addMust(subCriteria);
+            }else{
+                criteria.addShould(subCriteria);
+            }
+        }
+
+
+        return EsQueryBuilder.build(criteria, from, size, sort);
     }
 
         private void buildEsObject(Bool criteria, Filter filter) {
