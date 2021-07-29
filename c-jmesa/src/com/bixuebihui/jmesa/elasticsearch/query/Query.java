@@ -587,6 +587,7 @@ import java.util.Map;
          *
          * @return array Query
          */
+        @Override
         public Map toArray() {
             return ImmutableMap.<String, Object>builder().put("ids", this.getParams()).build();
         }
@@ -652,7 +653,7 @@ import java.util.Map;
          *
          * @var Query string
          */
-        protected String _queryString;
+        protected String queryString;
 
         /**
          * Creates query string object. Calls setQuery with argument.
@@ -874,11 +875,12 @@ import java.util.Map;
          * @return array Query array
          * @see Query#toArray()
          */
+        @Override
         public Map toArray() {
             Map res = Maps.newHashMap();
             Map res1 = Maps.newHashMap();
 
-            res1.put("query", this._queryString);
+            res1.put("query", this.queryString);
             res1.putAll(this.getParams());
             res.put("query_string", res1);
             return res;
@@ -1150,13 +1152,13 @@ import java.util.Map;
         /**
          * @var string
          */
-        protected String _field;
+        protected String field;
         protected float cutoffFrequency;
 
         /**
          * @var array
          */
-        protected Map<String, Object> _queryParams = new HashMap<>();
+        protected Map<String, Object> queryParams = new HashMap<>();
 
         /**
          * @param field           the field on which to query
@@ -1176,7 +1178,7 @@ import java.util.Map;
          * @return this
          */
         public Common setField(String field) {
-            this._field = field;
+            this.field = field;
             return this;
         }
 
@@ -1264,15 +1266,16 @@ import java.util.Map;
          * @return this
          */
         public Common setQueryParam(String key, Object value) {
-            this._queryParams.put(key, value);
+            this.queryParams.put(key, value);
             return this;
         }
 
         /**
          * @return array
          */
+        @Override
         public Map toArray() {
-            this.setParam(this._field, this._queryParams);
+            this.setParam(this.field, this.queryParams);
             return super.toArray();
         }
 

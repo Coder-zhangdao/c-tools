@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.RawValue;
 import com.google.common.collect.Maps;
 import io.burt.jmespath.Expression;
 import io.burt.jmespath.JmesPath;
@@ -20,6 +19,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.jmesa.limit.RowSelect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -37,22 +39,15 @@ import java.util.regex.Pattern;
 import static com.bixuebihui.jmesa.elasticsearch.EsQueryBuilder.EMPTY_JSON_STRING;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
+/**
+ * @author xwx
+ */
 public class EsRequest {
+    static  final Logger logger = LoggerFactory.getLogger(EsRequest.class);
 
     String host;
-
-    // The first thing you need is a runtime. These objects can compile expressions
-    // and they are specific to the kind of structure you want to search in.
-    // For most purposes you want the Jackson runtime, it can search in JsonNode
-    // structures created by Jackson.
-    JmesPath<JsonNode> jmespath = new JacksonRuntime();
-    // Expressions need to be compiled before you can search. Compiled expressions
-    // are reusable and thread safe. Compile your expressions once, just like database
-    // prepared statements.
-    Expression<JsonNode> exp = jmespath.compile("{caption:hits.hits[0]._index, " +
-            "titles:keys(hits.hits[0]._source),"+
-            "data:hits.hits[*]._source,"+
-            "paging:{totalRows:hits.total.value}}");
+    private final String username;
+    private final String password;
 
     // This you have to fill in yourself, you're probably using Jackson's ObjectMapper
     // to load JSON data, and that should fit right in here.
@@ -63,8 +58,23 @@ public class EsRequest {
      * 需要检索的索引
      */
     String indexName;
-    private String username;
-    private String password;
+    /**
+    // The first thing you need is a runtime. These objects can compile expressions
+    // and they are specific to the kind of structure you want to search in.
+    // For most purposes you want the Jackson runtime, it can search in JsonNode
+    // structures created by Jackson.
+     */
+    JmesPath<JsonNode> jmespath = new JacksonRuntime();
+    /**
+    // Expressions need to be compiled before you can search. Compiled expressions
+    // are reusable and thread safe. Compile your expressions once, just like database
+    // prepared statements.
+     */
+    Expression<JsonNode> exp = jmespath.compile("{caption:hits.hits[0]._index, " +
+            "titles:keys(hits.hits[0]._source)," +
+            "_id: hits.hits[*]._id," +
+            "data:hits.hits[*]._source," +
+            "paging:{totalRows:hits.total.value}}");
 
     Pattern pattern = Pattern.compile("open\\s+[\\.\\w|\\-|\\:+|\\w|\\-|\\:+]+");
     Pattern p = Pattern.compile("\\s+[\\.\\w\\-|\\:+|\\w\\-|\\:+]+");
@@ -73,7 +83,7 @@ public class EsRequest {
         return host;
     }
 
-    public  EsRequest(String host, String username, String password) {
+    public EsRequest(String host, String username, String password) {
         this.host = host;
         this.username = username;
         this.password = password;
@@ -90,10 +100,10 @@ public class EsRequest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         HttpEntityEnclosingRequestBase post;
-        post = new HttpPost(host +"/"+ EsQueryBuilder.ACTION_BULK);
+        post = new HttpPost(host + "/" + EsQueryBuilder.ACTION_BULK);
         StringBuilder sb = new StringBuilder();
 
-        for(Document doc : docs) {
+        for (Document doc : docs) {
             Map<String, Object> map1 = Maps.newHashMap();
             Map<String, Object> map2 = Maps.newHashMap();
             map2.put("_index", indexName);
@@ -118,10 +128,13 @@ public class EsRequest {
     }
 
     private String httpJson(HttpEntityEnclosingRequestBase requestBase) {
+        logger.debug("====>>>>");
+        logger.debug(requestBase.toString());
+
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-            if(this.username!=null && password!=null) {
+            if (this.username != null && password != null) {
                 Header header = new BasicHeader("Authorization", "Basic "
-                        + Base64.getUrlEncoder().encodeToString((this.username+":"+this.password).getBytes(StandardCharsets.UTF_8)));
+                        + Base64.getUrlEncoder().encodeToString((this.username + ":" + this.password).getBytes(StandardCharsets.UTF_8)));
                 requestBase.addHeader(header);
             }
 
@@ -133,7 +146,10 @@ public class EsRequest {
                         " with message:" + getResponseString(response));
             }
 
-            return getResponseString(response);
+            String res = getResponseString(response);
+            logger.debug("<<<<====");
+            logger.debug(res);
+            return res;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -141,11 +157,15 @@ public class EsRequest {
     }
 
     public String query(Query query, int from, int size) {
+        return query(query, from, size, null);
+    }
+
+    public String query(Query query, int from, int size, LinkedHashMap<String, String> sort) {
         try {
             HttpGetWithJsonEntity getRequest =
                     HttpGetWithJsonEntity.builder()
                             .withUrl(host + "/" + indexName + "/" + EsQueryBuilder.ACTION_SEARCH)
-                            .withBodyEntry(EsQueryBuilder.build(query, from, size))
+                            .withBodyEntry(EsQueryBuilder.build(query, from, size, sort))
                             .build();
 
             return httpJson(getRequest);
@@ -205,72 +225,72 @@ public class EsRequest {
     }
 
     /**
-     {
-     "took" : 17,
-     "timed_out" : false,
-     "_shards" : {
-     "total" : 1,
-     "successful" : 1,
-     "skipped" : 0,
-     "failed" : 0
-     },
-     "hits" : {
-     "total" : {
-     "value" : 2,
-     "relation" : "eq"
-     },
-     "max_score" : 1.0,
-     "hits" : [
-     {
-     "_index" : "my-index-000001",
-     "_type" : "_doc",
-     "_id" : "1",
-     "_score" : 1.0,
-     "_source" : {
-     "color" : [
-     "blue",
-     "green"
-     ]
-     }
-     },
-     {
-     "_index" : "my-index-000001",
-     "_type" : "_doc",
-     "_id" : "2",
-     "_score" : 1.0,
-     "_source" : {
-     "color" : "blue"
-     }
-     }
-     ]
-     }
-     }
-
-     ==>
-
-     {
-      "caption":"t_config",
-      "titles": [
-      "C _key",
-      "c_name",
-      "c_value"],
-      "data": [{
-      "c_key":"key1",
-      "c_name":"name1",
-      "c_value":"value1"}
-      ],
-
-      "paging":{"page":2,"maxRows":1,"rowEnd":2,"rowStart":1,"totalRows":3}}
-
+     * {
+     * "took" : 17,
+     * "timed_out" : false,
+     * "_shards" : {
+     * "total" : 1,
+     * "successful" : 1,
+     * "skipped" : 0,
+     * "failed" : 0
+     * },
+     * "hits" : {
+     * "total" : {
+     * "value" : 2,
+     * "relation" : "eq"
+     * },
+     * "max_score" : 1.0,
+     * "hits" : [
+     * {
+     * "_index" : "my-index-000001",
+     * "_type" : "_doc",
+     * "_id" : "1",
+     * "_score" : 1.0,
+     * "_source" : {
+     * "color" : [
+     * "blue",
+     * "green"
+     * ]
+     * }
+     * },
+     * {
+     * "_index" : "my-index-000001",
+     * "_type" : "_doc",
+     * "_id" : "2",
+     * "_score" : 1.0,
+     * "_source" : {
+     * "color" : "blue"
+     * }
+     * }
+     * ]
+     * }
+     * }
+     * <p>
+     * ==>
+     * <p>
+     * {
+     * "caption":"t_config",
+     * "titles": [
+     * "C _key",
+     * "c_name",
+     * "c_value"],
+     * "data": [{
+     * "c_key":"key1",
+     * "c_name":"name1",
+     * "c_value":"value1"}
+     * ],
+     * <p>
+     * "paging":{"page":2,"maxRows":1,"rowEnd":2,"rowStart":1,"totalRows":3}}
+     *
      * @param esJson
      * @return
      */
-    protected   String esJsonToTableJson(String esJson, RowSelect rowSelect) throws JsonProcessingException {
+    protected String esJsonToTableJson(String esJson, RowSelect rowSelect) throws JsonProcessingException {
         JsonNode input = mapper.readTree(esJson);
         // Finally this is how you search a structure. There's really not much more to it.
         JsonNode resultTotal = exp.search(input);
         JsonNode paging = resultTotal.path("paging");
-        if(rowSelect!=null) {
+        if (rowSelect != null) {
             ((ObjectNode) paging).put("maxRows", rowSelect.getMaxRows());
             ((ObjectNode) paging).put("rowEnd", rowSelect.getRowEnd());
             ((ObjectNode) paging).put("rowStart", rowSelect.getRowStart());
@@ -282,7 +302,7 @@ public class EsRequest {
         return res;
     }
 
-    static class Document{
+    static class Document {
         String id;
         Map<String, Object> values;
 

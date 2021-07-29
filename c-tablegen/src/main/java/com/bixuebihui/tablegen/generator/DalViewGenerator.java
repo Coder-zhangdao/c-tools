@@ -29,6 +29,7 @@ public class DalViewGenerator extends DalGenerator {
         super.isView = true;
     }
 
+    @Override
     public String getTargetFileName(String tableName) {
         return getTargetFileName(VIEW_DIR+ File.separator+"dal", tableName);
     }

@@ -8,8 +8,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+/**
+ * @author xwx
+ */
 public class ElasticSearchFilter extends SqlFilter {
 
 
@@ -77,9 +81,10 @@ Test cases:
         return Arrays.asList(value);
     }
 
-    public String toEsObject(String indexName, int from, int size) {
-        if (filters==null || filters.isEmpty()) {
-            return EsQueryBuilder.build(Query.match_all(), from, size);
+    public String toEsObject(int from, int size, LinkedHashMap<String, String> sort) {
+
+        if (isNoFilters()) {
+            return EsQueryBuilder.build(Query.match_all(), from, size, sort);
         }
 
         Bool criteria = new Bool();
@@ -87,9 +92,23 @@ Test cases:
         for (Filter filter : filters) {
             buildEsObject(criteria, filter);
         }
-        return EsQueryBuilder.build(criteria, from, size);
 
-        //TODO or/and group
+        for(SqlFilter sqlFilter: subGroups){
+
+            Bool subCriteria = new Bool();
+            for(Filter filter: sqlFilter.getFilters()) {
+                buildEsObject(criteria, filter);
+            }
+
+            if(subGroupsJoinOperator==Operator.AND) {
+                criteria.addMust(subCriteria);
+            }else{
+                criteria.addShould(subCriteria);
+            }
+        }
+
+
+        return EsQueryBuilder.build(criteria, from, size, sort);
     }
 
         private void buildEsObject(Bool criteria, Filter filter) {
@@ -142,6 +161,7 @@ Test cases:
             case NOT_IN:
                 queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
                 criteria.addMustNot(queryFilter);
+                break;
             case IN:
                 queryFilter = Query.terms(filter.getProperty(), Lists.newArrayList(filter.getValue()));
                 criteria.addMust(queryFilter);
@@ -151,6 +171,7 @@ Test cases:
                 queryFilter = Query.exists(filter.getProperty());
 
                 criteria.addMustNot(queryFilter);
+                break;
             case EXISTS:
                 queryFilter = Query.exists(filter.getProperty());
 
@@ -161,6 +182,8 @@ Test cases:
 
                 criteria.addMust(queryFilter);
                 break;
+            default:
+
         }
 
     }

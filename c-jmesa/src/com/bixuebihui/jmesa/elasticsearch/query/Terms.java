@@ -20,14 +20,14 @@ public class Terms extends Query
      *
      * @var array Terms
      */
-    protected List _terms;
+    protected List terms;
 
     /**
      * Terms key.
      *
      * @var string Terms key
      */
-    protected String _key;
+    protected String key;
 
     /**
      * Construct terms query.
@@ -50,8 +50,8 @@ public class Terms extends Query
      */
     public Terms setTerms(String key, List terms)
     {
-        this._key = key;
-        this._terms = terms;
+        this.key = key;
+        this.terms = terms;
 
         return this;
     }
@@ -66,8 +66,8 @@ public class Terms extends Query
      */
     public Terms setTermsLookup(String key, List termsLookup)
     {
-        this._key = key;
-        this._terms = termsLookup;
+        this.key = key;
+        this.terms = termsLookup;
 
         return this;
     }
@@ -81,10 +81,10 @@ public class Terms extends Query
      */
     public Terms addTerm(String term)
     {
-        if(this._terms==null){
-            this._terms = Lists.newArrayList();
+        if(this.terms ==null){
+            this.terms = Lists.newArrayList();
         }
-        this._terms.add(term);
+        this.terms.add(term);
 
         return this;
     }
@@ -110,12 +110,13 @@ public class Terms extends Query
      *
      * @return array Query array
      */
+    @Override
     public Map toArray()
     {
-        if(this._key==null){
+        if(this.key ==null){
             throw new IllegalArgumentException("term key is empty ");
         }
-        this.setParam(this._key, this._terms);
+        this.setParam(this.key, this.terms);
 
         return super.toArray();
     }

@@ -26,6 +26,7 @@ public class NumberRange implements ISqlConditionType {
     /**
      * @param tildeSeparatedBeginInclusiveEndExclusive yyyy-MM-dd~yyyy-MM-dd
      * @return time span
+     * @throws ParseException if any.
      */
     public static NumberRange build(String tildeSeparatedBeginInclusiveEndExclusive) throws ParseException {
         NumberRange range = new NumberRange(null, null);

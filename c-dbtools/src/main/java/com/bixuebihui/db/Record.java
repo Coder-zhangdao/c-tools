@@ -44,10 +44,9 @@ public interface Record<T> {
 
 
 	/**
-	 * <p>find.</p>
-	 * 查询单条
+	 * select one record from db
 	 * @return a T object.
-	 * @throws java.sql.SQLException if any.
+	 * @throws  java.sql.SQLException if any.
 	 */
 	T find() throws SQLException;
 

@@ -19,9 +19,7 @@ import org.apache.commons.text.StringEscapeUtils;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import javax.annotation.processing.Generated;
 
-@Generated("com.github.yujiaao:tablegen")
 @ApiModel(description ="测试表")
 public class TestGen  implements Serializable {
 

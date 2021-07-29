@@ -40,7 +40,7 @@ public class Match extends Query {
          */
         public Match setFieldParam(String field, String key, Object value) {
             if (!this.getParams().containsKey(field)) {
-                this.getParams().put(field, new HashMap<>());
+                this.getParams().put(field, new HashMap<>(8));
             }
 
             ((Map) this.getParams().get(field)).put(key, value);

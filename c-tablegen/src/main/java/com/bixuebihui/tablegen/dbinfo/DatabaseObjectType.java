@@ -58,7 +58,7 @@ public class DatabaseObjectType implements IHasIdentifier
 	public final static DatabaseObjectType USER = createNewDatabaseObjectType();
 
 	/** Uniquely identifies this Object. */
-	private final IIdentifier _id;
+	private final IIdentifier id;
 
 	/**
 	 * Default ctor.
@@ -66,7 +66,7 @@ public class DatabaseObjectType implements IHasIdentifier
 	private DatabaseObjectType()
 	{
 		super();
-		_id = IDENTIFIER_FACTORY.createIdentifier();
+		id = IDENTIFIER_FACTORY.createIdentifier();
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class DatabaseObjectType implements IHasIdentifier
 	@Override
 	public IIdentifier getIdentifier()
 	{
-		return _id;
+		return id;
 	}
 
 	public static DatabaseObjectType createNewDatabaseObjectType()

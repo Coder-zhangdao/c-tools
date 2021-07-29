@@ -10,6 +10,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+/**
+ * @author xwx
+ */
 public interface Generator {
     void init(ProjectConfig config, DatabaseConfig dbConfig, TableSetInfo setInfo);
 

@@ -2,6 +2,9 @@ package com.bixuebihui.jmesa.elasticsearch.suggest;
 
 import java.util.ArrayList;
 
+/**
+ * @author xwx
+ */
 public class Completion extends Suggest {
         public Completion(String name, String field) {
             super(name, field);

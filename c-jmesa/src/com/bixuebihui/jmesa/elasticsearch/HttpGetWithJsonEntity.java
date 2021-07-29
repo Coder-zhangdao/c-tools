@@ -9,6 +9,9 @@ import java.net.URISyntaxException;
 
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
+/**
+ * @author xwx
+ */
 public class HttpGetWithJsonEntity extends HttpEntityEnclosingRequestBase {
     public final static String METHOD_NAME = "GET";
 

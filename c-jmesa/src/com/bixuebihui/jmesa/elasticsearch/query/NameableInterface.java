@@ -18,9 +18,9 @@ interface NameableInterface
     /**
      * Set the name of this object.
      *
-     * @param  $name
+     * @param  name
      *
-     * @return $this
+     * @return this
      */
-    NameableInterface setName(String $name);
+    NameableInterface setName(String name);
 }

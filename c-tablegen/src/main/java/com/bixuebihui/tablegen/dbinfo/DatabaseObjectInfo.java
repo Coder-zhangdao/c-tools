@@ -19,16 +19,16 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
 	}
 
 	/** Catalog name. Can be <CODE>null</CODE> */
-	private final String _catalog;
+	private final String catalog;
 
 	/** Schema name. Can be <CODE>null</CODE> */
-	private final String _schema;
+	private final String schema;
 
 	/** Simple object name. */
-	private final String _simpleName;
+	private final String simpleName;
 
 	/** Object type. @see DatabaseObjectType.*/
-	private DatabaseObjectType _dboType = DatabaseObjectType.OTHER;
+	private DatabaseObjectType dboType = DatabaseObjectType.OTHER;
 
 	public DatabaseObjectInfo(String catalog, String schema, String simpleName,
 								DatabaseObjectType dboType)
@@ -39,10 +39,10 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
 			throw new IllegalArgumentException("Null DatabaseObjectType passed");
 		}
 
-		_catalog = catalog;
-		_schema = schema;
-		_simpleName = simpleName;
-		_dboType = dboType;
+		this.catalog = catalog;
+		this.schema = schema;
+		this.simpleName = simpleName;
+		this.dboType = dboType;
 	}
 
 	@Override
@@ -54,19 +54,19 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
 	@Override
     public String getCatalogName()
 	{
-		return _catalog;
+		return catalog;
 	}
 
 	@Override
     public String getSchemaName()
 	{
-		return _schema;
+		return schema;
 	}
 
 	@Override
     public String getSimpleName()
 	{
-		return _simpleName;
+		return simpleName;
 	}
 
 
@@ -74,7 +74,7 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
 	@Override
     public DatabaseObjectType getDatabaseObjectType()
 	{
-		return _dboType;
+		return dboType;
 	}
 
 
@@ -85,20 +85,20 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
 		if (obj instanceof DatabaseObjectInfo)
 		{
 			DatabaseObjectInfo info = (DatabaseObjectInfo) obj;
-			if ((info._catalog == null && _catalog == null)
-				|| ((info._catalog != null && _catalog != null)
-					&& info._catalog.equals(_catalog)))
+			if ((info.catalog == null && catalog == null)
+				|| ((info.catalog != null && catalog != null)
+					&& info.catalog.equals(catalog)))
 			{
 
-					if ((info._schema == null && _schema == null)
-						|| ((info._schema != null && _schema != null)
-							&& info._schema.equals(_schema)))
+					if ((info.schema == null && schema == null)
+						|| ((info.schema != null && schema != null)
+							&& info.schema.equals(schema)))
 					{
 						return (
-							(info._simpleName == null && _simpleName == null)
-								|| ((info._simpleName != null
-									&& _simpleName != null)
-									&& info._simpleName.equals(_simpleName)));
+							(info.simpleName == null && simpleName == null)
+								|| ((info.simpleName != null
+									&& simpleName != null)
+									&& info.simpleName.equals(simpleName)));
 					}
 
 
@@ -111,11 +111,11 @@ public class DatabaseObjectInfo implements IDatabaseObjectInfo
     public int compareTo(Object o)
 	{
 		DatabaseObjectInfo other = (DatabaseObjectInfo) o;
-		return _simpleName.compareTo(other._simpleName);
+		return simpleName.compareTo(other.simpleName);
 	}
 
 	@Override
     public String getQualifiedName() {
-		return _simpleName;
+		return simpleName;
 	}
 }

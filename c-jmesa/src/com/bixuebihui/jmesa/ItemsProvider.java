@@ -44,6 +44,7 @@ public class ItemsProvider<T> implements PageItems {
 
     }
 
+    @Override
     public Collection<T> getItems(Limit limit) {
         SqlSort sort = AbstractWebUI.getSort(limit);
         SqlFilter filter = AbstractWebUI.getFilter(limit);

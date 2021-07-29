@@ -13,105 +13,105 @@ import com.bixuebihui.jmesa.elasticsearch.query.Params;
         static final String SUGGEST_MODE_ALWAYS = "always";
 
         /**
-         * @param $field
+         * @param field
          */
-        public DirectGenerator(String $field) {
-            this.setField($field);
+        public DirectGenerator(String field) {
+            this.setField(field);
         }
 
         /**
          * Set the field name from which to fetch candidate suggestions.
          *
-         * @param $field
-         * @return $this
+         * @param field
+         * @return this
          */
-        public DirectGenerator setField(String $field) {
-            return (DirectGenerator) this.setParam("field", $field);
+        public DirectGenerator setField(String field) {
+            return (DirectGenerator) this.setParam("field", field);
         }
 
         /**
          * Set the maximum corrections to be returned per suggest text token.
          *
-         * @param $size int
-         * @return $this
+         * @param size int
+         * @return this
          */
-        public DirectGenerator setSize(int $size) {
-            return (DirectGenerator) this.setParam("size", $size);
+        public DirectGenerator setSize(int size) {
+            return (DirectGenerator) this.setParam("size", size);
         }
 
         /**
-         * @param $mode see SUGGEST_MODE_* constants for options
-         * @return $this
+         * @param mode see SUGGEST_MODE_* constants for options
+         * @return this
          */
-        public DirectGenerator setSuggestMode(String $mode) {
-            return (DirectGenerator) this.setParam("suggest_mode", $mode);
+        public DirectGenerator setSuggestMode(String mode) {
+            return (DirectGenerator) this.setParam("suggest_mode", mode);
         }
 
         /**
-         * @param $max can only be a value between 1 and 2. Defaults to 2.
-         * @return $this
+         * @param max can only be a value between 1 and 2. Defaults to 2.
+         * @return this
          */
-        public DirectGenerator setMaxEdits(int $max) {
-            return (DirectGenerator) this.setParam("max_edits", $max);
+        public DirectGenerator setMaxEdits(int max) {
+            return (DirectGenerator) this.setParam("max_edits", max);
         }
 
         /**
-         * @param $length defaults to 1
-         * @return $this
+         * @param length defaults to 1
+         * @return this
          */
-        public DirectGenerator setPrefixLength(int $length) {
-            return (DirectGenerator) this.setParam("prefix_length", $length);
+        public DirectGenerator setPrefixLength(int length) {
+            return (DirectGenerator) this.setParam("prefix_length", length);
         }
 
         /**
-         * @param $min defaults to 4
-         * @return $this
+         * @param min defaults to 4
+         * @return this
          */
-        public DirectGenerator setMinWordLength(int $min) {
-            return (DirectGenerator) this.setParam("min_word_length", $min);
+        public DirectGenerator setMinWordLength(int min) {
+            return (DirectGenerator) this.setParam("min_word_length", min);
         }
 
         /**
-         * @param $max
-         * @return $this
+         * @param max
+         * @return this
          */
-        public DirectGenerator setMaxInspections(int $max) {
-            return (DirectGenerator) this.setParam("max_inspections", $max);
+        public DirectGenerator setMaxInspections(int max) {
+            return (DirectGenerator) this.setParam("max_inspections", max);
         }
 
         /**
-         * @param $min float
-         * @return $this
+         * @param min float
+         * @return this
          */
-        public DirectGenerator setMinDocFrequency(float $min) {
-            return (DirectGenerator) this.setParam("min_doc_freq", $min);
+        public DirectGenerator setMinDocFrequency(float min) {
+            return (DirectGenerator) this.setParam("min_doc_freq", min);
         }
 
         /**
-         * @param $max float
-         * @return $this
+         * @param max float
+         * @return this
          */
-        public DirectGenerator setMaxTermFrequency(float $max) {
-            return (DirectGenerator) this.setParam("max_term_freq", $max);
+        public DirectGenerator setMaxTermFrequency(float max) {
+            return (DirectGenerator) this.setParam("max_term_freq", max);
         }
 
         /**
          * Set an analyzer to be applied to the original token prior to candidate generation.
          *
-         * @param $pre an analyzer string
-         * @return $this
+         * @param pre an analyzer string
+         * @return this
          */
-        public DirectGenerator setPreFilter(String $pre) {
-            return (DirectGenerator) this.setParam("pre_filter", $pre);
+        public DirectGenerator setPreFilter(String pre) {
+            return (DirectGenerator) this.setParam("pre_filter", pre);
         }
 
         /**
          * Set an analyzer to be applied to generated tokens before they are passed to the phrase scorer.
          *
-         * @param $post string
-         * @return $this
+         * @param post string
+         * @return this
          */
-        public DirectGenerator setPostFilter(String $post) {
-            return (DirectGenerator) this.setParam("post_filter", $post);
+        public DirectGenerator setPostFilter(String post) {
+            return (DirectGenerator) this.setParam("post_filter", post);
         }
     }
