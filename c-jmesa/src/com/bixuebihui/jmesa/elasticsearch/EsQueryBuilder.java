@@ -15,6 +15,8 @@ public class EsQueryBuilder {
     static  final Logger logger = LoggerFactory.getLogger(EsQueryBuilder.class);
     static final String ACTION_SEARCH = "_search";
     static final String ACTION_BULK = "_bulk";
+    static final String ACTION_CAT = "_cat";
+    static final String ACTION_INDICES = "indices";
 
     static final String queryAllFields = "q=?";
     static final String SIZE = "size";

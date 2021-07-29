@@ -27,9 +27,12 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.bixuebihui.jmesa.elasticsearch.EsQueryBuilder.EMPTY_JSON_STRING;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
@@ -63,7 +66,8 @@ public class EsRequest {
     private String username;
     private String password;
 
-
+    Pattern pattern = Pattern.compile("open\\s+[\\.\\w|\\-|\\:+|\\w|\\-|\\:+]+");
+    Pattern p = Pattern.compile("\\s+[\\.\\w\\-|\\:+|\\w\\-|\\:+]+");
 
     public String getHost() {
         return host;
@@ -73,6 +77,13 @@ public class EsRequest {
         this.host = host;
         this.username = username;
         this.password = password;
+    }
+
+    public  EsRequest(String host, String username, String password, String indexName) {
+        this.host = host;
+        this.username = username;
+        this.password = password;
+        this.indexName = indexName;
     }
 
     public String createDoc(String indexName, List<Document> docs) throws JsonProcessingException {
@@ -157,6 +168,28 @@ public class EsRequest {
             e.printStackTrace();
         }
         return EMPTY_JSON_STRING;
+    }
+
+    public List<String> getAllIndexList() {
+        List<String> indexList = new ArrayList<>();
+        try {
+            HttpGetWithJsonEntity getRequest =
+                    HttpGetWithJsonEntity.builder()
+                            .withUrl(host + "/" + EsQueryBuilder.ACTION_CAT + "/" + EsQueryBuilder.ACTION_INDICES)
+                            .withBodyEntry("")
+                            .build();
+            String res = httpJson(getRequest);
+            Matcher matcher = pattern.matcher(res);
+            while (matcher.find()){
+                String matchStr = matcher.group();
+                Matcher m = p.matcher(matchStr);
+                m.find();
+                indexList.add(m.group().trim());
+            }
+        } catch (UnsupportedEncodingException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return indexList;
     }
 
     private String getResponseString(HttpResponse response) throws IOException {

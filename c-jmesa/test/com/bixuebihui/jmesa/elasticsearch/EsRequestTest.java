@@ -4,13 +4,19 @@ import com.bixuebihui.jmesa.elasticsearch.query.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.JsonUtils;
 import org.jmesa.limit.RowSelect;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,7 +31,7 @@ public class EsRequestTest {
     @Test
     public  void testQuery() {
 
-        esRequest.indexName = "test*";
+        esRequest.indexName = "library*";
 
         String s0 = esRequest.query(Query.match_all(), 0, 10);
         System.out.println(s0);
@@ -42,7 +48,7 @@ public class EsRequestTest {
 
     @Test
     public void testMatchAll(){
-        esRequest.indexName = "test*";
+        esRequest.indexName = "library*";
         String s0 = esRequest.query(Query.match_all(), 0, 10);
         System.out.println(s0);
     }
@@ -165,5 +171,18 @@ public class EsRequestTest {
                 "  }\n" +
                 "}", result);
 
+    }
+
+    @Test
+    public void queryAllIndex(){
+        List<String> indexList = esRequest.getAllIndexList();
+        System.out.println(StringUtils.join(indexList,","));
+    }
+
+    @Test
+    public void queryData(){
+        esRequest.indexName = "library*";
+        String json = esRequest.query(Query.match_all(), 0, 2);
+        System.out.println(json);
     }
 }

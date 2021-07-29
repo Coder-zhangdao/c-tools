@@ -15,7 +15,7 @@ class EsTableTest {
 
     @Test
     void json() throws SQLException, JsonProcessingException {
-        String tableName = "test";
+        String tableName = "library";
         EsTable et = new EsTable(EsRequestTest.host,
                 EsRequestTest.username, EsRequestTest.password,
                 tableName, tableName);

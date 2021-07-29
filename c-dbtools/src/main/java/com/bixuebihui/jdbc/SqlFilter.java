@@ -441,7 +441,7 @@ public class SqlFilter {
 
 	}
 
-	protected static class Filter {
+	public static class Filter {
 		private final String property;
 		private final Object[] value;
 		private final Comparison comparison;
