@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.bixuebihui.jmesa.elasticsearch.EsQueryBuilder.EMPTY_JSON_STRING;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
 /**
@@ -153,7 +152,7 @@ public class EsRequest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return EMPTY_JSON_STRING;
+        return EsQueryBuilder.EMPTY_JSON_STRING;
     }
 
     public String query(Query query, int from, int size) {
@@ -172,7 +171,7 @@ public class EsRequest {
         } catch (UnsupportedEncodingException | URISyntaxException e) {
             e.printStackTrace();
         }
-        return EMPTY_JSON_STRING;
+        return EsQueryBuilder.EMPTY_JSON_STRING;
     }
 
     public String query(String rawJson) {
@@ -187,7 +186,7 @@ public class EsRequest {
         } catch (UnsupportedEncodingException | URISyntaxException e) {
             e.printStackTrace();
         }
-        return EMPTY_JSON_STRING;
+        return EsQueryBuilder.EMPTY_JSON_STRING;
     }
 
     public List<String> getAllIndexList() {
