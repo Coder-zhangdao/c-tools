@@ -30,3 +30,5 @@ To generate code please refer [`c-tablegen-demo`](c-tablegen-demo) project.
 
 ## A json table export adapter : c-jmesa
 
+## TODO
+add async support for r2dbc.
