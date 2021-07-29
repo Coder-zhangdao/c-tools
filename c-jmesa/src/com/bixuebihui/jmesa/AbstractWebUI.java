@@ -4,13 +4,10 @@ package com.bixuebihui.jmesa;
 import com.bixuebihui.cache.DictionaryCache;
 import com.bixuebihui.jdbc.*;
 import com.bixuebihui.jsp.TimeSpan;
-import io.burt.jmespath.node.Operator;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.jmesa.limit.*;
 import org.jmesa.model.ExportTypes;
 import org.jmesa.model.TableModel;
@@ -27,6 +24,8 @@ import org.jmesa.worksheet.WorksheetColumn;
 import org.jmesa.worksheet.WorksheetUtils;
 import org.jmesa.worksheet.editor.CheckboxWorksheetEditor;
 import org.jmesa.worksheet.editor.WorksheetCheckboxHeaderEditor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -109,7 +108,7 @@ public abstract class AbstractWebUI<T, V> implements WorksheetSaver {
                 SqlFilter subFilter = getFilter(subSqlFilter, set, tableAlias);
                 subFilters.add(subFilter);
             }
-            sqlFilter.addSubGroupCondition(SqlFilter.Operator.valueOf(filterSet.getOperator().toString()),
+            sqlFilter.addSubGroupCondition(SqlFilter.Operator.valueOf(filterSet.getOperator()+""),
                     subFilters.toArray(new SqlFilter[0]));
         }
         return sqlFilter;
