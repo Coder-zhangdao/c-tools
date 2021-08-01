@@ -1,15 +1,14 @@
 package com.bixuebihui.tablegen.generator;
 
-import com.itextpdf.styledxmlparser.jsoup.select.Evaluator;
 import org.hamcrest.core.StringEndsWith;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ViewGeneratorTest {
 
@@ -44,5 +43,6 @@ class ViewGeneratorTest {
 
         System.out.println(res);
     }
+
 
 }
