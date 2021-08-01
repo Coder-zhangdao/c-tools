@@ -9,13 +9,14 @@ package com.bixuebihui.generated.tablegen.dal;
   * (c) www.goldjetty.com
   */
 
-import java.sql.*;
-import java.util.List;
-
-import com.bixuebihui.sequence.SequenceUtils;
 import com.bixuebihui.generated.tablegen.BaseList;
 import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 import org.springframework.stereotype.Service;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 @Service
 public class T_metatableList  extends BaseList<T_metatable,Long>
@@ -49,8 +50,7 @@ public String getKeyName()
   * Updates the object from a selected ResultSet.
   */
 @Override
-public T_metatable mapRow (ResultSet r, int index) throws SQLException
-{
+public T_metatable mapRow (ResultSet r, int index) throws SQLException {
       T_metatable res = new T_metatable();
       res.setTid(r.getLong("tid"));
       res.setTname(r.getString("tname"));
@@ -82,7 +82,7 @@ public void setId(T_metatable info, Long id) {
   * Updates the current object values into the database.
   */
 @Override
-public boolean updateByKey(T_metatable info) throws SQLException
+public boolean updateByKey(T_metatable info)
 {
     String query="update " + getTableName() + " set "+
 "tid=?"+","+
@@ -102,7 +102,7 @@ public boolean updateByKey(T_metatable info) throws SQLException
   * Updates the current object values into the database.
   */
 @Override
-public boolean updateByKey(T_metatable info, Connection cn) throws SQLException
+public boolean updateByKey(T_metatable info, Connection cn)
 {
     String query="update " + getTableName() + " set "+
 "tid=?"+","+
@@ -122,7 +122,7 @@ public boolean updateByKey(T_metatable info, Connection cn) throws SQLException
   * Deletes from the database for table "t_metatable"
   */
 @Override
-public boolean deleteByKey(Long tid) throws SQLException
+public boolean deleteByKey(Long tid)
 {
 
     String query = "delete from " + getTableName() + " where tid=?";
@@ -133,7 +133,7 @@ public boolean deleteByKey(Long tid) throws SQLException
   * Deletes from the database for table "t_metatable"
   */
 @Override
-public boolean deleteByKey(Long tid, Connection cn) throws SQLException
+public boolean deleteByKey(Long tid, Connection cn)
 {
 
     String query = "delete from " + getTableName() + " where tid=?";
@@ -144,7 +144,7 @@ public boolean deleteByKey(Long tid, Connection cn) throws SQLException
   * Inserts the T_metatable object values into the database.
   */
 @Override
-public boolean insert (T_metatable info) throws SQLException
+public boolean insert (T_metatable info)
 {
     String query="insert into " + getTableName() + " ( tid,tname,isnode,isstate,isversion,isuuid,ismodifydate,extrainterfaces,extrasuperclasses,description ) values ( ?,?,?,?,?,?,?,?,?,? )";
     return 1== dbHelper.executeNoQuery(query, new Object[]{info.getTid(),info.getTname(),info.getIsnode(),info.getIsstate(),info.getIsversion(),info.getIsuuid(),info.getIsmodifydate(),info.getExtrainterfaces(),info.getExtrasuperclasses(),info.getDescription()});
@@ -154,7 +154,7 @@ public boolean insert (T_metatable info) throws SQLException
   * Inserts the T_metatable object values into the database.
   */
 @Override
-public boolean insert (T_metatable info, Connection cn) throws SQLException
+public boolean insert (T_metatable info, Connection cn)
 {
     String query="insert into " + getTableName() + " ( tid,tname,isnode,isstate,isversion,isuuid,ismodifydate,extrainterfaces,extrasuperclasses,description ) values ( ?,?,?,?,?,?,?,?,?,? )";
     return 1== dbHelper.executeNoQuery(query, new Object[]{info.getTid(),info.getTname(),info.getIsnode(),info.getIsstate(),info.getIsversion(),info.getIsuuid(),info.getIsmodifydate(),info.getExtrainterfaces(),info.getExtrasuperclasses(),info.getDescription()}, cn);
@@ -164,7 +164,7 @@ public boolean insert (T_metatable info, Connection cn) throws SQLException
   * Inserts the T_metatable object values into the database.
   */
 @Override
-public boolean insertBatch (T_metatable[] infos, Connection cn) throws SQLException
+public boolean insertBatch (T_metatable[] infos, Connection cn)
 {
     String query="insert into " + getTableName() + " ( tid,tname,isnode,isstate,isversion,isuuid,ismodifydate,extrainterfaces,extrasuperclasses,description ) values ( ?,?,?,?,?,?,?,?,?,? )";
     List<Object[]> a = new java.util.ArrayList<Object[]>();
@@ -179,7 +179,7 @@ public boolean insertBatch (T_metatable[] infos, Connection cn) throws SQLExcept
   * Inserts the dummy record of T_metatable object values into the database.
   */
 @Override
-public boolean insertDummy() throws SQLException
+public boolean insertDummy()
 {
      T_metatable  info = new T_metatable();
     info.setTid(getNextKey());

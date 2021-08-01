@@ -1,5 +1,6 @@
 package com.bixuebihui.jdbc;
 
+import com.bixuebihui.DbException;
 import com.bixuebihui.shardingjdbc.core.constant.SQLType;
 import com.bixuebihui.shardingjdbc.core.hint.HintManagerHolder;
 
@@ -37,16 +38,20 @@ public class MSDbHelper extends DbHelper {
      * {@inheritDoc}
      */
     @Override
-    public Connection getConnection(boolean readOnly) throws SQLException {
-        if (!readOnly) {
-            DML_FLAG.set(true);
-            return masterDatasource.getConnection();
-        }else if(isMasterRoute(SQLType.DQL)){
-            return masterDatasource.getConnection();
+    public Connection getConnection(boolean readOnly)  {
+        try {
+            if (!readOnly) {
+                DML_FLAG.set(true);
+                return masterDatasource.getConnection();
+            } else if (isMasterRoute(SQLType.DQL)) {
+                return masterDatasource.getConnection();
+            }
+            Connection conn = super.getConnection();
+            conn.setReadOnly(readOnly);
+            return conn;
+        }catch (SQLException e){
+            throw new DbException(e);
         }
-        Connection conn = super.getConnection();
-        conn.setReadOnly(readOnly);
-        return conn;
     }
 
     /**
@@ -75,7 +80,7 @@ public class MSDbHelper extends DbHelper {
      * @throws java.sql.SQLException if any.
      */
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         return  getConnection(false);
     }
 
@@ -99,7 +104,7 @@ public class MSDbHelper extends DbHelper {
 
     /** {@inheritDoc} */
     @Override
-    public void close() throws SQLException {
+    public void close() {
         HintManagerHolder.clear();
         resetDMLFlag();
         super.close();

@@ -10,14 +10,11 @@ package com.bixuebihui.generated.tablegen.web;
   */
 
 import com.bixuebihui.generated.tablegen.business.T_metatableManager;
+import com.bixuebihui.generated.tablegen.pojo.T_metatable;
+import com.bixuebihui.jmesa.AbstractWebUI;
 import org.jmesa.worksheet.WorksheetColumn;
 
-import static org.jmesa.facade.TableFacadeFactory.createTableFacade;
-
 import javax.servlet.http.HttpServletRequest;
-
-import com.bixuebihui.jmesa.AbstractWebUI;
-import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 
 public class T_metatableWebUI  extends AbstractWebUI<T_metatable, Long>
 {

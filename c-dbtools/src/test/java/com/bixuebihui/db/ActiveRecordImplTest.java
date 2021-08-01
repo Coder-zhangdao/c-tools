@@ -52,46 +52,26 @@ public class ActiveRecordImplTest extends TestCase {
 		ds.setDatabaseConfig(DataSourceTest.getConfigDerby());
 		DbHelper db = new DbHelper();
 		db.setDataSource(ds);
-		try {
-			cn = db.getConnection();
-			try {
-				db.executeNoQuery("drop table test", cn);
-			} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-			try {
-				db.executeNoQuery("drop table test1", cn);
-			} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-			try {
-				db.executeNoQuery(
-						"create table test(id int, name varchar(100), value int default 0, createtime timestamp)", cn);
-			} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-			try {
-				db.executeNoQuery(
-						"create table test1(id int, name varchar(100))", cn);
-			} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-			bd = new BD(db);
-			bd.getDbHelper().executeNoQuery(
-					"insert into test(id,name, createtime)values(123,'bac',"+
-					bd.getTimestampSql("2016-1-1 12:10:11.0")
-			+")");
-			bd.getDbHelper().executeNoQuery(
-					"insert into test(id,name, createtime)values(234,'bac',"+
-							bd.getTimestampSql("2017-10-10 01:01:01.0")
-					+")");
-			bd.getDbHelper().executeNoQuery(
-					"insert into test1(id,name)values(123,'bacqqq')");
-			bd.getDbHelper().executeNoQuery(
-					"insert into test1(id,name)values(234,'bacddd')");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		cn = db.getConnection();
+		db.executeNoQuery("drop table test", cn);
+		db.executeNoQuery("drop table test1", cn);
+		db.executeNoQuery(
+				"create table test(id int, name varchar(100), value int default 0, createtime timestamp)", cn);
+		db.executeNoQuery(
+				"create table test1(id int, name varchar(100))", cn);
+		bd = new BD(db);
+		bd.getDbHelper().executeNoQuery(
+				"insert into test(id,name, createtime)values(123,'bac',"+
+				bd.getTimestampSql("2016-1-1 12:10:11.0")
+		+")");
+		bd.getDbHelper().executeNoQuery(
+				"insert into test(id,name, createtime)values(234,'bac',"+
+						bd.getTimestampSql("2017-10-10 01:01:01.0")
+				+")");
+		bd.getDbHelper().executeNoQuery(
+				"insert into test1(id,name)values(123,'bacqqq')");
+		bd.getDbHelper().executeNoQuery(
+				"insert into test1(id,name)values(234,'bacddd')");
 
 		// boolean res = JDBCUtils.tableOrViewExists(null, null, "%", cn);
 	}
@@ -109,7 +89,7 @@ public class ActiveRecordImplTest extends TestCase {
 		assertEquals("bac", ((T) obj).name);
 	}
 
-	public void testInc() throws SQLException {
+	public void testInc() {
 		int res = bd.ar().in("id",new Object[]{123,234}).inc("value");
 		System.out.println(res);
 		assertEquals(2, res);
@@ -117,7 +97,7 @@ public class ActiveRecordImplTest extends TestCase {
 		assertEquals(1, inc);
 	}
 
-	public void testUpdate() throws SQLException {
+	public void testUpdate() {
 		int res = bd.ar()
 				.in("id",new Object[]{123,234})
 				.update(new String[]{"value", "name"},
@@ -128,7 +108,7 @@ public class ActiveRecordImplTest extends TestCase {
 		assertEquals(1, inc);
 	}
 
-	public void testJoin() throws SQLException {
+	public void testJoin() {
 
 		Object obj = bd.ar().alias("t1").fields("t1.*,t2.name anothor_name ").eq("t1.id", 123).join("left join test1 t2 on t1.id=t2.id").find();
 
@@ -145,7 +125,7 @@ public class ActiveRecordImplTest extends TestCase {
 
 
 
-	public void testCountSum() throws SQLException {
+	public void testCountSum() {
 
 		 CountValue res = bd.ar().countSum("id");
 
@@ -155,7 +135,7 @@ public class ActiveRecordImplTest extends TestCase {
 	}
 
 
-	public void testCountObject() throws SQLException {
+	public void testCountObject() {
 
 		 String field="createtime";
 		GroupFunction fun = GroupFunction.MAX;
@@ -176,7 +156,7 @@ public class ActiveRecordImplTest extends TestCase {
 
 	}
 
-	public void testOrCond() throws SQLException {
+	public void testOrCond() {
 		ActiveRecord<Object> ar = bd.ar().eq("id", 123)
 				.or(bd.ar().eq("name", "bacddd").getCondStack())
 				.ne("id", 2);

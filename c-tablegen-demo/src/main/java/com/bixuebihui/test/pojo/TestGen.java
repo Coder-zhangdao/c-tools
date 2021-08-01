@@ -19,7 +19,9 @@ import org.apache.commons.text.StringEscapeUtils;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javax.annotation.processing.Generated;
 
+@Generated("com.github.yujiaao:tablegen")
 @ApiModel(description ="测试表")
 public class TestGen  implements Serializable {
 
@@ -63,6 +65,10 @@ public class TestGen  implements Serializable {
 
 
 
+    public void setId(Integer id)
+    {
+      this.id = id;
+    }
     public TestGen()
     {
 
@@ -77,50 +83,50 @@ public class TestGen  implements Serializable {
             eduId=0;
 
     }
-    public Integer getId()
-    {
-      return this.id;
-    }
-
-    public void setId(Integer id)
-    {
-      this.id = id;
-    }
-    public String getName()
-    {
-      return this.name;
-    }
 
     public void setName(String name)
     {
       this.name = name;
     }
-    public Short getAge()
+
+    public Integer getId()
     {
-      return this.age;
+      return this.id;
     }
 
     public void setAge(Short age)
     {
       this.age = age;
     }
-    public Timestamp getBirth()
+
+    public String getName()
     {
-      return this.birth;
+      return this.name;
     }
 
     public void setBirth(Timestamp birth)
     {
       this.birth = birth;
     }
-    public Integer getEduId()
+
+    public Short getAge()
     {
-      return this.eduId;
+      return this.age;
     }
 
     public void setEduId(Integer eduId)
     {
       this.eduId = eduId;
+    }
+
+    public Timestamp getBirth()
+    {
+      return this.birth;
+    }
+
+    public Integer getEduId()
+    {
+      return this.eduId;
     }
 
     public String toXml()

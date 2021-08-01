@@ -1,6 +1,8 @@
 package com.bixuebihui.jdbc;
 
 
+import com.bixuebihui.DbException;
+
 import java.sql.SQLException;
 
 /**
@@ -45,25 +47,30 @@ public class SqlServer2005PageHepler extends SqlServer2000PageHepler {
 
     /**
      * 得到分页的SQL
-     * @param limit  count of records to return
-     * @param offset  offset from start
+     *
+     * @param limit       count of records to return
+     * @param offset      offset from start
      * @param querySelect select clause
      * @return select clause with pagination
-     *  {@link SqlServer2000PageHepler#getLimitString }
+     * {@link SqlServer2000PageHepler#getLimitString }
      */
-    public static String getLimitString(String querySelect,int offset, int limit) throws SQLException {
+    public static String getLimitString(String querySelect, int offset, int limit) {
 
-        querySelect     = getLineText(querySelect);
-        int orderIndex  = getLastOrderInsertPoint(querySelect);
+        try {
+            querySelect = getLineText(querySelect);
+            int orderIndex = getLastOrderInsertPoint(querySelect);
 
-        return "select * from (select *,ROW_NUMBER() OVER (" +
-                querySelect.substring(orderIndex).replaceAll("[^\\s,]+\\.", "") +
-                ") _row_num from (" +
-                querySelect.substring(0, orderIndex) + ") _t" +
-                ") _t where _t._row_num > " +
-                (offset == -1 ? "?" : offset) +
-                " and _t._row_num <=  " +
-                (limit == -1 ? "?" : limit);
+            return "select * from (select *,ROW_NUMBER() OVER (" +
+                    querySelect.substring(orderIndex).replaceAll("[^\\s,]+\\.", "") +
+                    ") _row_num from (" +
+                    querySelect.substring(0, orderIndex) + ") _t" +
+                    ") _t where _t._row_num > " +
+                    (offset == -1 ? "?" : offset) +
+                    " and _t._row_num <=  " +
+                    (limit == -1 ? "?" : limit);
+        } catch (SQLException ex) {
+            throw new DbException(ex);
+        }
     }
 
 

@@ -1,7 +1,7 @@
 package com.bixuebihui.tablegen.dbinfo;
 
-import com.bixuebihui.tablegen.entry.ColumnData;
 import com.bixuebihui.tablegen.NameUtils;
+import com.bixuebihui.tablegen.entry.ColumnData;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.DatabaseMetaData;

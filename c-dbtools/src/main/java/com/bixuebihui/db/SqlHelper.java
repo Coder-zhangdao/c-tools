@@ -1,8 +1,8 @@
 package com.bixuebihui.db;
 
+import com.bixuebihui.DbException;
 import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.ISqlConditionType;
-import com.bixuebihui.jdbc.SqlFilter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
@@ -56,13 +56,12 @@ public class SqlHelper {
 	 * <p>toCondition.</p>
 	 *
 	 * @return a {@link SqlPocket} object.
-	 * @throws java.sql.SQLException if any.
 	 */
-	protected SqlPocket toCondition() throws SQLException {
+	protected SqlPocket toCondition() {
 		SqlPocket criteria = new SqlPocket();
 		if (filters == null || filters.size() <= 0) {
-            return criteria;
-        }
+			return criteria;
+		}
 		for (BaseFilter filter : filters) {
 			buildCriteria(criteria, filter);
 		}
@@ -120,14 +119,13 @@ public class SqlHelper {
 	 * <p>build.</p>
 	 *
 	 * @return a {@link SqlPocket} object.
-	 * @throws java.sql.SQLException if any.
 	 */
-	public SqlPocket build() throws SQLException {
+	public SqlPocket build() {
 		return toCondition();
 	}
 
 	private void buildCriteria(SqlPocket criteria, BaseFilter f)
-			throws SQLException {
+	{
 		if (f.value != null || useNullAsCondition || f instanceof NullFilter ) {
 			f.build(criteria);
 		}
@@ -339,6 +337,7 @@ public class SqlHelper {
 		filters.add(new GtFilter(field, value));
 		return this;
 	}
+
 	public SqlHelper greaterOrEqualThan(String field, Object value) {
 		filters.add(new GeFilter(field, value));
 		return this;
@@ -413,7 +412,7 @@ public class SqlHelper {
 			this.value = value;
 		}
 
-		abstract public SqlPocket build(SqlPocket pkt) throws SQLException;
+		abstract public SqlPocket build(SqlPocket pkt) ;
 
 	}
 
@@ -427,16 +426,16 @@ public class SqlHelper {
 		}
 
 		@Override
-		public SqlPocket build(SqlPocket sb) throws SQLException {
-			if(value instanceof SqlString){
+		public SqlPocket build(SqlPocket sb) {
+			if (value instanceof SqlString) {
 				sb.getCondition().append(" and ").append(property).append(" in (").append(value).append(")");
 
-			}else if (!(value instanceof Collection)) {
-                throw new SQLException("InFilter must have a Collection value:"
-                        + value + "->" + value.getClass());
-            } else {
+			} else if (!(value instanceof Collection)) {
+				throw new DbException("InFilter must have a Collection value:"
+						+ value + "->" + value.getClass());
+			} else {
 				int size = ((Collection<?>) value).size();
-				sb.addFilter(" and "+
+				sb.addFilter(" and " +
 						property + " in (" + StringUtils.repeat("?", ",", size)
 						+ ")", value);
 			}
@@ -453,11 +452,11 @@ public class SqlHelper {
 		}
 
 		@Override
-		public SqlPocket build(SqlPocket sb) throws SQLException {
-			if(value instanceof SqlString ){
+		public SqlPocket build(SqlPocket sb) {
+			if (value instanceof SqlString) {
 				sb.getCondition().append(" and ").append(property).append(sign)
 						.append(((SqlString) value).getContent());
-			}else if (value != null) {
+			} else if (value != null) {
 				sb.getCondition().append(" and ").append(property).append(sign)
 						.append("?");
 				sb.getParams().add(value);
@@ -520,13 +519,13 @@ public class SqlHelper {
 		}
 
 		@Override
-		public SqlPocket build(SqlPocket sb) throws SQLException {
+		public SqlPocket build(SqlPocket sb) {
 			if (value != null && value instanceof ISqlConditionType) {
 				sb.getCondition().append(
 						((ISqlConditionType) value).getConditionSql(property,
 								databaseType));
 			} else {
-				throw new SQLException(
+				throw new DbException(
 						"CondFilter constructor only accept value of type ISqlConditionType:"
 								+ value + "->" + (value == null ? "null" : value.getClass()));
 			}
@@ -542,13 +541,13 @@ public class SqlHelper {
 		public abstract String getConcat();
 
 		@Override
-		public SqlPocket build(SqlPocket sb) throws SQLException {
+		public SqlPocket build(SqlPocket sb) {
 			if (value != null && value instanceof String) {
 				sb.getCondition().append(" and ").append(property)
 						.append(" like ").append(getConcat());
 				sb.getParams().add(value);
 			} else {
-				throw new SQLException(
+				throw new DbException(
 						"CondFilter constructor only accept value of type ISqlConditionType:"
 								+ value + "->" + (value == null ? "null" : value.getClass()));
 			}

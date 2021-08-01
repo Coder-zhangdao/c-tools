@@ -1,19 +1,20 @@
 package com.bixuebihui.jdbc;
 
+import com.bixuebihui.DbException;
 import com.bixuebihui.db.*;
-import com.bixuebihui.sql.SQLUtil;
+import com.bixuebihui.db.Record.GroupFunction;
 import com.bixuebihui.jdbc.entity.CountObject;
 import com.bixuebihui.jdbc.entity.CountValue;
-import com.bixuebihui.db.Record.GroupFunction;
+import com.bixuebihui.sequence.SequenceUtils;
 import com.bixuebihui.shardingjdbc.core.api.HintManager;
+import com.bixuebihui.sql.SQLUtil;
 import org.apache.commons.beanutils.*;
 import org.apache.commons.beanutils.converters.*;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.bixuebihui.sequence.SequenceUtils;
-import org.apache.commons.text.CaseUtils;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
@@ -170,21 +171,15 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     private int dbtype = UNKNOWN;
 
     /**
-     * <p>getCount.</p>
+     * MS SQL Server 2000
      *
-     * @param tableName a {@link java.lang.String} object.
-     * @param whereClause a {@link java.lang.String} object.
-     * @return a int.
-     * @throws java.sql.SQLException if any.
+     * @param selectSql 不带分页的基本语句
+     * @param startNum  起始行，第一页从零开始
+     * @param endNum    结束行，每页数+startNum
+     * @return 完整分页SQL
      */
-    public int getCount(String tableName, String whereClause) throws SQLException {
-
-        String strSql =SELECT_COUNT_FROM + addAlias(tableName) + " " + whereClause;
-        if (this.getDbType() == ORACLE) {
-            return ((BigDecimal) getDbHelper().executeScalar(strSql)).intValue();
-        } else {
-            return Integer.parseInt(getDbHelper().executeScalar(strSql).toString());
-        }
+    private static String getPagingSqlSqlServer(String selectSql, int startNum, int endNum) {
+        return SqlServer2000PageHepler.getLimitString(selectSql, startNum, endNum - startNum + 1);
     }
 
     /**
@@ -229,35 +224,16 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     }
 
     /**
-     * <p>getPagingSql.</p>
+     * MS SQL Server 2005 and up
      *
-     * @param selectSql a {@link java.lang.String} object.
-     * @param startNum a int.
-     * @param endNum a int.
-     * @return a {@link java.lang.String} object.
-     * @throws java.sql.SQLException if any.
+     * @param selectSql 不带分页的基本语句
+     * @param startNum  起始行，第一页从零开始
+     * @param endNum    结束行，每页数+startNum
+     * @return 完整分页SQL
      */
-    public String getPagingSql(String selectSql, int startNum, int endNum) throws SQLException {
+    private static String getPagingSqlSqlServer2005(String selectSql, int startNum, int endNum) {
 
-        detectDbType();
-
-        if (dbtype == DERBY) {
-            return getPagingSqlDerby(selectSql, startNum, endNum);
-        } else if (dbtype == SQLSERVER) {
-            return getPagingSqlSqlServer(selectSql, startNum, endNum);
-        } else if (dbtype == SQLSERVER_2005_AND_UP) {
-            return getPagingSqlSqlServer2005(selectSql, startNum, endNum);
-
-        } else if (dbtype == MYSQL || dbtype == H2) {
-            return getPagingSqlMySql(selectSql, startNum, endNum);
-        } else if (dbtype == POSTGRESQL) {
-            return getPagingSqlPostgresql(selectSql, startNum, endNum);
-        } else if (dbtype == ACCESS) {
-            return getPagingSqlSqlServer(selectSql, startNum, endNum);
-        } else {
-
-            return getPagingSqlOracle(selectSql, startNum, endNum);
-        }
+        return SqlServer2005PageHepler.getLimitString(selectSql, startNum, endNum);
 
     }
 
@@ -294,28 +270,52 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     }
 
     /**
-     * MS SQL Server 2000
+     * <p>getCount.</p>
      *
-     * @param selectSql 不带分页的基本语句
-     * @param startNum  起始行，第一页从零开始
-     * @param endNum    结束行，每页数+startNum
-     * @return 完整分页SQL
+     * @param tableName   a {@link java.lang.String} object.
+     * @param whereClause a {@link java.lang.String} object.
+     * @return a int.
      */
-    private static String getPagingSqlSqlServer(String selectSql, int startNum, int endNum) throws SQLException {
-        return SqlServer2000PageHepler.getLimitString(selectSql, startNum, endNum - startNum + 1);
+    public int getCount(String tableName, String whereClause) {
+
+        String strSql = SELECT_COUNT_FROM + addAlias(tableName) + " " + whereClause;
+        if (this.getDbType() == ORACLE) {
+            return ((BigDecimal) getDbHelper().executeScalar(strSql)).intValue();
+        } else {
+            return Integer.parseInt(getDbHelper().executeScalar(strSql).toString());
+        }
     }
 
     /**
-     * MS SQL Server 2005 and up
+     * <p>getPagingSql.</p>
      *
-     * @param selectSql 不带分页的基本语句
-     * @param startNum  起始行，第一页从零开始
-     * @param endNum    结束行，每页数+startNum
-     * @return 完整分页SQL
+     * @param selectSql a {@link java.lang.String} object.
+     * @param startNum  a int.
+     * @param endNum    a int.
+     * @return a {@link java.lang.String} object.
+     * @throws java.sql.SQLException if any.
      */
-    private static String getPagingSqlSqlServer2005(String selectSql, int startNum, int endNum) throws SQLException {
+    public String getPagingSql(String selectSql, int startNum, int endNum) {
 
-        return SqlServer2005PageHepler.getLimitString(selectSql, startNum, endNum);
+        detectDbType();
+
+        if (dbtype == DERBY) {
+            return getPagingSqlDerby(selectSql, startNum, endNum);
+        } else if (dbtype == SQLSERVER) {
+            return getPagingSqlSqlServer(selectSql, startNum, endNum);
+        } else if (dbtype == SQLSERVER_2005_AND_UP) {
+            return getPagingSqlSqlServer2005(selectSql, startNum, endNum);
+
+        } else if (dbtype == MYSQL || dbtype == H2) {
+            return getPagingSqlMySql(selectSql, startNum, endNum);
+        } else if (dbtype == POSTGRESQL) {
+            return getPagingSqlPostgresql(selectSql, startNum, endNum);
+        } else if (dbtype == ACCESS) {
+            return getPagingSqlSqlServer(selectSql, startNum, endNum);
+        } else {
+
+            return getPagingSqlOracle(selectSql, startNum, endNum);
+        }
 
     }
 
@@ -372,7 +372,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
     }
 
-    private String getDateTimeSql(String dt, boolean isTimestamp) throws SQLException {
+    private String getDateTimeSql(String dt, boolean isTimestamp) {
         detectDbType();
         if (dbtype == DERBY) {
             if (isTimestamp) {
@@ -395,7 +395,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a {@link java.lang.String} object.
      * @throws java.sql.SQLException if any.
      */
-    public String getDateSql(String dt) throws SQLException {
+    public String getDateSql(String dt) {
         return getDateTimeSql(dt, false);
     }
 
@@ -406,7 +406,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a {@link java.lang.String} object.
      * @throws java.sql.SQLException if any.
      */
-    public String getTimestampSql(String dt) throws SQLException {
+    public String getTimestampSql(String dt) {
         return getDateTimeSql(dt, true);
     }
 
@@ -437,7 +437,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a {@link java.lang.String} object.
      * @throws java.sql.SQLException if any.
      */
-    public String getDateSql(Date dt) throws SQLException {
+    public String getDateSql(Date dt) {
         detectDbType();
         if (dbtype == DERBY) {
             return getDateSqlDerby(dt);
@@ -492,7 +492,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
-    public int getDbType() throws SQLException {
+    public int getDbType() {
         detectDbType();
         return dbtype;
     }
@@ -507,11 +507,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * Counts the number of entries for this table in the database.
      */
     @Override
-    public int count(String where) throws SQLException {
+    public int count(String where) {
         return getCount(getTableName(), where);
     }
 
@@ -521,19 +521,19 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
-    public int count() throws SQLException {
+    public int count() {
         return getCount(getTableName(), "");
     }
 
     /**
      * <p>count.</p>
      *
-     * @param sql a {@link java.lang.String} object.
+     * @param sql    a {@link java.lang.String} object.
      * @param params a {@link java.lang.Object} object.
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
-    public int count(String sql, Object... params) throws SQLException {
+    public int count(String sql, Object... params) {
         Object o = this.getDbHelper().executeScalar(sql, params);
         return o == null ? 0 : Integer.parseInt(o.toString());
     }
@@ -541,26 +541,26 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * <p>exists.</p>
      *
-     * @param where a {@link java.lang.String} object.
+     * @param where  a {@link java.lang.String} object.
      * @param params a {@link java.lang.Object} object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    public boolean exists(String where, Object ...params) throws SQLException {
-        Object o = this.getDbHelper().executeScalar("select 1 from "+getTableName()+" "+where, params);
+    public boolean exists(String where, Object... params) {
+        Object o = this.getDbHelper().executeScalar("select 1 from " + getTableName() + " " + where, params);
         return o != null && Integer.parseInt(o.toString()) == 1;
     }
 
     /**
      * <p>countWhere.</p>
      *
-     * @param where a {@link java.lang.String} object.
+     * @param where  a {@link java.lang.String} object.
      * @param params a {@link java.lang.Object} object.
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
     @Override
-    public int countWhere(String where, Object... params) throws SQLException {
+    public int countWhere(String where, Object... params) {
         String query = SELECT_COUNT_FROM + getTableName() + " " + where;
         Object o = this.getDbHelper().executeScalar(query, params);
         return o == null ? 0 : Integer.parseInt(o.toString());
@@ -576,7 +576,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return 更新记录数
      * @throws java.sql.SQLException 数据库执行出错
      */
-    public int update(String[] fieldNames, String whereClause, Object[] params, Connection cn) throws SQLException {
+    public int update(String[] fieldNames, String whereClause, Object[] params, Connection cn) {
         String query = getUpdateSql(fieldNames, whereClause);
         if (cn == null) {
             return getDbHelper().executeNoQuery(query, params);
@@ -588,13 +588,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * <p>update.</p>
      *
-     * @param fieldNames an array of {@link java.lang.String} objects.
+     * @param fieldNames  an array of {@link java.lang.String} objects.
      * @param whereClause a {@link java.lang.String} object.
-     * @param params an array of {@link java.lang.Object} objects.
+     * @param params      an array of {@link java.lang.Object} objects.
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
-    public int update(String[] fieldNames, String whereClause, Object[] params) throws SQLException {
+    public int update(String[] fieldNames, String whereClause, Object[] params) {
         return update(fieldNames, whereClause, params, null);
     }
 
@@ -613,14 +613,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * <p>getUpdateSql.</p>
      *
-     * @param fieldNames an array of {@link java.lang.String} objects.
+     * @param fieldNames  an array of {@link java.lang.String} objects.
      * @param whereClause a {@link java.lang.String} object.
      * @return a {@link java.lang.String} object.
-     * @throws java.sql.SQLException if any.
      */
-    protected String getUpdateSql(String[] fieldNames, String whereClause) throws SQLException {
+    protected String getUpdateSql(String[] fieldNames, String whereClause) {
         if (fieldNames == null || fieldNames.length == 0) {
-            throw new SQLException("参数fieldNames不能为空");
+            throw new DbException("参数fieldNames不能为空");
         }
 
         String res = StringUtils.join(fieldNames, "=?, ") + "=? ";
@@ -631,15 +630,14 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * 获取单个数据库对象, 并直接对 receiver的属性赋值
      *
-     * @param <K>    期待类型
+     * @param <K>      期待类型
      * @param sql      sql语包
      * @param params   sql语句所需参数
      * @param receiver 要赋值的对象
      * @return receiver 承载查询结果的java bean
      * @throws java.sql.SQLException 数据库执行出错
      */
-    public @NotNull
-    <K> K getSingleObject(String sql, Object[] params, @NotNull K receiver) throws SQLException {
+    public @NotNull <K> K getSingleObject(String sql, Object[] params, @NotNull K receiver) {
 
         List<Map<String, Object>> v = this.getDbHelper().executeQuery(sql, params);
         if (v.isEmpty()) {
@@ -652,12 +650,12 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * <p>selectToObjects.</p>
      *
-     * @param sql a {@link java.lang.String} object.
-     * @param params an array of {@link java.lang.Object} objects.
+     * @param sql       a {@link java.lang.String} object.
+     * @param params    an array of {@link java.lang.Object} objects.
      * @param receivers an array of {@link java.lang.Object} objects.
      * @throws java.sql.SQLException if any.
      */
-    public void selectToObjects(String sql, Object[] params, Object[] receivers) throws SQLException {
+    public void selectToObjects(String sql, Object[] params, Object[] receivers) {
         List<Map<String, Object>> v = this.getDbHelper().executeQuery(sql, params);
         if (v.isEmpty()) {
             return;
@@ -734,7 +732,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a {@link java.lang.String} object.
      * @throws java.sql.SQLException if any.
      */
-    protected String addAlias(String tableName) throws SQLException {
+    protected String addAlias(String tableName) {
         // hack the
         // " com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException:
         // Every derived table must have its own alias]"
@@ -744,15 +742,16 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return tableName;
     }
 
-    private void detectDbType() throws SQLException {
+    private void detectDbType() {
         if (dbtype == UNKNOWN) {
             if (getDbHelper() != null) {
-               try( Connection cn = getDbHelper().getConnection())
-               {
+                try (Connection cn = getDbHelper().getConnection()) {
                     dbtype = detectDbType(cn.getMetaData().getDriverName());
+                } catch (SQLException throwables) {
+                    throw new DbException(throwables);
                 }
             } else {
-                throw new SQLException("DbHelper not initialized!");
+                throw new DbException("DbHelper not initialized!");
             }
         }
     }
@@ -764,7 +763,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    public boolean executeTransaction(SqlObject[] sqlObjs) throws SQLException {
+    public boolean executeTransaction(SqlObject[] sqlObjs) {
 
         Connection cn = null;
         try {
@@ -789,7 +788,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
             } catch (Exception e) {
                 LOG.warn("rollback", e);
             }
-            throw sqlException;
+            throw new DbException(sqlException);
         } finally {
             try {
                 if (cn != null) {
@@ -888,9 +887,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a {@link java.util.List} object.
      * @throws java.sql.SQLException if any.
      */
-    public @NotNull
-    <K> List<K> select(String select, String whereClause, String orderBy, Object[] params, int rowStart,
-                       int rowEnd, Class<K> clz) throws SQLException {
+    public @NotNull <K> List<K> select(String select, String whereClause, String orderBy, Object[] params, int rowStart,
+                                       int rowEnd, Class<K> clz) {
 
         String selectSql = select + " " + whereClause + " " + orderBy; //(this.getDbType() == BaseDao.DERBY ? "" : orderBy);
 
@@ -905,10 +903,9 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         } else {
             for (Map<String, Object> h : v) {
                 try {
-                    // v1.add(convertCaseSensitive(h, clz.getDeclaredConstructor().newInstance()));
                     v1.add(convert(h, clz.getConstructor().newInstance()));
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
-                    throw new SQLException(e);
+                    throw new DbException(e);
                 }
             }
         }
@@ -930,7 +927,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     protected @NotNull
     List<Map<String, Object>> select(String sql, String whereClause, String orderBy,
-                                     Object[] params, int rowStart, int rowEnd) throws SQLException {
+                                     Object[] params, int rowStart, int rowEnd) {
         String selectSql = sql + " " + whereClause + " " + (this.getDbType() == BaseDao.DERBY ? "" : orderBy);
         return getDbHelper().executeQuery(this.getPagingSql(selectSql, rowStart, rowEnd), params);
     }
@@ -949,7 +946,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     @Override
     public @NotNull
     List<T> select(String whereClause, Object[] params, String orderbyClause, int beginNum, int endNum)
-            throws SQLException {
+             {
         String query = getSelectAllFromTable() + whereClause;
         if (this.getDbType() != BaseDao.DERBY) {
             query += orderbyClause;
@@ -971,7 +968,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     protected @NotNull
     List<T> select2step(String whereClause, Object[] params, String orderbyClause, int beginNum,
-                        int endNum) throws SQLException {
+                        int endNum) {
         String query = "select " + getKeyName() + " from " + getTableName() + " " + whereClause;
         if (this.getDbType() != BaseDao.DERBY) {
             query += orderbyClause;
@@ -1000,7 +997,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     public @NotNull
     List<T> selectWithJoin(String fieldList, String whereClause, Object[] params, String orderByClause,
-                           int beginNum, int endNum) throws SQLException {
+                           int beginNum, int endNum) {
         String query = "select " + fieldList + " from " + getTableName() + " " + whereClause;
         if (this.getDbType() != BaseDao.DERBY) {
             query += orderByClause;
@@ -1011,9 +1008,9 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
 
     public @NotNull
     List<T> select(String whereClause, String orderbyClause, int beginNum, int endNum)
-            throws SQLException {
+             {
         return select(whereClause, null, orderbyClause, beginNum, endNum);
-    }
+             }
 
     /**
      * Select from the database for table
@@ -1022,16 +1019,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return 数据对象pojo
      * @throws java.sql.SQLException 数据库出错
      */
-    public T selectByKey(@NotNull V id) throws SQLException {
+    public T selectByKey(@NotNull V id) {
         String query = SELECT_FROM + getTableName() + WHERE + getKeyName() + "=?";
-        try {
-            List<T> info = getDbHelper().executeQuery(query, new Object[]{id}, new RowMapperResultReader<>(this));
-            if (!info.isEmpty()) {
-                return info.get(0);
-            }
-        } catch (SQLException e) {
-            LOG.warn("Error when execute selectByKey with args: tableName=" + this.getTableName() + " id=" + id);
-            throw e;
+        List<T> info = getDbHelper().executeQuery(query, new Object[]{id}, new RowMapperResultReader<>(this));
+        if (!info.isEmpty()) {
+            return info.get(0);
         }
         return null;
     }
@@ -1040,11 +1032,10 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * Select from the database for table "Agent_form"
      *
      * @param ids 主键数组
-     *            @return List of pojo
-     *            @throws java.sql.SQLException 数据库出错
+     * @return List of pojo
      */
     public @NotNull
-    List<T> selectByKeys(V[] ids) throws SQLException {
+    List<T> selectByKeys(V[] ids) {
         if (ids == null || ids.length <= 0) {
             return Collections.emptyList();
         }
@@ -1062,13 +1053,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * <p>selectByKeys.</p>
      *
-     * @param ids a {@link java.util.List} object.
+     * @param ids           a {@link java.util.List} object.
      * @param orderbyClause a {@link java.lang.String} object.
      * @return a {@link java.util.List} object.
      * @throws java.sql.SQLException if any.
      */
     protected @NotNull
-    List<T> selectByKeys(List<V> ids, String orderbyClause) throws SQLException {
+    List<T> selectByKeys(List<V> ids, String orderbyClause) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
@@ -1083,11 +1074,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      *
      * @param id 主键
      * @param cn 数据库连接
-     *           @return true成功删除
-     *           @throws java.sql.SQLException 数据库出错
-     * Deletes from the database for table
+     * @return true成功删除
+     * @throws java.sql.SQLException 数据库出错
+     *                               Deletes from the database for table
      */
-    public boolean deleteByKey(V id, Connection cn) throws SQLException {
+    public boolean deleteByKey(V id, Connection cn) {
         String query = getDeleteWhere() + getKeyName() + "=?";
         return 1 <= getDbHelper().executeNoQuery(query, new Object[]{id}, cn);
     }
@@ -1100,12 +1091,12 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * <p>deleteByKey.</p>
      *
      * @param id 主键
-     *           @throws java.sql.SQLException 数据库出错
-     *           @return true 成功删除
+     * @return true 成功删除
      * Deletes from the database for table
+     * @throws java.sql.SQLException 数据库出错
      */
     @Override
-    public boolean deleteByKey(V id) throws SQLException {
+    public boolean deleteByKey(V id) {
         String query = getDeleteWhere() + getKeyName() + "=?";
         return 1 <= getDbHelper().executeNoQuery(query, new Object[]{id});
     }
@@ -1117,7 +1108,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    public boolean deleteByKeys(V[] id) throws SQLException {
+    public boolean deleteByKeys(V[] id) {
         String query = getDeleteWhere() + makeInPlaceHolder(getKeyName(), id.length);
         return 1 <= getDbHelper().executeNoQuery(query, id);
     }
@@ -1137,12 +1128,12 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * <p>countByKey.</p>
      *
      * @param id 主键
-     *
-     * Counts the number of entries for this table in the database.
-     *           @return 总数
-     *           @throws java.sql.SQLException 数据库出错
+     *           <p>
+     *           Counts the number of entries for this table in the database.
+     * @return 总数
+     * @throws java.sql.SQLException 数据库出错
      */
-    public int countByKey(V id) throws SQLException {
+    public int countByKey(V id) {
         String query = SELECT_COUNT_FROM + getTableName() + WHERE + getKeyName() + "=?";
         Object o = getDbHelper().executeScalar(query, new Object[]{id});
         return o == null ? 0 : Integer.parseInt(o.toString());
@@ -1155,7 +1146,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
-    public int countLikeKey(V id) throws SQLException {
+    public int countLikeKey(V id) {
         return countByKey(id);
     }
 
@@ -1213,21 +1204,21 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @throws java.sql.SQLException if any.
      */
     @Override
-    public boolean insertAutoNewKey(T info) throws SQLException {
+    public boolean insertAutoNewKey(T info) {
         try {
             setId(info, getNextKey());
             return this.insert(info);
-        }catch (SQLIntegrityConstraintViolationException ex){
-            // Duplicate entry '10061' for key 'PRIMARY'
-            String message = ex.getMessage();
+        } catch (DbException e) {
+            if (e.getCause() instanceof SQLIntegrityConstraintViolationException) {
+                // Duplicate entry '10061' for key 'PRIMARY'
+                String message = e.getMessage();
 
-            if (message.contains("Duplicate") && message.contains("PRIMARY")) {
-                repairAndTry(info, 1);
+                if (message.contains("Duplicate") && message.contains("PRIMARY")) {
+                    repairAndTry(info, 1);
+                }
             }
-        } catch (SQLException ex) {
-            throw ex;
+            throw e;
         }
-        return false;
     }
 
     /**
@@ -1238,7 +1229,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     @Override
     public @NotNull
     Map<String, T> selectByIds(String uniquePropertyName, List<String> uniquePropertyValues)
-            throws SQLException {
+             {
 
         String ids = StringUtils.join(uniquePropertyValues, ",");
 
@@ -1248,8 +1239,8 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         for (T info : infos) {
             map.put("" + getId(info), info);
         }
-        return map;
-    }
+                 return map;
+             }
 
     /**
      * <p>selectAllWhere.</p>
@@ -1259,7 +1250,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @throws java.sql.SQLException if any.
      */
     public @NotNull
-    List<T> selectAllWhere(String where) throws SQLException {
+    List<T> selectAllWhere(String where) {
         String query = getSelectAllFromTable() + where;
         return getDbHelper().executeQuery(query, null, new RowMapperResultReader<>(this));
     }
@@ -1267,13 +1258,13 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * <p>selectAllWhere.</p>
      *
-     * @param where a {@link java.lang.String} object.
+     * @param where   a {@link java.lang.String} object.
      * @param objects a {@link java.lang.Object} object.
      * @return a {@link java.util.List} object.
      * @throws java.sql.SQLException if any.
      */
     public @NotNull
-    List<T> selectAllWhere(String where, Object... objects) throws SQLException {
+    List<T> selectAllWhere(String where, Object... objects) {
         String query = getSelectAllFromTable() + where;
         return getDbHelper().executeQuery(query, objects, new RowMapperResultReader<>(this));
     }
@@ -1290,24 +1281,24 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      */
     public @NotNull
     List<T> selectAllByStep(String where, String orderBy, int stepMax, Object[] params)
-            throws SQLException {
+             {
         final List<T> result = new ArrayList<>();
         processAllByStep(where, orderBy, stepMax, result::addAll, params);
         return result;
-    }
+             }
 
     /**
      * <p>processAllByStep.</p>
      *
-     * @param where a {@link java.lang.String} object.
+     * @param where   a {@link java.lang.String} object.
      * @param orderBy a {@link java.lang.String} object.
      * @param stepMax a int.
      * @param handler a {@link ProcessHandler} object.
-     * @param params an array of {@link java.lang.Object} objects.
+     * @param params  an array of {@link java.lang.Object} objects.
      * @throws java.sql.SQLException if any.
      */
     public void processAllByStep(String where, String orderBy, int stepMax, ProcessHandler<T> handler,
-                                 Object[] params) throws SQLException {
+                                 Object[] params) {
         processAllByStep(where, orderBy, stepMax, handler, params, false);
     }
 
@@ -1324,7 +1315,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @throws java.sql.SQLException 数据库出错
      */
     public void processAllByStep(String where, String orderBy, int stepMax, ProcessHandler<T> handler,
-                                 Object[] params, boolean alwaysFromBeginning) throws SQLException {
+                                 Object[] params, boolean alwaysFromBeginning) {
         List<T> list;
         int beginNum = 0;
         for (list = select(where, params, orderBy, beginNum, beginNum + stepMax);
@@ -1334,7 +1325,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
                 beginNum = beginNum + stepMax;
             }
             LOG.debug("the size of " + this.getTableName() + " selectAllWhereByStep:" + list.size());
-            handler.process(list);
+            try {
+                handler.process(list);
+            } catch (SQLException e) {
+                throw new DbException(e);
+            }
         }
     }
 
@@ -1342,10 +1337,9 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * Select from the database for table "Agent_form"
      *
      * @return list of pojo
-     * @throws java.sql.SQLException db error
      */
     public @NotNull
-    List<T> selectAll() throws SQLException {
+    List<T> selectAll() {
         String query = getSelectAllFromTable();
         return getDbHelper().executeQuery(query, null, new RowMapperResultReader<>(this));
     }
@@ -1361,20 +1355,20 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a {@link java.lang.Long} object.
      * @throws java.sql.SQLException if any.
      */
-    public Long getLastInsertId(Connection cn) throws  SQLException {
+    public Long getLastInsertId(Connection cn) {
         return Long.parseLong(this.getDbHelper().executeScalar(getLastInsertIdSql(), null, cn).toString());
     }
 
-    private String getLastInsertIdSql() throws  SQLException {
+    private String getLastInsertIdSql() {
         detectDbType();
         if (dbtype == DERBY) {
-           return  "select last_insert_id()";
+            return "select last_insert_id()";
         } else if (dbtype == SQLSERVER || dbtype == SQLSERVER_2005_AND_UP || dbtype == ACCESS) {
-           return "select scope_identity()";
+            return "select scope_identity()";
         } else if (dbtype == MYSQL) {
-           return "select last_insert_id()";
+            return "select last_insert_id()";
         } else {
-            throw new SQLException("getLastInsertId is not support for current dbtype=" + dbtype);
+            throw new DbException("getLastInsertId is not support for current dbtype=" + dbtype);
         }
 
     }
@@ -1390,11 +1384,10 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @param rowEnd a int.
      * @param clz an array of {@link java.lang.Class} objects.
      * @return a {@link java.util.List} object.
-     * @throws java.sql.SQLException if any.
      */
     protected @NotNull
     List<Object[]> select(String sql, String where, String orderBy, Object[] params, int start,
-                          int rowEnd, Class[] clz) throws SQLException {
+                          int rowEnd, Class[] clz) {
         List<Map<String, Object>> v = select(sql, where, orderBy, params, start, rowEnd);
         ArrayList<Object[]> res = new ArrayList<>();
         for (Map<String, Object> h : v) {
@@ -1412,7 +1405,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         return res;
     }
 
-    private boolean repairAndTry(T info, int tryCount) throws SQLException {
+    private boolean repairAndTry(T info, int tryCount) {
         if (tryCount++ > 3) {
             return false;
         }
@@ -1420,20 +1413,24 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
         try {
             setId(info, getNextKey());
             return this.insert(info);
-        }catch (SQLIntegrityConstraintViolationException ex){
-            // Duplicate entry '10061' for key 'PRIMARY'
-            String message = ex.getMessage();
+        } catch (DbException e) {
+            if (e.getCause() instanceof SQLIntegrityConstraintViolationException) {
 
-            if (message.contains("Duplicate") && message.contains("PRIMARY")) {
+                // Duplicate entry '10061' for key 'PRIMARY'
+                String message = e.getMessage();
 
-                String key = getSequenceKeyName();
-                long max = (long) this.ar().countValue(this.getKeyName(), GroupFunction.MAX).getValue();
-                try {
-                    SequenceUtils.getInstance().moveKeyValueToCurrent(key, max,
-                            this.getDbHelper());
-                    return repairAndTry(info, tryCount);
-                } catch (Exception e) {
-                    throw new SQLException(ex);
+                if (message.contains("Duplicate") && message.contains("PRIMARY")) {
+
+                    String key = getSequenceKeyName();
+                    try {
+                        long max = (long) this.ar().countValue(this.getKeyName(), GroupFunction.MAX).getValue();
+
+                        SequenceUtils.getInstance().moveKeyValueToCurrent(key, max,
+                                this.getDbHelper());
+                        return repairAndTry(info, tryCount);
+                    } catch (Exception ex) {
+                        throw new DbException(ex);
+                    }
                 }
             }
         }
@@ -1488,7 +1485,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @throws java.sql.SQLException db error
      */
     @Override
-    public boolean updateByKey(T info) throws SQLException {
+    public boolean updateByKey(T info) {
         beforeChange(info);
         return 1 == getDbHelper().executeNoQuery(getUpdateSql(), getUpdateObjs(info));
     }
@@ -1500,7 +1497,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    public boolean updateByVersionAndKey(T info) throws SQLException {
+    public boolean updateByVersionAndKey(T info) {
         return updateByKey(info);
     }
 
@@ -1508,11 +1505,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * Updates the current object values into the database.
      *
      * @param info pojo
-     * @param cn db connection
+     * @param cn   db connection
      * @return true if success
      * @throws java.sql.SQLException db error
      */
-    public boolean updateByKey(T info, Connection cn) throws SQLException {
+    public boolean updateByKey(T info, Connection cn) {
         beforeChange(info);
         return 1 == getDbHelper().executeNoQuery(getUpdateSql(), getUpdateObjs(info), cn);
     }
@@ -1525,7 +1522,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @throws java.sql.SQLException db error
      */
     @Override
-    public boolean insert(T info) throws SQLException {
+    public boolean insert(T info) {
         beforeChange(info);
         return 1 == getDbHelper().executeNoQuery(getInsertSql(), getInsertObjs(info));
     }
@@ -1534,11 +1531,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * Inserts the info object values into the database.
      *
      * @param info pojo
-     * @param cn db connection
+     * @param cn   db connection
      * @return true if success
      * @throws java.sql.SQLException db error
      */
-    public boolean insert(T info, Connection cn) throws SQLException {
+    public boolean insert(T info, Connection cn) {
         beforeChange(info);
         return 1 == getDbHelper().executeNoQuery(getInsertSql(), getInsertObjs(info), cn);
     }
@@ -1550,7 +1547,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    public boolean insertBatch(T[] infos) throws SQLException {
+    public boolean insertBatch(T[] infos) {
         beforeChange(infos);
 
         return insertBatch(infos, null);
@@ -1563,7 +1560,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    public boolean updateBatch(T[] infos) throws SQLException {
+    public boolean updateBatch(T[] infos) {
         beforeChange(infos);
         return updateBatch(infos, null);
     }
@@ -1571,12 +1568,12 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     /**
      * Inserts the Agent object values into the database.
      *
-     * @param  infos pojos array
-     * @param cn db connection
+     * @param infos pojos array
+     * @param cn    db connection
      * @return true if all success
      * @throws java.sql.SQLException db error
      */
-    public boolean insertBatch(T[] infos, Connection cn) throws SQLException {
+    public boolean insertBatch(T[] infos, Connection cn) {
         beforeChange(infos);
 
         List<Object[]> a = new ArrayList<>();
@@ -1590,11 +1587,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * <p>updateBatch.</p>
      *
      * @param infos an array of T[] objects.
-     * @param cn a {@link java.sql.Connection} object.
+     * @param cn    a {@link java.sql.Connection} object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    public boolean updateBatch(T[] infos, Connection cn) throws SQLException {
+    public boolean updateBatch(T[] infos, Connection cn) {
         beforeChange(infos);
 
         List<Object[]> a = new ArrayList<>();
@@ -1654,10 +1651,10 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     @Deprecated
     public @NotNull
     List<CountValue> countGroupValue(String field, String groupFunction, String where, String having,
-                                     String[] groupBy, Object... params) throws SQLException {
+                                     String[] groupBy, Object... params) {
 
         if (field == null) {
-            throw new SQLException("field must not null");
+            throw new DbException("field must not null");
         }
 
         String keyName = StringUtils.isEmpty(this.getKeyName()) ? field : this.getKeyName();
@@ -1697,12 +1694,11 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return 返回统计的键值对列表
      * @throws java.sql.SQLException 数据库异常
      */
-    public @NotNull
-    <K> List<CountObject<K>> countGroupObject(String field, String groupFunction, String where, String having,
-                                              String[] groupBy, final Class<K> type, Object... params) throws SQLException {
+    public @NotNull <K> List<CountObject<K>> countGroupObject(String field, String groupFunction, String where, String having,
+                                                              String[] groupBy, final Class<K> type, Object... params) {
 
         if (field == null) {
-            throw new SQLException("field must not null");
+            throw new DbException("field must not null");
         }
 
         String keyName = StringUtils.isEmpty(this.getKeyName()) ? field : this.getKeyName();
@@ -1731,7 +1727,6 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * 获取主键最大的记录，仅用于方便测试
      *
      * @return 最近的表记录
-     * @throws java.sql.SQLException 数据库异常
      */
     public T getLast() throws SQLException {
         @SuppressWarnings("unchecked")
@@ -1748,7 +1743,7 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
      * @return 主键最小记录
      * @throws java.sql.SQLException db error
      */
-    public T getFirst() throws SQLException {
+    public T getFirst() {
         @SuppressWarnings("unchecked")
         V id = (V) this.ar().get("min(" + this.getKeyName() + ")");
         if (id == null) {
@@ -1789,32 +1784,33 @@ public abstract class BaseDao<T, V> implements RowMapper<T>, IBaseListService<T,
     public void endForceMasterDB() {
         try {
             this.getDbHelper().close();
-        } catch (SQLException e) {
+        } catch (DbException e) {
             LOG.warn("endForceMasterDB", e);
         }
     }
 
 
-    public boolean save(T info) throws SQLException {
-        if(getId(info) !=null && Integer.parseInt(getId(info).toString() )!= 0){
+    public boolean save(T info) {
+        if (getId(info) != null && Integer.parseInt(getId(info).toString()) != 0) {
             return updateByKey(info);
-        }else{
+        } else {
             return insertAutoIncrement(info);
         }
     }
 
-    protected void setIdLong(T info, long id){}
+    protected void setIdLong(T info, long id) {
+    }
 
-    protected boolean insertAutoIncrement(T info) throws SQLException {
+    protected boolean insertAutoIncrement(T info) {
         beforeChange(info);
-        setIdLong(info,getDbHelper().insertAndFetchLastId( this.getInsertSql(),
-                getInsertObjs(info), null, null ));
+        setIdLong(info, getDbHelper().insertAndFetchLastId(this.getInsertSql(),
+                getInsertObjs(info), null, null));
         return true;
     }
 
-    protected String getInsertSqlAutoIncrement() throws SQLException {
-        String res =  this.getInsertSql();
-            res   += " ;"+getLastInsertIdSql() ;
+    protected String getInsertSqlAutoIncrement() {
+        String res = this.getInsertSql();
+        res += " ;" + getLastInsertIdSql() ;
         return res;
     }
 

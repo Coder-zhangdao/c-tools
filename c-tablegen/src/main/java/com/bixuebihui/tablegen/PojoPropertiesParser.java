@@ -1,16 +1,15 @@
 package com.bixuebihui.tablegen;
 
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
+import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
+import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
-import com.bixuebihui.generated.tablegen.pojo.T_metatable;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author xwx
