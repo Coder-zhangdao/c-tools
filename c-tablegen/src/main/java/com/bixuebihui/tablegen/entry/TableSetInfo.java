@@ -70,27 +70,27 @@ public class TableSetInfo {
 
     private static  void findFieldComment(String tableName, List<ColumnData> fields, String tableSql) {
         String fieldSql = tableSql.substring(tableSql.indexOf("(") + 1, tableSql.lastIndexOf(")"));
-        String[] fieldDescs = org.apache.commons.lang3.StringUtils.split(fieldSql, "\n");
+        String[] fieldDescs = StringUtils.split(fieldSql, "\n");
         Map<String, ColumnData> commentMap = new HashMap<>();
         for (ColumnData fieldInfo : fields) {
             commentMap.put(fieldInfo.getName().toUpperCase(), fieldInfo);
         }
         for (String fieldDesc : fieldDescs) {
-            String trim = org.apache.commons.lang.StringUtils.trim(fieldDesc);
-            String fieldName = org.apache.commons.lang.StringUtils.split(trim, " ")[0].toUpperCase();
-            fieldName = replace(fieldName);
+            String trim = StringUtils.trim(fieldDesc);
+            String fieldName = StringUtils.split(trim, " ")[0].toUpperCase();
+            fieldName = replaceForIdentifier(fieldName);
             String upper = fieldDesc.toUpperCase();
             if (upper.contains("AUTO_INCREMENT")) {
-                if (Arrays.asList(org.apache.commons.lang.StringUtils.split(upper, " ")).contains("AUTO_INCREMENT")) {
+                if (Arrays.asList(StringUtils.split(upper, " ")).contains("AUTO_INCREMENT")) {
                     commentMap.get(fieldName).setAutoIncrement(true);
                 }
             }
-            if (!fieldDesc.contains("COMMENT")) {
+            if (!upper.contains("COMMENT")) {
                 continue;
             }
-            String[] splits = org.apache.commons.lang.StringUtils.split(trim, "COMMENT");
+            String[] splits = StringUtils.split(trim, "COMMENT");
             String comment = splits[splits.length - 1];
-            comment = replace(comment);
+            comment = replaceComment(comment);
             if (commentMap.containsKey(fieldName)) {
                 commentMap.get(fieldName).setComment(comment);
             } else {
@@ -104,20 +104,27 @@ public class TableSetInfo {
             return "";
         }
         String classCommentTmp = tableSql.substring(tableSql.lastIndexOf("COMMENT=") + 8).trim();
-        classCommentTmp = replace(classCommentTmp);
-        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
+        classCommentTmp = replaceForIdentifier(classCommentTmp);
+        classCommentTmp = StringUtils.trim(classCommentTmp);
         return classCommentTmp;
     }
 
-    private static String replace(String classCommentTmp) {
-        classCommentTmp = org.apache.commons.lang3.StringUtils.split(classCommentTmp, " ")[0];
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "'", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ";", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, ",", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "`", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\n", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.replace(classCommentTmp, "\t", "");
-        classCommentTmp = org.apache.commons.lang3.StringUtils.trim(classCommentTmp);
+    private static String replaceForIdentifier(String classCommentTmp) {
+        classCommentTmp = StringUtils.split(classCommentTmp, " ")[0];
+        classCommentTmp = StringUtils.replace(classCommentTmp, "'", "");
+        classCommentTmp = StringUtils.replace(classCommentTmp, ";", "");
+        classCommentTmp = StringUtils.replace(classCommentTmp, ",", "");
+        classCommentTmp = StringUtils.replace(classCommentTmp, "`", "");
+        classCommentTmp = StringUtils.replace(classCommentTmp, "\n", "");
+        classCommentTmp = StringUtils.replace(classCommentTmp, "\t", "");
+        classCommentTmp = StringUtils.trim(classCommentTmp);
+        return classCommentTmp;
+    }
+
+    private static String replaceComment(String classCommentTmp) {
+        classCommentTmp = StringUtils.replace(classCommentTmp, "\n", "");
+        classCommentTmp = StringUtils.replace(classCommentTmp, "\t", "");
+        classCommentTmp = StringUtils.trim(classCommentTmp);
         return classCommentTmp;
     }
 
