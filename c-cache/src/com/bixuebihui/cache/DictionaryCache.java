@@ -1,6 +1,7 @@
 package com.bixuebihui.cache;
 
 import com.bixuebihui.BeanFactory;
+import com.bixuebihui.DbException;
 import com.bixuebihui.util.html.FormControl;
 import com.opensymphony.oscache.base.NeedsRefreshException;
 import com.opensymphony.oscache.general.GeneralCacheAdministrator;
@@ -188,7 +189,7 @@ public class DictionaryCache {
                         // DictionaryItem
                         return mm[isById ? 0 : 1].get(dict.keyName);
                     }
-                } catch (SQLException e) {
+                } catch (DbException e) {
                     LOG.error("查询" + dict.tableName + "时数据库出错：");
                     e.printStackTrace();
                     admin.cancelUpdate(key);
