@@ -31,7 +31,7 @@ public class OnFlyViewUtils {
         try {
             for (int i=1; i<=rs.getColumnCount(); i++) {
 
-                String colName = rs.getColumnName(i);
+                String colName = rs.getColumnLabel(i);
 
                 boolean existsCol = false;
                 for (ColumnData dt : colData) {

@@ -10,13 +10,12 @@ package com.bixuebihui.generated.tablegen.web;
  * (c) www.goldjetty.com
  */
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.bixuebihui.generated.tablegen.business.T_metacolumnManager;
+import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
+import com.bixuebihui.jmesa.AbstractWebUI;
 import org.jmesa.worksheet.WorksheetColumn;
 
-import com.bixuebihui.jmesa.AbstractWebUI;
-import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
+import javax.servlet.http.HttpServletRequest;
 
 public class T_metacolumnWebUI extends AbstractWebUI<T_metacolumn, Long> {
 

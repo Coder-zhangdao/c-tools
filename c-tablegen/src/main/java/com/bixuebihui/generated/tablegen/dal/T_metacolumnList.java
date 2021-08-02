@@ -9,12 +9,13 @@ package com.bixuebihui.generated.tablegen.dal;
   * (c) www.goldjetty.com
   */
 
-import java.sql.*;
-import java.util.List;
-
-import com.bixuebihui.sequence.SequenceUtils;
 import com.bixuebihui.generated.tablegen.BaseList;
 import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 public class T_metacolumnList  extends BaseList<T_metacolumn,Long>
 {
@@ -80,7 +81,7 @@ public void setId(T_metacolumn info, Long id) {
   * Updates the current object values into the database.
   */
 @Override
-public boolean updateByKey(T_metacolumn info) throws SQLException
+public boolean updateByKey(T_metacolumn info)
 {
     String query="update " + getTableName() + " set "+
 "cid=?"+","+
@@ -99,7 +100,7 @@ public boolean updateByKey(T_metacolumn info) throws SQLException
   * Updates the current object values into the database.
   */
 @Override
-public boolean updateByKey(T_metacolumn info, Connection cn) throws SQLException
+public boolean updateByKey(T_metacolumn info, Connection cn)
 {
     String query="update " + getTableName() + " set "+
 "cid=?"+","+
@@ -118,7 +119,7 @@ public boolean updateByKey(T_metacolumn info, Connection cn) throws SQLException
   * Deletes from the database for table "t_metacolumn"
   */
 @Override
-public boolean deleteByKey(Long cid) throws SQLException
+public boolean deleteByKey(Long cid)
 {
 
     String query = "delete from " + getTableName() + " where cid=?";
@@ -129,7 +130,7 @@ public boolean deleteByKey(Long cid) throws SQLException
   * Deletes from the database for table "t_metacolumn"
   */
 @Override
-public boolean deleteByKey(Long cid, Connection cn) throws SQLException
+public boolean deleteByKey(Long cid, Connection cn)
 {
 
     String query = "delete from " + getTableName() + " where cid=?";
@@ -140,7 +141,7 @@ public boolean deleteByKey(Long cid, Connection cn) throws SQLException
   * Inserts the T_metacolumn object values into the database.
   */
 @Override
-public boolean insert (T_metacolumn info) throws SQLException
+public boolean insert (T_metacolumn info)
 {
     String query="insert into " + getTableName() + " ( cid,tid,cname,type,columns,decimaldigits,isnullable,isauto_increment,description ) values ( ?,?,?,?,?,?,?,?,? )";
     return 1== dbHelper.executeNoQuery(query, new Object[]{info.getCid(),info.getTid(),info.getCname(),info.getType(),info.getColumns(),info.getDecimaldigits(),info.getIsnullable(),info.getIsauto_increment(),info.getDescription()});
@@ -150,7 +151,7 @@ public boolean insert (T_metacolumn info) throws SQLException
   * Inserts the T_metacolumn object values into the database.
   */
 @Override
-public boolean insert (T_metacolumn info, Connection cn) throws SQLException
+public boolean insert (T_metacolumn info, Connection cn)
 {
     String query="insert into " + getTableName() + " ( cid,tid,cname,type,columns,decimaldigits,isnullable,isauto_increment,description ) values ( ?,?,?,?,?,?,?,?,? )";
     return 1== dbHelper.executeNoQuery(query, new Object[]{info.getCid(),info.getTid(),info.getCname(),info.getType(),info.getColumns(),info.getDecimaldigits(),info.getIsnullable(),info.getIsauto_increment(),info.getDescription()}, cn);
@@ -160,10 +161,10 @@ public boolean insert (T_metacolumn info, Connection cn) throws SQLException
   * Inserts the T_metacolumn object values into the database.
   */
 @Override
-public boolean insertBatch (T_metacolumn[] infos, Connection cn) throws SQLException
+public boolean insertBatch (T_metacolumn[] infos, Connection cn)
 {
     String query="insert into " + getTableName() + " ( cid,tid,cname,type,columns,decimaldigits,isnullable,isauto_increment,description ) values ( ?,?,?,?,?,?,?,?,? )";
-    List<Object[]> a = new java.util.ArrayList<Object[]>();
+    List<Object[]> a = new java.util.ArrayList<>();
     for(T_metacolumn info:infos){
      Object[] os = new Object[]{info.getCid(),info.getTid(),info.getCname(),info.getType(),info.getColumns(),info.getDecimaldigits(),info.getIsnullable(),info.getIsauto_increment(),info.getDescription()};
      a.add(os);
@@ -175,8 +176,7 @@ public boolean insertBatch (T_metacolumn[] infos, Connection cn) throws SQLExcep
   * Inserts the dummy record of T_metacolumn object values into the database.
   */
 @Override
-public boolean insertDummy() throws SQLException
-{
+public boolean insertDummy() {
      T_metacolumn  info = new T_metacolumn();
      java.util.Random rnd = new java.util.Random();
     info.setCname(Integer.toString(Math.abs(rnd.nextInt(Integer.MAX_VALUE)), 36));

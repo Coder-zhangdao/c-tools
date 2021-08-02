@@ -146,7 +146,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     /**
      * Updates the current object values into the database with version condition as an optimistic database lock.
      */
-    public boolean updateByKeyAndVersion({{pojoClassName}}  info, Connection cn) throws SQLException
+    public boolean updateByKeyAndVersion({{pojoClassName}}  info, Connection cn)
     {
        return 1 == dbHelper.executeNoQuery(getUpdateSql()+" and {{config.versionColName}}=?", new Object[]{
         {{#each fields}}
@@ -159,7 +159,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
         }, cn );
     }
 
-    public boolean updateByKeyAndVersion({{pojoClassName}}  info) throws SQLException
+    public boolean updateByKeyAndVersion({{pojoClassName}}  info)
     {
         return 1 == dbHelper.executeNoQuery(getUpdateSql()+" and {{config.versionColName}}=?", new Object[]{
         {{#each fields}}
@@ -178,7 +178,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
      * Deletes from the database for table {{tableName}} with connection
      */
     @Override
-    public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}}, {{/each}}  Connection cn ) throws SQLException
+    public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}}, {{/each}}  Connection cn )
     {
         return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} }, cn);
     }
@@ -187,7 +187,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     * Deletes from the database for table {{tableName}}
     */
     @Override
-    public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}} {{#unless @last}}, {{/unless}}{{/each}}) throws SQLException
+    public boolean deleteByKey( {{#each keys}} {{colType tableName this}} {{this}} {{#unless @last}}, {{/unless}}{{/each}})
     {
         return 1 <= dbHelper.executeNoQuery(getDeleteSql(), new Object[]{ {{#each keys}} {{this}} {{#unless @last}}, {{/unless}} {{/each}} });
     }
@@ -195,13 +195,13 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
 {{~ else ~}}
     {{! writeDummyUpdate(tableName, "updateByKey"); }}
     @Override
-    public boolean updateByKey({{pojoClassName}} info) throws SQLException {
+    public boolean updateByKey({{pojoClassName}} info)  {
         throw new SQLException("This operation is not supported, because table {{tableName}} not have a unique key!");
     }
 
     {{! writeDummyDelete(tableName, keyData, "deleteByKey", colData); }}
     @Override
-    public boolean deleteByKey({{firstKeyType}}  key) throws SQLException {
+    public boolean deleteByKey({{firstKeyType}}  key)  {
         throw new SQLException("This operation is not supported, because table {{ tableName }} not have a unique key!");
     }
 {{/if}}
@@ -210,7 +210,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
      * Imported {{tableName}}  PK: {{this.pKTableName}}  FK:{{this.fKTableName}}
      */"
     public {{getPojoClassName this.pkTableName}} get{{getPojoClassName this.pkTableName}}By{{this.fKColumnName}}(
-    {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}})
     {
         {{getPojoClassName this.pkTableName}}Manager x = new {{getPojoClassName this.pkTableName}}Manager(this.getDbHelper().getDataSource());
         return x.selectByKey({{this.fKColList}});
@@ -219,7 +219,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     /**
     * Select from the database for table {{tableName}} "
     */
-    public List<{{pojoClassName}}> selectBy{{firstUp this.fKTableName}}{{firstUp this.fKColumnName}}(  {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    public List<{{pojoClassName}}> selectBy{{firstUp this.fKTableName}}{{firstUp this.fKColumnName}}(  {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}})
     {
         String query = "select * from {{tableName}}";
         String where = " where {{#each this.fKFields}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}}";
@@ -235,7 +235,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     * Get all related  {{this.fKTableName}} which have same {{this.fKColList}}
     */
     public List<{{getPojoClassName this.fkTableName}}> getRelated{{firstUp this.fkTableName}}{{firstUp this.fKColumnName}}(
-    {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    {{#each this.fKFields as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}})
     {
         {{getPojoClassName this.fKTableName}}Manager x = new {{getPojoClassName this.fKTableName}}Manager(this.getDbHelper().getDataSource());
         return x.selectBy{{this.fKTableName}}__{{this.fKColumnName}}({{#each this.pKColList}} {{name}} {{#unless @last}},{{/unless}} {{/each}});
@@ -247,7 +247,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
     /**
     * Select from the database for table {{tableName}} by index  {{#each indexData as | field |}}{{field.name}}{{#unless @last}},{{/unless}}{{/each}}
     */
-    public List<{{pojoClassName}}> selectByIndex({{#each indexData as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}}) throws SQLException
+    public List<{{pojoClassName}}> selectByIndex({{#each indexData as | field |}}{{colType tableName field.name}} {{field.name}}{{#unless @last}},{{/unless}}{{/each}})
     {
         String query = "select * from {{tableName}}";
         String where = " where {{#each this.indexData}} {{this}}=?{{#unless @last}} and {{/unless}}{{/each}}";
@@ -286,7 +286,7 @@ public class {{className}}  extends BaseList<{{pojoClassName}}, {{firstKeyType}}
      * Inserts the dummy record of {{pojoClassName}} object values into the database.
      */
     @Override
-    public boolean insertDummy() throws SQLException
+    public boolean insertDummy()
     {
         {{pojoClassName}}  info = new {{pojoClassName}}();
         java.util.Random rnd = new java.util.Random();

@@ -1,14 +1,10 @@
 package com.bixuebihui.generated.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+
+import java.util.*;
 
 /**
  * @author xwx

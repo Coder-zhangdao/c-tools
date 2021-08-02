@@ -1,5 +1,6 @@
 package com.bixuebihui.jdbc;
 
+import com.bixuebihui.DbException;
 import com.bixuebihui.datasource.DataSourceTest;
 import com.bixuebihui.datasource.DbcpDataSource;
 import com.bixuebihui.db.ActiveRecord;
@@ -71,7 +72,7 @@ public class BaseDaoTest extends TestCase {
 			db.executeNoQuery("DROP TABLE IF EXISTS test ",cn);
 			db.executeNoQuery("create table if not exists test(id int not null AUTO_INCREMENT, name varchar(100), primary key(id))",
 					cn);
-		}catch(SQLException ex){
+		}catch(DbException ex){
 			ex.printStackTrace();
 		}
 		AbstractBaseDao bd = new AbstractBaseDao(db) {
@@ -88,7 +89,7 @@ public class BaseDaoTest extends TestCase {
 		Long res;
 		try {
 			res = bd.getLastInsertId(cn);
-		}catch (SQLException e){
+		}catch (DbException e){
 			e.printStackTrace();
 			cn.close();
 			return;
@@ -130,7 +131,7 @@ public class BaseDaoTest extends TestCase {
 			db.executeNoQuery("drop table test",cn);
 			db.executeNoQuery("create table test(id int, name varchar(100))",
 					cn);
-		}catch(SQLException ex){
+		}catch(DbException ex){
 			ex.printStackTrace();
 		}
 		class T {
@@ -183,7 +184,7 @@ public class BaseDaoTest extends TestCase {
 		Connection cn = db.getConnection();
 
 		try{
-			db.executeNoQuery("drop table test",cn);}catch(SQLException ex){
+			db.executeNoQuery("drop table test",cn);}catch(Exception ex){
 				ex.printStackTrace();
 			}
 		try{
@@ -195,7 +196,7 @@ public class BaseDaoTest extends TestCase {
 					cn);
 			db.executeNoQuery("insert into test(id , name) values(300,'MKD')",
 					cn);
-		}catch(SQLException ex){
+		}catch(Exception ex){
 			ex.printStackTrace();
 		}
 
@@ -227,7 +228,7 @@ public class BaseDaoTest extends TestCase {
 		Connection cn = db.getConnection();
 
 		try{
-			db.executeNoQuery("drop table test",cn);}catch(SQLException ex){
+			db.executeNoQuery("drop table test",cn);}catch(DbException ex){
 				ex.printStackTrace();
 			}
 		try{
@@ -239,7 +240,7 @@ public class BaseDaoTest extends TestCase {
 					cn);
 			db.executeNoQuery("insert into test(id , name, dt) values(300,'MKD', null)",
 					cn);
-		}catch(SQLException ex){
+		}catch(Exception ex){
 			ex.printStackTrace();
 		}
 
@@ -308,7 +309,7 @@ public class BaseDaoTest extends TestCase {
 		Connection cn = db.getConnection();
 
 		try{
-			db.executeNoQuery("drop table test1",cn);}catch(SQLException ex){
+			db.executeNoQuery("drop table test1",cn);}catch(DbException ex){
 				//ex.printStackTrace();
 			}
 		try{
@@ -320,7 +321,7 @@ public class BaseDaoTest extends TestCase {
 					cn);
 			db.executeNoQuery("insert into test1(id , name, dt) values(200,'efg', current_timestamp)",
 					cn);
-		}catch(SQLException ex){
+		}catch(DbException ex){
 			ex.printStackTrace();
 		}
 		class DbObj{
@@ -398,14 +399,14 @@ public class BaseDaoTest extends TestCase {
 		IDbHelper dbHelper = (IDbHelper) obj.getProxy();
 
 		try{
-			dbHelper.executeNoQuery("drop table test2");}catch(SQLException ex){
+			dbHelper.executeNoQuery("drop table test2");}catch(Exception ex){
 		}
 		try{
 			dbHelper.executeNoQuery("create table test2(id int, name_Snake varchar(100), dt timestamp  default current_timestamp, primary key (id))");
 			dbHelper.executeNoQuery("insert into test2(id , name_Snake, dt) values(300,'MKD', null)");
 			dbHelper.executeNoQuery("insert into test2(id , name_Snake, dt) values(100,'abc', current_timestamp)");
 			dbHelper.executeNoQuery("insert into test2(id , name_Snake, dt) values(200,'efg', current_timestamp)");
-		}catch(SQLException ex){
+		}catch(DbException ex){
 			ex.printStackTrace();
 		}
 
@@ -430,7 +431,7 @@ public class BaseDaoTest extends TestCase {
 				return "test2";
 			}
 			@Override
-			public boolean insertDummy() throws SQLException {
+			public boolean insertDummy() {
 				return false;
 			}
 			@Override

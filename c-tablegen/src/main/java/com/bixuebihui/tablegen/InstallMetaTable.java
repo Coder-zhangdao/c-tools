@@ -1,12 +1,12 @@
 package com.bixuebihui.tablegen;
 
-import java.sql.Connection;
-
 import com.bixuebihui.BeanFactory;
 import com.bixuebihui.generated.tablegen.business.T_metatableManager;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jdbc.JDBCUtils;
 import com.bixuebihui.jdbc.SqlFileExecutor;
+
+import java.sql.Connection;
 
 /**
  * @author xwx

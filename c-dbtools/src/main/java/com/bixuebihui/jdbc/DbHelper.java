@@ -1,5 +1,6 @@
 package com.bixuebihui.jdbc;
 
+import com.bixuebihui.DbException;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -53,10 +54,13 @@ public class DbHelper implements IDbHelper {
      * <p>freeConnection.</p>
      *
      * @param cn a {@link java.sql.Connection} object.
-     * @throws java.sql.SQLException if any.
      */
-    public static void freeConnection(Connection cn) throws SQLException {
-        cn.close();
+    public static void freeConnection(Connection cn) {
+        try {
+            cn.close();
+        } catch (SQLException e) {
+            throw new DbException(e);
+        }
     }
 
     /**
@@ -86,7 +90,7 @@ public class DbHelper implements IDbHelper {
             try {
                 rs.close();
             } catch (SQLException e) {
-                LOG.error("",e);
+                LOG.error("", e);
             }
         }
     }
@@ -116,18 +120,24 @@ public class DbHelper implements IDbHelper {
         }
     }
 
-    private static void dumpSql(SQLException ex, String[] sql) {
+    private static void dumpSql(Exception ex, String[] sql) {
         LOG.warn(ex.getMessage());
         for (String s : sql) {
             LOG.warn("==" + s);
         }
     }
 
-    public static String clob2Str(Clob clobObject) throws SQLException, IOException {
-        InputStream in = clobObject.getAsciiStream();
-        StringWriter w = new StringWriter();
-        IOUtils.copy(in, w, Charset.defaultCharset());
-        return w.toString();
+    public static String clob2Str(Clob clobObject) {
+        InputStream in;
+        try {
+            in = clobObject.getAsciiStream();
+            StringWriter w = new StringWriter();
+            IOUtils.copy(in, w, Charset.defaultCharset());
+            return w.toString();
+        } catch (SQLException | IOException e) {
+            throw new DbException(e);
+        }
+
     }
 
 
@@ -153,11 +163,14 @@ public class DbHelper implements IDbHelper {
      * <p>Getter for the field <code>connection</code>.</p>
      *
      * @return a {@link java.sql.Connection} object.
-     * @throws java.sql.SQLException if any.
      */
     @Override
-    public Connection getConnection() throws SQLException {
-        return connection != null ? connection : dataSource.getConnection();
+    public Connection getConnection() throws DbException {
+        try {
+            return connection != null ? connection : dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new DbException(e);
+        }
     }
 
     // 用于事务处理
@@ -168,7 +181,7 @@ public class DbHelper implements IDbHelper {
      * this method for subclass override
      */
     @Override
-    public Connection getConnection(boolean readOnly) throws SQLException {
+    public Connection getConnection(boolean readOnly) {
         return getConnection();
     }
 
@@ -176,9 +189,13 @@ public class DbHelper implements IDbHelper {
      * {@inheritDoc}
      */
     @Override
-    public void close() throws SQLException {
+    public void close() {
         if (connection != null) {
-            connection.close();
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -189,18 +206,16 @@ public class DbHelper implements IDbHelper {
      * @param sql sql
      * @param cn  connection
      * @return ResultSet must closed after using
-     * @throws java.sql.SQLException db error
      * @deprecated ResultSet must closed, before close the connection, is not recommend to use this
      */
     @Deprecated
-    public ResultSet executeQuery(String sql, @NotNull Connection cn)
-            throws SQLException {
+    public ResultSet executeQuery(String sql, @NotNull Connection cn) {
         ResultSet rs;
         try (Statement stmt = cn.createStatement()) {
             rs = stmt.executeQuery(sql);
         } catch (SQLException ex) {
             dumpSql(ex, sql, null);
-            throw ex;
+            throw new DbException(ex);
         }
         return rs;
     }
@@ -210,17 +225,16 @@ public class DbHelper implements IDbHelper {
      *
      * @param sql a {@link java.lang.String} object.
      * @return a int.
-     * @throws java.sql.SQLException if any.
      */
     @Override
-    public int executeNoQuery(String sql) throws SQLException {
+    public int executeNoQuery(String sql) {
         Connection cn = this.getConnection(false);
         try (Statement stmt = cn.createStatement()) {
             return stmt.executeUpdate(sql);
         } catch (SQLException ex) {
             dumpSql(ex, sql, null);
 
-            throw ex;
+            throw new DbException(ex);
         } finally {
             close(cn);
         }
@@ -239,14 +253,13 @@ public class DbHelper implements IDbHelper {
      * @param sql a {@link java.lang.String} object.
      * @param cn  a {@link java.sql.Connection} object.
      * @return a int.
-     * @throws java.sql.SQLException if any.
      */
-    public int executeNoQuery(String sql, @NotNull Connection cn) throws SQLException {
+    public int executeNoQuery(String sql, @NotNull Connection cn) {
         try (Statement stmt = cn.createStatement()) {
             return stmt.executeUpdate(sql);
         } catch (SQLException ex) {
             dumpSql(ex, sql, null);
-            throw ex;
+            throw new DbException(ex);
         }
     }
 
@@ -254,7 +267,7 @@ public class DbHelper implements IDbHelper {
      * {@inheritDoc}
      */
     @Override
-    public int executeNoQueryBatch(String strSql, Iterable<Object[]> params) throws SQLException {
+    public int executeNoQueryBatch(String strSql, Iterable<Object[]> params) {
         return executeNoQueryBatch(strSql, params, null);
     }
 
@@ -262,7 +275,7 @@ public class DbHelper implements IDbHelper {
      * {@inheritDoc}
      */
     @Override
-    public int executeNoQueryBatch(String strSql, int total, ParamsIterator.CurrentParameters cur, Connection cn) throws SQLException {
+    public int executeNoQueryBatch(String strSql, int total, ParamsIterator.CurrentParameters cur, Connection cn) {
         return executeNoQueryBatch(strSql, new ParamsIterator(total, cur), cn);
     }
 
@@ -270,7 +283,7 @@ public class DbHelper implements IDbHelper {
      * {@inheritDoc}
      */
     @Override
-    public Object executeScalar(String strSql) throws SQLException {
+    public Object executeScalar(String strSql) {
         return executeScalarSession(strSql, null);
     }
 
@@ -279,12 +292,16 @@ public class DbHelper implements IDbHelper {
      *
      * @param sql an array of {@link java.lang.String} objects.
      * @return a count of influenced records.
-     * @throws java.sql.SQLException if any.
      */
     @Override
-    public int executeNoQuery(String[] sql) throws SQLException {
+    public int executeNoQuery(String[] sql) {
         Connection cn = this.getConnection(false);
-        cn.setAutoCommit(false);
+        try {
+            cn.setAutoCommit(false);
+        } catch (SQLException e) {
+            LOG.warn("", e);
+        }
+
         int n = 0;
         try (Statement stmt = cn.createStatement()) {
             for (String s : sql) {
@@ -294,14 +311,18 @@ public class DbHelper implements IDbHelper {
             }
             cn.commit();
         } catch (SQLException ex) {
-            cn.rollback();
+            try {
+                cn.rollback();
+            } catch (SQLException e) {
+                LOG.warn("", e);
+            }
             dumpSql(ex, sql);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             try {
                 cn.setAutoCommit(true);
             } catch (SQLException e) {
-                LOG.warn("",e);
+                LOG.warn("", e);
             }
             close(cn);
         }
@@ -313,28 +334,35 @@ public class DbHelper implements IDbHelper {
      *
      * @param sqls 批量在事条里执行SQL语句数组
      * @return 每一个SQL执行结果的数组
-     * @throws java.sql.SQLException 数据库出错
      */
-    public int[] executeUpdate(String[] sqls) throws SQLException {
+    public int[] executeUpdate(String[] sqls) {
 
         if (sqls == null || sqls.length < 1) {
             return new int[0];
         }
 
+
         Connection cn = getConnection(false);
-        cn.setAutoCommit(false);
+
         int[] j = new int[sqls.length];
         int step = -1;
-        try (Statement oStmt = cn.createStatement()) {
-            for (int i = 0; i < sqls.length; i++) {
-                j[i] = oStmt.executeUpdate(sqls[i]); //NOSONAR
-                step = i;
+        try {
+            cn.setAutoCommit(false);
+            try (Statement oStmt = cn.createStatement()) {
+                for (int i = 0; i < sqls.length; i++) {
+                    j[i] = oStmt.executeUpdate(sqls[i]); //NOSONAR
+                    step = i;
+                }
+                cn.commit();
             }
-            cn.commit();
         } catch (SQLException e) {
-            cn.rollback();
+            try {
+                cn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
 
-            SQLException ex = new SQLException("执行SQL语句出错"
+            DbException ex = new DbException("执行SQL语句出错"
                     + (step < 0 ? "" : ":" + sqls[step])
                     + " DbHelper.ExecuteUpdate" + e.getMessage());
             dumpSql(ex, sqls);
@@ -352,14 +380,14 @@ public class DbHelper implements IDbHelper {
      */
     @Override
     public @NotNull
-    List<Map<String, Object>> exeQuery(String sql) throws SQLException {
+    List<Map<String, Object>> exeQuery(String sql) {
         Connection cn = getConnection(true);
         try (Statement stmt = cn.createStatement();
              ResultSet rset = stmt.executeQuery(sql)) {
             return resultSet2Vector(rset);
         } catch (SQLException ex) {
             dumpSql(ex, sql, null);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             close(cn);
         }
@@ -371,11 +399,9 @@ public class DbHelper implements IDbHelper {
      * @param strSql an array of {@link java.lang.String} objects.
      * @param cn     a {@link java.sql.Connection} object.
      * @return a int.
-     * @throws java.sql.SQLException if any.
      */
     @Override
-    public int executeNoQuery(String[] strSql, @NotNull Connection cn)
-            throws SQLException {
+    public int executeNoQuery(String[] strSql, @NotNull Connection cn) {
         int n = 0;
         try (Statement stmt = cn.createStatement()) {
             for (String s : strSql) {
@@ -386,7 +412,7 @@ public class DbHelper implements IDbHelper {
             }
         } catch (SQLException ex) {
             dumpSql(ex, strSql);
-            throw ex;
+            throw new DbException(ex);
         }
         return n;
     }
@@ -395,8 +421,7 @@ public class DbHelper implements IDbHelper {
      * {@inheritDoc}
      */
     @Override
-    public int executeNoQuery(String sql, Object[] params, @NotNull Connection cn)
-            throws SQLException {
+    public int executeNoQuery(String sql, Object[] params, @NotNull Connection cn) {
 
         try (Statement p = ArrayUtils.isEmpty(params) ? cn.createStatement() : cn.prepareStatement(sql)) {
             if (p instanceof PreparedStatement) {
@@ -408,7 +433,7 @@ public class DbHelper implements IDbHelper {
             }
         } catch (SQLException ex) {
             dumpSql(ex, sql, params);
-            throw ex;
+            throw new DbException(ex);
         }
     }
 
@@ -419,7 +444,7 @@ public class DbHelper implements IDbHelper {
      */
     @Override
     public int executeNoQueryBatch(String sql, Iterable<Object[]> params,
-                                   Connection cn) throws SQLException {
+                                   Connection cn) {
 
         boolean needRelease = false;
         if (cn == null) {
@@ -438,7 +463,7 @@ public class DbHelper implements IDbHelper {
             for (Object[] ps : params) {
                 dumpSql(ex, sql, ps);
             }
-            throw ex;
+            throw new DbException(ex);
         } finally {
             if (needRelease) {
                 close(cn);
@@ -451,8 +476,7 @@ public class DbHelper implements IDbHelper {
      * {@inheritDoc}
      */
     @Override
-    public void executeQuery(String sql, RowCallbackHandler handle)
-            throws SQLException {
+    public void executeQuery(String sql, RowCallbackHandler handle) {
         Connection cn = this.getConnection(true);
         try (Statement stmt = cn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -461,7 +485,7 @@ public class DbHelper implements IDbHelper {
             }
         } catch (SQLException ex) {
             dumpSql(ex, sql, null);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             close(cn);
         }
@@ -474,10 +498,9 @@ public class DbHelper implements IDbHelper {
      * @param cn  connection
      * @param sql sql语句
      * @return single object, may be integer or string
-     * @throws java.sql.SQLException db error
      * @see IDbHelper#executeScalar(java.lang.String)
      */
-    public Object executeScalarSession(String sql, Connection cn) throws SQLException {
+    public Object executeScalarSession(String sql, Connection cn) {
 
         boolean localCn = cn == null;
 
@@ -491,7 +514,7 @@ public class DbHelper implements IDbHelper {
             return null;
         } catch (SQLException ex) {
             dumpSql(ex, sql, null);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             if (localCn) {
                 close(cn);
@@ -504,160 +527,160 @@ public class DbHelper implements IDbHelper {
      *
      * @param rs a {@link java.sql.ResultSet} object.
      * @return a {@link java.util.List} object.
-     * @throws java.sql.SQLException if any.
      */
     public @NotNull
-    List<Map<String, Object>> resultSet2Vector(ResultSet rs) throws SQLException {
+    List<Map<String, Object>> resultSet2Vector(ResultSet rs) {
         List<Map<String, Object>> result = new ArrayList<>();
         //System.out.println("No data"); //http://stackoverflow.com/a/6813771/1484621
-        if (!rs.isBeforeFirst()) {
-            return result;
-        }
-
-        ResultSetMetaData metaData = rs.getMetaData();
-        int iColumnNumber = metaData.getColumnCount();
-
-        while (rs.next()) {
-            Map<String, Object> mapColumn = new HashMap<>(32);
-            for (int i = 1; i <= iColumnNumber; i++) {
-
-                String colTypeName = metaData.getColumnTypeName(i).toUpperCase();
-
-                String colName = metaData.getColumnName(i);
-
-                if (!StringUtils.isBlank(metaData.getColumnLabel(i))) {
-                    colName = metaData.getColumnLabel(i);
-                }
-
-                if (mapColumn.containsKey(colName) && rs.getObject(i) == null) {
-                    //同一列名的已存在且不为空，则保留当前值，用于多表联合查询，但后表无记录的情况
-                    continue;
-                }
-
-                switch (colTypeName) {
-                    case "NUMBER":
-                    case "INT":
-                    case "INTEGER":
-                    case "TINYINT":
-                    case "TINYINT UNSIGNED":
-                    case "INTEGER IDENTITY":
-                    case "COUNTER":
-                    case "NUMERIC":
-                    case "DECIMAL":
-                    case "MEDIUMINT":
-                    case "INT UNSIGNED":
-                    case "MEDIUMINT UNSIGNED":
-
-                        dealNumber(rs, metaData, mapColumn, i, colTypeName, colName);
-
-                        break;
-                    case "BIGINT":
-                    case "BIGINT UNSIGNED":
-                        mapColumn.put(colName,
-                                rs.getLong(i));
-                        break;
-                    case "SMALLINT":
-                        mapColumn.put(colName,
-                                rs.getInt(i));
-                        break;
-                    case "VARCHAR2":
-                    case "VARCHAR":
-                    case "NVARCHAR2":
-                    case "NVARCHAR":
-                    case "TEXT":
-                    case "MEDIUMTEXT":
-                    case "LONGTEXT":
-                    case "CHAR":
-                    case "NTEXT":
-                    case "NCHAR":
-                    case "LONGVARCHAR":
-                    case "LONGCHAR": {
-                        String temp = rs.getString(i);
-                        if (temp == null) {
-                            temp = "";
-                        }
-                        mapColumn.put(colName, temp);
-                        break;
-                    }
-                    case "DATETIME":
-                    case "TIMESTAMP":
-                        // 10.17
-                        if (rs.getTimestamp(i) != null) {
-                            mapColumn.put(colName, rs.getTimestamp(i));
-                        } else {
-                            // 1970 year
-                            Timestamp d1970 = new Timestamp(0);
-                            mapColumn.put(colName, d1970);
-                        }
-                        break;
-                    case "DATE":
-                        java.util.Date dt = rs.getDate(i);
-                        if (dt != null) {
-                            Timestamp tm = new Timestamp(
-                                    dt.getTime());
-                            mapColumn.put(colName, tm);
-                        } else {
-                            Timestamp d1970 = new Timestamp(0);
-                            mapColumn.put(colName, d1970);
-                        }
-
-                        break;
-                    case "LONG": {
-                        String temp = "";
-                        byte[] mybyte = rs.getBytes(i);
-                        if (mybyte != null) {
-                            temp = new String(mybyte, Charset.defaultCharset());
-                        }
-                        mapColumn.put(colName, temp);
-                        break;
-                    }
-                    case "RAW":
-                    case "VARCHAR () FOR BIT DATA":
-                        byte[] bb = rs.getBytes(i);
-                        mapColumn.put(colName, bb == null ? new byte[0]
-                                : bb);
-                        break;
-                    case "CLOB": {
-                        String temp = null;
-                        try {
-                            temp = clob2Str(rs.getClob(i));
-                        } catch (IOException e) {
-                            LOG.error("",e);
-                        }
-                        mapColumn.put(colName, temp);
-                        break;
-                    }
-                    case "BOOL":
-                    case "BIT": {
-                        Boolean temp = rs.getBoolean(i);
-                        mapColumn.put(colName, temp);
-                        break;
-                    }
-                    case "FLOAT": {
-                        Float temp = rs.getFloat(i);
-                        mapColumn.put(colName, temp);
-                        break;
-                    }
-                    case "DOUBLE": {
-                        Double temp = rs.getDouble(i);
-                        mapColumn.put(colName, temp);
-                        break;
-                    }
-                    default:
-                        mapColumn.put(colName, rs.getObject(i));
-                        String string = " -colName:";
-                        LOG.warn(
-                                "Unknow data type, ask xwx@live.cn for adding this to DbHelper.resultSet2Vector colTypeName: "
-                                        + colTypeName + string + colName);
-                        break;
-                }
+        try {
+            if (!rs.isBeforeFirst()) {
+                return result;
             }
-            result.add(mapColumn);
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            int iColumnNumber = metaData.getColumnCount();
+
+            while (rs.next()) {
+                Map<String, Object> mapColumn = new HashMap<>(32);
+                for (int i = 1; i <= iColumnNumber; i++) {
+
+                    String colTypeName = metaData.getColumnTypeName(i).toUpperCase();
+
+                    String colName = metaData.getColumnName(i);
+
+                    if (!StringUtils.isBlank(metaData.getColumnLabel(i))) {
+                        colName = metaData.getColumnLabel(i);
+                    }
+
+                    if (mapColumn.containsKey(colName) && rs.getObject(i) == null) {
+                        //同一列名的已存在且不为空，则保留当前值，用于多表联合查询，但后表无记录的情况
+                        continue;
+                    }
+
+                    switch (colTypeName) {
+                        case "NUMBER":
+                        case "INT":
+                        case "INTEGER":
+                        case "TINYINT":
+                        case "TINYINT UNSIGNED":
+                        case "INTEGER IDENTITY":
+                        case "COUNTER":
+                        case "NUMERIC":
+                        case "DECIMAL":
+                        case "MEDIUMINT":
+                        case "INT UNSIGNED":
+                        case "MEDIUMINT UNSIGNED":
+
+                            dealNumber(rs, metaData, mapColumn, i, colTypeName, colName);
+
+                            break;
+                        case "BIGINT":
+                        case "BIGINT UNSIGNED":
+                            mapColumn.put(colName,
+                                    rs.getLong(i));
+                            break;
+                        case "SMALLINT":
+                            mapColumn.put(colName,
+                                    rs.getInt(i));
+                            break;
+                        case "VARCHAR2":
+                        case "VARCHAR":
+                        case "NVARCHAR2":
+                        case "NVARCHAR":
+                        case "TEXT":
+                        case "MEDIUMTEXT":
+                        case "LONGTEXT":
+                        case "CHAR":
+                        case "NTEXT":
+                        case "NCHAR":
+                        case "LONGVARCHAR":
+                        case "LONGCHAR": {
+                            String temp = rs.getString(i);
+                            if (temp == null) {
+                                temp = "";
+                            }
+                            mapColumn.put(colName, temp);
+                            break;
+                        }
+                        case "DATETIME":
+                        case "TIMESTAMP":
+                            // 10.17
+                            if (rs.getTimestamp(i) != null) {
+                                mapColumn.put(colName, rs.getTimestamp(i));
+                            } else {
+                                // 1970 year
+                                Timestamp d1970 = new Timestamp(0);
+                                mapColumn.put(colName, d1970);
+                            }
+                            break;
+                        case "DATE":
+                            java.util.Date dt = rs.getDate(i);
+                            if (dt != null) {
+                                Timestamp tm = new Timestamp(
+                                        dt.getTime());
+                                mapColumn.put(colName, tm);
+                            } else {
+                                Timestamp d1970 = new Timestamp(0);
+                                mapColumn.put(colName, d1970);
+                            }
+
+                            break;
+                        case "LONG": {
+                            String temp = "";
+                            byte[] mybyte = rs.getBytes(i);
+                            if (mybyte != null) {
+                                temp = new String(mybyte, Charset.defaultCharset());
+                            }
+                            mapColumn.put(colName, temp);
+                            break;
+                        }
+                        case "RAW":
+                        case "VARCHAR () FOR BIT DATA":
+                            byte[] bb = rs.getBytes(i);
+                            mapColumn.put(colName, bb == null ? new byte[0]
+                                    : bb);
+                            break;
+                        case "CLOB": {
+                            String temp = clob2Str(rs.getClob(i));
+                            mapColumn.put(colName, temp);
+                            break;
+                        }
+                        case "BOOL":
+                        case "BIT": {
+                            Boolean temp = rs.getBoolean(i);
+                            mapColumn.put(colName, temp);
+                            break;
+                        }
+                        case "FLOAT": {
+                            Float temp = rs.getFloat(i);
+                            mapColumn.put(colName, temp);
+                            break;
+                        }
+                        case "DOUBLE": {
+                            Double temp = rs.getDouble(i);
+                            mapColumn.put(colName, temp);
+                            break;
+                        }
+                        default:
+                            mapColumn.put(colName, rs.getObject(i));
+                            String string = " -colName:";
+                            LOG.warn(
+                                    "Unknow data type, ask xwx@live.cn for adding this to DbHelper.resultSet2Vector colTypeName: "
+                                            + colTypeName + string + colName);
+                            break;
+                    }
+                }
+                result.add(mapColumn);
+            }
+            return result;
+        } catch (SQLException ex) {
+            dumpSql(ex, "", null);
+            throw new DbException(ex);
         }
-        return result;
     }
 
-    private void dealNumber(ResultSet rset, ResultSetMetaData rsmdQuery, Map<String, Object> columnMap, int i, String colTypeName, String colName) throws SQLException {
+    private void dealNumber(ResultSet rset, ResultSetMetaData rsmdQuery, Map<String, Object> columnMap, int i, String colTypeName, String colName)
+            throws SQLException {
         if ("TINYINT".equals(colTypeName) && rsmdQuery.getPrecision(i) == 1) {
             columnMap.put(colName, rset.getBoolean(i));
         } else if ("TINYINT".equals(colTypeName) || "TINYINT UNSIGNED".equals(colTypeName)) {
@@ -695,11 +718,9 @@ public class DbHelper implements IDbHelper {
      * @param sql    a {@link java.lang.String} object.
      * @param params an array of {@link java.lang.Object} objects.
      * @return a {@link java.lang.Object} object.
-     * @throws java.sql.SQLException if any.
      */
     @Override
-    public Object executeScalar(String sql, Object[] params)
-            throws SQLException {
+    public Object executeScalar(String sql, Object[] params) {
         return executeScalar(sql, params, null);
     }
 
@@ -708,10 +729,8 @@ public class DbHelper implements IDbHelper {
      *
      * @param p      a {@link java.sql.PreparedStatement} object.
      * @param params an array of {@link java.lang.Object} objects.
-     * @throws java.sql.SQLException if any.
      */
-    public void fillParameter(PreparedStatement p, Object[] params)
-            throws SQLException {
+    public void fillParameter(PreparedStatement p, Object[] params) throws SQLException {
         fillParameter(p, params, null);
     }
 
@@ -719,8 +738,7 @@ public class DbHelper implements IDbHelper {
      * {@inheritDoc}
      */
     @Override
-    public Object executeScalar(String sql, Object[] params, Connection cn)
-            throws SQLException {
+    public Object executeScalar(String sql, Object[] params, Connection cn) {
         if (params == null || params.length == 0) {
             return executeScalarSession(sql, cn);
         }
@@ -738,7 +756,7 @@ public class DbHelper implements IDbHelper {
             }
         } catch (SQLException ex) {
             dumpSql(ex, sql, params);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             if (localCn) {
                 close(cn);
@@ -753,7 +771,6 @@ public class DbHelper implements IDbHelper {
      * @param p              a {@link java.sql.PreparedStatement} object.
      * @param params         an array of {@link java.lang.Object} objects.
      * @param targetSqlTypes an array of int objects.
-     * @throws java.sql.SQLException if any.
      */
     public void fillParameter(PreparedStatement p, Object[] params,
                               int[] targetSqlTypes) throws SQLException {
@@ -763,9 +780,10 @@ public class DbHelper implements IDbHelper {
         }
 
         if (ArrayUtils.isNotEmpty(targetSqlTypes) && targetSqlTypes.length != params.length) {
-            throw new SQLException(
+            throw new DbException(
                     "Intenal error: The params and the targetSqlTypes must have same length!");
         }
+
 
         if (ArrayUtils.isNotEmpty(targetSqlTypes)) {
             for (int i = 1; i <= params.length; i++) {
@@ -808,10 +826,9 @@ public class DbHelper implements IDbHelper {
      * @param sql    参数化sql语句
      * @param params 参数
      * @return (字段)) 结果集
-     * @throws java.sql.SQLException 数据库出错
      */
     @Override
-    public List<Map<String, Object>> executeQuery(String sql, Object[] params) throws SQLException {
+    public List<Map<String, Object>> executeQuery(String sql, Object[] params) {
         Connection cn = getConnection(true);
         ResultSet rs = null;
 
@@ -829,7 +846,7 @@ public class DbHelper implements IDbHelper {
 
         } catch (SQLException ex) {
             dumpSql(ex, sql, params);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             close(rs);
             close(cn);
@@ -844,11 +861,9 @@ public class DbHelper implements IDbHelper {
      * @param params         an array of {@link java.lang.Object} objects.
      * @param targetSqlTypes an array of int objects.
      * @return a int.
-     * @throws java.sql.SQLException if any.
      */
     @Override
-    public int executeNoQuery(String sql, Object[] params, int[] targetSqlTypes)
-            throws SQLException {
+    public int executeNoQuery(String sql, Object[] params, int[] targetSqlTypes) {
         return executeNoQuery(sql, params, targetSqlTypes, null);
 
     }
@@ -858,7 +873,7 @@ public class DbHelper implements IDbHelper {
      */
     @Override
     public int executeNoQuery(String sql, Object[] params,
-                              int[] targetSqlTypes, Connection conn) throws SQLException {
+                              int[] targetSqlTypes, Connection conn) {
         boolean localCn = conn == null;
         Connection cn = localCn ? getConnection(false) : conn;
         try (Statement p = ArrayUtils.isNotEmpty(params) ? cn.prepareStatement(sql) : cn.createStatement()) {
@@ -871,7 +886,7 @@ public class DbHelper implements IDbHelper {
             return p.getUpdateCount();
         } catch (SQLException ex) {
             dumpSql(ex, sql, params);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             if (localCn) {
                 close(cn);
@@ -884,7 +899,7 @@ public class DbHelper implements IDbHelper {
      */
     @Override
     public long insertAndFetchLastId(String sql, Object[] params,
-                                     int[] targetSqlTypes, Connection conn) throws SQLException {
+                                     int[] targetSqlTypes, Connection conn) {
         boolean localCn = conn == null;
         Connection cn = localCn ? getConnection(false) : conn;
         try (PreparedStatement p = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -904,7 +919,7 @@ public class DbHelper implements IDbHelper {
 
         } catch (SQLException ex) {
             dumpSql(ex, sql, params);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             if (localCn) {
                 close(cn);
@@ -918,10 +933,9 @@ public class DbHelper implements IDbHelper {
      * @param sql    a {@link java.lang.String} object.
      * @param params an array of {@link java.lang.Object} objects.
      * @return a int.
-     * @throws java.sql.SQLException if any.
      */
     @Override
-    public int executeNoQuery(String sql, Object[] params) throws SQLException {
+    public int executeNoQuery(String sql, Object[] params) {
 
         return executeNoQuery(sql, params, new int[0]);
 
@@ -933,11 +947,10 @@ public class DbHelper implements IDbHelper {
      * @param sql    a {@link java.lang.String} object.
      * @param params an array of {@link java.lang.Object} objects.
      * @param handle a {@link RowCallbackHandler} object.
-     * @throws java.sql.SQLException if any.
      */
     @Override
     public void executeQuery(String sql, Object[] params,
-                             RowCallbackHandler handle) throws SQLException {
+                             RowCallbackHandler handle) {
         Connection cn = getConnection(true);
         try (Statement p = ArrayUtils.isNotEmpty(params) ? cn.prepareStatement(sql) : cn.createStatement()) {
             if (p instanceof PreparedStatement) {
@@ -950,7 +963,7 @@ public class DbHelper implements IDbHelper {
             }
         } catch (SQLException ex) {
             dumpSql(ex, sql, params);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             DbUtils.closeQuietly(cn);
         }
@@ -962,7 +975,7 @@ public class DbHelper implements IDbHelper {
      */
     @Override
     public @NotNull <T> List<T> executeQuery(String sql, Object[] params,
-                                             @NotNull RowMapperResultReader<T> handle) throws SQLException {
+                                             @NotNull RowMapperResultReader<T> handle) {
         Connection cn = getConnection(true);
         try (Statement p = ArrayUtils.isNotEmpty(params) ? cn.prepareStatement(sql) : cn.createStatement()) {
             if (p instanceof PreparedStatement) {
@@ -974,7 +987,7 @@ public class DbHelper implements IDbHelper {
         } catch (SQLException ex) {
             //可能超时，输出sql和参数
             dumpSql(ex, sql, params);
-            throw ex;
+            throw new DbException(ex);
         } finally {
             DbUtils.closeQuietly(cn);
         }

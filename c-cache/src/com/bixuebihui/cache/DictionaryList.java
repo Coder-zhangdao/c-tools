@@ -60,7 +60,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
      */
     @Override
     public List<DictionaryItem> select(String whereClause, String orderbyClause,
-                                       int beginNum, int endNum) throws SQLException {
+                                       int beginNum, int endNum)  {
 
         if (StringUtils.trimToNull(whereClause) == null) {
             whereClause = " where 1=1 ";
@@ -80,7 +80,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
      * Select from the database for table "DictionaryItem"
      */
     @Override
-    public List<DictionaryItem> selectAll() throws SQLException {
+    public List<DictionaryItem> selectAll()  {
         String query = getSelectSql() + getTableName() + " where 1=1 " + def.getSqlCondition();
 
         if (StringUtils.trimToNull(def.getSortFieldName()) != null) {
@@ -126,7 +126,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
      * @return true success
      */
     @Override
-    public boolean updateByKey(DictionaryItem info) throws SQLException {
+    public boolean updateByKey(DictionaryItem info)  {
         String query = "update " + getTableName() + " set " + def.getIdFieldName() + "=?" + ","
                 + def.getValueFieldName() + "=?" + "," + def.getSortFieldName() + "=?" + " where " + def.getIdFieldName() + "=?" + " " + def.getSqlCondition();
         return 1 == dbHelper.executeNoQuery(query, new Object[]{
@@ -191,7 +191,7 @@ public class DictionaryList extends BaseList<DictionaryItem, String> {
      * @return true if success
      */
     @Override
-    public boolean insert(DictionaryItem info) throws SQLException {
+    public boolean insert(DictionaryItem info)  {
         String query = "insert into " + getTableName()
                 + " ( " + def.getIdFieldName() + "," + def.getValueFieldName() + "," + def.getSortFieldName() + " ) values ( ?,?,? )";
         return 1 == dbHelper.executeNoQuery(query, new Object[]{

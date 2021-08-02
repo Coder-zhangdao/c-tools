@@ -11,8 +11,8 @@ package com.bixuebihui.generated.tablegen.pojo;
 
 import com.bixuebihui.util.other.CMyString;
 
-import java.util.Map;
 import java.io.Serializable;
+import java.util.Map;
 public class T_metatable  implements Serializable
 {
 /**

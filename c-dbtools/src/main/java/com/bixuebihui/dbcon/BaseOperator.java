@@ -63,26 +63,8 @@ public class BaseOperator
      * @return 连接
      */
     public Connection getConnection() {
-        try {
-            conn = dbHelper.getConnection();
-        } catch(SQLException e) {
-            LOG.error("",e);
-        }
-        return conn;
-    }
-
-    /**
-     * 单独获取数据库连接
-     *
-     * @return 连接
-     */
-    public Connection getMyConnection() {
-        try {
-            return dbHelper.getConnection();
-        } catch(SQLException e) {
-            LOG.error("",e);
-        }
-        return null;
+        return
+             dbHelper.getConnection();
     }
 
     /**

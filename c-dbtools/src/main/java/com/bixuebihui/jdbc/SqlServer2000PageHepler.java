@@ -4,6 +4,8 @@ package com.bixuebihui.jdbc;
  * Copyright 2009 www.goldjetty.com Inc. All rights reserved.
  */
 
+import com.bixuebihui.DbException;
+
 import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,32 +65,36 @@ public class SqlServer2000PageHepler {
      * @return 分页SQL
      * @throws java.sql.SQLException 数据库出错
      */
-    public static String getLimitString(String querySelect,int offset, int limit) throws SQLException {
-    	String innerQuerySelect = getLineText(querySelect);
+    public static String getLimitString(String querySelect, int offset, int limit) throws DbException {
+        try {
+            String innerQuerySelect = getLineText(querySelect);
 
-		if ( offset > 0 ) {
-			int orderbyPos = getLastOrderInsertPoint(innerQuerySelect);
-			if(orderbyPos<0){
-				throw new UnsupportedOperationException( "query result offset is not supported without 'order by' subclause" );
-			}else{
-				String orderBy= innerQuerySelect.substring(orderbyPos);
-				String reverseOrderBy = "order by "+reversOrderbyClause(querySelect.substring(orderbyPos+"order by".length()));
-				String coreSql = innerQuerySelect.substring(0,orderbyPos);
-				StringBuilder sb = new StringBuilder( innerQuerySelect.length() *2 )
-				.append( coreSql )
-				.insert( getAfterSelectInsertPoint( coreSql ), " top " + offset )
-				.append(reverseOrderBy);
+            if (offset > 0) {
+                int orderbyPos = getLastOrderInsertPoint(innerQuerySelect);
+                if (orderbyPos < 0) {
+                    throw new UnsupportedOperationException("query result offset is not supported without 'order by' subclause");
+                } else {
+                    String orderBy = innerQuerySelect.substring(orderbyPos);
+                    String reverseOrderBy = "order by " + reversOrderbyClause(querySelect.substring(orderbyPos + "order by".length()));
+                    String coreSql = innerQuerySelect.substring(0, orderbyPos);
+                    StringBuilder sb = new StringBuilder(innerQuerySelect.length() * 2)
+                            .append(coreSql)
+                            .insert(getAfterSelectInsertPoint(coreSql), " top " + offset)
+                            .append(reverseOrderBy);
 
-				sb.insert(0, "select top "+limit+" * from (").append(") _table1 ").append(orderBy) ;
+                    sb.insert(0, "select top " + limit + " * from (").append(") _table1 ").append(orderBy);
 
-				return sb.toString();
+                    return sb.toString();
 
-			}
-		}
-		return new StringBuilder( innerQuerySelect.length() + 8 )
-				.append( innerQuerySelect )
-				.insert( getAfterSelectInsertPoint( innerQuerySelect ), " top " + limit )
-				.toString();
+                }
+            }
+            return new StringBuilder(innerQuerySelect.length() + 8)
+                    .append(innerQuerySelect)
+                    .insert(getAfterSelectInsertPoint(innerQuerySelect), " top " + limit)
+                    .toString();
+        } catch (SQLException ex) {
+            throw new DbException(ex);
+        }
 
     }
 
@@ -133,7 +139,7 @@ public class SqlServer2000PageHepler {
      */
     private static boolean isHaveGroupBy(String querySelect){
         int groupIndex = querySelect.toLowerCase().lastIndexOf("group by");
-        return (groupIndex != -1 && isBracketCanPartnership(querySelect.substring(groupIndex,querySelect.length()))) ;
+        return (groupIndex != -1 && isBracketCanPartnership(querySelect.substring(groupIndex)));
     }
 
 
@@ -145,7 +151,7 @@ public class SqlServer2000PageHepler {
     private static int getLastOrderInsertPoint(String querySelect) throws SQLException {
         int orderIndex = querySelect.toLowerCase().lastIndexOf("order by");
         if (orderIndex == -1
-                || !isBracketCanPartnership(querySelect.substring(orderIndex,querySelect.length()))) {
+                || !isBracketCanPartnership(querySelect.substring(orderIndex))) {
             throw new SQLException("SQL 2000 分页必须要有Order by 语句!");
         }
         return orderIndex;

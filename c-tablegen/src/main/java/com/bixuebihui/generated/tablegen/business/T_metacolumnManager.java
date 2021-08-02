@@ -9,12 +9,12 @@ package com.bixuebihui.generated.tablegen.business;
   * (c) www.goldjetty.com
   */
 
+import com.bixuebihui.generated.tablegen.dal.T_metacolumnList;
+import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Vector;
-
-import com.bixuebihui.generated.tablegen.dal.T_metacolumnList;
-import com.bixuebihui.generated.tablegen.pojo.T_metacolumn;
 
 public class T_metacolumnManager  extends T_metacolumnList
 {

@@ -5,6 +5,7 @@ package {{config.packageName}}{{viewModifier}}.business;
 import javax.sql.DataSource;
 import {{config.packageName}}{{viewModifier}}.dal.{{pojoClassName}}List;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.processing.Generated;
@@ -17,7 +18,7 @@ public class {{className}}  extends {{pojoClassName}}List
     /**
      * @param ds datasource for injecting
      */
-    public {{className}}(DataSource ds)
+    public {{className}}(@Qualifier("{{config.alias}}") DataSource ds)
     {
         super(ds);
     }

@@ -15,8 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StopWatch;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author xwx
@@ -42,7 +47,7 @@ public class TableUtils {
                     "\n in db url \n";
             if (first) {
                 first = false;
-                LOG.error(info);
+                LOG.warn(info);
             } else {
                 LOG.warn(info);
             }

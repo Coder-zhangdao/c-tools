@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ViewGeneratorTest {
 
@@ -28,6 +30,16 @@ class ViewGeneratorTest {
         ViewGenerator gen = new ViewGenerator();
         gen.init(this.getClass().getResource("/tablegen.properties").getPath());
         String res = gen.generate("my_test_view");
+
+        System.out.println(res);
+    }
+
+    @Test
+    void testGenerateViewAsField() throws IOException {
+        ViewGenerator gen = new ViewGenerator();
+        gen.init(this.getClass().getResource("/tablegen.properties").getPath());
+        String res = gen.generate("my_test_view");
+        assertThat("contains as field", res, containsString("DegreePlus"));
 
         System.out.println(res);
     }

@@ -24,12 +24,31 @@ class OnFlyViewUtilsTest {
     }
 
     @Test
-    void getColumnData() throws SQLException {
-        String sql = "select test_gen.*, degree from test_gen left join t_edu on test_gen.edu_id=t_edu.id limit 1";
+    void getColumnData() {
+        String sql = "select test_gen.*, concat(t_edu.degree) degree_plus from test_gen left join t_edu on test_gen.edu_id=t_edu.id limit 1";
         List<TableInfo> list = dbHelper.executeQuery(sql, null, new RowMapperResultReader<>((rs, index) -> OnFlyViewUtils.getColumnData(rs.getMetaData(), "test", BaseDao.MYSQL)));
 
         TableInfo cols = list.get(0);
         assertEquals("Type : INT(11) Name : id", cols.getFields().get(0).toString());
+        assertEquals("Type : VARCHAR(100) Name : degree_plus", cols.getFields().get(cols.getFields().size()-1).toString());
+
+        for (ColumnData col : cols.getFields()) {
+            System.out.println(col);
+        }
+
+    }
+
+    @Test
+    void getColumnDataAs() {
+        String sql = "select test_gen.*, degree AS degree_plus from test_gen left join t_edu on test_gen.edu_id=t_edu.id limit 1";
+        List<TableInfo> list = dbHelper.executeQuery(sql, null,
+                new RowMapperResultReader<>((rs, index) ->
+                        OnFlyViewUtils.getColumnData(rs.getMetaData(), "test", BaseDao.MYSQL)));
+
+        TableInfo cols = list.get(0);
+        assertEquals("Type : INT(11) Name : id", cols.getFields().get(0).toString());
+        assertEquals("Type : VARCHAR(100) Name : degree_plus", cols.getFields().get(cols.getFields().size()-1).toString());
+
         for (ColumnData col : cols.getFields()) {
             System.out.println(col);
         }

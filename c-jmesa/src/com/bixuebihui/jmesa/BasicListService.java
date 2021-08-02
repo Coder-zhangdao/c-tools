@@ -1,11 +1,11 @@
 package com.bixuebihui.jmesa;
 
+import com.bixuebihui.DbException;
 import com.bixuebihui.jdbc.AbstractBaseDao;
 import com.bixuebihui.jdbc.BaseDao;
 import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jdbc.SqlObject;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class BasicListService extends AbstractBaseDao {
     }
 
     @Override
-    public int count(String where) throws NumberFormatException, SQLException {
+    public int count(String where) throws NumberFormatException {
         if (this.getSqlParams() == null || this.getSqlParams().length == 0) {
             return super.count(where);
         }
@@ -39,7 +39,7 @@ public class BasicListService extends AbstractBaseDao {
 
     @Override
     public List<Object> select(String whereClause, Object[] params, String orderBy, int rowStart, int rowEnd)
-            throws SQLException {
+             {
 
         boolean needOrderBy = true;
         String tableName = getTableName();
@@ -60,13 +60,13 @@ public class BasicListService extends AbstractBaseDao {
 
     @Override
     public Map<String, Object> selectByIds(String arg0, List<String> arg1)
-            throws SQLException {
-        throw new SQLException("not implement!");
+             {
+        throw new DbException("not implement!");
     }
 
     @Override
-    public boolean updateByKey(Object arg0) throws SQLException {
-        throw new SQLException("not implement!");
+    public boolean updateByKey(Object arg0)  {
+        throw new DbException("not implement!");
     }
 
     public void setCoreSql(String coreSql) {

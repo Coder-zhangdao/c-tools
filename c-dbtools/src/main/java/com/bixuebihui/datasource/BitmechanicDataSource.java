@@ -1,7 +1,7 @@
 package com.bixuebihui.datasource;
 
-import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.ConnectionManager;
+import com.bixuebihui.dbcon.DatabaseConfig;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;

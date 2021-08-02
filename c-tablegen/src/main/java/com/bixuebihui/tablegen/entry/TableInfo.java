@@ -1,6 +1,5 @@
 package com.bixuebihui.tablegen.entry;
 
-import com.bixuebihui.tablegen.entry.ColumnData;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;

@@ -8,9 +8,11 @@ package com.bixuebihui.tablegen;
   * (c) Ian Holsman 1998
   * Released under GPL. See LICENSE for full details.
   */
+
 import org.apache.commons.lang.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ForeignKeyDefinition
 {

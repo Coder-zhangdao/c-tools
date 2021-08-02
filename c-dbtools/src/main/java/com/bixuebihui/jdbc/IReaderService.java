@@ -2,8 +2,6 @@ package com.bixuebihui.jdbc;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 配合使用完成分页读取数据库表

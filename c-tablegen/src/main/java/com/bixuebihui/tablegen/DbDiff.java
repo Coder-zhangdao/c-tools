@@ -4,7 +4,8 @@ import com.bixuebihui.datasource.BitmechanicDataSource;
 import com.bixuebihui.dbcon.DatabaseConfig;
 import com.bixuebihui.tablegen.diffhandler.DiffHandler;
 import com.bixuebihui.tablegen.entry.ColumnData;
-import com.bixuebihui.tablegen.entry.TableInfo;import org.apache.commons.collections.CollectionUtils;
+import com.bixuebihui.tablegen.entry.TableInfo;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

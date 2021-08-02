@@ -10,15 +10,14 @@ package com.bixuebihui.generated.tablegen.business;
  * (c) www.goldjetty.com
  */
 
+import com.bixuebihui.generated.tablegen.dal.T_metatableList;
+import com.bixuebihui.generated.tablegen.pojo.T_metatable;
+import com.bixuebihui.jdbc.IDbHelper;
+import org.apache.commons.lang.StringUtils;
+
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.bixuebihui.jdbc.IDbHelper;
-import com.bixuebihui.generated.tablegen.dal.T_metatableList;
-import com.bixuebihui.generated.tablegen.pojo.T_metatable;
 
 /**
  * @author xwx

@@ -16,7 +16,9 @@ import com.bixuebihui.jdbc.IDbHelper;
 import com.bixuebihui.jdbc.MSDbHelper;
 import com.bixuebihui.jdbc.aop.DbHelperAroundAdvice;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import javax.annotation.processing.Generated;
 
 import javax.sql.DataSource;
 
@@ -24,6 +26,7 @@ import javax.sql.DataSource;
 * @author xwx
 */
 
+@Generated("com.github.yujiaao:tablegen")
 @Service
 public abstract class BaseList<T, V> extends BaseDao<T, V> {
 

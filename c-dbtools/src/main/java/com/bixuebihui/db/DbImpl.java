@@ -183,16 +183,20 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 		return false;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean delete(T entity) throws SQLException {
+	public boolean delete(T entity) {
 		return deleteByKey(getId(entity));
 	}
 
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public List<T> findAll() throws SQLException {
+	public List<T> findAll() {
 		try {
 			SqlPocket p = this.getSql();
 			String where = p.getCondition().toString();
@@ -205,11 +209,11 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	}
 
 	@Override
-	public <K> List<K> findAll(Class<K> clz) throws SQLException {
+	public <K> List<K> findAll(Class<K> clz) {
 		SqlPocket p = this.getSql();
 		String where = p.getCondition().toString();
 		Object[] params = p.getParams().toArray();
-		String select = "select " + resultFields + " from " + getTableName() + " " ;
+		String select = "select " + resultFields + " from " + getTableName() + " ";
 		return select(select, where, parseOrder(), params, limit.getBegin(),
 				limit.getEnd(), clz);
 	}
@@ -219,9 +223,11 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 		this.orderStack.clear();
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public int countAll() throws SQLException {
+	public int countAll() {
 		try {
 			SqlPocket p = this.getSql();
 			String where = p.getCondition().toString();
@@ -233,9 +239,11 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public T find() throws SQLException {
+	public T find() {
 		try {
 			SqlPocket p = this.getSql();
 			String where = p.getCondition().toString();
@@ -252,9 +260,11 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean delete() throws SQLException {
+	public boolean delete() {
 		try {
 			SqlPocket p = this.getSql();
 			String where = p.getCondition().toString();
@@ -270,9 +280,11 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public String get(String field) throws SQLException {
+	public String get(String field) {
 		try {
 			field = SqlFilter.transactSQLInjection(field);
 			SqlPocket p = this.getSql();
@@ -287,9 +299,11 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public SqlPocket getSql() throws SQLException {
+	public SqlPocket getSql()  {
 		return filterStack.build();
 	}
 
@@ -299,15 +313,17 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	// from basedao
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public T mapRow(ResultSet rs, int index) throws SQLException {
+	public T mapRow(ResultSet rs, int index) {
 		throw new NotImplementedException();
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean updateByKey(T info) throws SQLException {
+	public boolean updateByKey(T info)  {
 		throw new NotImplementedException();
 	}
 
@@ -346,7 +362,9 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 		return null;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getKeyName() {
 		return null;
@@ -354,21 +372,21 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean insert(T entity) throws SQLException {
+	public boolean insert(T entity) {
 		throw new NotImplementedException();
 	}
 
 
 	/** {@inheritDoc} */
 	@Override
-	public List<Object> getVector(String field) throws SQLException {
+	public List<Object> getVector(String field) {
 		throw new NotImplementedException();
 	}
 
 
 	/** {@inheritDoc} */
 	@Override
-	public List<Long> getLongVector(String field) throws SQLException {
+	public List<Long> getLongVector(String field) {
 		throw new NotImplementedException();
 	}
 
@@ -411,7 +429,9 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	}
 
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ActiveRecord<T> desc(String field) {
 		return null;
@@ -420,7 +440,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	/** {@inheritDoc} */
 	@Override
-	public List<String> getStringVector(String field) throws SQLException {
+	public List<String> getStringVector(String field) {
 		return null;
 	}
 
@@ -449,49 +469,54 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 
 	/** {@inheritDoc} */
 	@Override
-	public CountValue countValue(String field, GroupFunction fun)
-			throws SQLException {
+	public CountValue countValue(String field, GroupFunction fun) {
 		throw new NotImplementedException();
 	}
 
 
 	/** {@inheritDoc} */
 	@Override
-	public CountValue countSum(String field) throws SQLException {
+	public CountValue countSum(String field) {
 		return countValue(field, GroupFunction.SUM);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean exists() throws SQLException {
+	public boolean exists() {
 		throw new NotImplementedException();
 	}
 
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public int inc(String field) throws SQLException {
+	public int inc(String field) {
 		try {
 			SqlPocket sqlPocket = this.getSql();
 			String whereClause = sqlPocket.getCondition().toString();
 			Object[] params = sqlPocket.getParams().toArray();
 
-			return getDbHelper().executeNoQuery("update "+getTableName()+" set "+field+"="+field+"+1 "+ whereClause, params);
+			return getDbHelper().executeNoQuery("update " + getTableName() + " set " + field + "=" + field + "+1 " + whereClause, params);
 		} finally {
 			clear();
 		}
 	}
 
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public int update(String[] fields, Object[] values) throws SQLException {
+	public int update(String[] fields, Object[] values) {
 		throw new NotImplementedException();
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public int update(String fields, Object values) throws SQLException {
+	public int update(String fields, Object values) {
 		throw new NotImplementedException();
 	}
 
@@ -499,7 +524,7 @@ public class DbImpl<T, V> extends BaseDao<T, V> implements ActiveRecord<T>,
 	/** {@inheritDoc} */
 	@Override
 	public <K> CountObject<K> countObject(String field, GroupFunction fun, Class<K> objectType)
-			throws SQLException {
+			 {
 		throw new NotImplementedException();
 	}
 

@@ -17,9 +17,9 @@
 
 package com.bixuebihui.shardingjdbc.core.constant;
 
+import com.bixuebihui.shardingjdbc.core.util.StringUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.bixuebihui.shardingjdbc.core.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;

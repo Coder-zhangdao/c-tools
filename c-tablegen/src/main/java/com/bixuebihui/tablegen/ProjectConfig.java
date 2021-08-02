@@ -13,6 +13,10 @@ import java.util.*;
 public class ProjectConfig {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectConfig.class);
 
+    /**
+     * used for DataSource alias for spring autowired @Qualifer('alias') annotation
+     */
+    String alias;
 
     String catalog;
     String tableOwner;
@@ -61,6 +65,7 @@ public class ProjectConfig {
     public static ProjectConfig readFrom(Properties props, String baseDir) {
         ProjectConfig c = new ProjectConfig();
 
+        c.alias = props.getProperty("alias");
         c.baseDir = baseDir;
 
         c.srcDir = baseDir + props.getProperty("src_dir");

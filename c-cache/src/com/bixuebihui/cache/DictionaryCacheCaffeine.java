@@ -1,6 +1,7 @@
 package com.bixuebihui.cache;
 
 import com.bixuebihui.BeanFactory;
+import com.bixuebihui.DbException;
 import com.bixuebihui.util.html.FormControl;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -230,7 +231,7 @@ public class DictionaryCacheCaffeine {
                 // DictionaryItem
                 return (isById ? mmById : mmByValue).get(dict.keyName);
             }
-        } catch (SQLException e) {
+        } catch (DbException e) {
             LOG.error("查询" + dict.tableName + "时数据库出错：");
             e.printStackTrace();
             return null;

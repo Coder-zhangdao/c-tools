@@ -2,10 +2,8 @@ package com.bixuebihui.session;
 
 import com.bixuebihui.BeanFactory;
 import com.bixuebihui.jdbc.IDbHelper;
-import com.bixuebihui.jdbc.RowCallbackHandler;
 import com.bixuebihui.util.other.CMyException;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -52,29 +50,20 @@ public class DbSessionManager extends BaseSessionManager {
 
     @Override
     public boolean destroy(String id) {
-        try {
             return 1 == dbHelper.executeNoQuery(DELETE_SQL, new Object[]{id,
                     (new Date()).getTime()});
-        } catch (SQLException e) {
-            LOG.warn("",e);
-        }
-        return false;
     }
 
     @Override
     public int gc(long time) {
-        try {
+
             return dbHelper.executeNoQuery(GC_SQL,
                     new Object[]{time});
-        } catch (SQLException e) {
-            LOG.warn("", e);
-        }
-        return 0;
+
     }
 
     @Override
     public SimpleSession read(String id) {
-        try {
             final SimpleSession ss = new SimpleSession();
 
             String sql = SELECT_SQL + "? and s_expire>= ?";
@@ -91,17 +80,10 @@ public class DbSessionManager extends BaseSessionManager {
                     });
 
             return ss;
-        } catch (SQLException ex) {
-            LOG.warn("", ex);
-        }
-
-        return null;
-
     }
 
     @Override
     public boolean insert(SimpleSession ss) throws CMyException {
-        try {
             insert_counter++;
             if (isAutoGC() && insert_counter > SimpleSession.GC_LIMIT) {
                 gc((new Date()).getTime());
@@ -114,29 +96,21 @@ public class DbSessionManager extends BaseSessionManager {
                     ss.getS_fp(),
                     (new Date()).getTime()
                             + SimpleSession.SESSION_LIFE});
-        } catch (SQLException e) {
-            throw new CMyException("更新数据库session出错" + e.getMessage(), e);
-        }
+
     }
 
     @Override
     public boolean update(String s_id) throws CMyException {
-        try {
             return 1 == dbHelper.executeNoQuery(UPDATE_SQL, new Object[]{
                     (new Date()).getTime()
                             + SimpleSession.SESSION_LIFE, s_id});
-        } catch (SQLException e) {
-            throw new CMyException("更新数据库session出错" + e.getMessage(), e);
-        }
+
     }
 
     @Override
     public int getCount() throws CMyException {
-        try {
             return dbHelper.executeNoQuery(COUNT_SQL, new Object[]{(new Date()).getTime()});
-        } catch (SQLException e) {
-            throw new CMyException("查询数据库session出错" + e.getMessage(), e);
-        }
+
     }
 
 }

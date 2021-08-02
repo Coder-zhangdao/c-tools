@@ -3,7 +3,6 @@ package com.bixuebihui.tablegen.diffhandler;
 import com.bixuebihui.tablegen.entry.ColumnData;
 
 import java.io.IOException;
-import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.List;
 

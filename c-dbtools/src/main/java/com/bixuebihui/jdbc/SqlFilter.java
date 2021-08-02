@@ -3,7 +3,6 @@ package com.bixuebihui.jdbc;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.script.ScriptEngine;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
